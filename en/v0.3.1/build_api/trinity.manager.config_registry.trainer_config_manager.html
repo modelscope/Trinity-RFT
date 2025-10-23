@@ -588,6 +588,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display"><code class="docutils literal notranslate"><span class="pre">set_trainer_gpu_num_display()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.use_critic"><code class="docutils literal notranslate"><span class="pre">use_critic()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_trainer_type"><code class="docutils literal notranslate"><span class="pre">set_trainer_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_save_interval"><code class="docutils literal notranslate"><span class="pre">set_save_interval()</span></code></a></li>
@@ -622,7 +623,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.check_resume_from_path"><code class="docutils literal notranslate"><span class="pre">check_resume_from_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_impl_backend"><code class="docutils literal notranslate"><span class="pre">set_impl_backend()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup"><code class="docutils literal notranslate"><span class="pre">set_critic_warmup()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps"><code class="docutils literal notranslate"><span class="pre">set_total_training_steps()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir"><code class="docutils literal notranslate"><span class="pre">set_default_hdfs_dir()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_del_local_ckpt_after_load"><code class="docutils literal notranslate"><span class="pre">set_del_local_ckpt_after_load()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_max_actor_ckpt_to_keep"><code class="docutils literal notranslate"><span class="pre">set_max_actor_ckpt_to_keep()</span></code></a></li>
@@ -636,6 +636,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_target_kl"><code class="docutils literal notranslate"><span class="pre">set_target_kl()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_micro_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_actor_ppo_micro_batch_size_per_gpu()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_ref_log_prob_micro_batch_size_per_gpu()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_actor_ppo_max_token_len_per_gpu()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ulysses_sequence_parallel_size"><code class="docutils literal notranslate"><span class="pre">set_actor_ulysses_sequence_parallel_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_from_logits_with_chunking()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_checkpointing()</span></code></a></li>
@@ -666,6 +667,11 @@ document.write(`
                   
   <section id="module-trinity.manager.config_registry.trainer_config_manager">
 <span id="trinity-manager-config-registry-trainer-config-manager-module"></span><h1>trinity.manager.config_registry.trainer_config_manager module<a class="headerlink" href="#module-trinity.manager.config_registry.trainer_config_manager" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_trainer_gpu_num_display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.use_critic">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">use_critic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/config_registry/trainer_config_manager.html#use_critic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.use_critic" title="Link to this definition">#</a></dt>
@@ -837,11 +843,6 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_total_training_steps">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_total_training_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_default_hdfs_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -904,6 +905,11 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_ref_log_prob_micro_batch_size_per_gpu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_ppo_max_token_len_per_gpu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1038,6 +1044,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display"><code class="docutils literal notranslate"><span class="pre">set_trainer_gpu_num_display()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.use_critic"><code class="docutils literal notranslate"><span class="pre">use_critic()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_trainer_type"><code class="docutils literal notranslate"><span class="pre">set_trainer_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_save_interval"><code class="docutils literal notranslate"><span class="pre">set_save_interval()</span></code></a></li>
@@ -1072,7 +1079,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.check_resume_from_path"><code class="docutils literal notranslate"><span class="pre">check_resume_from_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_impl_backend"><code class="docutils literal notranslate"><span class="pre">set_impl_backend()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup"><code class="docutils literal notranslate"><span class="pre">set_critic_warmup()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps"><code class="docutils literal notranslate"><span class="pre">set_total_training_steps()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir"><code class="docutils literal notranslate"><span class="pre">set_default_hdfs_dir()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_del_local_ckpt_after_load"><code class="docutils literal notranslate"><span class="pre">set_del_local_ckpt_after_load()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_max_actor_ckpt_to_keep"><code class="docutils literal notranslate"><span class="pre">set_max_actor_ckpt_to_keep()</span></code></a></li>
@@ -1086,6 +1092,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_target_kl"><code class="docutils literal notranslate"><span class="pre">set_target_kl()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_micro_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_actor_ppo_micro_batch_size_per_gpu()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_ref_log_prob_micro_batch_size_per_gpu()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu"><code class="docutils literal notranslate"><span class="pre">set_actor_ppo_max_token_len_per_gpu()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_ulysses_sequence_parallel_size"><code class="docutils literal notranslate"><span class="pre">set_actor_ulysses_sequence_parallel_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_from_logits_with_chunking()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_checkpointing()</span></code></a></li>

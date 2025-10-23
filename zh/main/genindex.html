@@ -4565,6 +4565,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio">set_actor_lr_warmup_steps_ratio()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu">set_actor_ppo_max_token_len_per_gpu()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_micro_batch_size_per_gpu">set_actor_ppo_micro_batch_size_per_gpu()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_save_checkpoint">set_actor_save_checkpoint()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
@@ -4584,8 +4586,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type">set_algorithm_type()（在 trinity.manager.config_registry.algorithm_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_auxiliary_models">set_auxiliary_models()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_bench_on_latest_checkpoint">set_bench_on_latest_checkpoint()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn">set_beta_in_policy_loss_fn()（在 trinity.manager.config_registry.algorithm_config_manager 模块中）</a>
 </li>
@@ -4639,6 +4639,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_chunked_prefill">set_enable_chunked_prefill()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_history">set_enable_history()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_openai_api">set_enable_openai_api()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_prefix_caching">set_enable_prefix_caching()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
@@ -4650,8 +4652,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enforce_eager">set_enforce_eager()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_engine_num">set_engine_num()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_engine_type">set_engine_type()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn">set_entropy_coef_in_entropy_loss_fn()（在 trinity.manager.config_registry.algorithm_config_manager 模块中）</a>
 </li>
@@ -4674,8 +4674,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_expert_tensor_parallel_size">set_expert_tensor_parallel_size()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_explore_batch_size">set_explore_batch_size()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_explorer_max_retry_times">set_explorer_max_retry_times()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.set_explorer_status">set_explorer_status() （trinity.manager.Synchronizer 方法）</a>
 </li>
@@ -4717,21 +4715,21 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.explorer.api.service.html#trinity.explorer.api.service.ExplorerService.set_latest_model_version">set_latest_model_version() （trinity.explorer.api.service.ExplorerService 方法）</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_log_level">set_log_level()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_actor_ckpt_to_keep">set_max_actor_ckpt_to_keep()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_critic_ckpt_to_keep">set_max_critic_ckpt_to_keep()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_model_len">set_max_model_len()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_model_len">set_max_model_len()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_prompt_tokens">set_max_prompt_tokens()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_min_response_tokens">set_min_response_tokens()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
@@ -4799,8 +4797,6 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_repeat_times">set_repeat_times()（在 trinity.manager.config_registry.algorithm_config_manager 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix">set_reply_prefix()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_reshard_after_forward">set_reshard_after_forward()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_resume_from_path">set_resume_from_path()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
@@ -4819,6 +4815,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_sequence_parallel">set_sequence_parallel()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs">set_sft_dataset_kwargs()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_sft_loss_agg_mode">set_sft_loss_agg_mode()（在 trinity.manager.config_registry.algorithm_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_storage_type">set_storage_type()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
@@ -4827,9 +4825,9 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_method">set_sync_method()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_timeout">set_sync_timeout()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_style">set_sync_style()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_system_prompt">set_system_prompt()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_timeout">set_sync_timeout()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_target_kl">set_target_kl()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
@@ -4851,11 +4849,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_total_gpu_num">set_total_gpu_num()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps">set_total_training_steps()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
+      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_total_steps">set_total_steps()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_train_batch_size">set_train_batch_size()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_trainer_gpu_num">set_trainer_gpu_num()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display">set_trainer_gpu_num_display()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.set_trainer_status">set_trainer_status() （trinity.manager.Synchronizer 方法）</a>
 </li>
@@ -4878,8 +4878,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_use_mbridge">set_use_mbridge()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_use_priority_queue">set_use_priority_queue()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_use_v1">set_use_v1()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_virtual_pipeline_model_parallel_size">set_virtual_pipeline_model_parallel_size()（在 trinity.manager.config_registry.trainer_config_manager 模块中）</a>
 </li>

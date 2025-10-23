@@ -528,6 +528,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_total_epochs"><code class="docutils literal notranslate"><span class="pre">set_total_epochs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_total_steps"><code class="docutils literal notranslate"><span class="pre">set_total_steps()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_explore_batch_size"><code class="docutils literal notranslate"><span class="pre">set_explore_batch_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.get_train_batch_size"><code class="docutils literal notranslate"><span class="pre">get_train_batch_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.get_train_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">get_train_batch_size_per_gpu()</span></code></a></li>
@@ -542,8 +543,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_workflow_type"><code class="docutils literal notranslate"><span class="pre">set_default_workflow_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_eval_workflow_type"><code class="docutils literal notranslate"><span class="pre">set_default_eval_workflow_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_reward_fn_type"><code class="docutils literal notranslate"><span class="pre">set_default_reward_fn_type()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_system_prompt"><code class="docutils literal notranslate"><span class="pre">set_system_prompt()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix"><code class="docutils literal notranslate"><span class="pre">set_reply_prefix()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_storage_type"><code class="docutils literal notranslate"><span class="pre">set_storage_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_use_priority_queue"><code class="docutils literal notranslate"><span class="pre">set_use_priority_queue()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_reuse_cooldown_time"><code class="docutils literal notranslate"><span class="pre">set_reuse_cooldown_time()</span></code></a></li>
@@ -552,6 +551,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_experience_buffer_path"><code class="docutils literal notranslate"><span class="pre">set_experience_buffer_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.check_experience_buffer_path"><code class="docutils literal notranslate"><span class="pre">check_experience_buffer_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_dpo_dataset_kwargs"><code class="docutils literal notranslate"><span class="pre">set_dpo_dataset_kwargs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs"><code class="docutils literal notranslate"><span class="pre">set_sft_dataset_kwargs()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -568,6 +568,11 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_total_epochs">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_total_epochs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_total_epochs" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_total_steps">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_total_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_total_steps" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -641,16 +646,6 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_system_prompt">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_system_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_system_prompt" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_reply_prefix">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_reply_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_storage_type">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_storage_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_storage_type" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -688,6 +683,11 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_dpo_dataset_kwargs">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_dpo_dataset_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_dpo_dataset_kwargs" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.buffer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_sft_dataset_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -738,6 +738,7 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_total_epochs"><code class="docutils literal notranslate"><span class="pre">set_total_epochs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_total_steps"><code class="docutils literal notranslate"><span class="pre">set_total_steps()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_explore_batch_size"><code class="docutils literal notranslate"><span class="pre">set_explore_batch_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.get_train_batch_size"><code class="docutils literal notranslate"><span class="pre">get_train_batch_size()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.get_train_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">get_train_batch_size_per_gpu()</span></code></a></li>
@@ -752,8 +753,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_workflow_type"><code class="docutils literal notranslate"><span class="pre">set_default_workflow_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_eval_workflow_type"><code class="docutils literal notranslate"><span class="pre">set_default_eval_workflow_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_default_reward_fn_type"><code class="docutils literal notranslate"><span class="pre">set_default_reward_fn_type()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_system_prompt"><code class="docutils literal notranslate"><span class="pre">set_system_prompt()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix"><code class="docutils literal notranslate"><span class="pre">set_reply_prefix()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_storage_type"><code class="docutils literal notranslate"><span class="pre">set_storage_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_use_priority_queue"><code class="docutils literal notranslate"><span class="pre">set_use_priority_queue()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_reuse_cooldown_time"><code class="docutils literal notranslate"><span class="pre">set_reuse_cooldown_time()</span></code></a></li>
@@ -762,6 +761,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_experience_buffer_path"><code class="docutils literal notranslate"><span class="pre">set_experience_buffer_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.check_experience_buffer_path"><code class="docutils literal notranslate"><span class="pre">check_experience_buffer_path()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_dpo_dataset_kwargs"><code class="docutils literal notranslate"><span class="pre">set_dpo_dataset_kwargs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs"><code class="docutils literal notranslate"><span class="pre">set_sft_dataset_kwargs()</span></code></a></li>
 </ul>
   </nav></div>
 

@@ -4382,6 +4382,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio">set_actor_lr_warmup_steps_ratio() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_max_token_len_per_gpu">set_actor_ppo_max_token_len_per_gpu() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_ppo_micro_batch_size_per_gpu">set_actor_ppo_micro_batch_size_per_gpu() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_actor_save_checkpoint">set_actor_save_checkpoint() (in module trinity.manager.config_registry.trainer_config_manager)</a>
@@ -4403,8 +4405,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type">set_algorithm_type() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_auxiliary_models">set_auxiliary_models() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_bench_on_latest_checkpoint">set_bench_on_latest_checkpoint() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn">set_beta_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
@@ -4458,6 +4458,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_chunked_prefill">set_enable_chunked_prefill() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_history">set_enable_history() (in module trinity.manager.config_registry.explorer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_openai_api">set_enable_openai_api() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enable_prefix_caching">set_enable_prefix_caching() (in module trinity.manager.config_registry.explorer_config_manager)</a>
@@ -4469,8 +4471,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_enforce_eager">set_enforce_eager() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_engine_num">set_engine_num() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_engine_type">set_engine_type() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn">set_entropy_coef_in_entropy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
@@ -4493,8 +4493,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_expert_tensor_parallel_size">set_expert_tensor_parallel_size() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_explore_batch_size">set_explore_batch_size() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_explorer_max_retry_times">set_explorer_max_retry_times() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.set_explorer_status">set_explorer_status() (trinity.manager.Synchronizer method)</a>
 
@@ -4536,12 +4534,14 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_lam_in_advantage_fn">set_lam_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_actor_ckpt_to_keep">set_max_actor_ckpt_to_keep() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_log_level">set_log_level() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_critic_ckpt_to_keep">set_max_critic_ckpt_to_keep() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_actor_ckpt_to_keep">set_max_actor_ckpt_to_keep() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_max_critic_ckpt_to_keep">set_max_critic_ckpt_to_keep() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_model_len">set_max_model_len() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_prompt_tokens">set_max_prompt_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
@@ -4549,8 +4549,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_min_response_tokens">set_min_response_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
@@ -4624,8 +4622,6 @@ document.write(`
         <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow.set_repeat_times">(trinity.common.workflows.workflow.Workflow method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix">set_reply_prefix() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_reshard_after_forward">set_reshard_after_forward() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_resume_from_path">set_resume_from_path() (in module trinity.manager.config_registry.trainer_config_manager)</a>
@@ -4644,6 +4640,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_sequence_parallel">set_sequence_parallel() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_sft_dataset_kwargs">set_sft_dataset_kwargs() (in module trinity.manager.config_registry.buffer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_sft_loss_agg_mode">set_sft_loss_agg_mode() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_storage_type">set_storage_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
@@ -4652,9 +4650,9 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_method">set_sync_method() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_timeout">set_sync_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_style">set_sync_style() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_system_prompt">set_system_prompt() (in module trinity.manager.config_registry.buffer_config_manager)</a>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_sync_timeout">set_sync_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_target_kl">set_target_kl() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
@@ -4676,11 +4674,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_total_gpu_num">set_total_gpu_num() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps">set_total_training_steps() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+      <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_total_steps">set_total_steps() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_train_batch_size">set_train_batch_size() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_trainer_gpu_num">set_trainer_gpu_num() (in module trinity.manager.config_registry.model_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_trainer_gpu_num_display">set_trainer_gpu_num_display() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.set_trainer_status">set_trainer_status() (trinity.manager.Synchronizer method)</a>
 
@@ -4705,8 +4705,6 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_use_mbridge">set_use_mbridge() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_use_priority_queue">set_use_priority_queue() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_use_v1">set_use_v1() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_virtual_pipeline_model_parallel_size">set_virtual_pipeline_model_parallel_size() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
