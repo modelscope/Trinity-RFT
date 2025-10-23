@@ -386,7 +386,6 @@ def set_entropy_loss_fn(**kwargs):
     st.selectbox(
         "Entropy Loss Function",
         options=candidates,
-        format_func=lambda x: x.upper(),
         on_change=on_change,
         **kwargs,
     )

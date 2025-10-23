@@ -129,7 +129,7 @@ class ConfigManager:
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             self.get_configs("taskset_path", "explore_batch_size", columns_spec=[3, 1])
         else:
-            self.get_configs("experience_buffer_path", "explore_batch_size", columns_spec=[3, 1])
+            self.get_configs("experience_buffer_path", "train_batch_size", columns_spec=[3, 1])
         if st.session_state["algorithm_type"] == "dpo":
             self.get_configs("dpo_dataset_kwargs")
         elif st.session_state["algorithm_type"] == "sft":
@@ -559,6 +559,8 @@ class ConfigManager:
                 and st.session_state["storage_type"] == StorageType.SQL.value
             ):
                 experience_buffer_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_root_dir'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
+        else:
+            st.session_state["storage_type"] = StorageType.FILE.value
 
         buffer_config = {
             "batch_size": st.session_state["explore_batch_size"],
@@ -571,15 +573,19 @@ class ConfigManager:
                     "name": "experience_buffer",
                     "storage_type": st.session_state["storage_type"],
                     "path": experience_buffer_path,
-                    # "max_retry_interval": st.session_state["max_retry_interval"],
-                    # "max_retry_times": st.session_state["buffer_max_retry_times"],
                 },
             },
         }
         if not experience_buffer_path:
             del buffer_config["trainer_input"]["experience_buffer"]["path"]
         if st.session_state["train_batch_size"] is None:
-            del buffer_config["train_batch_size"]
+            if st.session_state["algorithm_type"] in ("dpo", "sft"):
+                buffer_config["train_batch_size"] = (
+                    st.session_state["explore_batch_size"] * st.session_state["repeat_times"]
+                )
+                del buffer_config["batch_size"]
+            else:
+                del buffer_config["train_batch_size"]
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
             experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
@@ -749,27 +755,35 @@ class ConfigManager:
 
             st.session_state.config_generated = True
             st.subheader("Generated Config File")
-            buttons = st.container()
-            save_btn, run_btn = buttons.columns(2, vertical_alignment="bottom")
+            # buttons = st.container()
+            # save_btn, run_btn = buttons.columns(2, vertical_alignment="bottom")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)
-            save_btn.download_button(
+            # save_btn.download_button(
+            #     "Save",
+            #     data=yaml_config,
+            #     file_name=f"{config['project']}-{config['name']}.yaml",
+            #     mime="text/plain",
+            #     icon=":material/download:",
+            #     use_container_width=True,
+            # )
+            # run_btn.button(
+            #     "Run",
+            #     on_click=self.run_config,
+            #     args=(
+            #         buttons,
+            #         yaml_config,
+            #     ),
+            #     icon=":material/terminal:",
+            #     use_container_width=True,
+            #     disabled=st.session_state.is_running,
+            # )
+            st.download_button(
                 "Save",
                 data=yaml_config,
                 file_name=f"{config['project']}-{config['name']}.yaml",
                 mime="text/plain",
                 icon=":material/download:",
                 use_container_width=True,
-            )
-            run_btn.button(
-                "Run",
-                on_click=self.run_config,
-                args=(
-                    buttons,
-                    yaml_config,
-                ),
-                icon=":material/terminal:",
-                use_container_width=True,
-                disabled=st.session_state.is_running,
             )
             st.code(yaml_config, language="yaml")
 
