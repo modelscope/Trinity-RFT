@@ -123,14 +123,13 @@ class ConfigManager:
         self.get_configs("model_path", "max_model_len", columns_spec=[3, 1])
 
         st.header("Algorithm Config")
-        self.get_configs("algorithm_type", "policy_loss_fn", "advantage_fn")
-        self.get_configs("repeat_times", "explore_batch_size", "actor_lr", "critic_lr")
+        self.get_configs("algorithm_type", "repeat_times", "actor_lr", "critic_lr")
 
         st.header("Dataset Config")
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
-            self.get_configs("taskset_path")
+            self.get_configs("taskset_path", "explore_batch_size", columns_spec=[3, 1])
         else:
-            self.get_configs("experience_buffer_path")
+            self.get_configs("experience_buffer_path", "explore_batch_size", columns_spec=[3, 1])
         if st.session_state["algorithm_type"] == "dpo":
             self.get_configs("dpo_dataset_kwargs")
         elif st.session_state["algorithm_type"] == "sft":

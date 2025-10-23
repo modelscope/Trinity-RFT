@@ -118,7 +118,7 @@ def set_max_response_tokens(**kwargs):
     st.number_input("Max Response Length", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=2048)
+@CONFIG_GENERATORS.register_config(default_value=4096)
 def set_max_model_len(**kwargs):
     st.number_input("Max Model Length", min_value=1, **kwargs)
 

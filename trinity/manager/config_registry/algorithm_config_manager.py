@@ -43,7 +43,7 @@ def set_algorithm_type(**kwargs):
             st.session_state[key] = value
         set_trainer_gpu_num()
 
-    candidates = [c.upper() for c in ALGORITHM_TYPE.modules.keys()]
+    candidates = ALGORITHM_TYPE.modules.keys()
     st.selectbox(
         "Algorithm Type",
         candidates,
@@ -133,7 +133,7 @@ def set_expert_data_ratio_in_sample_strategy(**kwargs):
 )
 def set_advantage_fn(**kwargs):
     on_change = _create_on_change_callback("advantage_fn", ADVANTAGE_FN, **kwargs)
-    candidates = [c.upper() for c in ADVANTAGE_FN.modules.keys()]
+    candidates = ADVANTAGE_FN.modules.keys()
     st.selectbox(
         "Advantage Function",
         candidates,
@@ -209,7 +209,7 @@ def set_tau_in_advantage_fn(**kwargs):
 )
 def set_kl_loss_fn(**kwargs):
     on_change = _create_on_change_callback("kl_loss_fn", KL_FN, **kwargs)
-    candidates = [c.upper() for c in KL_FN.modules.keys()]
+    candidates = KL_FN.modules.keys()
     st.selectbox(
         "KL Loss Type",
         candidates,
@@ -241,7 +241,7 @@ def set_kl_coef_in_kl_loss_fn(**kwargs):
 )
 def set_kl_penalty_fn(**kwargs):
     on_change = _create_on_change_callback("kl_penalty_fn", KL_FN, **kwargs)
-    candidates = [c.upper() for c in KL_FN.modules.keys()]
+    candidates = KL_FN.modules.keys()
     st.selectbox(
         "KL Penalty Type",
         candidates,
@@ -286,7 +286,7 @@ def set_kl_coef_in_kl_penalty_fn(**kwargs):
 )
 def set_policy_loss_fn(**kwargs):
     on_change = _create_on_change_callback("policy_loss_fn", POLICY_LOSS_FN, **kwargs)
-    candidates = [c.upper() for c in POLICY_LOSS_FN.modules.keys()]
+    candidates = POLICY_LOSS_FN.modules.keys()
     st.selectbox(
         "Policy Loss Fn",
         candidates,
