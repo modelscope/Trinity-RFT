@@ -83,23 +83,21 @@ class SequentialSelector(BaseSelector):
     """
     Selects data sequentially in fixed order across epochs.
 
-    Example: [0,1,2,...,B-1], then [B,B+1,...,2B-1], etc., wrapping at epoch boundaries.
-    Useful for deterministic iteration or when combined with external shuffling.
+    Example: [0,1,2,...,B-1], then [B,B+1,...,2B-1], etc.
     """
 
     def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
         super().__init__(data_source, config)
-        self.num_per_epoch = data_source.num_per_epoch
+        self.dataset_size = data_source.dataset_size
         self.current_index = 0
 
     def get_indices(self, batch_size: int, return_extra_info: bool = False) -> List[int]:
-        start = self.current_index % self.num_per_epoch
+        start = self.current_index % self.dataset_size
         end = start + batch_size
-        assert (
-            end <= self.num_per_epoch
-        ), f"Batch size ({batch_size}) exceeds remaining data in epoch"
         self.current_index += batch_size
-        return list(range(start, end))
+        if end <= self.dataset_size:
+            return list(range(start, end))
+        return list(range(start, self.dataset_size)) + list(range(0, end - self.dataset_size))
 
     def update(self, indices: List[int], values: List[float]) -> None:
         # No-op: sequential selection doesn't adapt based on feedback
@@ -119,41 +117,42 @@ class ShuffleSelector(BaseSelector):
     """
     Shuffles dataset once per epoch and iterates through it sequentially.
 
-    Each epoch uses a different permutation of a subset of the full dataset
-    (of size num_per_epoch). When one epoch ends, a new shuffle is triggered.
+    Each epoch uses a different permutation of a subset of the full dataset.
+    When one epoch ends, a new shuffle is triggered.
     Mimics standard PyTorch DataLoader with shuffle=True.
     """
 
     def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
         super().__init__(data_source, config)
         self.dataset_size = data_source.dataset_size  # Total available samples
-        self.num_per_epoch = data_source.num_per_epoch  # Samples used per epoch
         self.current_index = 0  # Progress tracker
         self.seed = config.seed  # For reproducible shuffling
-        self.order = self._get_order()  # Current shuffled index order
+        self.orders = self._get_orders()  # Current shuffled index order
 
-    def _get_order(self) -> List[int]:
+    def _get_orders(self) -> List[int]:
         """
         Generate a new shuffled order for the current epoch.
 
         Uses NumPy's PCG64 random generator seeded by epoch number for reproducibility.
         Ensures different shuffle per epoch while being deterministic if seed is fixed.
         """
-        rng = np.random.default_rng(self.seed + self.current_index // self.num_per_epoch)
-        return rng.choice(self.dataset_size, self.num_per_epoch, replace=False)
+        rng = np.random.default_rng(self.seed + self.current_index // self.dataset_size)
+        return rng.permutation(self.dataset_size).tolist()
 
     def get_indices(self, batch_size: int, return_extra_info: bool = False) -> List[int]:
-        start = self.current_index % self.num_per_epoch
+        start = self.current_index % self.dataset_size
         end = start + batch_size
-        assert end <= self.num_per_epoch, f"Batch size ({batch_size}) is too large"
-
-        # Fetch pre-shuffled indices for this batch
-        ret = self.order[start:end]
+        if end <= self.dataset_size:
+            ret = self.orders[start:end]
+            # At end of epoch, reshuffle for next epoch
+            if end == self.dataset_size:
+                self.orders = self._get_orders()
+        else:
+            ret = self.orders[start:]
+            # At end of epoch, reshuffle for next epoch
+            self.orders = self._get_orders()
+            ret += self.orders[: (end - self.dataset_size)]
         self.current_index += batch_size
-
-        # At end of epoch, reshuffle for next epoch
-        if self.current_index % self.num_per_epoch == 0:
-            self.order = self._get_order()
         return ret
 
     def update(self, indices: List[int], values: List[float]) -> None:
@@ -167,7 +166,7 @@ class ShuffleSelector(BaseSelector):
 
     def load_state_dict(self, state_dict):
         self.current_index = state_dict.get("current_index", 0)
-        self.order = self._get_order()
+        self.orders = self._get_orders()
 
 
 @SELECTORS.register_module("random")
@@ -182,7 +181,6 @@ class RandomSelector(BaseSelector):
     def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
         super().__init__(data_source, config)
         self.dataset_size = data_source.dataset_size
-        self.num_per_epoch = data_source.num_per_epoch
         self.current_index = 0
         self.seed = config.seed
 
@@ -245,7 +243,7 @@ class OfflineEasy2HardSelector(BaseSelector):
         self.sorted_index = np.array([i[-1] for i in features_with_index])
 
         # Number of samples per epoch (may be less than full dataset size)
-        self.num_per_epoch = data_source.num_per_epoch
+        self.dataset_size = data_source.dataset_size
         self.current_index = 0
 
     def update(self, indices: List[int], values: List[float]) -> None:
@@ -259,13 +257,15 @@ class OfflineEasy2HardSelector(BaseSelector):
         Batches are taken sequentially from the pre-sorted list. When epoch ends,
         it wraps around to the beginning (i.e., restarts curriculum).
         """
-        start = self.current_index % self.num_per_epoch
+        start = self.current_index % self.dataset_size
         end = start + batch_size
-        assert (
-            end <= self.num_per_epoch
-        ), f"Batch size ({batch_size}) exceeds available data in epoch"
+        if end <= self.dataset_size:
+            selected_indices = self.sorted_index[start:end]
+        else:
+            selected_indices = np.concatenate(
+                [self.sorted_index[start:], self.sorted_index[: (end - self.dataset_size)]]
+            )
         self.current_index += batch_size
-        selected_indices = self.sorted_index[start:end]
         if not return_extra_info:
             return selected_indices
         else:

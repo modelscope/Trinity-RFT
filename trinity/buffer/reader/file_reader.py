@@ -45,11 +45,7 @@ class _HFBatchReader:
         if total_steps:
             self.total_samples = default_batch_size * total_steps
         else:
-            if drop_last:
-                self.num_per_epoch = self.dataset_size - (self.dataset_size % default_batch_size)
-            else:
-                self.num_per_epoch = self.dataset_size
-            self.total_samples = self.num_per_epoch * total_epochs
+            self.total_samples = self.dataset_size * total_epochs
 
         if enable_progress_bar:
             from ray.experimental.tqdm_ray import tqdm
@@ -68,26 +64,21 @@ class _HFBatchReader:
         return self.base_seed + self.current_offset // self.dataset_size
 
     def read_batch(self, batch_size: int) -> Union[List, Iterable]:
-        if self.current_offset >= self.total_samples:
-            self.progress_bar.close()
-            raise StopIteration
-        start_epoch = self.current_offset // self.num_per_epoch
-        start_index = self.current_offset % self.num_per_epoch
-
-        batch = []
-        for i in range(start_index, start_index + batch_size):
-            if i < self.num_per_epoch:
-                batch.append(self.dataset[i])
-            else:
-                assert not self.drop_last
-                break
+        batch, indices = [], []
+        while len(batch) < batch_size:
+            if self.current_offset >= self.total_samples:
+                if not self.drop_last and len(batch) > 0:
+                    break
+                self.progress_bar.close()
+                raise StopIteration
+            index = self.current_offset % self.dataset_size
+            batch.append(self.dataset[index])
+            indices.append(index)
 
         self.current_offset += len(batch)
         self.progress_bar.update(len(batch))
-        if start_epoch != self.current_offset // self.num_per_epoch:
-            assert self.current_offset % self.num_per_epoch == 0
 
-        return batch, range(start_index, self.current_offset)
+        return batch, indices
 
     def select_batch(self, indices: List[int]) -> List:
         batch = []
@@ -99,7 +90,7 @@ class _HFBatchReader:
 
 class BaseFileReader(BufferReader):
     def __len__(self):
-        return self.dataset.num_per_epoch
+        return self.dataset.dataset_size
 
     @property
     def index(self) -> int:

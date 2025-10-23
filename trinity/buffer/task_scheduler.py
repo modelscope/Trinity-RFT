@@ -82,8 +82,7 @@ class TasksetScheduler:
         self.base_taskset_ids = []
         for i, taskset in enumerate(self.tasksets):
             self.base_taskset_ids.extend([i] * len(taskset))
-        self.steps_per_epoch = len(self.base_taskset_ids) // self.read_batch_size
-        self.epoch = self.step // self.steps_per_epoch
+        self.epoch = self.step * self.read_batch_size // len(self.base_taskset_ids)
         self.orders = self.build_orders(self.epoch)
 
     def build_orders(self, epoch: int):
@@ -121,20 +120,31 @@ class TasksetScheduler:
         Returns:
             List[Task]: A batch of tasks from potentially multiple tasksets
         """
-        batch_size = self.read_batch_size
-        batch = []
+        if self.config.buffer.total_steps:
+            if self.step >= self.config.buffer.total_steps:
+                raise StopAsyncIteration
+        else:
+            if self.epoch >= self.config.buffer.total_epochs:
+                raise StopAsyncIteration
 
-        current_epoch = self.step // self.steps_per_epoch
-        if current_epoch != self.epoch:
-            # New epoch started
-            self.epoch = current_epoch
+        batch_size = self.read_batch_size
+        start = self.step * batch_size % len(self.base_taskset_ids)
+        end = start + batch_size
+        if end <= len(self.base_taskset_ids):
+            taskset_ids = self.orders[start:end]
+            if end == len(self.base_taskset_ids):
+                self.epoch += 1
+                self.orders = self.build_orders(self.epoch)
+        else:
+            taskset_ids = self.orders[start:]
+            self.epoch += 1
             if self.epoch >= self.config.buffer.total_epochs:
                 raise StopAsyncIteration
             self.orders = self.build_orders(self.epoch)
+            taskset_ids += self.orders[: (end - len(self.base_taskset_ids))]
 
-        start = (self.step - self.epoch * self.steps_per_epoch) * batch_size
-        taskset_ids = self.orders[start : start + batch_size]
         counter = Counter(taskset_ids)
+        batch = []
         for taskset_id, count in counter.items():
             indices = self.selectors[taskset_id].get_indices(batch_size=count)
             tasks = await self.tasksets[taskset_id].read_with_indices_async(indices)

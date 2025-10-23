@@ -703,8 +703,14 @@ class Config:
         experience_buffer = trainer_input.experience_buffer
         explorer_input = self.buffer.explorer_input
 
-        if len(explorer_input.tasksets) == 0 and explorer_input.taskset:
-            explorer_input.tasksets.append(explorer_input.taskset)
+        if explorer_input.taskset:
+            if len(explorer_input.tasksets) > 0:
+                raise ValueError("Do not support setting `taskset` and `tasksets` simultaneously!")
+            explorer_input.tasksets = [explorer_input.taskset]
+            explorer_input.taskset = None
+        else:
+            if len(explorer_input.tasksets) == 0:
+                explorer_input.tasksets = [StorageConfig()]
         tasksets = explorer_input.tasksets
 
         if self.mode == "train":
