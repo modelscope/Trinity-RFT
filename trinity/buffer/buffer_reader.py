@@ -18,11 +18,6 @@ class BufferReader(ABC):
         """Get the number of samples in buffer."""
         raise NotImplementedError
 
-    @property
-    @abstractmethod
-    def index(self) -> int:
-        """Get the current index."""
-
     def state_dict(self) -> Dict:
         return {}
 

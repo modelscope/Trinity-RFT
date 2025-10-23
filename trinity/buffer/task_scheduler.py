@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """The taskset scheduler."""
 
-import copy
 from collections import Counter
 from typing import Dict, List
 
@@ -10,9 +9,8 @@ import numpy as np
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.selector import SELECTORS
 from trinity.common.config import Config
+from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
-
-SELECTOR_METRIC = "taskset_schedule"
 
 
 @Experimental
@@ -82,6 +80,9 @@ class TasksetScheduler:
         self.base_taskset_ids = []
         for i, taskset in enumerate(self.tasksets):
             self.base_taskset_ids.extend([i] * len(taskset))
+        if len(self.base_taskset_ids) == 0:
+            raise ValueError("Empty tasksets provided!")
+
         self.epoch = self.step * self.read_batch_size // len(self.base_taskset_ids)
         self.orders = self.build_orders(self.epoch)
 
@@ -98,7 +99,7 @@ class TasksetScheduler:
         Returns:
             List[int]: Sequence of taskset IDs, length = steps_per_epoch * batch_size
         """
-        taskset_ids = copy.deepcopy(self.base_taskset_ids)
+        taskset_ids = self.base_taskset_ids.copy()
         rng = np.random.default_rng(epoch)
         rng.shuffle(taskset_ids)
         return taskset_ids

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -7,14 +7,14 @@ from trinity.buffer.operators.experience_operator import (
     EXPERIENCE_OPERATORS,
     ExperienceOperator,
 )
-from trinity.buffer.task_scheduler import SELECTOR_METRIC
+from trinity.common.constants import SELECTOR_METRIC
 from trinity.common.experience import Experience
 
 
 @EXPERIENCE_OPERATORS.register_module("pass_rate_calculator")
 class PassRateCalculator(ExperienceOperator):
-    def __init__(self, reward_shaping_configs: Optional[List[Dict]] = None):
-        self.reward_shaping_configs = reward_shaping_configs
+    def __init__(self, **kwargs):
+        pass
 
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
         raw_metric = defaultdict(lambda: defaultdict(list))

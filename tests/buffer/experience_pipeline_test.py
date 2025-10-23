@@ -7,8 +7,8 @@ import torch
 from tests.tools import RayUnittestBaseAysnc, get_template_config
 from trinity.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
-from trinity.buffer.task_scheduler import SELECTOR_METRIC
 from trinity.common.config import ExperiencePipelineConfig, OperatorConfig
+from trinity.common.constants import SELECTOR_METRIC
 from trinity.common.experience import EID, Experience
 
 BUFFER_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_pipeline_buffer.jsonl")

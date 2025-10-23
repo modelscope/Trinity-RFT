@@ -1,6 +1,6 @@
 """Filed based buffer reader."""
 
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Tuple
 
 import datasets
 from datasets import Dataset, load_dataset
@@ -59,11 +59,7 @@ class _HFBatchReader:
 
         self.progress_bar.update(self.current_offset)
 
-    @property
-    def current_seed(self):
-        return self.base_seed + self.current_offset // self.dataset_size
-
-    def read_batch(self, batch_size: int) -> Union[List, Iterable]:
+    def read_batch(self, batch_size: int) -> Tuple[List, List]:
         batch, indices = [], []
         while len(batch) < batch_size:
             if self.current_offset >= self.total_samples:
@@ -74,10 +70,9 @@ class _HFBatchReader:
             index = self.current_offset % self.dataset_size
             batch.append(self.dataset[index])
             indices.append(index)
+            self.current_offset += 1
 
-        self.current_offset += len(batch)
         self.progress_bar.update(len(batch))
-
         return batch, indices
 
     def select_batch(self, indices: List[int]) -> List:
@@ -91,10 +86,6 @@ class _HFBatchReader:
 class BaseFileReader(BufferReader):
     def __len__(self):
         return self.dataset.dataset_size
-
-    @property
-    def index(self) -> int:
-        return self.dataset.current_offset
 
     async def read_async(self, batch_size: Optional[int] = None):
         try:

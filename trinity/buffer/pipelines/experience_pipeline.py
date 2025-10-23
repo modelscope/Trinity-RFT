@@ -4,7 +4,6 @@ from typing import Dict, List, Optional
 from trinity.buffer.buffer import BufferWriter, get_buffer_reader, get_buffer_writer
 from trinity.buffer.operators.experience_operator import ExperienceOperator
 from trinity.buffer.storage.queue import is_database_url, is_json_file
-from trinity.buffer.task_scheduler import SELECTOR_METRIC
 from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,
@@ -12,7 +11,7 @@ from trinity.common.config import (
     ExperiencePipelineConfig,
     StorageConfig,
 )
-from trinity.common.constants import StorageType
+from trinity.common.constants import SELECTOR_METRIC, StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins

@@ -17,10 +17,12 @@ class BaseBetaPREstimator:
         """
         alpha_{t+1} = (1 - lamb) * alpha_t + (1 - rho) * bar{s} + rho * tilde{s}
         beta_{t+1} = (1 - lamb) beta_t + (1 - rho) * bar{f} + rho * tilde{f}
-        :param n: number of tasks
-        :param m: repeat times per tasks
-        :param lamb: discount factor of historical estimation
-        :param rho: weight of pseudo counts
+
+        Args:
+            n (int): number of tasks.
+            m (int): repeat times per tasks.
+            timeout (lamb): discount factor of historical estimation.
+            rho (float): weight of pseudo counts.
         """
         self.n = n
         self.m = m

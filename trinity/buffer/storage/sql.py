@@ -86,9 +86,6 @@ class SQLStorage:
             self.stopped = True
         return self.ref_count
 
-    def get_offset(self) -> int:
-        return self.offset
-
 
 class SQLExperienceStorage(SQLStorage):
     """Used as trainer input."""
