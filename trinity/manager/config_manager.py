@@ -166,8 +166,6 @@ class ConfigManager:
         self.get_configs(
             "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
         )
-        self.get_configs("system_prompt")
-        self.get_configs("reply_prefix")
 
         if st.session_state["algorithm_type"] == "dpo":
             with st.expander("DPO Dataset Configs", expanded=True):
@@ -612,8 +610,6 @@ class ConfigManager:
                 "default_workflow_type": st.session_state["default_workflow_type"],
                 "default_eval_workflow_type": st.session_state["default_eval_workflow_type"],
                 "default_reward_fn_type": st.session_state["default_reward_fn_type"],
-                "system_prompt": st.session_state["system_prompt"],
-                "reply_prefix": st.session_state["reply_prefix"],
             }
             for idx in range(st.session_state["_eval_tasksets_num"]):
                 if st.session_state[f"eval_taskset_{idx}_path"].strip():

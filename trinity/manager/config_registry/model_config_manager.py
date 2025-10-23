@@ -37,7 +37,7 @@ def set_project(**kwargs):
     st.text_input("Project", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value="qwen2.5-1.5B")
+@CONFIG_GENERATORS.register_config(default_value="Example")
 def set_exp_name(**kwargs):
     st.text_input("Experiment Name", **kwargs)
 
@@ -59,10 +59,11 @@ def check_checkpoint_root_dir(unfinished_fields: set, key: str):
 
 @CONFIG_GENERATORS.register_config(default_value="tensorboard")
 def set_monitor_type(**kwargs):
-    candidates = [c.upper() for c in MONITOR.modules.keys()]
+    candidates = list(MONITOR.modules.keys())
     st.selectbox(
         "Monitor Type",
         options=candidates,
+        format_func=lambda x: x.capitalize(),
         help="Set your API_KEY in environment variables if using `Wandb` or `MLFlow`",
         **kwargs,
     )

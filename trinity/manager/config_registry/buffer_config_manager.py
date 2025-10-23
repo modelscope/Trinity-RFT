@@ -269,25 +269,6 @@ def set_default_reward_fn_type(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=None)
-def set_system_prompt(**kwargs):
-    st.text_area(
-        "System Prompt",
-        placeholder="""You are a helpful assistant that solves MATH problems....""",
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(default_value=None)
-def set_reply_prefix(**kwargs):
-    st.text_area(
-        "Assistant Reply Prefix",
-        placeholder="""Assistant reply prefix is used to specify the initial content of model reply, """
-        """and a common setting is: \nLet me solve this step by step. """,
-        **kwargs,
-    )
-
-
 @CONFIG_GENERATORS.register_config(
     default_value=StorageType.QUEUE.value,
     other_configs={

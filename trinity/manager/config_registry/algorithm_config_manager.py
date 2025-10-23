@@ -43,10 +43,11 @@ def set_algorithm_type(**kwargs):
             st.session_state[key] = value
         set_trainer_gpu_num()
 
-    candidates = ALGORITHM_TYPE.modules.keys()
+    candidates = list(ALGORITHM_TYPE.modules.keys())
     st.selectbox(
         "Algorithm Type",
-        candidates,
+        options=candidates,
+        format_func=lambda x: x.upper(),
         on_change=on_change,
         **kwargs,
     )
@@ -133,10 +134,11 @@ def set_expert_data_ratio_in_sample_strategy(**kwargs):
 )
 def set_advantage_fn(**kwargs):
     on_change = _create_on_change_callback("advantage_fn", ADVANTAGE_FN, **kwargs)
-    candidates = ADVANTAGE_FN.modules.keys()
+    candidates = list(ADVANTAGE_FN.modules.keys())
     st.selectbox(
         "Advantage Function",
-        candidates,
+        options=candidates,
+        format_func=lambda x: x.upper(),
         help="The advantage function used to compute advantages.",
         on_change=on_change,
         **kwargs,
@@ -209,10 +211,11 @@ def set_tau_in_advantage_fn(**kwargs):
 )
 def set_kl_loss_fn(**kwargs):
     on_change = _create_on_change_callback("kl_loss_fn", KL_FN, **kwargs)
-    candidates = KL_FN.modules.keys()
+    candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Loss Type",
-        candidates,
+        options=candidates,
+        format_func=lambda x: x.upper(),
         on_change=on_change,
         **kwargs,
     )
@@ -241,10 +244,11 @@ def set_kl_coef_in_kl_loss_fn(**kwargs):
 )
 def set_kl_penalty_fn(**kwargs):
     on_change = _create_on_change_callback("kl_penalty_fn", KL_FN, **kwargs)
-    candidates = KL_FN.modules.keys()
+    candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Penalty Type",
-        candidates,
+        options=candidates,
+        format_func=lambda x: x.upper(),
         on_change=on_change,
         **kwargs,
     )
@@ -286,10 +290,11 @@ def set_kl_coef_in_kl_penalty_fn(**kwargs):
 )
 def set_policy_loss_fn(**kwargs):
     on_change = _create_on_change_callback("policy_loss_fn", POLICY_LOSS_FN, **kwargs)
-    candidates = POLICY_LOSS_FN.modules.keys()
+    candidates = list(POLICY_LOSS_FN.modules.keys())
     st.selectbox(
         "Policy Loss Fn",
-        candidates,
+        options=candidates,
+        format_func=lambda x: x.upper(),
         on_change=on_change,
         **kwargs,
     )
@@ -378,7 +383,13 @@ def set_mu_in_policy_loss_fn(**kwargs):
 def set_entropy_loss_fn(**kwargs):
     on_change = _create_on_change_callback("entropy_loss_fn", ENTROPY_LOSS_FN, **kwargs)
     candidates = list(ENTROPY_LOSS_FN.modules.keys())
-    st.selectbox("Entropy Loss Function", candidates, on_change=on_change, **kwargs)
+    st.selectbox(
+        "Entropy Loss Function",
+        options=candidates,
+        format_func=lambda x: x.upper(),
+        on_change=on_change,
+        **kwargs,
+    )
 
 
 @CONFIG_GENERATORS.register_config(
