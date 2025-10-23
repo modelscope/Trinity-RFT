@@ -28,7 +28,7 @@ buffer:
       rollout_args:
         temperature: 1.0
         logprobs: 0
-    default_workflow_type: 'math_workflow'
+      default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
       name: gsm8k_buffer

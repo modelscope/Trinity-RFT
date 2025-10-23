@@ -30,8 +30,8 @@ buffer:
         image_key: 'images'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'simple_mm_workflow'
-    default_reward_fn_type: 'math_boxed_reward'
+      default_workflow_type: 'simple_mm_workflow'
+      default_reward_fn_type: 'math_boxed_reward'
   trainer_input:
     experience_buffer:
       name: experience_buffer
@@ -53,5 +53,5 @@ trainer:
   save_interval: 100
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1

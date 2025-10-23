@@ -29,8 +29,8 @@ buffer:
         response_key: 'solution'
       rollout_args:
         temperature: 1.0
+      default_workflow_type: 'agentscope_react_math_workflow'
     eval_tasksets: []
-    default_workflow_type: 'agentscope_react_math_workflow'
   trainer_input:
     experience_buffer:
       name: agentscope_dapo_buffer
@@ -60,7 +60,7 @@ trainer:
   save_interval: 100
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 24576
+  max_token_len_per_gpu: 24576
   ulysses_sequence_parallel_size: 2
 monitor:
   monitor_type: wandb

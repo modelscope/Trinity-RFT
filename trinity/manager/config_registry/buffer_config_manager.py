@@ -12,6 +12,13 @@ def set_total_epochs(**kwargs):
     st.number_input("Total Epochs", min_value=1, **kwargs)
 
 
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_total_steps(**kwargs):
+    st.number_input(
+        "Total Steps", min_value=1, help="If set, `Total Epochs` will be ignored", **kwargs
+    )
+
+
 @CONFIG_GENERATORS.register_config(default_value=96)
 def set_explore_batch_size(**kwargs):
     st.number_input(
@@ -45,7 +52,7 @@ def _str_for_train_batch_size():
         else "`gpu_per_node * node_num`"
     )
     return (
-        f"`train_batch_size` defaults to `task_batch_size` * `repeat_times`.\n\n"
+        f"Number of experiences in a mini-batch; defaults to `task_batch_size` * `repeat_times`.\n\n"
         f"Please ensure that `train_batch_size` ({get_train_batch_size()}) can be divided by "
         f"{trainer_gpu_num_str} ({st.session_state['trainer_gpu_num']})."
     )
@@ -130,8 +137,7 @@ def set_taskset_args(**kwargs):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key="taskset_subset_name",
-        help="The subset name used for `datasets.load_datasets`, see "
-        "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
+        help="The subset name used for `datasets.load_datasets`, defaults to `None`",
     )
     split_col.text_input("Train Split :orange-badge[(Needs review)]", key="taskset_split")
     prompt_key_col, response_key_col = st.columns(2)
@@ -163,8 +169,7 @@ def _set_eval_taskset_idx(idx):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key=f"eval_taskset_{idx}_subset_name",
-        help="The subset name used for `datasets.load_datasets`, see "
-        "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
+        help="The subset name used for `datasets.load_datasets`, defaults to `None`",
     )
     split_col.text_input(
         "Eval Split :orange-badge[(Needs review)]",
@@ -264,46 +269,25 @@ def set_default_reward_fn_type(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=None)
-def set_system_prompt(**kwargs):
-    st.text_area(
-        "System Prompt",
-        placeholder="""You are a helpful assistant that solves MATH problems....""",
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(default_value=None)
-def set_reply_prefix(**kwargs):
-    st.text_area(
-        "Assistant Reply Prefix",
-        placeholder="""Assistant reply prefix is used to specify the initial content of model reply, """
-        """and a common setting is: \nLet me solve this step by step. """,
-        **kwargs,
-    )
-
-
 @CONFIG_GENERATORS.register_config(
     default_value=StorageType.QUEUE.value,
     other_configs={
-        "_dpo_storage_type": StorageType.FILE.value,
-        "_not_dpo_storage_type": StorageType.QUEUE.value,
+        "_offline_dataset_storage_type": StorageType.FILE.value,
+        "_not_offline_dataset_storage_type": StorageType.QUEUE.value,
     },
 )
 def set_storage_type(**kwargs):
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == "dpo":
-        st.session_state[key] = st.session_state["_dpo_storage_type"]
+    if st.session_state["algorithm_type"] in ("dpo", "sft"):
+        st.session_state[key] = st.session_state["_offline_dataset_storage_type"]
         storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
     else:
-        st.session_state[key] = st.session_state["_not_dpo_storage_type"]
+        st.session_state[key] = st.session_state["_not_offline_dataset_storage_type"]
         storage_candidates = [StorageType.QUEUE.value]
 
     def on_change():
-        if st.session_state["algorithm_type"] == "dpo":
-            st.session_state["_dpo_storage_type"] = st.session_state[key]
-        else:
-            st.session_state["_not_dpo_storage_type"] = st.session_state[key]
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.session_state["_not_offline_dataset_storage_type"] = st.session_state[key]
 
     st.selectbox(
         "Storage Type",
@@ -326,7 +310,7 @@ def set_reuse_cooldown_time(**kwargs):
         "Reuse Cooldown Time",
         min_value=0.0,
         max_value=1e5,
-        help="Leave blank to indicate no reuse",
+        help="Leave blank to indicate no experience reuse",
         placeholder=None,
         **kwargs,
     )
@@ -357,32 +341,33 @@ def set_priority_decay(**kwargs):
 @CONFIG_GENERATORS.register_config(
     default_value="",
     other_configs={
-        "_dpo_experience_buffer_path": "",
-        "_not_dpo_experience_buffer_path": "",
+        "_offline_dataset_experience_buffer_path": "",
+        "_not_offline_dataset_experience_buffer_path": "",
     },
 )
-def set_experience_buffer_path(**kwargs):  # TODO
+def set_experience_buffer_path(**kwargs):
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == "dpo":
-        if st.session_state["taskset_path"] and not st.session_state["_dpo_experience_buffer_path"]:
-            st.session_state["_dpo_experience_buffer_path"] = st.session_state["taskset_path"]
-        st.session_state[key] = st.session_state["_dpo_experience_buffer_path"]
-        title = "DPO Dataset Path"
-        help_msg = r"""This path to DPO dataset,
-
-if `storage_type == StorageType.FILE`, this should be a path to a file,
-
-if `storage_type == StorageType.SQL`, this should be a path to database."""
+    if st.session_state["algorithm_type"] in ("dpo", "sft"):
+        if (
+            st.session_state["taskset_path"]
+            and not st.session_state["_offline_dataset_experience_buffer_path"]
+        ):
+            st.session_state["_offline_dataset_experience_buffer_path"] = st.session_state[
+                "taskset_path"
+            ]
+        st.session_state[key] = st.session_state["_offline_dataset_experience_buffer_path"]
+        title = "Dataset Path"
+        help_msg = r"""Path to the dataset."""
     else:
-        st.session_state[key] = st.session_state["_not_dpo_experience_buffer_path"]
+        st.session_state[key] = st.session_state["_not_offline_dataset_experience_buffer_path"]
         title = "Experience Buffer Path"
         help_msg = r"""This path is used for experiences persistent storage, default to `None`."""
 
     def on_change():
-        if st.session_state["algorithm_type"] == "dpo":
-            st.session_state["_dpo_experience_buffer_path"] = st.session_state[key]
+        if st.session_state["algorithm_type"] in ("dpo", "sft"):
+            st.session_state["_offline_dataset_experience_buffer_path"] = st.session_state[key]
         else:
-            st.session_state["_not_dpo_experience_buffer_path"] = st.session_state[key]
+            st.session_state["_not_offline_dataset_experience_buffer_path"] = st.session_state[key]
 
     st.text_input(title, help=help_msg, on_change=on_change, **kwargs)
 
@@ -393,24 +378,36 @@ def check_experience_buffer_path(unfinished_fields: set, key: str):
         if not st.session_state[key].strip():
             unfinished_fields.add(key)
             st.warning("Please input DPO dataset path.")
+    elif st.session_state["algorithm_type"] == "sft":
+        if not st.session_state[key].strip():
+            unfinished_fields.add(key)
+            st.warning("Please input SFT dataset path.")
 
 
 @CONFIG_GENERATORS.register_config(
     other_configs={
+        "dpo_dataset_subset_name": None,
         "dpo_dataset_train_split": "train",
-        "dpo_dataset_prompt_type": PromptType.MESSAGES.value,
+        "dpo_dataset_prompt_type": PromptType.PLAINTEXT.value,
         "dpo_dataset_prompt_key": "prompt",
         "dpo_dataset_chosen_key": "chosen",
         "dpo_dataset_rejected_key": "rejected",
     }
 )
 def set_dpo_dataset_kwargs(**kwargs):
-    dpo_dataset_train_split_col, dpo_dataset_prompt_type_col = st.columns(2)
+    (
+        dpo_dataset_subset_name_col,
+        dpo_dataset_train_split_col,
+        dpo_dataset_prompt_type_col,
+    ) = st.columns(3)
+    dpo_dataset_subset_name_col.text_input(
+        "Subset Name :orange-badge[(Needs review)]", key="dpo_dataset_subset_name"
+    )
     dpo_dataset_train_split_col.text_input(
-        "DPO Dataset Train Split :orange-badge[(Needs review)]", key="dpo_dataset_train_split"
+        "Train Split :orange-badge[(Needs review)]", key="dpo_dataset_train_split"
     )
     dpo_dataset_prompt_type_col.selectbox(
-        "DPO Dataset Prompt Type :orange-badge[(Needs review)]",
+        "Prompt Type :orange-badge[(Needs review)]",
         [prompt_type.value for prompt_type in PromptType],
         key="dpo_dataset_prompt_type",
     )
@@ -421,12 +418,58 @@ def set_dpo_dataset_kwargs(**kwargs):
         dpo_dataset_rejected_key_col,
     ) = st.columns(3)
     dpo_dataset_prompt_key_col.text_input(
-        "DPO Dataset Prompt Key :orange-badge[(Needs review)]", key="dpo_dataset_prompt_key"
+        "Prompt Key :orange-badge[(Needs review)]", key="dpo_dataset_prompt_key"
     )
     dpo_dataset_chosen_key_col.text_input(
-        "DPO Dataset Chosen Key :orange-badge[(Needs review)]", key="dpo_dataset_chosen_key"
+        "Chosen Key :orange-badge[(Needs review)]", key="dpo_dataset_chosen_key"
     )
     dpo_dataset_rejected_key_col.text_input(
-        "DPO Dataset Rejected Key :orange-badge[(Needs review)]",
+        "Rejected Key :orange-badge[(Needs review)]",
         key="dpo_dataset_rejected_key",
+    )
+
+
+@CONFIG_GENERATORS.register_config(
+    other_configs={
+        "sft_dataset_subset_name": None,
+        "sft_dataset_train_split": "train",
+        "sft_dataset_prompt_type": PromptType.MESSAGES.value,
+        "sft_dataset_prompt_key": "prompt",
+        "sft_dataset_response_key": "response",
+        "sft_dataset_messages_key": "messages",
+    }
+)
+def set_sft_dataset_kwargs(**kwargs):
+    (
+        sft_dataset_subset_name_col,
+        sft_dataset_train_split_col,
+        sft_dataset_prompt_type_col,
+    ) = st.columns(3)
+    sft_dataset_subset_name_col.text_input(
+        "Subset Name :orange-badge[(Needs review)]", key="sft_dataset_subset_name"
+    )
+    sft_dataset_train_split_col.text_input(
+        "Train Split :orange-badge[(Needs review)]", key="sft_dataset_train_split"
+    )
+    sft_dataset_prompt_type_col.selectbox(
+        "Prompt Type :orange-badge[(Needs review)]",
+        [prompt_type.value for prompt_type in PromptType],
+        key="sft_dataset_prompt_type",
+        help="When `Prompt Type` is `plaintext`, `Prompt Key` and `Response Key` are effective; when `Prompt Type` is `messages`, `Messages Key` is effective.",
+    )
+
+    (
+        sft_dataset_prompt_key_col,
+        sft_dataset_response_key_col,
+        sft_dataset_messages_key_col,
+    ) = st.columns(3)
+    sft_dataset_prompt_key_col.text_input(
+        "Prompt Key :orange-badge[(Needs review)]", key="sft_dataset_prompt_key"
+    )
+    sft_dataset_response_key_col.text_input(
+        "Response Key :orange-badge[(Needs review)]", key="sft_dataset_response_key"
+    )
+    sft_dataset_messages_key_col.text_input(
+        "Messages Key :orange-badge[(Needs review)]",
+        key="sft_dataset_messages_key",
     )

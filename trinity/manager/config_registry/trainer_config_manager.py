@@ -7,6 +7,20 @@ from trinity.manager.config_registry.buffer_config_manager import (
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 
 
+@CONFIG_GENERATORS.register_config(default_value=6)
+def set_trainer_gpu_num_display(**kwargs):
+    from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
+
+    st.number_input(
+        "Trainer GPU Num",
+        disabled=True,
+        step=1,
+        on_change=set_trainer_gpu_num,
+        help="Automatically calculated based on total GPU number and Explorer configurations",
+        **kwargs,
+    )
+
+
 def use_critic():
     algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
     return algorithm.use_critic
@@ -28,7 +42,7 @@ def set_save_interval(**kwargs):
 
 @CONFIG_GENERATORS.register_config(default_value=True)
 def set_enable_preview(**kwargs):
-    st.checkbox("Enable Preview", **kwargs)
+    st.checkbox("Enable Experience Preview", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=1.0)
@@ -233,11 +247,6 @@ def set_critic_warmup(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=None)
-def set_total_training_steps(**kwargs):
-    st.number_input("Total Training Steps", min_value=1, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=None)
 def set_default_hdfs_dir(**kwargs):
     st.text_input("Default HDFS Dir", **kwargs)
 
@@ -298,7 +307,11 @@ def set_actor_ppo_micro_batch_size_per_gpu(**kwargs):
     max_value = get_train_batch_size_per_gpu()
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
-        "Micro Batch Size Per GPU :blue-badge[(Actor)]", min_value=1, max_value=max_value, **kwargs
+        "Micro Batch Size Per GPU :blue-badge[(Actor)]",
+        min_value=1,
+        max_value=max_value,
+        help="Micro batch size per GPU; effective when `use_dynamic_bsz` is False",
+        **kwargs,
     )
 
 
@@ -309,6 +322,16 @@ def set_ref_log_prob_micro_batch_size_per_gpu(**kwargs):
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
         "Micro Batch Size Per GPU :blue-badge[(Ref)]", min_value=1, max_value=max_value, **kwargs
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=16384)
+def set_actor_ppo_max_token_len_per_gpu(**kwargs):
+    st.number_input(
+        "Max Token Len Per GPU :blue-badge[(Actor)]",
+        min_value=1,
+        help="Max token length per GPU for actor model; effective when `use_dynamic_bsz` is True",
+        **kwargs,
     )
 
 
@@ -387,6 +410,7 @@ def set_critic_lr(**kwargs):
         min_value=1e-7,
         max_value=1e-3,
         format="%.1e",
+        help="Effective only when using PPO algorithm",
         **kwargs,
     )
 

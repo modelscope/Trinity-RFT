@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.common.constants import SyncMethod
+from trinity.common.constants import SyncMethod, SyncStyle
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
 
@@ -14,29 +14,9 @@ def set_runner_per_model(**kwargs):
     st.number_input("Runner per Model", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=900, visible=explorer_visible)
-def set_max_timeout(**kwargs):
-    st.number_input("Max Timeout", min_value=0, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=2, visible=explorer_visible)
-def set_explorer_max_retry_times(**kwargs):
-    st.number_input("Explorer Max Retry Times", min_value=0, **kwargs)
-
-
 @CONFIG_GENERATORS.register_config(default_value=1000, visible=explorer_visible)
 def set_eval_interval(**kwargs):
     st.number_input("Eval Interval", min_value=1, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
-def set_bench_on_latest_checkpoint(**kwargs):
-    st.checkbox("Eval on Latest Checkpoint", **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value="vllm_async", visible=explorer_visible)
-def set_engine_type(**kwargs):
-    st.selectbox("Engine Type", ["vllm_async", "vllm"], **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=2, visible=explorer_visible)
@@ -48,7 +28,7 @@ def set_engine_num(**kwargs):
         st.session_state[key] = max_engine_num
         set_trainer_gpu_num()
     st.number_input(
-        "Engine Num",
+        "Explorer Engine Num",
         min_value=1,
         max_value=max_engine_num,
         on_change=set_trainer_gpu_num,
@@ -93,11 +73,6 @@ def check_tensor_parallel_size(unfinished_fields: set, key: str):
 
 
 @CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
-def set_use_v1(**kwargs):
-    st.checkbox("Use V1 Engine", **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
 def set_enforce_eager(**kwargs):
     st.checkbox("Enforce Eager", **kwargs)
 
@@ -127,14 +102,14 @@ def set_seed(**kwargs):
     st.number_input("Seed", step=1, **kwargs)
 
 
-# TODO: max_response_tokens
-# TODO: max_model_len
-# TODO: chat_template
-
-
 @CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
 def set_enable_thinking(**kwargs):
     st.checkbox("Enable Thinking For Qwen3", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
+def set_enable_history(**kwargs):
+    st.checkbox("Enable History Recording", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
@@ -174,13 +149,10 @@ def _set_auxiliary_model_idx(idx):
     if col2.button("✖️", key=f"auxiliary_model_{idx}_del_flag", type="primary"):
         st.rerun()
 
-    engine_type_col, engine_num_col, tensor_parallel_size_col = st.columns(3)
+    engine_num_col, tensor_parallel_size_col = st.columns(2)
     total_gpu_num = st.session_state["total_gpu_num"]
-    engine_type_col.selectbox(
-        "Engine Type", ["vllm_async"], key=f"auxiliary_model_{idx}_engine_type"
-    )
     engine_num_col.number_input(
-        "Engine Num",
+        "Explorer Engine Num",
         min_value=1,
         max_value=total_gpu_num - 1,
         on_change=set_trainer_gpu_num,
@@ -207,12 +179,10 @@ def _set_auxiliary_model_idx(idx):
     seed_col.number_input("Seed", step=1, key=f"auxiliary_model_{idx}_seed")
 
     (
-        use_v1_col,
         enforce_eager_col,
         enable_prefix_caching_col,
         enable_chunked_prefill_col,
-    ) = st.columns(4)
-    use_v1_col.checkbox("Use V1 Engine", key=f"auxiliary_model_{idx}_use_v1")
+    ) = st.columns(3)
     enforce_eager_col.checkbox("Enforce Eager", key=f"auxiliary_model_{idx}_enforce_eager")
     enable_prefix_caching_col.checkbox(
         "Prefix Caching", key=f"auxiliary_model_{idx}_enable_prefix_caching"
@@ -236,7 +206,6 @@ def set_auxiliary_models(**kwargs):
         st.session_state[f"auxiliary_model_{idx}_tensor_parallel_size"] = 1
         st.session_state[f"auxiliary_model_{idx}_gpu_memory_utilization"] = 0.9
         st.session_state[f"auxiliary_model_{idx}_seed"] = 42
-        st.session_state[f"auxiliary_model_{idx}_use_v1"] = True
         st.session_state[f"auxiliary_model_{idx}_enforce_eager"] = True
         st.session_state["_auxiliary_models_num"] += 1
         set_trainer_gpu_num()
@@ -274,34 +243,66 @@ def check_auxiliary_models(unfinished_fields: set, key: str):
 @CONFIG_GENERATORS.register_config(
     default_value=SyncMethod.NCCL.value,
     visible=explorer_visible,
-    other_configs={"_not_dpo_sync_method": SyncMethod.NCCL.value},
+    other_configs={"_not_offline_dataset_sync_method": SyncMethod.NCCL.value},
 )
 def set_sync_method(**kwargs):
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == "dpo":
+    if st.session_state["algorithm_type"] in ("dpo", "sft"):
         st.session_state[key] = SyncMethod.CHECKPOINT.value
         disabled = True
     else:
-        st.session_state[key] = st.session_state["_not_dpo_sync_method"]
+        st.session_state[key] = st.session_state["_not_offline_dataset_sync_method"]
         disabled = False
 
     def on_change():
-        if st.session_state["algorithm_type"] != "dpo":
-            st.session_state["_not_dpo_sync_method"] = st.session_state[key]
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.session_state["_not_offline_dataset_sync_method"] = st.session_state[key]
 
     st.selectbox(
         "Sync Method",
         [sync_method.value for sync_method in SyncMethod],
-        help="""`nccl`: the explorer and trainer sync model weights once every `sync_interval` steps.
+        help="""`nccl`: The explorer and trainer sync model weights once by NCCL.
 
-`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_interval`.""",
+`checkpoint`: The trainer saves the model checkpoint, and the explorer loads it at `sync_interval`.
+
+`memory`: The trainer and explorer sync model weights in memory.""",
         disabled=disabled,
         on_change=on_change,
         **kwargs,
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=10, visible=explorer_visible)
+@CONFIG_GENERATORS.register_config(
+    default_value=SyncStyle.FIXED.value,
+    visible=explorer_visible,
+    other_configs={"_not_offline_dataset_sync_style": SyncStyle.FIXED.value},
+)
+def set_sync_style(**kwargs):
+    key = kwargs.get("key")
+    if st.session_state["algorithm_type"] in ("dpo", "sft"):
+        st.session_state[key] = SyncStyle.CHECKPOINT.value
+        disabled = True
+    else:
+        st.session_state[key] = st.session_state["_not_offline_dataset_sync_style"]
+        disabled = False
+
+    def on_change():
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.session_state["_not_offline_dataset_sync_style"] = st.session_state[key]
+
+    st.selectbox(
+        "Sync Style",
+        [sync_style.value for sync_style in SyncStyle],
+        help="""`fixed`: The explorer and trainer sync model weights once every `sync_interval` steps.
+
+`dynamic_by_explorer`: The explorer decides to request a sync after `sync_interval` steps.""",
+        disabled=disabled,
+        on_change=on_change,
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=1, visible=explorer_visible)
 def set_sync_interval(**kwargs):
     st.number_input(
         "Sync Interval",

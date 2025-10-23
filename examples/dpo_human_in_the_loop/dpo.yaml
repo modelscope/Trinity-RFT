@@ -77,7 +77,7 @@ trainer:
   save_interval: 30
   total_steps: 200
   use_dynamic_bsz: false
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config:
     actor_rollout_ref:

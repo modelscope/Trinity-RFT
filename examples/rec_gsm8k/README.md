@@ -1,41 +1,40 @@
-# Example: REC on GSM8k dataset
+# Example: group-relative REINFORCE variants on GSM8k dataset
 
-This example shows the usage of REC on the [GSM8k dataset](https://huggingface.co/datasets/openai/gsm8k).
+This example shows the usage of group-relative REINFORCE variants on the [GSM8k dataset](https://huggingface.co/datasets/openai/gsm8k).
 
-For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_reasoning_basic.md).
+For more details about algorithm design, please refer to [our paper](https://arxiv.org/abs/2509.24203).
 
 The config file is located in [`gsm8k.yaml`](gsm8k.yaml).
 
-# Group-relative REINFORCE Families
-This folder provides **example configurations** for running different group-relative REINFORCE families within Trinity-RFT.
+## Group-relative REINFORCE variants
 
+This folder provides example configurations for running different group-relative REINFORCE variants within Trinity-RFT.
 It includes three major families:
 
-- **REC family** (clipping + importance sampling)
-- **REP family** (regularization-based variants)
-- **RED family** (data-distribution shaping strategies)
+- **REC family** (regularization by clipping)
+- **REP family** (regularization by an additive loss term)
+- **RED family** (actively shaping data distribution)
 
-We also provide baseline implementations such as **Vanilla REINFORCE** and **GRPO**.
+These include baseline algorithms like vanilla REINFORCE and GRPO as special cases.
 
 All algorithms are instantiated through modular YAML configs for easy reproduction and extension.
 
-# Summary Table 📝
+## Summary Table 📝
 
 | Family        | Variants                                        | Key Idea                            |
 | ------------- | ----------------------------------------------- | ----------------------------------- |
-| **Baselines** | REINFORCE, GRPO                                 | Standard references                 |
-| **REC**       | OneSide-NoIS, OneSide-IS, TwoSide-IS, Ring-NoIS | Clipping + importance sampling      |
-| **REP**       | AsymRE, OPMD                                    | Regularization |
-| **RED**       | Drop, Weight                                    | Data-distribution shaping           |
+| **Baselines** | REINFORCE, GRPO                                 | Standard references          |
+| **REC**       | OneSide/TwoSide/Ring-IS/NoIS                    | Clipping as regularization, with or without importance sampling   |
+| **REP**       | AsymRE, OPMD                                    | Regularization by an additive loss term |
+| **RED**       | Drop, Weight                                    | Actively shaping data distribution      |
 
 
 
-# Instantiations
+## Instantiations
 
-## Baselines
+### Baselines
 
-### REINFORCE
-Vanilla REINFORCE with group mean as baseline.
+**Vanilla REINFORCE** with group mean as baseline:
 
 ```
 algorithm:
@@ -52,8 +51,7 @@ algorithm:
     std_normalize: false
 ```
 
-### GRPO
-GRPO implemented with zero KL regularizer. Regularization can be enabled via `kl_loss_fn` and `kl_loss_fn_args`.
+**GRPO** with KL regularization (enabled via `kl_loss_fn` and `kl_loss_fn_args`):
 
 ```
 algorithm:
@@ -71,17 +69,11 @@ algorithm:
   kl_loss_fn: 'k2'
   kl_loss_fn_args:
     kl_coef:  0.0
-
 ```
 
-## REC family
-Variants of clipping and importance-sampling strategies.
-- REC-OneSide-NoIS
-- REC-OneSide-IS
-- REC-TwoSide-IS
-- REC-Ring-NoIS
+### REC family
 
-### REC-OneSide-NoIS
+**REC-OneSide-NoIS:**
 
 ```
 algorithm:
@@ -98,7 +90,7 @@ algorithm:
     std_normalize: false
 ```
 
-### REC-OneSide-IS
+**REC-OneSide-IS:**
 
 ```
 algorithm:
@@ -115,7 +107,7 @@ algorithm:
     std_normalize: false
 ```
 
-### REC-TwoSide-IS
+**REC-TwoSide-IS:**
 
 ```
 algorithm:
@@ -131,7 +123,8 @@ algorithm:
   advantage_fn_args:
     std_normalize: false
 ```
-### REC-Ring-NoIS
+
+**REC-Ring-NoIS:**
 
 ```
 algorithm:
@@ -150,13 +143,10 @@ algorithm:
     std_normalize: false
 ```
 
-## REP family
+### REP family
 
-Regularization-based algorithms.
-- AsymRE (forward KL regularization)
-- Kimi’s OPMD (k2 regularizer)
 
-### AsymRE
+**Meta's AsymRE:**
 
 ```
 algorithm:
@@ -172,7 +162,7 @@ algorithm:
 ```
 
 
-### Kimi's OPMD
+**Kimi's OPMD:**
 
 ```
 algorithm:
@@ -186,12 +176,10 @@ algorithm:
     std_normalize: false
 ```
 
-## RED family
-Data-distribution shaping variants.
-- RED-Drop (drop extra negative examples to balance the positive examples v.s. negative examples)
-- RED-Weight (advantage-weighting strategy)
+### RED family
 
-### RED-Drop
+
+**RED-Drop:**
 
 ```
 algorithm:
@@ -206,7 +194,7 @@ algorithm:
 ```
 
 
-### RED-Weight
+**RED-Weight:**
 
 ```
 algorithm:
@@ -218,4 +206,18 @@ algorithm:
     temp: 1.0
   advantage_fn_args:
     std_normalize: false
+```
+
+## Citation
+
+```bibtex
+@misc{yao2025grouprelativereinforcesecretlyoffpolicy,
+      title={Group-Relative REINFORCE Is Secretly an Off-Policy Algorithm: Demystifying Some Myths About GRPO and Its Friends},
+      author={Chaorui Yao and Yanxi Chen and Yuchang Sun and Yushuo Chen and Wenhao Zhang and Xuchen Pan and Yaliang Li and Bolin Ding},
+      year={2025},
+      eprint={2509.24203},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2509.24203},
+}
 ```

@@ -77,6 +77,7 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
+      default_workflow_type: 'math_workflow'
     eval_tasksets:
     - name: gsm8k-eval
       storage_type: file
@@ -86,7 +87,7 @@ buffer:
       format:
         prompt_key: 'question'
         response_key: 'answer'
-    default_workflow_type: 'math_workflow'
+      default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
       name: gsm8k_buffer
@@ -94,7 +95,7 @@ buffer:
       path: 'sqlite:///gsm8k.db'
 explorer:
   eval_interval: 50
-  runner_num: 16
+  runner_per_model: 16
   rollout_model:
     engine_num: 1
 synchronizer:
@@ -117,7 +118,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 ## Optional: RFT with SFT Warmup
 
-Before RFT, we may use SFT as a warmup step. Trinity-RFT supports adding SFT warmup stage before RFT by setting `stages` in the config file. The `sft_warmup_dataset` specifies the dataset used for SFT warmup, and `sft_warmup_steps` specifies the number of training steps for SFT warmup.
+Before RFT, we may use SFT as a warmup step. Trinity-RFT supports adding SFT warmup stage before RFT by setting `stages` in the config file. The `experience_buffer` specifies the dataset used for SFT warmup, and `total_steps` specifies the number of training steps for SFT warmup.
 
 ```yaml
 # Properly add the following configs in gsm8k.yaml

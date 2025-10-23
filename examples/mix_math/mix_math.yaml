@@ -84,7 +84,7 @@ trainer:
   save_interval: 50
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 25600
+  max_token_len_per_gpu: 25600
   ulysses_sequence_parallel_size: 1
 monitor:
   monitor_type: wandb

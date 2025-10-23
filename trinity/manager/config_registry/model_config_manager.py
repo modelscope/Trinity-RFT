@@ -24,9 +24,12 @@ def set_trainer_gpu_num():
             engine_num = st.session_state[f"auxiliary_model_{idx}_engine_num"]
             tensor_parallel_size = st.session_state[f"auxiliary_model_{idx}_tensor_parallel_size"]
             trainer_gpu_num -= engine_num * tensor_parallel_size
-        st.session_state["trainer_gpu_num"] = trainer_gpu_num
+        st.session_state["trainer_gpu_num"] = int(trainer_gpu_num)
     else:  # model == train
-        st.session_state["trainer_gpu_num"] = st.session_state["total_gpu_num"]
+        st.session_state["trainer_gpu_num"] = int(st.session_state["total_gpu_num"])
+
+    # sync number to display
+    st.session_state["trainer_gpu_num_display"] = st.session_state["trainer_gpu_num"]
 
 
 @CONFIG_GENERATORS.register_config(default_value="Trinity-RFT")
@@ -34,7 +37,7 @@ def set_project(**kwargs):
     st.text_input("Project", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value="qwen2.5-1.5B")
+@CONFIG_GENERATORS.register_config(default_value="Example")
 def set_exp_name(**kwargs):
     st.text_input("Experiment Name", **kwargs)
 
@@ -56,9 +59,21 @@ def check_checkpoint_root_dir(unfinished_fields: set, key: str):
 
 @CONFIG_GENERATORS.register_config(default_value="tensorboard")
 def set_monitor_type(**kwargs):
+    candidates = list(MONITOR.modules.keys())
     st.selectbox(
         "Monitor Type",
-        options=MONITOR.modules.keys(),
+        options=candidates,
+        format_func=lambda x: x.capitalize(),
+        help="Set your API_KEY in environment variables if using `Wandb` or `MLFlow`",
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value="INFO")
+def set_log_level(**kwargs):
+    st.selectbox(
+        "Log Level",
+        options=["DEBUG", "INFO", "WARNING", "ERROR"],
         **kwargs,
     )
 
@@ -104,7 +119,7 @@ def set_max_response_tokens(**kwargs):
     st.number_input("Max Response Length", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=2048)
+@CONFIG_GENERATORS.register_config(default_value=4096)
 def set_max_model_len(**kwargs):
     st.number_input("Max Model Length", min_value=1, **kwargs)
 

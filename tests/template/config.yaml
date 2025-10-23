@@ -32,9 +32,6 @@ buffer:
       path: 'placeholder'
       split: 'train'
       enable_progress_bar: false
-    default_workflow_type: ''
-    default_eval_workflow_type: ''
-    default_reward_fn_type: ''
 explorer:
   eval_interval: 100
   runner_per_model: 8
@@ -51,7 +48,7 @@ trainer:
   save_interval: 100
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config:
     actor_rollout_ref:
@@ -64,8 +61,6 @@ trainer:
         lr: 1e-5
       model:
         use_remove_padding: false
-      ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
-      forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
       cliprange_value: 0.5
       checkpoint:
         load_contents: ['model', 'optimizer', 'extra']

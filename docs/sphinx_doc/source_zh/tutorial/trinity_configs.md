@@ -214,9 +214,6 @@ buffer:
         ...
       buffer_2:
         ...
-
-  default_workflow_type: 'math_workflow'
-  default_reward_fn_type: 'countdown_reward'
 ```
 
 - `batch_size`: 每个训练步骤使用的任务数。*请勿手动将此值乘以 `algorithm.repeat_times`*。
@@ -231,6 +228,9 @@ buffer:
 ```yaml
 buffer:
   explorer_input:
+    default_workflow_type: 'math_workflow'
+    default_eval_workflow_type: 'math_workflow'
+    default_reward_fn_type: 'countdown_reward'
     taskset:
       name: countdown_train
       storage_type: file
@@ -256,13 +256,14 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 0.1
-      default_workflow_type: 'math_workflow'
-      default_reward_fn_type: 'countdown_reward'
     ...
 ```
 
 - `buffer.explorer_input.taskset`: 用于训练探索策略的任务数据集。
-- `buffer.explorer_input.eval_taskset`: 用于评估的任务数据集列表。
+- `buffer.explorer_input.eval_tasksets`: 用于评测的任务数据集列表。
+- `buffer.explorer_input.default_workflow_type`: 若未在数据集级别指定，则为所有任务数据集设置默认的工作流类型。
+- `buffer.explorer_input.default_eval_workflow_type`: 若未在数据集级别指定，则为所有评测任务数据集设置默认的工作流类型。
+- `buffer.explorer_input.default_reward_fn_type`: 若未在数据集级别指定，则为所有任务数据集设置默认的奖励类型。
 
 每个任务数据集的配置定义如下：
 
@@ -413,7 +414,7 @@ trainer:
   save_strategy: "unrestricted"
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config: null
 ```
@@ -429,7 +430,7 @@ trainer:
   - `unrestricted`：不限制保存操作，允许多个节点、进程或线程同时保存模型。
 - `grad_clip`: 梯度裁剪阈值。
 - `use_dynamic_bsz`: 是否使用动态批量大小。
-- `ppo_max_token_len_per_gpu`: 训练过程中，每个 GPU 最大 token 长度; 当 `use_dynamic_bsz=true` 时生效。
+- `max_token_len_per_gpu`: 训练过程中，每个 GPU 最大 token 长度; 当 `use_dynamic_bsz=true` 时生效。
 - `ulysses_sequence_parallel_size`: 序列并行的并行度，即用于分割单个序列的 GPU 数量。
 - `trainer_config`: 内联提供的 trainer 配置。
 
