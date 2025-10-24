@@ -15,6 +15,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
+from trinity.buffer.task_scheduler import TasksetScheduler
 from trinity.common.config import Config
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
@@ -49,11 +50,8 @@ class Explorer:
         self.config = config
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
-        self.config.buffer.explorer_input.taskset.index = explorer_state.get("latest_task_index", 0)
         self.taskset = (
-            get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
-            if self.config.mode != "serve"
-            else None
+            TasksetScheduler(explorer_state, config) if self.config.mode != "serve" else None
         )
         self.scheduler = None
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
@@ -329,7 +327,7 @@ class Explorer:
         # save explore checkpoint
         self.state.save_explorer(
             current_step=self.explore_step_num,
-            current_task_index=self.explore_step_num * self.config.buffer.batch_size,
+            taskset_states=self.taskset.state_dict() if self.taskset else [],
         )
 
     async def sync_weight(self) -> None:
@@ -353,6 +351,7 @@ class Explorer:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
+        self.taskset.update(pipeline_metrics)
         metric.update(pipeline_metrics)
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))

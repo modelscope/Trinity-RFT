@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 import ray
@@ -26,7 +27,7 @@ class TestFileBuffer(unittest.IsolatedAsyncioTestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         if os.path.exists(cls.temp_output_path):
-            os.system(f"rm -rf {cls.temp_output_path}")
+            shutil.rmtree(cls.temp_output_path)
 
     def test_file_reader(self):  # noqa: C901
         """Test file reader."""

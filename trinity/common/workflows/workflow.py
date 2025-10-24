@@ -37,6 +37,8 @@ class Task(dict):
     batch_id: Union[int, str] = ""
     task_id: Union[int, str] = ""
 
+    index: dict = field(default_factory=dict)
+
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None
     ) -> Workflow:

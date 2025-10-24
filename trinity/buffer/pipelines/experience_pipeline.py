@@ -11,7 +11,7 @@ from trinity.common.config import (
     ExperiencePipelineConfig,
     StorageConfig,
 )
-from trinity.common.constants import StorageType
+from trinity.common.constants import SELECTOR_METRIC, StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins
@@ -132,6 +132,8 @@ class ExperiencePipeline:
         for key, value in metrics.items():
             if isinstance(value, (int, float)):
                 result_metrics[f"pipeline/{key}"] = float(value)
+        if SELECTOR_METRIC in metrics:
+            result_metrics[SELECTOR_METRIC] = metrics[SELECTOR_METRIC]
 
         return result_metrics
 

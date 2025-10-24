@@ -137,6 +137,7 @@ class WorkflowRunner:
                     exp.info = {}
                 exp.info["model_version"] = model_version
                 exp.info["use_count"] = 0
+                exp.info["task_index"] = task.index
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:
                     exp.metrics = {}
@@ -171,7 +172,7 @@ class DebugWorkflowRunner(WorkflowRunner):
     ) -> None:
         model, auxiliary_models = get_debug_inference_model(config)
         super().__init__(config, model, auxiliary_models, 0)
-        self.taskset = get_buffer_reader(config.buffer.explorer_input.taskset, config.buffer)
+        self.taskset = get_buffer_reader(config.buffer.explorer_input.tasksets[0], config.buffer)
         self.output_file = output_file
 
     async def debug(self) -> None:

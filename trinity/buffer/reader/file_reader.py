@@ -1,6 +1,6 @@
 """Filed based buffer reader."""
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import datasets
 from datasets import Dataset, load_dataset
@@ -40,10 +40,6 @@ class _HFBatchReader:
         self.drop_last = drop_last
 
         self.current_offset = offset
-        self.iter = iter(self.dataset)
-
-        for _ in range(self.current_offset % self.dataset_size):
-            next(self.iter)
 
         # convert epochs/steps to sample number
         if total_steps:
@@ -63,34 +59,34 @@ class _HFBatchReader:
 
         self.progress_bar.update(self.current_offset)
 
-    def read_batch(self, batch_size: int) -> List:
-        if self.current_offset >= self.total_samples:
-            self.progress_bar.close()
-            raise StopIteration
-        batch = []
-
+    def read_batch(self, batch_size: int) -> Tuple[List, List]:
+        batch, indices = [], []
         while len(batch) < batch_size:
-            try:
-                item = next(self.iter)
-                batch.append(item)
-                self.current_offset += 1
-            except StopIteration:
-                if self.current_offset >= self.total_samples:
-                    # No more data to read
-                    if not self.drop_last and len(batch) > 0:
-                        # return last batch
-                        self.progress_bar.update(len(batch))
-                        return batch
-                    else:
-                        self.progress_bar.close()
-                        raise StopIteration
-                # Step to the next epoch
-                self.iter = iter(self.dataset)
-        self.progress_bar.update(batch_size)
+            if self.current_offset >= self.total_samples:
+                if not self.drop_last and len(batch) > 0:
+                    break
+                self.progress_bar.close()
+                raise StopIteration
+            index = self.current_offset % self.dataset_size
+            batch.append(self.dataset[index])
+            indices.append(index)
+            self.current_offset += 1
+
+        self.progress_bar.update(len(batch))
+        return batch, indices
+
+    def select_batch(self, indices: List[int]) -> List:
+        batch = []
+        for i in indices:
+            assert 0 <= i < self.dataset_size
+            batch.append(self.dataset[int(i)])
         return batch
 
 
 class BaseFileReader(BufferReader):
+    def __len__(self):
+        return self.dataset.dataset_size
+
     async def read_async(self, batch_size: Optional[int] = None):
         try:
             return self.read(batch_size)
@@ -117,7 +113,7 @@ class ExperienceFileReader(BaseFileReader):
         )
 
     def read(self, batch_size: Optional[int] = None) -> List:
-        samples = self.dataset.read_batch(batch_size or self.read_batch_size)
+        samples, _ = self.dataset.read_batch(batch_size or self.read_batch_size)
         exp_list = []
         for sample in samples:
             experience = self.formatter.format(sample)
@@ -147,11 +143,24 @@ class TaskFileReader(BaseFileReader):
         )
         self.formatter = FORMATTER.get("task")(meta)
 
-    def read(self, batch_size: Optional[int] = None) -> List:
-        batch_size = batch_size or self.read_batch_size
+    def _get_tasks(self, samples: List, indices: List) -> List:
         tasks = []
-        samples = self.dataset.read_batch(batch_size)
-        for sample in samples:
+        for sample, index in zip(samples, indices):
             task = self.formatter.format(sample)
+            task.index["index"] = int(index)
             tasks.append(task)
         return tasks
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        batch_size = batch_size or self.read_batch_size
+        samples, indices = self.dataset.read_batch(batch_size)
+        return self._get_tasks(samples, indices)
+
+    def read_with_indices(self, indices: List[int]) -> List:
+        """Read tasks with indices."""
+        samples = self.dataset.select_batch(indices)
+        return self._get_tasks(samples, indices)
+
+    async def read_with_indices_async(self, indices: List[int]) -> List:
+        """Read tasks with indices asynchronously."""
+        return self.read_with_indices(indices)

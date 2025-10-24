@@ -223,7 +223,6 @@ class SQLTaskStorage(SQLStorage):
         self.default_workflow_cls = WORKFLOWS.get(storage_config.default_workflow_type)  # type: ignore
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(storage_config.default_reward_fn_type)  # type: ignore
         self.formatter = TaskFormatter(storage_config)
-        self.offset = storage_config.index
         if storage_config.total_steps:
             self.total_samples = self.batch_size * storage_config.total_steps
         else:

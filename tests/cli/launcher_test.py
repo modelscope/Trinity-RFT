@@ -263,7 +263,7 @@ class TestLauncherMain(unittest.TestCase):
             except Exception:
                 time.sleep(3)
         output_file = os.path.join(self.config.checkpoint_job_dir, "debug.html")
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.buffer.explorer_input.tasksets = [get_unittest_dataset_config("gsm8k")]
         mock_load.return_value = self.config
         with mock.patch(
             "argparse.ArgumentParser.parse_args",

@@ -2,7 +2,7 @@
 """State manager."""
 import json
 import os
-from typing import Optional
+from typing import Dict, List, Optional
 
 from trinity.common.config import Config, load_config
 from trinity.utils.log import get_logger
@@ -48,14 +48,14 @@ class StateManager:
 
     def save_explorer(
         self,
-        current_task_index: int,
         current_step: int,
+        taskset_states: List[Dict],
     ) -> None:
         with open(self.explorer_state_path, "w", encoding="utf-8") as f:
             json.dump(
                 {
-                    "latest_task_index": current_task_index,
                     "latest_iteration": current_step,
+                    "taskset_states": taskset_states,
                 },
                 f,
                 indent=2,

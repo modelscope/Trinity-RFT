@@ -7,6 +7,8 @@ from enum import Enum, EnumMeta
 EXPLORER_NAME = "explorer"
 TRAINER_NAME = "trainer"
 
+SELECTOR_METRIC = "selector_metric"
+
 ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
 DEBUG_NAMESPACE = "TRINITY_DEBUG_NAMESPACE"
 

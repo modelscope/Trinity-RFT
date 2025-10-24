@@ -112,6 +112,21 @@ class LoRAConfig:
     target_modules: str = "all-linear"
 
 
+@Experimental
+@dataclass
+class TaskSelectorConfig:
+    """Data selector config."""
+
+    selector_type: Optional[str] = "sequential"
+
+    # For shuffle
+    seed: int = 42
+
+    # Estimator Config
+    feature_keys: List[str] = field(default_factory=lambda: [])
+    kwargs: dict = field(default_factory=dict)
+
+
 @dataclass
 class StorageConfig:
     """Storage config."""
@@ -148,6 +163,7 @@ class StorageConfig:
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
+    task_selector: TaskSelectorConfig = field(default_factory=TaskSelectorConfig)
 
     # enable progress bar (tqdm) for _HFBatchReader
     enable_progress_bar: Optional[bool] = False
@@ -381,7 +397,8 @@ class ClusterConfig:
 class ExplorerInput:
     """Config for explorer input."""
 
-    taskset: StorageConfig = field(default_factory=StorageConfig)
+    taskset: Optional[StorageConfig] = None
+    tasksets: List[StorageConfig] = field(default_factory=list)
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
     # The following args provide default values for the corresponding args in `taskset` and `eval_tasksets`
     default_workflow_type: Optional[str] = None
@@ -669,34 +686,44 @@ class Config:
         trainer_input = self.buffer.trainer_input
         experience_buffer = trainer_input.experience_buffer
         explorer_input = self.buffer.explorer_input
-        taskset = explorer_input.taskset
 
-        if self.mode != "train" and not taskset.path:
-            raise ValueError(
-                "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
-            )
-        if not taskset.name:
-            taskset.name = "taskset"
-        if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
-            taskset.repeat_times = self.algorithm.repeat_times
-            logger.info(
-                "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
-                f" (={self.algorithm.repeat_times})."
-            )
+        if explorer_input.taskset:
+            if len(explorer_input.tasksets) > 0:
+                raise ValueError("Do not support setting `taskset` and `tasksets` simultaneously!")
+            explorer_input.tasksets = [explorer_input.taskset]
+            explorer_input.taskset = None
+        else:
+            if len(explorer_input.tasksets) == 0:
+                explorer_input.tasksets = [StorageConfig()]
+        tasksets = explorer_input.tasksets
+
         if self.mode == "train":
             assert (
                 experience_buffer is not None
             ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
             experience_buffer.total_epochs = self.buffer.total_epochs
             experience_buffer.total_steps = self.buffer.total_steps
-        else:
+
+        for taskset in tasksets:
+            if self.mode != "train" and not taskset.path:
+                raise ValueError(
+                    "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
+                )
+            if not taskset.name:
+                taskset.name = "taskset"
+            if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
+                taskset.repeat_times = self.algorithm.repeat_times
+                logger.info(
+                    "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
+                    f" (={self.algorithm.repeat_times})."
+                )
             taskset.total_epochs = self.buffer.total_epochs
             taskset.total_steps = self.buffer.total_steps
 
-        set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
-        set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-        set_if_none(taskset, "ray_namespace", self.ray_namespace)
-        set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
+            set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
+            set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
+            set_if_none(taskset, "ray_namespace", self.ray_namespace)
+            set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
         remained_tasksets = []
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
@@ -760,8 +787,8 @@ class Config:
         task_pipeline = self.data_processor.task_pipeline
         if task_pipeline is not None:
             if task_pipeline.output is None:
-                if taskset.path is not None:
-                    task_pipeline.output = taskset
+                if tasksets and tasksets[0].path is not None:
+                    task_pipeline.output = tasksets[0]
                 elif (
                     experience_buffer.schema_type in {"dpo", "sft"}
                     and experience_buffer.path is not None
@@ -770,7 +797,7 @@ class Config:
                 else:
                     raise ValueError(
                         "`data_processor.task_pipeline.output` is required when both "
-                        "`buffer.explorer_input.taskset.path` and `buffer.trainer_input.experience_buffer.path` are "
+                        "`buffer.explorer_input.tasksets[0].path` and `buffer.trainer_input.experience_buffer.path` are "
                         "None"
                     )
             if task_pipeline.output.path and os.path.exists(task_pipeline.output.path):

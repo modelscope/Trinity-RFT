@@ -30,6 +30,7 @@ from trinity.common.config import (
     ExplorerInput,
     StageConfig,
     StorageConfig,
+    TaskSelectorConfig,
     TrainerInput,
 )
 from trinity.common.constants import (
@@ -73,6 +74,9 @@ class TestTrainerCountdown(BaseTrainerCase):
         """Test the both and bench mode."""
         # test both mode
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.taskset.task_selector = TaskSelectorConfig(
+            selector_type="shuffle", seed=42
+        )
         self.config.buffer.explorer_input.eval_tasksets.append(
             get_unittest_dataset_config("countdown", "test")
         )
@@ -778,8 +782,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        # shutil.rmtree(self.config.checkpoint_job_dir)
-        pass
+        shutil.rmtree(self.config.checkpoint_job_dir)
 
 
 class TestTrainerMIX(BaseTrainerCase):
