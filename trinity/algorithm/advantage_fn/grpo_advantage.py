@@ -214,11 +214,11 @@ class GRPOGroupedAdvantage(GroupAdvantage):
                 group_id, group_exps, precomputed_std=precomputed_std
             )
             metric_list.append(group_metrics)
-        try:
-            # TODO: sum skipped count
-            metrics = gather_metrics(metric_list, "group_advantages")
-        except ValueError:
-            metrics = {}  # empty metric list causes ValueError, ignore it
+
+        # Update the filtered_count metric
+        filtered_count = sum(metric.pop("skipped_count", 0) for metric in metric_list)
+        metrics = gather_metrics(metric_list, "group_advantages")
+        metrics["filtered_count"] = filtered_count
         if self.duplicate_experiences and self.std_threshold is not None:
             exps = self._duplicate_experiences(exp_groups)
         else:

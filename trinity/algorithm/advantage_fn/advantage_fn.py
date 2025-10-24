@@ -76,10 +76,7 @@ class GroupAdvantage(AdvantageFn, ExperienceOperator):
         for group_id, group_exps in exp_groups.items():
             group_exps, group_metrics = self.calculate_group_advantage(group_id, group_exps)
             metric_list.append(group_metrics)
-        try:
-            metrics = gather_metrics(metric_list, "group_advantages")
-        except ValueError:
-            metrics = {}  # empty metric list causes ValueError, ignore it
+        metrics = gather_metrics(metric_list, "group_advantages")
         exps = [exp for group in exp_groups.values() for exp in group]  # Flatten the list
         return exps, metrics
 
