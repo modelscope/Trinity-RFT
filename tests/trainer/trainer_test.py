@@ -782,8 +782,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        # shutil.rmtree(self.config.checkpoint_job_dir)
-        pass
+        shutil.rmtree(self.config.checkpoint_job_dir)
 
 
 class TestTrainerMIX(BaseTrainerCase):
