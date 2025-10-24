@@ -43,7 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/develop_operator';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Configuration Guide" href="trinity_configs.html" />
+    <link rel="next" title="🧪 Experimental: Task Selection &amp; Scheduling System" href="develop_selector.html" />
     <link rel="prev" title="Advanced Algorithm Development" href="example_mix_algo.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -189,6 +189,7 @@
 <li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithms Development Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Advanced Algorithm Development</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Operator Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_selector.html">🧪 Experimental: Task Selection &amp; Scheduling System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
@@ -236,6 +237,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.schema.sql_schema.html">trinity.buffer.schema.sql_schema module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.selector.html">trinity.buffer.selector package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.selector.difficulty_estimator.html">trinity.buffer.selector.difficulty_estimator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.selector.selector.html">trinity.buffer.selector.selector module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.storage.html">trinity.buffer.storage package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.storage.file.html">trinity.buffer.storage.file module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.storage.queue.html">trinity.buffer.storage.queue module</a></li>
@@ -251,6 +257,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer.html">trinity.buffer.buffer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer_reader.html">trinity.buffer.buffer_reader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer_writer.html">trinity.buffer.buffer_writer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.task_scheduler.html">trinity.buffer.task_scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.utils.html">trinity.buffer.utils module</a></li>
 </ul>
 </details></li>
@@ -603,7 +610,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="operator-development-guide">
-<h1>Operator Development Guide<a class="headerlink" href="#operator-development-guide" title="Link to this heading">#</a></h1>
+<span id="operators"></span><h1>Operator Development Guide<a class="headerlink" href="#operator-development-guide" title="Link to this heading">#</a></h1>
 <section id="step-0-basic-concepts-of-operator-module">
 <h2>Step 0: Basic Concepts of Operator Module<a class="headerlink" href="#step-0-basic-concepts-of-operator-module" title="Link to this heading">#</a></h2>
 <p>In Trinity-RFT, the operator module is responsible for processing experience data in the buffer module. It supports existing data processing capabilities from <a class="reference external" href="https://github.com/modelscope/data-juicer">Data-Juicer</a> naturally, and allows developers to implement their own operators as well.
@@ -703,11 +710,11 @@ The above setting means that the <code class="docutils literal notranslate"><spa
       </div>
     </a>
     <a class="right-next"
-       href="trinity_configs.html"
+       href="develop_selector.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Configuration Guide</p>
+        <p class="prev-next-title">🧪 Experimental: Task Selection &amp; Scheduling System</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

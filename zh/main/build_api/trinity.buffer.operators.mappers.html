@@ -44,7 +44,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'build_api/trinity.buffer.operators.mappers';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="trinity.buffer.operators.mappers.reward_shaping_mapper module" href="trinity.buffer.operators.mappers.reward_shaping_mapper.html" />
+    <link rel="next" title="trinity.buffer.operators.mappers.pass_rate_calculator module" href="trinity.buffer.operators.mappers.pass_rate_calculator.html" />
     <link rel="prev" title="trinity.buffer.operators.filters.reward_filter module" href="trinity.buffer.operators.filters.reward_filter.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
@@ -232,6 +232,11 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.schema.sql_schema.html">trinity.buffer.schema.sql_schema module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.buffer.selector.html">trinity.buffer.selector package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.selector.difficulty_estimator.html">trinity.buffer.selector.difficulty_estimator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.selector.selector.html">trinity.buffer.selector.selector module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.buffer.storage.html">trinity.buffer.storage package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.storage.file.html">trinity.buffer.storage.file module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.storage.queue.html">trinity.buffer.storage.queue module</a></li>
@@ -247,6 +252,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.buffer.html">trinity.buffer.buffer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.buffer_reader.html">trinity.buffer.buffer_reader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.buffer_writer.html">trinity.buffer.buffer_writer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.task_scheduler.html">trinity.buffer.task_scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.utils.html">trinity.buffer.utils module</a></li>
 </ul>
 </details></li>
@@ -603,6 +609,14 @@ document.write(`
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="trinity.buffer.operators.mappers.pass_rate_calculator.html">trinity.buffer.operators.mappers.pass_rate_calculator module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator"><code class="docutils literal notranslate"><span class="pre">PassRateCalculator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator.__init__"><code class="docutils literal notranslate"><span class="pre">PassRateCalculator.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator.process"><code class="docutils literal notranslate"><span class="pre">PassRateCalculator.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.operators.mappers.reward_shaping_mapper.html">trinity.buffer.operators.mappers.reward_shaping_mapper module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.operators.mappers.reward_shaping_mapper.html#trinity.buffer.operators.mappers.reward_shaping_mapper.RewardShapingMapper"><code class="docutils literal notranslate"><span class="pre">RewardShapingMapper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.operators.mappers.reward_shaping_mapper.html#trinity.buffer.operators.mappers.reward_shaping_mapper.RewardShapingMapper.__init__"><code class="docutils literal notranslate"><span class="pre">RewardShapingMapper.__init__()</span></code></a></li>
@@ -640,11 +654,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="trinity.buffer.operators.mappers.reward_shaping_mapper.html"
+       href="trinity.buffer.operators.mappers.pass_rate_calculator.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">trinity.buffer.operators.mappers.reward_shaping_mapper module</p>
+        <p class="prev-next-title">trinity.buffer.operators.mappers.pass_rate_calculator module</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

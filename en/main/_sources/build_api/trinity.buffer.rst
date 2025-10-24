@@ -11,6 +11,7 @@ Subpackages
    trinity.buffer.pipelines
    trinity.buffer.reader
    trinity.buffer.schema
+   trinity.buffer.selector
    trinity.buffer.storage
    trinity.buffer.writer
 
@@ -23,6 +24,7 @@ Submodules
    trinity.buffer.buffer
    trinity.buffer.buffer_reader
    trinity.buffer.buffer_writer
+   trinity.buffer.task_scheduler
    trinity.buffer.utils
 
 Module contents

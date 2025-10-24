@@ -443,7 +443,7 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;State manager.&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">load_config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -496,14 +496,14 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.StateManager.save_explorer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_explorer</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">current_task_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">current_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">taskset_states</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer_state_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;latest_task_index&quot;</span><span class="p">:</span> <span class="n">current_task_index</span><span class="p">,</span>
                     <span class="s2">&quot;latest_iteration&quot;</span><span class="p">:</span> <span class="n">current_step</span><span class="p">,</span>
+                    <span class="s2">&quot;taskset_states&quot;</span><span class="p">:</span> <span class="n">taskset_states</span><span class="p">,</span>
                 <span class="p">},</span>
                 <span class="n">f</span><span class="p">,</span>
                 <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
