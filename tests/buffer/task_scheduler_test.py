@@ -157,7 +157,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ],
             ),
             (
-                {"selector_type": "diff_based", "feature_keys": ["feat_1", "feat_2"]},
+                {"selector_type": "difficulty_based", "feature_keys": ["feat_1", "feat_2"]},
                 [
                     {"index": 3, "taskset_id": 1},
                     {"index": 3, "taskset_id": 0},

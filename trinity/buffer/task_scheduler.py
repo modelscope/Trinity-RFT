@@ -62,7 +62,11 @@ class TasksetScheduler:
         for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config, config.buffer)
-            assert isinstance(taskset, TaskFileReader), "Currently only support `TaskFileReader`"
+            if not isinstance(taskset, TaskFileReader):
+                raise TypeError(
+                    f"Taskset '{taskset_config.name}' has an unsupported type '{type(taskset).__name__}'."
+                    f"Currently, only 'TaskFileReader' is supported by TasksetScheduler."
+                )
 
             # Create selector based on type specified in config (e.g., 'sequential', 'shuffle')
             selector = SELECTORS.get(taskset_config.task_selector.selector_type)(
@@ -179,7 +183,7 @@ class TasksetScheduler:
                 ...  # other metrics
             }
 
-        This allows adaptive selectors (like `DiffBasedSelector`) to refine difficulty estimates.
+        This allows adaptive selectors (like `DifficultyBasedSelector`) to refine difficulty estimates.
 
         Args:
             pipeline_metrics (Dict): Metrics dictionary passed from explorer.

@@ -143,25 +143,23 @@ class TaskFileReader(BaseFileReader):
         )
         self.formatter = FORMATTER.get("task")(meta)
 
-    def read(self, batch_size: Optional[int] = None) -> List:
-        batch_size = batch_size or self.read_batch_size
+    def _get_tasks(self, samples: List, indices: List) -> List:
         tasks = []
-        samples, indices = self.dataset.read_batch(batch_size)
         for sample, index in zip(samples, indices):
-            task = self.formatter.format(sample)
-            task.index["index"] = index
-            tasks.append(task)
-        return tasks
-
-    def read_with_indices(self, indices: List[int]) -> List:
-        """Read tasks with indices."""
-        samples = self.dataset.select_batch(indices)
-        tasks = []
-        for index, sample in zip(indices, samples):
             task = self.formatter.format(sample)
             task.index["index"] = int(index)
             tasks.append(task)
         return tasks
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        batch_size = batch_size or self.read_batch_size
+        samples, indices = self.dataset.read_batch(batch_size)
+        return self._get_tasks(samples, indices)
+
+    def read_with_indices(self, indices: List[int]) -> List:
+        """Read tasks with indices."""
+        samples = self.dataset.select_batch(indices)
+        return self._get_tasks(samples, indices)
 
     async def read_with_indices_async(self, indices: List[int]) -> List:
         """Read tasks with indices asynchronously."""

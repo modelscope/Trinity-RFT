@@ -7,14 +7,14 @@
 
 ## 概述
 
-本系统支持在探索过程中，从多个数据集（称为 *tasksets*）中进行**智能、自适应的任务采样**。它包含两个核心组件：
+本系统支持在探索过程中，从多个数据集/任务集（称为 *tasksets*）中进行**智能、自适应的任务采样**。它包含两个核心组件：
 
 1. **`Selector`（选择器）** —— 控制每个任务集中**如何选择单个样本**。
 2. **`TasksetScheduler`（任务集调度器）** —— 管理**哪些任务集参与当前批次的训练**，并协调它们的采样过程。
 
 二者结合，支持以下高级训练策略：
 - 课程学习（由易到难）
-- 多任务交替训练
+- 多任务交替/混合训练
 - 基于难度的采样
 - 根据模型表现动态调整数据选择
 
@@ -34,7 +34,7 @@
 | `shuffle` | 每个 epoch 开始时对数据集整体打乱一次，之后按顺序遍历。 |
 | `random` | 在每个 batch 中无放回地随机采样，不同 batch 之间相互独立。 |
 | `offline_easy2hard` | 根据预定义特征（如损失值、长度）对样本排序，先提供简单样本，逐步过渡到困难样本。 |
-| `diff_based` *(自定义示例)* | 使用概率建模动态选择接近目标难度水平的样本。 |
+| `difficulty_based` *(自定义示例)* | 使用概率建模动态选择接近目标难度水平的样本。 |
 
 你也可以实现自己的**自定义选择器**，以支持自适应或课程式学习。
 
@@ -53,16 +53,16 @@
 | `state_dict() -> Dict` | 序列化当前状态，用于保存检查点。 |
 | `load_state_dict(state_dict: Dict)` | 从保存的状态字典中恢复选择器状态。 |
 
-#### 示例：`DiffBasedSelector`
+#### 示例：`DifficultyBasedSelector`
 
 该选择器聚焦于模型预测表现最接近目标值的样本（例如 90% 成功率），从而挑选出“难度适中”的任务。
 
 ```python
-@SELECTORS.register_module("diff_based")
-class DiffBasedSelector(BaseSelector):
+@SELECTORS.register_module("difficulty_based")
+class DifficultyBasedSelector(BaseSelector):
     def __init__(self, data_source, config: DataSelectorConfig) -> None:
         super().__init__(data_source, config)
-        self.logger = get_logger("diff_based_selector")
+        self.logger = get_logger("difficulty_based_selector")
 
         # 使用两个输入特征（如正确性、不确定性）构建难度估计器
         self.diff_estimator = self.build_diff_estimator(
@@ -129,7 +129,7 @@ class DiffBasedSelector(BaseSelector):
 
 ### ✅ 步骤 2：实现反馈操作器（Feedback Operator）
 
-对于像 `DiffBasedSelector` 这样的自适应选择器，你需要提供运行时反馈（例如任务奖励）。这通过一个 **Experience Operator（经验操作器）** 实现，它处理 rollout 数据并计算相关指标。
+对于像 `DifficultyBasedSelector` 这样的自适应选择器，你需要提供运行时反馈（例如任务奖励）。这通过一个 **Experience Operator（经验操作器）** 实现，它处理 rollout 数据并计算相关指标。
 
 > 📚 更多关于自定义经验处理器的内容，请参见 {ref}`Operator 开发指南<Operators>`。
 
@@ -205,7 +205,7 @@ buffer:
         storage_type: file
         path: ./path/to/tasks
         task_selector:
-          selector_type: diff_based   # 必须与 @register_module 名称匹配
+          selector_type: difficulty_based   # 必须与 @register_module 名称匹配
           feature_keys: ["correct", "uncertainty"]
           kwargs:
             m: 16
@@ -220,7 +220,7 @@ buffer:
 
 
 
-## 模块 2：TasksetScheduler —— 多任务协调调度
+## 模块 2：TasksetScheduler —— 多任务集协调调度
 
 `TasksetScheduler` 负责管理训练过程中**不同任务集之间的交错方式**。
 
@@ -229,7 +229,7 @@ buffer:
 - 支持**同时加载多个任务集**。
 - 按数据集大小比例**平衡采样权重**。
 - 每个 epoch 开始时**打乱任务集的访问顺序**。
-- 支持**课程式学习**或**多任务交替训练**。
+- 支持**课程式学习**或**多任务交替/混合训练**。
 - 完全**可恢复断点**：能精确从中断处继续训练。
 - 与任意已注册的 `Selector` 无缝集成。
 

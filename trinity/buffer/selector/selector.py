@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from trinity.buffer.reader.file_reader import _HFBatchReader
-from trinity.buffer.selector.diff_estimator import InterpolationBetaPREstimator
+from trinity.buffer.selector.difficulty_estimator import InterpolationBetaPREstimator
 from trinity.common.config import DataSelectorConfig
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
@@ -292,8 +292,8 @@ class OfflineEasy2HardSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 
 
-@SELECTORS.register_module("diff_based")
-class DiffBasedSelector(BaseSelector):
+@SELECTORS.register_module("difficulty_based")
+class DifficultyBasedSelector(BaseSelector):
     """
     Adaptive difficulty-based selector using probabilistic modeling of sample difficulty.
 
@@ -307,7 +307,7 @@ class DiffBasedSelector(BaseSelector):
 
     def __init__(self, data_source, config: DataSelectorConfig) -> None:
         super().__init__(data_source, config)
-        self.logger = get_logger("diff_based_selector")
+        self.logger = get_logger("difficulty_based_selector")
 
         # Initialize difficulty estimator using two features (assumed: e.g., correctness & uncertainty)
         self.diff_estimator = self.build_diff_estimator(
@@ -330,7 +330,10 @@ class DiffBasedSelector(BaseSelector):
         into a feature matrix and passed to InterpolationBetaPREstimator for modeling P(success).
         """
         self.logger.debug(f"{config=}")
-        assert len(feature_keys) == 2
+        if len(feature_keys) != 2:
+            raise ValueError(
+                f"DifficultyBasedSelector requires exactly 2 feature keys, but got {len(feature_keys)}."
+            )
         features = np.concatenate(
             [np.array(list(dataset[k]))[:, None] for k in feature_keys], axis=1
         )

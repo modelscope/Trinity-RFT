@@ -17,7 +17,7 @@ This system enables **intelligent, adaptive task sampling** from multiple datase
 
 Together, they support advanced training strategies such as:
 - Curriculum learning (easy → hard)
-- Multi-task interleaving
+- Multi-task interleaving or mixing
 - Difficulty-aware sampling
 - Adaptive data selection based on model performance
 
@@ -37,7 +37,7 @@ A `Selector` determines **which tasks (samples) to select** from its associated 
 | `shuffle` | Shuffles the dataset once per epoch; then iterates sequentially. |
 | `random` | Randomly samples without replacement within each batch. Independent across batches. |
 | `offline_easy2hard` | Sorts samples by pre-defined features (e.g., loss, length), serving easier ones first, progressing to harder ones. |
-| `diff_based` *(custom example)* | Dynamically selects samples near a target difficulty level using probabilistic modeling. |
+| `difficulty_based` *(custom example)* | Dynamically selects samples near a target difficulty level using probabilistic modeling. |
 
 You can also **implement your own custom selector** to enable adaptive or curriculum-based learning.
 
@@ -52,20 +52,20 @@ To create a new selector, inherit from `BaseSelector` and implement the followin
 | Method | Purpose |
 |-------|--------|
 | `get_indices(batch_size: int, return_extra_info=False) -> List[int]` | Return a list of sample indices to read next. |
-| `update(indices: List[int], values: List[float])` | Update internal state using feedback (e.g., rewards, losses). Used for adaptation. |
+| `update(indices: List[int], values: List[float])` | Update internal state using feedback (e.g., rewards, losses). |
 | `state_dict() -> Dict` | Serialize current state for checkpointing. |
 | `load_state_dict(state_dict: Dict)` | Restore state from a saved dictionary. |
 
-#### Example: `DiffBasedSelector`
+#### Example: `DifficultyBasedSelector`
 
 This selector focuses on samples whose predicted performance is closest to a target (e.g., 90% success rate), effectively choosing "just right" difficulty tasks.
 
 ```python
-@SELECTORS.register_module("diff_based")
-class DiffBasedSelector(BaseSelector):
+@SELECTORS.register_module("difficulty_based")
+class DifficultyBasedSelector(BaseSelector):
     def __init__(self, data_source, config: DataSelectorConfig) -> None:
         super().__init__(data_source, config)
-        self.logger = get_logger("diff_based_selector")
+        self.logger = get_logger("difficulty_based_selector")
 
         # Build difficulty estimator using two input features (e.g., correctness, uncertainty)
         self.diff_estimator = self.build_diff_estimator(
@@ -132,7 +132,7 @@ class DiffBasedSelector(BaseSelector):
 
 ### ✅ Step 2: Implement a Feedback Operator
 
-For adaptive selectors like `DiffBasedSelector`, you need to provide runtime feedback (e.g., task rewards). This is done via an **Experience Operator** that processes rollouts and computes metrics.
+For adaptive selectors like `DifficultyBasedSelector`, you need to provide runtime feedback (e.g., task rewards). This is done via an **Experience Operator** that processes rollouts and computes metrics.
 
 > 📚 See the {ref}`Operator Development Guide<Operators>` for more on building custom experience processors.
 
@@ -208,7 +208,7 @@ buffer:
         storage_type: file
         path: ./path/to/tasks
         task_selector:
-          selector_type: diff_based   # Matches @register_module name
+          selector_type: difficulty_based   # Matches @register_module name
           feature_keys: ["correct", "uncertainty"]
           kwargs:
             m: 16
@@ -223,9 +223,9 @@ buffer:
 
 
 
-## Module 2: TasksetScheduler – Multi-Task Orchestration
+## Module 2: TasksetScheduler – Multi-Taskset Orchestration
 
-The `TasksetScheduler` manages **how different tasksets are interleaved** during training.
+The `TasksetScheduler` manages **how different tasksets are interleaved or mixed** during training.
 
 ### Key Features
 
