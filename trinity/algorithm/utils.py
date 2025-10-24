@@ -102,4 +102,7 @@ def prefix_metrics(src_metrics: dict, prefix: str, dst_metrics: dict = None) -> 
         dst_metrics = {}
     for k, v in src_metrics.items():
         dst_metrics[f"{prefix}/{k}"] = v
+
+    # unify the time metrics
+    dst_metrics = {k.replace("timing_s/", "time/"): v for k, v in dst_metrics.items()}
     return dst_metrics
