@@ -98,7 +98,7 @@ class MixSampleStrategy(SampleStrategy):
 
     async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
         metrics = {}
-        with Timer(metrics, "read_time"):
+        with Timer(metrics, "time/read_experience"):
             usual_exp_list = await self.usual_exp_buffer.read_async()
             for exp in usual_exp_list:
                 if exp.info is None:

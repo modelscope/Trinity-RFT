@@ -26,6 +26,8 @@ MONITOR = Registry("monitor")
 
 
 def gather_metrics(metric_list: List[Dict], prefix: str) -> Dict:
+    if not metric_list:
+        return {}  # empty metric list causes ValueError, return empty dict
     df = pd.DataFrame(metric_list)
     numeric_df = df.select_dtypes(include=[np.number])
     stats_df = numeric_df.agg(["mean", "max", "min"])
