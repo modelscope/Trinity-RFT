@@ -74,8 +74,9 @@ class Explorer:
         self.enable_lora = self.config.explorer.rollout_model.enable_lora
         self.model_version = -1
         self.last_sync_successful = True
-        self.explore_start_time = None
         self.eval_start_time = None
+        self.explore_start_time = None
+        self.explore_step_start_time = dict()  # {step_num: start_time}
         self.logger.info("Finished initializing Explorer.")
 
     async def setup_weight_sync_group(
@@ -222,6 +223,7 @@ class Explorer:
             )
             await self.shutdown()
             return False
+        self.explore_step_start_time.update({self.explore_step_num + 1: time.time()})
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
         self.explore_step_num += 1
         return True
@@ -343,7 +345,7 @@ class Explorer:
 
         # Record the time: read_task + explore_step (>=1) + eval (if any)
         if self.explore_start_time is not None:
-            metric = {"time/explore_total_time": time.time() - self.explore_start_time}
+            metric = {"time/explorer_sync_interval": time.time() - self.explore_start_time}
             self.explore_start_time = None
             self.monitor.log(metric, step=end_step)
 
@@ -353,6 +355,10 @@ class Explorer:
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
         self.taskset.update(pipeline_metrics)
         metric.update(pipeline_metrics)
+        explore_step_start_time = self.explore_step_start_time.get(step, None)
+        if explore_step_start_time is not None:
+            metric.update({"time/explore_step": time.time() - explore_step_start_time})
+            self.explore_step_start_time.pop(step)
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)

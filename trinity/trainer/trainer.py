@@ -83,7 +83,7 @@ class Trainer:
                 metrics.update(await self.train_step(exps))
                 if await self.need_sync():
                     # Record the time: sample_experience + train_step (>=1)
-                    metrics.update({"time/train_total_time": time.time() - st})
+                    metrics.update({"time/trainer_sync_interval": time.time() - st})
                     metrics.update(await self.sync_weight())
                 if self.need_save():
                     metrics.update(self.save_checkpoint())
