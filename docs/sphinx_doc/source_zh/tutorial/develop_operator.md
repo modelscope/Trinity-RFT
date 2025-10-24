@@ -7,9 +7,9 @@
 Operator 模块负责处理由 Explorer 所生成的轨迹数据（我们称之为 `Experience`）。它原生支持来自 [Data-Juicer](https://github.com/modelscope/data-juicer) 的数据处理功能，也允许开发者实现自己的算子。
 通过自定义数据处理算子，开发者可以实现各种数据处理功能，如数据增强、过滤和转换。你甚至可以将优势值/回报值计算实现为 Operator，如 {ref}`算法 <Algorithms>` 部分所示。
 
-- **DataJuicerOperator** ({class}`trinity.data.operators.DataJuicerOperator`)：封装后的 Data-Juicer 算子，使用时只需在配置文件中标明想要使用的 Data-Juicer 算子列表即可。完整的 Data-Juicer 算子列表请见 [此处](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html)。
-- **ExperienceOperator** ({class}`trinity.data.operators.ExperienceOperator`)：用于 experience 数据处理的所有数据处理算子的基类。定义了所有数据处理算子应具备的接口和通用功能。每个算子处理一批 experience 数据，并返回处理后的数据及用于日志记录的指标。
-- **ExperiencePipeline** ({class}`trinity.data.pipelines.ExperiencePipeline`)：管理一系列数据处理算子的 experience 数据处理流水线。它从 `Explorer` 获取原始 experience，通过流水线中的每个算子处理，最后将最终处理过的 experience 写入 `Trainer` 的输入缓冲区。
+- **DataJuicerOperator** ({class}`trinity.buffer.operators.DataJuicerOperator`)：封装后的 Data-Juicer 算子，使用时只需在配置文件中标明想要使用的 Data-Juicer 算子列表即可。完整的 Data-Juicer 算子列表请见 [此处](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html)。
+- **ExperienceOperator** ({class}`trinity.buffer.operators.ExperienceOperator`)：用于 experience 数据处理的所有数据处理算子的基类。定义了所有数据处理算子应具备的接口和通用功能。每个算子处理一批 experience 数据，并返回处理后的数据及用于日志记录的指标。
+- **ExperiencePipeline** ({class}`trinity.buffer.pipelines.ExperiencePipeline`)：管理一系列数据处理算子的 experience 数据处理流水线。它从 `Explorer` 获取原始 experience，通过流水线中的每个算子处理，最后将最终处理过的 experience 写入 `Trainer` 的输入缓冲区。
 
 ```{note}
 除了 `ExperiencePipeline`，Trinity-RFT 还提供 `TaskPipeline` 用于任务数据处理。
@@ -57,7 +57,7 @@ class RewardFilter(ExperienceOperator):
         return filtered_exps, metrics
 ```
 
-实现后，你需要通过 {class}`trinity.data.operators.EXPERIENCE_OPERATORS` 注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
+实现后，你需要通过 {class}`trinity.buffer.operators.EXPERIENCE_OPERATORS` 注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
 
 ### 步骤 2：使用此算子
 

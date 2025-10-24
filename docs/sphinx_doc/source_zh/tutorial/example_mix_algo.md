@@ -77,11 +77,9 @@ class MixSampleStrategy(SampleStrategy):
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 
         # experience buffer
-        usual_buffer_config = copy.deepcopy(buffer_config)
-        usual_buffer_config.train_batch_size = tot_batch_size - expert_batch_size
-        self.usual_exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
-        )
+        usual_buffer_config = copy.deepcopy(buffer_config.trainer_input.experience_buffer)
+        usual_buffer_config.batch_size = tot_batch_size - expert_batch_size
+        self.usual_exp_buffer = get_buffer_reader(usual_buffer_config)
 
         if buffer_config.trainer_input.auxiliary_buffers is None:
             raise ValueError(
@@ -89,10 +87,11 @@ class MixSampleStrategy(SampleStrategy):
             )
 
         # expert experience buffer
-        expert_buffer_config = copy.deepcopy(buffer_config)
-        expert_buffer_config.train_batch_size = expert_batch_size
+        expert_buffer_config = copy.deepcopy(
+            buffer_config.trainer_input.auxiliary_buffers[self.sft_dataset_name]
+        )
+        expert_buffer_config.batch_size = expert_batch_size
         self.expert_exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.auxiliary_buffers[self.sft_dataset_name],
             expert_buffer_config,
         )
 

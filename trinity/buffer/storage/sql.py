@@ -11,8 +11,8 @@ from sqlalchemy.orm import sessionmaker
 
 from trinity.buffer.schema import init_engine
 from trinity.buffer.schema.formatter import FORMATTER, TaskFormatter
-from trinity.buffer.utils import default_storage_path, retry_session
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.buffer.utils import retry_session
+from trinity.common.config import StorageConfig
 from trinity.common.experience import Experience
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows import WORKFLOWS, Task
@@ -30,43 +30,43 @@ class SQLStorage:
     set `wrap_in_ray` to `True`.
     """
 
-    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        self.logger = get_logger(f"sql_{storage_config.name}", in_ray_actor=True)
-        if not storage_config.path:
-            storage_config.path = default_storage_path(storage_config, config)
+    def __init__(self, config: StorageConfig) -> None:
+        self.logger = get_logger(f"sql_{config.name}", in_ray_actor=True)
+        if not config.path:
+            raise ValueError("`path` is required for SQL storage type.")
         self.engine, self.table_model_cls = init_engine(
-            db_url=storage_config.path,
-            table_name=storage_config.name,
-            schema_type=storage_config.schema_type,
+            db_url=config.path,
+            table_name=config.name,
+            schema_type=config.schema_type,
         )
-        self.logger.info(f"Init SQL storage at {storage_config.path}")
+        self.logger.info(f"Init SQL storage at {config.path}")
         self.session = sessionmaker(bind=self.engine)
-        self.max_retry_times = storage_config.max_retry_times
-        self.max_retry_interval = storage_config.max_retry_interval
+        self.max_retry_times = config.max_retry_times
+        self.max_retry_interval = config.max_retry_interval
         self.ref_count = 0
         self.stopped = False
         # Assume that the auto-increment ID starts counting from 1, so the default offset should be 0.
-        self.offset = storage_config.index
+        self.offset = config.index
 
     @classmethod
-    def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
-        if storage_config.schema_type is None:
+    def get_wrapper(cls, config: StorageConfig):
+        if config.schema_type is None:
             storage_cls = SQLTaskStorage
         else:
             storage_cls = SQLExperienceStorage
-        if storage_config.wrap_in_ray:
+        if config.wrap_in_ray:
             return (
                 ray.remote(storage_cls)
                 .options(
-                    name=f"sql-{storage_config.name}",
-                    namespace=storage_config.ray_namespace or ray.get_runtime_context().namespace,
+                    name=f"sql-{config.name}",
+                    namespace=config.ray_namespace or ray.get_runtime_context().namespace,
                     get_if_exists=True,
                     max_concurrency=5,
                 )
-                .remote(storage_config, config)
+                .remote(config)
             )
         else:
-            return storage_cls(storage_config, config)
+            return storage_cls(config)
 
     @abstractmethod
     def write(self, data: List) -> None:
@@ -90,12 +90,12 @@ class SQLStorage:
 class SQLExperienceStorage(SQLStorage):
     """Used as trainer input."""
 
-    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        super().__init__(storage_config, config)
-        self.batch_size = config.train_batch_size
-        self.max_timeout = storage_config.max_read_timeout
+    def __init__(self, config: StorageConfig) -> None:
+        super().__init__(config)
+        self.max_timeout = config.max_read_timeout
+        self.batch_size = config.batch_size
         # TODO: optimize the following logic
-        if storage_config.schema_type == "experience":
+        if config.schema_type == "experience":
             # NOTE: consistent with the old version of experience buffer
             self._read_method = self._read_priority
         else:
@@ -191,15 +191,10 @@ class SQLExperienceStorage(SQLStorage):
         return self._read_method(batch_size)
 
     @classmethod
-    def load_from_dataset(
-        cls, dataset: Dataset, storage_config: StorageConfig, config: BufferConfig
-    ) -> "SQLExperienceStorage":
-        storage = cls(
-            storage_config=storage_config,
-            config=config,
-        )
-        formatter = FORMATTER.get(storage_config.schema_type)(
-            tokenizer_path=config.tokenizer_path, format_config=storage_config.format
+    def load_from_dataset(cls, dataset: Dataset, config: StorageConfig) -> "SQLExperienceStorage":
+        storage = cls(config)
+        formatter = FORMATTER.get(config.schema_type)(
+            tokenizer_path=config.tokenizer_path, format_config=config.format
         )
         batch_size = storage.batch_size
         batch = []
@@ -216,19 +211,20 @@ class SQLExperienceStorage(SQLStorage):
 class SQLTaskStorage(SQLStorage):
     """Used as explorer input."""
 
-    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        super().__init__(storage_config, config)
+    def __init__(self, config: StorageConfig) -> None:
+        super().__init__(config)
         self.batch_size = config.batch_size
-        self.is_eval = storage_config.is_eval
-        self.default_workflow_cls = WORKFLOWS.get(storage_config.default_workflow_type)  # type: ignore
-        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(storage_config.default_reward_fn_type)  # type: ignore
-        self.formatter = TaskFormatter(storage_config)
-        if storage_config.total_steps:
-            self.total_samples = self.batch_size * storage_config.total_steps
+        self.is_eval = config.is_eval
+        self.default_workflow_cls = WORKFLOWS.get(config.default_workflow_type)  # type: ignore
+        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(config.default_reward_fn_type)  # type: ignore
+        self.formatter = TaskFormatter(config)
+        self.offset = config.index
+        if config.total_steps:
+            self.total_samples = self.batch_size * config.total_steps
         else:
-            if storage_config.total_epochs > 1:
+            if config.total_epochs > 1:
                 self.logger.warning(
-                    f"SQL Storage do not support total_epochs, the value {storage_config.total_epochs} will be ignored"
+                    f"SQL Storage do not support total_epochs, the value {config.total_epochs} will be ignored"
                 )
             self.total_samples = float("inf")
 
@@ -259,13 +255,8 @@ class SQLTaskStorage(SQLStorage):
             return [self.formatter.format(item.raw_task) for item in results]
 
     @classmethod
-    def load_from_dataset(
-        cls, dataset: Dataset, storage_config: StorageConfig, config: BufferConfig
-    ) -> "SQLTaskStorage":
-        storage = cls(
-            storage_config=storage_config,
-            config=config,
-        )
+    def load_from_dataset(cls, dataset: Dataset, config: StorageConfig) -> "SQLTaskStorage":
+        storage = cls(config)
         batch_size = config.batch_size
         batch = []
         for item in dataset:

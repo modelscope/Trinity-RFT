@@ -6,7 +6,6 @@ from trinity.buffer.operators.experience_operator import ExperienceOperator
 from trinity.buffer.storage.queue import is_database_url, is_json_file
 from trinity.common.config import (
     AlgorithmConfig,
-    BufferConfig,
     Config,
     ExperiencePipelineConfig,
     StorageConfig,
@@ -17,13 +16,11 @@ from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins
 
 
-def get_input_buffers(
-    pipeline_config: ExperiencePipelineConfig, buffer_config: BufferConfig
-) -> Dict:
+def get_input_buffers(pipeline_config: ExperiencePipelineConfig) -> Dict:
     """Get input buffers for the experience pipeline."""
     input_buffers = {}
     for input_name, input_config in pipeline_config.inputs.items():
-        buffer_reader = get_buffer_reader(input_config, buffer_config)
+        buffer_reader = get_buffer_reader(input_config)
         input_buffers[input_name] = buffer_reader
     return input_buffers
 
@@ -37,8 +34,7 @@ class ExperiencePipeline:
         self.logger = get_logger(f"{config.explorer.name}_experience_pipeline", in_ray_actor=True)
         load_plugins()
         pipeline_config = config.data_processor.experience_pipeline
-        buffer_config = config.buffer
-        self.input_store = self._init_input_storage(pipeline_config, buffer_config)  # type: ignore [arg-type]
+        self.input_store = self._init_input_storage(pipeline_config)  # type: ignore [arg-type]
         try:
             self.operators = ExperienceOperator.create_operators(pipeline_config.operators)
         except Exception as e:
@@ -46,14 +42,12 @@ class ExperiencePipeline:
             raise e
         self._set_algorithm_operators(config.algorithm)
         self.output = get_buffer_writer(
-            buffer_config.trainer_input.experience_buffer,  # type: ignore [arg-type]
-            buffer_config,
+            config.buffer.trainer_input.experience_buffer,  # type: ignore [arg-type]
         )
 
     def _init_input_storage(
         self,
         pipeline_config: ExperiencePipelineConfig,
-        buffer_config: BufferConfig,
     ) -> Optional[BufferWriter]:
         """Initialize the input storage if it is not already set."""
         if pipeline_config.save_input:
@@ -66,7 +60,6 @@ class ExperiencePipeline:
                         path=pipeline_config.input_save_path,
                         wrap_in_ray=False,
                     ),
-                    buffer_config,
                 )
             elif is_database_url(pipeline_config.input_save_path):
                 return get_buffer_writer(
@@ -75,7 +68,6 @@ class ExperiencePipeline:
                         path=pipeline_config.input_save_path,
                         wrap_in_ray=False,
                     ),
-                    buffer_config,
                 )
             else:
                 raise ValueError(

@@ -7,7 +7,11 @@ import torch
 from tests.tools import RayUnittestBaseAysnc, get_template_config
 from trinity.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
-from trinity.common.config import ExperiencePipelineConfig, OperatorConfig
+from trinity.common.config import (
+    ExperienceBufferConfig,
+    ExperiencePipelineConfig,
+    OperatorConfig,
+)
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.common.experience import EID, Experience
 
@@ -52,9 +56,11 @@ class TestExperiencePipeline(RayUnittestBaseAysnc):
         config.algorithm.advantage_fn = (
             "grpo"  # grpo will add an operator at the end of the pipeline
         )
+        config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="pipeline_test_experience_buffer",
+            max_read_timeout=3,
+        )
         config.check_and_update()
-        config.buffer.trainer_input.experience_buffer.name = "pipeline_test_experience_buffer"
-        config.buffer.trainer_input.experience_buffer.max_read_timeout = 3
 
         pipeline = (
             ray.remote(ExperiencePipeline)
@@ -71,7 +77,7 @@ class TestExperiencePipeline(RayUnittestBaseAysnc):
         )  # first experience of each task will be filtered out by the reward filter
 
         # tests
-        reader = get_buffer_reader(config.buffer.trainer_input.experience_buffer, config.buffer)
+        reader = get_buffer_reader(config.buffer.trainer_input.experience_buffer)
         exps = await reader.read_async(batch_size=task_num * (repeat_times - 1))
         self.assertEqual(len(exps), task_num * (repeat_times - 1))
         with self.assertRaises(TimeoutError):

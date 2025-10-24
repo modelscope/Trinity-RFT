@@ -189,7 +189,7 @@ class ConfigManager:
             with st.expander("Experience Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
-                self.get_configs("use_priority_queue")
+                self.get_configs("enable_replay_buffer")
                 self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
 
         # TODO: used for SQL storage
@@ -588,11 +588,13 @@ class ConfigManager:
                 del buffer_config["train_batch_size"]
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
-            experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
-            experience_buffer["reuse_cooldown_time"] = st.session_state["reuse_cooldown_time"]
-            experience_buffer["replay_buffer_kwargs"] = {
+            experience_buffer["replay_buffer"] = {
+                "enable": st.session_state["enable_replay_buffer"],
                 "priority_fn": st.session_state["priority_fn"],
-                "decay": st.session_state["priority_decay"],
+                "reuse_cooldown_time": st.session_state["reuse_cooldown_time"],
+                "priority_fn_args": {
+                    "decay": st.session_state["priority_decay"],
+                },
             }
 
         if st.session_state["mode"] != "train":

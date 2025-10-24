@@ -264,7 +264,7 @@ class Explorer:
             self.logger.info(
                 f"Evaluation on {eval_taskset_config.name} at step {self.explore_step_num} started."
             )
-            eval_taskset = get_buffer_reader(eval_taskset_config, self.config.buffer)
+            eval_taskset = get_buffer_reader(eval_taskset_config)
             eval_batch_id = f"{self.explore_step_num}/{eval_taskset.name}"
             self.pending_eval_tasks.append((self.explore_step_num, eval_taskset.name))
             while True:

@@ -97,6 +97,13 @@ jobs:
           fi
         fi
 
+    - name: Clean checkpoint dir
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      if: always()
+      run: |
+        docker compose exec trinity-node-1 rm -rf /mnt/checkpoints/*
+      continue-on-error: true
+
     - name: Upload test results
       if: env.tests_run == 'true' || failure()
       uses: actions/upload-artifact@v4

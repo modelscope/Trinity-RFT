@@ -6,17 +6,17 @@ import ray
 
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.storage.sql import SQLStorage
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
 class SQLReader(BufferReader):
     """Reader of the SQL buffer."""
 
-    def __init__(self, meta: StorageConfig, config: BufferConfig) -> None:
-        assert meta.storage_type == StorageType.SQL
-        self.wrap_in_ray = meta.wrap_in_ray
-        self.storage = SQLStorage.get_wrapper(meta, config)
+    def __init__(self, config: StorageConfig) -> None:
+        assert config.storage_type == StorageType.SQL
+        self.wrap_in_ray = config.wrap_in_ray
+        self.storage = SQLStorage.get_wrapper(config)
 
     def read(self, batch_size: Optional[int] = None) -> List:
         if self.wrap_in_ray:

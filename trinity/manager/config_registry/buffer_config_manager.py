@@ -298,12 +298,12 @@ def set_storage_type(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=False)
-def set_use_priority_queue(**kwargs):
-    st.checkbox("Use Priority Queue", **kwargs)
+def set_enable_replay_buffer(**kwargs):
+    st.checkbox("Enable Replay Buffer", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=None, visible=lambda: st.session_state["use_priority_queue"]
+    default_value=None, visible=lambda: st.session_state["enable_replay_buffer"]
 )
 def set_reuse_cooldown_time(**kwargs):
     st.number_input(
@@ -317,7 +317,7 @@ def set_reuse_cooldown_time(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value="linear_decay", visible=lambda: st.session_state["use_priority_queue"]
+    default_value="linear_decay", visible=lambda: st.session_state["enable_replay_buffer"]
 )
 def set_priority_fn(**kwargs):
     candidates = list(PRIORITY_FUNC.modules.keys())
@@ -329,7 +329,7 @@ def set_priority_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=0.1, visible=lambda: st.session_state["use_priority_queue"]
+    default_value=0.1, visible=lambda: st.session_state["enable_replay_buffer"]
 )
 def set_priority_decay(**kwargs):
     st.number_input(

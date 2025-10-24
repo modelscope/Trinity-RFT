@@ -5,8 +5,7 @@ from typing import List
 
 import ray
 
-from trinity.buffer.utils import default_storage_path
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.experience import EID, Experience
 from trinity.common.workflows import Task
 
@@ -33,34 +32,32 @@ class FileStorage:
     StorageType.QUEUE instead.
     """
 
-    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        if not storage_config.path:
-            storage_config.path = default_storage_path(storage_config, config)
-        ext = os.path.splitext(storage_config.path)[-1]
+    def __init__(self, config: StorageConfig) -> None:
+        if not config.path:
+            raise ValueError("`path` is required for FILE storage type.")
+        ext = os.path.splitext(config.path)[-1]
         if ext != ".jsonl" and ext != ".json":
-            raise ValueError(
-                f"File path must end with '.json' or '.jsonl', got {storage_config.path}"
-            )
-        path_dir = os.path.dirname(os.path.abspath(storage_config.path))
+            raise ValueError(f"File path must end with '.json' or '.jsonl', got {config.path}")
+        path_dir = os.path.dirname(os.path.abspath(config.path))
         os.makedirs(path_dir, exist_ok=True)
-        self.file = open(storage_config.path, "a", encoding="utf-8")
+        self.file = open(config.path, "a", encoding="utf-8")
         self.encoder = _Encoder(ensure_ascii=False)
         self.ref_count = 0
 
     @classmethod
-    def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
-        if storage_config.wrap_in_ray:
+    def get_wrapper(cls, config: StorageConfig):
+        if config.wrap_in_ray:
             return (
                 ray.remote(cls)
                 .options(
-                    name=f"json-{storage_config.name}",
-                    namespace=storage_config.ray_namespace or ray.get_runtime_context().namespace,
+                    name=f"json-{config.name}",
+                    namespace=config.ray_namespace or ray.get_runtime_context().namespace,
                     get_if_exists=True,
                 )
-                .remote(storage_config, config)
+                .remote(config)
             )
         else:
-            return cls(storage_config, config)
+            return cls(config)
 
     def write(self, data: List) -> None:
         for item in data:

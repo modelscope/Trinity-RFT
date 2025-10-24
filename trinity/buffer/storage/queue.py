@@ -1,4 +1,5 @@
 """Ray Queue storage"""
+
 import asyncio
 import time
 from abc import ABC, abstractmethod
@@ -11,7 +12,7 @@ import numpy as np
 import ray
 from sortedcontainers import SortedDict
 
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
@@ -93,19 +94,22 @@ class QueueBuffer(ABC):
         """Check if there is no more data to read."""
 
     @classmethod
-    def get_queue(cls, storage_config: StorageConfig, config: BufferConfig) -> "QueueBuffer":
+    def get_queue(cls, config: StorageConfig) -> "QueueBuffer":
         """Get a queue instance based on the storage configuration."""
         logger = get_logger(__name__)
-        if storage_config.use_priority_queue:
-            reuse_cooldown_time = storage_config.reuse_cooldown_time
-            replay_buffer_kwargs = storage_config.replay_buffer_kwargs
-            capacity = storage_config.capacity
+        if config.replay_buffer.enable:
+            capacity = config.capacity
             logger.info(
-                f"Using AsyncPriorityQueue with capacity {capacity}, reuse_cooldown_time {reuse_cooldown_time}."
+                f"Using AsyncPriorityQueue with capacity {capacity}, reuse_cooldown_time {config.replay_buffer.reuse_cooldown_time}."
             )
-            return AsyncPriorityQueue(capacity, reuse_cooldown_time, **replay_buffer_kwargs)
+            return AsyncPriorityQueue(
+                capacity=capacity,
+                reuse_cooldown_time=config.replay_buffer.reuse_cooldown_time,
+                priority_fn=config.replay_buffer.priority_fn,
+                priority_fn_args=config.replay_buffer.priority_fn_args,
+            )
         else:
-            return AsyncQueue(capacity=storage_config.capacity)
+            return AsyncQueue(capacity=config.capacity)
 
 
 class AsyncQueue(asyncio.Queue, QueueBuffer):
@@ -140,9 +144,9 @@ class AsyncPriorityQueue(QueueBuffer):
     Attributes:
         capacity (int): Maximum number of items the queue can hold. This value is automatically
             adjusted to be at most twice the read batch size.
-        priority_groups (SortedDict): Maps priorities to deques of items with the same priority.
-        priority_fn (callable): Function used to determine the priority of an item.
         reuse_cooldown_time (float): Delay before reusing an item (set to infinity to disable).
+        priority_fn (callable): Function used to determine the priority of an item.
+        priority_groups (SortedDict): Maps priorities to deques of items with the same priority.
     """
 
     def __init__(
@@ -150,7 +154,7 @@ class AsyncPriorityQueue(QueueBuffer):
         capacity: int,
         reuse_cooldown_time: Optional[float] = None,
         priority_fn: str = "linear_decay",
-        **kwargs,
+        priority_fn_args: Optional[dict] = None,
     ):
         """
         Initialize the async priority queue.
@@ -164,7 +168,7 @@ class AsyncPriorityQueue(QueueBuffer):
         self.capacity = capacity
         self.item_count = 0
         self.priority_groups = SortedDict()  # Maps priority -> deque of items
-        self.priority_fn = partial(PRIORITY_FUNC.get(priority_fn), **kwargs)
+        self.priority_fn = partial(PRIORITY_FUNC.get(priority_fn), **(priority_fn_args or {}))
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
         self._closed = False
@@ -258,24 +262,24 @@ class AsyncPriorityQueue(QueueBuffer):
 class QueueStorage:
     """An wrapper of a async queue."""
 
-    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        self.logger = get_logger(f"queue_{storage_config.name}", in_ray_actor=True)
+    def __init__(self, config: StorageConfig) -> None:
+        self.logger = get_logger(f"queue_{config.name}", in_ray_actor=True)
         self.config = config
-        self.capacity = storage_config.capacity
-        self.queue = QueueBuffer.get_queue(storage_config, config)
-        st_config = deepcopy(storage_config)
+        self.capacity = config.capacity
+        self.queue = QueueBuffer.get_queue(config)
+        st_config = deepcopy(config)
         st_config.wrap_in_ray = False
         if st_config.path:
             if is_database_url(st_config.path):
                 from trinity.buffer.writer.sql_writer import SQLWriter
 
                 st_config.storage_type = StorageType.SQL
-                self.writer = SQLWriter(st_config, self.config)
+                self.writer = SQLWriter(st_config)
             elif is_json_file(st_config.path):
                 from trinity.buffer.writer.file_writer import JSONWriter
 
                 st_config.storage_type = StorageType.FILE
-                self.writer = JSONWriter(st_config, self.config)
+                self.writer = JSONWriter(st_config)
             else:
                 self.logger.warning("Unknown supported storage path: %s", st_config.path)
                 self.writer = None
@@ -283,7 +287,7 @@ class QueueStorage:
             from trinity.buffer.writer.file_writer import JSONWriter
 
             st_config.storage_type = StorageType.FILE
-            self.writer = JSONWriter(st_config, self.config)
+            self.writer = JSONWriter(st_config)
         self.logger.warning(f"Save experiences in {st_config.path}.")
         self.ref_count = 0
         self.exp_pool = deque()  # A pool to store experiences
@@ -335,14 +339,14 @@ class QueueStorage:
         return [self.exp_pool.popleft() for _ in range(batch_size)]
 
     @classmethod
-    def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
+    def get_wrapper(cls, config: StorageConfig):
         """Get the queue actor."""
         return (
             ray.remote(cls)
             .options(
-                name=f"queue-{storage_config.name}",
-                namespace=storage_config.ray_namespace or ray.get_runtime_context().namespace,
+                name=f"queue-{config.name}",
+                namespace=config.ray_namespace or ray.get_runtime_context().namespace,
                 get_if_exists=True,
             )
-            .remote(storage_config, config)
+            .remote(config)
         )

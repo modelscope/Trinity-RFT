@@ -172,7 +172,7 @@ class DebugWorkflowRunner(WorkflowRunner):
     ) -> None:
         model, auxiliary_models = get_debug_inference_model(config)
         super().__init__(config, model, auxiliary_models, 0)
-        self.taskset = get_buffer_reader(config.buffer.explorer_input.tasksets[0], config.buffer)
+        self.taskset = get_buffer_reader(config.buffer.explorer_input.tasksets[0])
         self.output_file = output_file
 
     async def debug(self) -> None:

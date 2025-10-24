@@ -42,10 +42,11 @@ buffer:
     experience_buffer:
       name: experience_buffer
       storage_type: queue
-      use_priority_queue: true
-      replay_buffer_kwargs:
+      replay_buffer:
+        enable: true
         priority_fn: linear_decay
-        decay: 0.1
+        priority_fn_args:
+          decay: 0.1
 explorer:
   runner_per_model: 8
   max_timeout: 900

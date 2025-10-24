@@ -21,9 +21,8 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.buffer import get_buffer_reader
-from trinity.buffer.utils import default_storage_path
 from trinity.cli.launcher import explore, run_stage
-from trinity.common.config import StorageConfig
+from trinity.common.config import ExperienceBufferConfig
 from trinity.common.constants import StorageType
 from trinity.explorer.explorer import Explorer
 from trinity.manager.state_manager import StateManager
@@ -116,10 +115,7 @@ class TestExplorerGSM8k(BaseExplorerCase):
             self.assertTrue(count >= 0)
             self.assertTrue(count <= 2 * 4)  # repeat_times * batch_size
             self.assertTrue(count % 2 == 0)  # should be multiple of repeat_times
-
-        exp_save_path = default_storage_path(
-            self.config.buffer.trainer_input.experience_buffer, self.config.buffer
-        )
+        exp_save_path = self.config.buffer.trainer_input.experience_buffer.path
         with open(exp_save_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
             self.assertTrue(len(lines) <= 4 * 2 * 4)  # step * repeat_times * batch_size
@@ -169,7 +165,7 @@ class ServeTest(RayUnittestBaseAysnc):
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.explorer.api_port = 8010
         self.config.explorer.service_status_check_interval = 30
-        self.config.buffer.trainer_input.experience_buffer = StorageConfig(
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="experience_buffer",
             storage_type=StorageType.SQL,
         )
@@ -248,7 +244,6 @@ class ServeTest(RayUnittestBaseAysnc):
         self.config.buffer.trainer_input.experience_buffer.max_read_timeout = 5
         buffer_reader = get_buffer_reader(
             self.config.buffer.trainer_input.experience_buffer,
-            self.config.buffer,
         )
         exps = await buffer_reader.read_async(batch_size=10)
         for exp in exps:

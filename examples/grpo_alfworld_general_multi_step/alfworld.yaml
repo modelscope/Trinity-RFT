@@ -35,7 +35,8 @@ buffer:
     experience_buffer:
       name: alfworld_buffer
       storage_type: queue
-      use_priority_queue: true
+      replay_buffer:
+        enable: true
 explorer:
   max_repeat_times_per_runner: 1
   runner_per_model: 8

@@ -10,7 +10,7 @@ from parameterized import parameterized
 from tests.tools import RayUnittestBaseAysnc
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import ExperienceBufferConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import EID, Experience
 
@@ -23,24 +23,22 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         self.put_batch_size = 2
         self.train_batch_size = 4
 
-        self.config = BufferConfig(
-            train_batch_size=self.train_batch_size,
-        )
         if os.path.exists(DB_PATH):
             os.remove(DB_PATH)
 
     @parameterized.expand([("sft",), ("dpo",)])
     async def test_sql_storage(self, schema_type):
-        meta = StorageConfig(
+        config = ExperienceBufferConfig(
             name="test_storage",
             schema_type=schema_type,
             storage_type=StorageType.SQL,
             max_read_timeout=3,
             path=f"sqlite:///{DB_PATH}",
+            batch_size=self.train_batch_size,
         )
-
-        writer = SQLWriter(meta, self.config)
-        reader = SQLReader(meta, self.config)
+        config = config.to_storage_config()
+        writer = SQLWriter(config)
+        reader = SQLReader(config)
         self.assertEqual(await writer.acquire(), 1)
         exps = [
             Experience(
@@ -90,15 +88,17 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         self.assertRaises(StopIteration, reader.read, batch_size=1)
 
     async def test_sql_experience_buffer(self):
-        meta = StorageConfig(
+        config = ExperienceBufferConfig(
             name="test_storage",
             schema_type="experience",
             storage_type=StorageType.SQL,
             max_read_timeout=3,
             path=f"sqlite:///{DB_PATH}",
+            batch_size=self.train_batch_size,
         )
-        writer = SQLWriter(meta, self.config)
-        reader = SQLReader(meta, self.config)
+        config = config.to_storage_config()
+        writer = SQLWriter(config)
+        reader = SQLReader(config)
         self.assertEqual(await writer.acquire(), 1)
         for idx in range(self.total_num // self.put_batch_size):
             exps = [
