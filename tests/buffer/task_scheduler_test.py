@@ -7,7 +7,7 @@ from parameterized import parameterized
 
 from tests.tools import get_template_config
 from trinity.buffer.task_scheduler import TasksetScheduler
-from trinity.common.config import DataSelectorConfig, FormatConfig, StorageConfig
+from trinity.common.config import FormatConfig, StorageConfig, TaskSelectorConfig
 from trinity.common.workflows.workflow import Task
 
 
@@ -211,7 +211,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ),
                 default_workflow_type="math_workflow",
                 default_reward_fn_type="math_reward",
-                task_selector=DataSelectorConfig(
+                task_selector=TaskSelectorConfig(
                     **task_selector_kwargs,
                 ),
             ),
@@ -233,7 +233,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ),
                 default_workflow_type="math_workflow",
                 default_reward_fn_type="math_reward",
-                task_selector=DataSelectorConfig(
+                task_selector=TaskSelectorConfig(
                     **task_selector_kwargs,
                 ),
             ),

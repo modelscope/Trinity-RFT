@@ -63,7 +63,7 @@ This selector focuses on samples whose predicted performance is closest to a tar
 ```python
 @SELECTORS.register_module("difficulty_based")
 class DifficultyBasedSelector(BaseSelector):
-    def __init__(self, data_source, config: DataSelectorConfig) -> None:
+    def __init__(self, data_source, config: TaskSelectorConfig) -> None:
         super().__init__(data_source, config)
         self.logger = get_logger("difficulty_based_selector")
 

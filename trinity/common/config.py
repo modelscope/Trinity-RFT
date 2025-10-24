@@ -114,7 +114,7 @@ class LoRAConfig:
 
 @Experimental
 @dataclass
-class DataSelectorConfig:
+class TaskSelectorConfig:
     """Data selector config."""
 
     selector_type: Optional[str] = "sequential"
@@ -163,7 +163,7 @@ class StorageConfig:
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
-    task_selector: DataSelectorConfig = field(default_factory=DataSelectorConfig)
+    task_selector: TaskSelectorConfig = field(default_factory=TaskSelectorConfig)
 
     # enable progress bar (tqdm) for _HFBatchReader
     enable_progress_bar: Optional[bool] = False
@@ -703,8 +703,6 @@ class Config:
             ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
             experience_buffer.total_epochs = self.buffer.total_epochs
             experience_buffer.total_steps = self.buffer.total_steps
-        else:
-            assert len(tasksets) > 0
 
         for taskset in tasksets:
             if self.mode != "train" and not taskset.path:

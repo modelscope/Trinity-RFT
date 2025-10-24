@@ -6,7 +6,7 @@ import torch
 
 from trinity.buffer.reader.file_reader import _HFBatchReader
 from trinity.buffer.selector.difficulty_estimator import InterpolationBetaPREstimator
-from trinity.common.config import DataSelectorConfig
+from trinity.common.config import TaskSelectorConfig
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
@@ -30,7 +30,7 @@ class BaseSelector:
         - state_dict / load_state_dict: for saving/loading selector state (checkpointing)
     """
 
-    def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
+    def __init__(self, data_source: _HFBatchReader, config: TaskSelectorConfig):
         self.data_source = data_source
         self.config = config
 
@@ -86,7 +86,7 @@ class SequentialSelector(BaseSelector):
     Example: [0,1,2,...,B-1], then [B,B+1,...,2B-1], etc.
     """
 
-    def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
+    def __init__(self, data_source: _HFBatchReader, config: TaskSelectorConfig):
         super().__init__(data_source, config)
         self.dataset_size = data_source.dataset_size
         self.current_index = 0
@@ -122,7 +122,7 @@ class ShuffleSelector(BaseSelector):
     Mimics standard PyTorch DataLoader with shuffle=True.
     """
 
-    def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
+    def __init__(self, data_source: _HFBatchReader, config: TaskSelectorConfig):
         super().__init__(data_source, config)
         self.dataset_size = data_source.dataset_size  # Total available samples
         self.current_index = 0  # Progress tracker
@@ -178,7 +178,7 @@ class RandomSelector(BaseSelector):
     Can result in repeated samples within an epoch. Suitable for online or stochastic training regimes.
     """
 
-    def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
+    def __init__(self, data_source: _HFBatchReader, config: TaskSelectorConfig):
         super().__init__(data_source, config)
         self.dataset_size = data_source.dataset_size
         self.current_index = 0
@@ -221,7 +221,7 @@ class OfflineEasy2HardSelector(BaseSelector):
     (e.g., via teacher model confidence, length, BLEU score, etc.).
     """
 
-    def __init__(self, data_source, config: DataSelectorConfig):
+    def __init__(self, data_source, config: TaskSelectorConfig):
         super().__init__(data_source, config)
         self.logger = get_logger("offline_easy2hard_selector")
 
@@ -305,7 +305,7 @@ class DifficultyBasedSelector(BaseSelector):
     Supports both greedy selection (`tau=0`) and stochastic sampling (`tau>0`).
     """
 
-    def __init__(self, data_source, config: DataSelectorConfig) -> None:
+    def __init__(self, data_source, config: TaskSelectorConfig) -> None:
         super().__init__(data_source, config)
         self.logger = get_logger("difficulty_based_selector")
 
