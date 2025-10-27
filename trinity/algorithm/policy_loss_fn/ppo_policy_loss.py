@@ -90,8 +90,6 @@ class PPOPolicyLossFn(PolicyLossFn):
                 (ratio_detached < self.truncate_is_range_low).float(), action_mask
             ) + masked_mean((ratio_detached > self.truncate_is_range_high).float(), action_mask)
             ratio = torch.clamp(ratio, self.truncate_is_range_low, self.truncate_is_range_high)
-        else:
-            is_truncate_frac = torch.tensor(0.0)
 
         pg_losses = -advantages * ratio
         pg_losses2 = -advantages * torch.clamp(
