@@ -565,8 +565,8 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">FORMATTER</span><span class="p">,</span> <span class="n">TaskFormatter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_storage_path</span><span class="p">,</span> <span class="n">retry_session</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">retry_session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
@@ -588,46 +588,46 @@ document.write(`
 
 <div class="viewcode-block" id="SQLStorage.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLStorage.__init__">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sql_</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-            <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">default_storage_path</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sql_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`path` is required for SQL storage type.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span> <span class="o">=</span> <span class="n">init_engine</span><span class="p">(</span>
-            <span class="n">db_url</span><span class="o">=</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-            <span class="n">table_name</span><span class="o">=</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">schema_type</span><span class="o">=</span><span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">,</span>
+            <span class="n">db_url</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">table_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">schema_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Init SQL storage at </span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Init SQL storage at </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_retry_times</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_retry_interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_retry_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_retry_interval</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># Assume that the auto-increment ID starts counting from 1, so the default offset should be 0.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">index</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">index</span></div>
 
 
 <div class="viewcode-block" id="SQLStorage.get_wrapper">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLStorage.get_wrapper">[文档]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">schema_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">storage_cls</span> <span class="o">=</span> <span class="n">SQLTaskStorage</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">storage_cls</span> <span class="o">=</span> <span class="n">SQLExperienceStorage</span>
-        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">storage_cls</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">options</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sql-</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">namespace</span><span class="o">=</span><span class="n">storage_config</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">or</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sql-</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">namespace</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">or</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span>
                     <span class="n">get_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">max_concurrency</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">storage_cls</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">storage_cls</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SQLStorage.write">
@@ -669,12 +669,12 @@ document.write(`
 
 <div class="viewcode-block" id="SQLExperienceStorage.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage.__init__">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_read_timeout</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_read_timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="c1"># TODO: optimize the following logic</span>
-        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">==</span> <span class="s2">&quot;experience&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">==</span> <span class="s2">&quot;experience&quot;</span><span class="p">:</span>
             <span class="c1"># NOTE: consistent with the old version of experience buffer</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_priority</span>
         <span class="k">else</span><span class="p">:</span>
@@ -779,15 +779,10 @@ document.write(`
 <div class="viewcode-block" id="SQLExperienceStorage.load_from_dataset">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage.load_from_dataset">[文档]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_dataset</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SQLExperienceStorage&quot;</span><span class="p">:</span>
-        <span class="n">storage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">storage_config</span><span class="o">=</span><span class="n">storage_config</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
-            <span class="n">tokenizer_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">storage_config</span><span class="o">.</span><span class="n">format</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_dataset</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SQLExperienceStorage&quot;</span><span class="p">:</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
+            <span class="n">tokenizer_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">format</span>
         <span class="p">)</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
@@ -810,19 +805,20 @@ document.write(`
 
 <div class="viewcode-block" id="SQLTaskStorage.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLTaskStorage.__init__">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">is_eval</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">TaskFormatter</span><span class="p">(</span><span class="n">storage_config</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">total_steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">total_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">total_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">is_eval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">TaskFormatter</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">total_steps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">total_steps</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;SQL Storage do not support total_epochs, the value </span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">total_epochs</span><span class="si">}</span><span class="s2"> will be ignored&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;SQL Storage do not support total_epochs, the value </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">total_epochs</span><span class="si">}</span><span class="s2"> will be ignored&quot;</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">total_samples</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span></div>
 
@@ -862,13 +858,8 @@ document.write(`
 <div class="viewcode-block" id="SQLTaskStorage.load_from_dataset">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLTaskStorage.load_from_dataset">[文档]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_dataset</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SQLTaskStorage&quot;</span><span class="p">:</span>
-        <span class="n">storage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">storage_config</span><span class="o">=</span><span class="n">storage_config</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_from_dataset</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SQLTaskStorage&quot;</span><span class="p">:</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>

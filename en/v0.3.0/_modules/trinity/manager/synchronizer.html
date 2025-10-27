@@ -621,7 +621,7 @@ document.write(`
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_find_latest_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span>
-        <span class="n">default_local_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span>
+        <span class="n">default_local_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint_job_dir</span>
         <span class="n">local_latest_state_dict_iteration</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">default_local_dir</span><span class="p">,</span> <span class="s2">&quot;latest_state_dict_iteration.txt&quot;</span>
         <span class="p">)</span>

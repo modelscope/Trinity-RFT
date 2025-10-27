@@ -566,9 +566,7 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.DefaultSampleStrategy.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span> <span class="n">buffer_config</span>  <span class="c1"># type: ignore</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 
 <div class="viewcode-block" id="DefaultSampleStrategy.sample">

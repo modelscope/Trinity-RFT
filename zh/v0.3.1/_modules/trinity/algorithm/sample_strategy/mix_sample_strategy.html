@@ -579,11 +579,9 @@ document.write(`
         <span class="n">expert_batch_size</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">*</span> <span class="n">tot_batch_size</span><span class="p">)</span>
 
         <span class="c1"># experience buffer</span>
-        <span class="n">usual_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="n">usual_buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="n">tot_batch_size</span> <span class="o">-</span> <span class="n">expert_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span> <span class="n">usual_buffer_config</span>  <span class="c1"># type: ignore</span>
-        <span class="p">)</span>
+        <span class="n">usual_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">)</span>
+        <span class="n">usual_buffer_config</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">tot_batch_size</span> <span class="o">-</span> <span class="n">expert_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">usual_buffer_config</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
         <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -603,10 +601,11 @@ document.write(`
             <span class="n">expert_storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">=</span> <span class="s2">&quot;sft&quot;</span>
 
         <span class="c1"># expert experience buffer</span>
-        <span class="n">expert_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="n">expert_buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="n">expert_batch_size</span>
+        <span class="n">expert_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">expert_buffer_config</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">expert_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="p">],</span>
             <span class="n">expert_buffer_config</span><span class="p">,</span>
         <span class="p">)</span></div>
 

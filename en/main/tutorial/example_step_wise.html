@@ -689,7 +689,7 @@ document.write(`
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">algorithm.algorithm_type</span> <span class="pre">=</span> <span class="pre">multi_step_grpo</span></code>: This algorithm allows you to have multiple steps in each run and generate multiple experiences for training, and it broadcasts the advantages value of the last step experience to the previous experiences.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.train_batch_size</span></code>: The number of experiences to be sampled from the buffer for training, which can be different from the number of generated experiences in each explore step.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.use_priority_queue</span> <span class="pre">=</span> <span class="pre">true</span></code>: Using <code class="docutils literal notranslate"><span class="pre">PriorityQueue</span></code> allows the model to use the experiences with higher priority, which prefers newly-generated experiences by default.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.replay_buffer</span></code>: Using <code class="docutils literal notranslate"><span class="pre">PriorityQueue</span></code> allows the model to use the experiences with higher priority, which prefers newly-generated experiences by default.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_style</span> <span class="pre">=</span> <span class="pre">dynamic_by_explorer</span></code>: The explorer determines when to synchronize the model weights with the trainer.</p></li>
 </ul>
 <p>The example configuration is shown as:</p>
@@ -730,7 +730,11 @@ document.write(`
 <span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alfworld_buffer</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
-<span class="w">      </span><span class="nt">use_priority_queue</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">replay_buffer</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">enable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">priority_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">linear_decay</span>
+<span class="w">        </span><span class="nt">priority_fn_args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
 <span class="nt">explorer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">max_repeat_times_per_runner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">runner_per_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>

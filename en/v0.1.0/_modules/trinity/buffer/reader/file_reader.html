@@ -436,7 +436,7 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">FORMATTER</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageConfig</span>
 
 
 <div class="viewcode-block" id="DummyProgressBar">
@@ -548,19 +548,19 @@ document.write(`
 
 <div class="viewcode-block" id="ExperienceFileReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
-            <span class="n">tokenizer_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
+            <span class="n">tokenizer_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">format</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
-            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">load_dataset</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default_batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span>
-            <span class="n">total_epochs</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">,</span>
+            <span class="n">total_epochs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">,</span>
             <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">total_steps</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
-            <span class="n">enable_progress_bar</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
+            <span class="n">total_steps</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
+            <span class="n">enable_progress_bar</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -580,28 +580,27 @@ document.write(`
 <div class="viewcode-block" id="TaskFileReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TaskFileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Reader for task file data.&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="TaskFileReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">split</span>
-        <span class="n">subset_name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span>
-        <span class="c1"># disable datasets caching to avoid reuse old-version dataset</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">datasets</span><span class="o">.</span><span class="n">disable_caching</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
-            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default_batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span>
-            <span class="n">total_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">is_eval</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-            <span class="n">drop_last</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
-            <span class="n">total_steps</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
-            <span class="n">enable_progress_bar</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
+            <span class="n">total_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_eval</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">drop_last</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
+            <span class="n">total_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
+            <span class="n">enable_progress_bar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)(</span><span class="n">meta</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)(</span><span class="n">config</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>

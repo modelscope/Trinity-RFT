@@ -565,7 +565,6 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.storage.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_database_url</span><span class="p">,</span> <span class="n">is_json_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AlgorithmConfig</span><span class="p">,</span>
-    <span class="n">BufferConfig</span><span class="p">,</span>
     <span class="n">Config</span><span class="p">,</span>
     <span class="n">ExperiencePipelineConfig</span><span class="p">,</span>
     <span class="n">StorageConfig</span><span class="p">,</span>
@@ -578,13 +577,11 @@ document.write(`
 
 <div class="viewcode-block" id="get_input_buffers">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.get_input_buffers">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_input_buffers</span><span class="p">(</span>
-    <span class="n">pipeline_config</span><span class="p">:</span> <span class="n">ExperiencePipelineConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_input_buffers</span><span class="p">(</span><span class="n">pipeline_config</span><span class="p">:</span> <span class="n">ExperiencePipelineConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get input buffers for the experience pipeline.&quot;&quot;&quot;</span>
     <span class="n">input_buffers</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_config</span> <span class="ow">in</span> <span class="n">pipeline_config</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">buffer_reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">input_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+        <span class="n">buffer_reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">input_config</span><span class="p">)</span>
         <span class="n">input_buffers</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">buffer_reader</span>
     <span class="k">return</span> <span class="n">input_buffers</span></div>
 
@@ -603,8 +600,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_experience_pipeline&quot;</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">load_plugins</span><span class="p">()</span>
         <span class="n">pipeline_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span>
-        <span class="n">buffer_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_input_storage</span><span class="p">(</span><span class="n">pipeline_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_input_storage</span><span class="p">(</span><span class="n">pipeline_config</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">operators</span> <span class="o">=</span> <span class="n">ExperienceOperator</span><span class="o">.</span><span class="n">create_operators</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">operators</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -612,15 +608,13 @@ document.write(`
             <span class="k">raise</span> <span class="n">e</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_algorithm_operators</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
-            <span class="n">buffer_config</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
         <span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_init_input_storage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pipeline_config</span><span class="p">:</span> <span class="n">ExperiencePipelineConfig</span><span class="p">,</span>
-        <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BufferWriter</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the input storage if it is not already set.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">pipeline_config</span><span class="o">.</span><span class="n">save_input</span><span class="p">:</span>
@@ -633,7 +627,6 @@ document.write(`
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>
-                    <span class="n">buffer_config</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
@@ -642,7 +635,6 @@ document.write(`
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>
-                    <span class="n">buffer_config</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

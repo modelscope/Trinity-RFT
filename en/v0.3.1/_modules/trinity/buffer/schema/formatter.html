@@ -600,7 +600,6 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.TaskFormatter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">is_eval</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">workflow_key</span>
@@ -630,7 +629,7 @@ document.write(`
             <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
             <span class="n">workflow_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">,</span>
             <span class="n">reward_fn_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">,</span>
-            <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
+            <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
             <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>

@@ -439,12 +439,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for trinity.buffer.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 
@@ -478,24 +475,6 @@ document.write(`
                 <span class="k">raise</span> <span class="n">e</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
-
-
-<div class="viewcode-block" id="default_storage_path">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.utils.html#trinity.buffer.utils.default_storage_path">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">default_storage_path</span><span class="p">(</span><span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">cache_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please call config.check_and_update() before using.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;sqlite:///&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.db&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.jsonl&quot;</span><span class="p">,</span>
-        <span class="p">)</span></div>
 
 </pre></div>
 

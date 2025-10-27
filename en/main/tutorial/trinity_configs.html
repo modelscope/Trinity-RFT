@@ -913,19 +913,17 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: How the dataset is stored. Options: <code class="docutils literal notranslate"><span class="pre">file</span></code>, <code class="docutils literal notranslate"><span class="pre">queue</span></code>, <code class="docutils literal notranslate"><span class="pre">sql</span></code>.</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: The dataset is stored in <code class="docutils literal notranslate"><span class="pre">jsonl</span></code>/<code class="docutils literal notranslate"><span class="pre">parquet</span></code> files. The data file organization is required to meet the huggingface standard. <em>We recommand using this storage type for most cases.</em></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">queue</span></code>: The dataset is stored in a queue. The queue is a simple FIFO queue that stores the task dataset. <em>Do not use this storage type for task dataset unless you know what you are doing.</em></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sql</span></code>: The dataset is stored in a SQL database. <em>This type is unstable and will be optimized in the future versions.</em></p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The path to the task dataset.</p>
 <ul>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path points to the directory that contains the task dataset files.</p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage type, the path is optional. You can back up the data in the queue by specifying a sqlite database path here.</p></li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the sqlite database file.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: The subset name of the task dataset. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>: The split of the task dataset. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: The subset name of the task dataset, corresponding to the <code class="docutils literal notranslate"><span class="pre">name</span></code> parameter in huggingface datasets <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> function. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>: The split of the task dataset, corresponding to the <code class="docutils literal notranslate"><span class="pre">split</span></code> parameter in huggingface datasets <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> function. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">repeat_times</span></code>: The number of rollouts generated for a task. If not set, it will be automatically set to <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code> for <code class="docutils literal notranslate"><span class="pre">taskset</span></code>, and <code class="docutils literal notranslate"><span class="pre">1</span></code> for <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_args</span></code>: The parameters for rollout.</p>
 <ul>
@@ -979,7 +977,7 @@ Users can use these features to simplify configuration.</p>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the SQLite database file.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: Defines keys for prompts and responses in the dataset.</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: Mainly for SFT and DPO algorithm datasets, used to format the extracted data.</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">prompt_type</span></code>: Specifies the type of prompts in the dataset. We support <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>, <code class="docutils literal notranslate"><span class="pre">messages</span></code> for now.</p>
 <ul>
@@ -1000,8 +998,14 @@ Users can use these features to simplify configuration.</p>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Default is 1800 seconds (30 minutes).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code> and <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_buffer</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Used to configure the replay buffer for experience reuse.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable</span></code>: Whether to enable the replay buffer. Default is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">priority_fn</span></code>: Experience priority function used to determine the order of experience reuse. Currently supports <code class="docutils literal notranslate"><span class="pre">linear_decay</span></code> and <code class="docutils literal notranslate"><span class="pre">linear_decay_use_count_control_randomization</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">priority_fn_args</span></code>: A dictionary of arguments passed to the priority function, specific parameters depend on the selected priority function.</p></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_buffers</span></code>: Optional buffers used for trainer. It is a dictionary where each key is the buffer name and the value is the buffer configuration. Each buffer configuration is similar to the <code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>.</p></li>

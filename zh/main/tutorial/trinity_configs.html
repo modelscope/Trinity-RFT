@@ -905,19 +905,17 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: 数据集的存储方式。选项：<code class="docutils literal notranslate"><span class="pre">file</span></code>、<code class="docutils literal notranslate"><span class="pre">queue</span></code>、<code class="docutils literal notranslate"><span class="pre">sql</span></code>。</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: 数据集存储在 <code class="docutils literal notranslate"><span class="pre">jsonl</span></code>/<code class="docutils literal notranslate"><span class="pre">parquet</span></code> 文件中。数据文件组织需符合 HuggingFace 标准。<em>建议大多数情况下使用此存储类型。</em></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">queue</span></code>: 数据集存储在队列中。队列是一个简单的 FIFO 队列，用于存储任务数据集。<em>除非你明确了解其用途，否则不要为此类数据集使用此类型。</em></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sql</span></code>: 数据集存储在 SQL 数据库中。<em>此类型尚不稳定，将在未来版本中优化。</em></p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: 任务数据集的路径。</p>
 <ul>
 <li><p>对于 <code class="docutils literal notranslate"><span class="pre">file</span></code> 类型，路径指向包含任务数据集文件的目录。</p></li>
-<li><p>对于 <code class="docutils literal notranslate"><span class="pre">queue</span></code> 类型，路径为可选。可通过在此指定 sqlite 数据库路径来备份队列数据。</p></li>
 <li><p>对于 <code class="docutils literal notranslate"><span class="pre">sql</span></code> 类型，路径指向 sqlite 数据库文件。</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: 任务数据集的子集名称。默认为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>: 任务数据集的划分。默认为 <code class="docutils literal notranslate"><span class="pre">train</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: 任务数据集的子集名称，对应 huggingface datasets <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> 函数中的 <code class="docutils literal notranslate"><span class="pre">name</span></code> 参数。默认为 <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>: 任务数据集的划分。对应 huggingface datasets <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> 函数中的 <code class="docutils literal notranslate"><span class="pre">split</span></code> 参数。默认为 <code class="docutils literal notranslate"><span class="pre">train</span></code>。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">repeat_times</span></code>: 为一个任务生成的 rollout 数量。若未设置，则自动设为 <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code>（<code class="docutils literal notranslate"><span class="pre">taskset</span></code>）或 <code class="docutils literal notranslate"><span class="pre">1</span></code>（<code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_args</span></code>: rollout 参数。</p>
 <ul>
@@ -971,7 +969,7 @@ document.write(`
 <li><p>对于 <code class="docutils literal notranslate"><span class="pre">sql</span></code> 类型，路径指向 SQLite 数据库文件。</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: 定义数据集中 prompt 和 response 的键。</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: 主要针对 SFT 和 DPO 算法的数据集，用于规范化提取的数据。</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">prompt_type</span></code>: 指定数据集中 prompt 的类型。目前支持 <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>、<code class="docutils literal notranslate"><span class="pre">messages</span></code>。</p>
 <ul>
@@ -992,8 +990,14 @@ document.write(`
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: 读取新 experience 数据的最大等待时间（秒）。若超时，则直接返回不完整批次。仅当 <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">queue</span></code> 时生效。默认为 1800 秒（30 分钟）。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code>: 仅当 <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">queue</span></code> 时生效。若设为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，队列为优先级队列，允许优先处理某些 experience。默认为 <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: 仅当 <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">queue</span></code> 且 <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> 为 <code class="docutils literal notranslate"><span class="pre">True</span></code> 时生效。若设置，指定 experience 重用的冷却时间（秒）。若未指定，默认为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，表示 experience 不可被重复使用。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replay_buffer</span></code>: 仅当 <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">queue</span></code> 时生效。用于配置 experience 重用的回放缓冲区。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable</span></code>: 是否将 experience 放回缓冲区。默认为 <code class="docutils literal notranslate"><span class="pre">false</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: experience 重用的冷却时间（秒）。若未指定，默认为 <code class="docutils literal notranslate"><span class="pre">None</span></code>，表示 experience 不可被重复使用。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">priority_fn</span></code>: experience 优先级函数，用于确定 experience 的重用顺序。目前支持 <code class="docutils literal notranslate"><span class="pre">linear_decay</span></code> 和 <code class="docutils literal notranslate"><span class="pre">linear_decay_use_count_control_randomization</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">priority_fn_args</span></code>: 传递给优先级函数的参数字典，具体参数取决于所选的优先级函数。</p></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_buffers</span></code>: trainer 使用的可选缓冲区。为字典结构，每个键为 buffer 名称，值为 buffer 配置。每个 buffer 配置与 <code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code> 类似。</p></li>
