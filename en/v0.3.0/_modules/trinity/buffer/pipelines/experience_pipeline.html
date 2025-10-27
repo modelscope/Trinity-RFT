@@ -534,7 +534,8 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for trinity.buffer.pipelines.experience_pipeline</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferWriter</span><span class="p">,</span> <span class="n">get_buffer_reader</span><span class="p">,</span> <span class="n">get_buffer_writer</span>
@@ -550,6 +551,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.plugin_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.timer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 
 
 <div class="viewcode-block" id="get_input_buffers">
@@ -653,26 +655,33 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict: A dictionary containing metrics collected during the processing of experiences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Process experiences through operators</span>
-        <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
-            <span class="n">exps</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
-            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
-
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">operator</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;time/experience_pipeline/operator/</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">operator</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">):</span>
+                <span class="n">exps</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+                <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
         <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;experience_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
 
         <span class="c1"># Write processed experiences to output buffer</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/experience_pipeline/write&quot;</span><span class="p">):</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;time/experience_pipeline/total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
 
         <span class="c1"># prefix metrics keys with &#39;pipeline/&#39;</span>
         <span class="n">result_metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-                <span class="n">result_metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pipeline/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;time/&quot;</span><span class="p">):</span>
+                <span class="n">result_metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">result_metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;experience_pipeline/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">SELECTOR_METRIC</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
             <span class="n">result_metrics</span><span class="p">[</span><span class="n">SELECTOR_METRIC</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">SELECTOR_METRIC</span><span class="p">]</span>
 

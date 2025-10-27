@@ -543,6 +543,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span><span class="p">,</span> <span class="n">gather_metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.plugin_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.timer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 
 
 <div class="viewcode-block" id="Explorer">
@@ -589,6 +590,8 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_lora</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_successful</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_start_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished initializing Explorer.&quot;</span><span class="p">)</span></div>
 
 
@@ -735,6 +738,8 @@ document.write(`
 <div class="viewcode-block" id="Explorer.explore_step">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.explorer.html#trinity.explorer.Explorer.explore_step">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">explore_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tasks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">StopAsyncIteration</span><span class="p">:</span>
@@ -789,6 +794,7 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.explorer.html#trinity.explorer.Explorer.eval">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluation on all evaluation data samples.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">eval_tasksets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No evaluation data samples. Skip evaluation.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
@@ -885,9 +891,16 @@ document.write(`
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finish_explore_step</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">model_version</span><span class="o">=</span><span class="n">model_version</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finish_eval_step</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
 
+        <span class="c1"># Record the time: read_task + explore_step (&gt;=1) + eval (if any)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time/explorer_sync_interval&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">explore_start_time</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">end_step</span><span class="p">)</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_finish_explore_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">statuses</span><span class="p">,</span> <span class="n">exps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">get_results</span><span class="p">(</span><span class="n">batch_id</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rollout/model_version&quot;</span><span class="p">:</span> <span class="n">model_version</span><span class="p">}</span>
+        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="s2">&quot;time/wait_explore_step&quot;</span><span class="p">):</span>
+            <span class="n">statuses</span><span class="p">,</span> <span class="n">exps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">get_results</span><span class="p">(</span><span class="n">batch_id</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
         <span class="n">pipeline_metrics</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pipeline_metrics</span><span class="p">)</span>
         <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pipeline_metrics</span><span class="p">)</span>
@@ -899,7 +912,6 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_eval_tasks</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="n">step</span> <span class="o">=</span> <span class="n">step</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span>
-        <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_eval_tasks</span><span class="p">:</span>
             <span class="n">eval_step</span><span class="p">,</span> <span class="n">eval_task_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending_eval_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -912,7 +924,9 @@ document.write(`
                     <span class="p">[</span><span class="n">status</span><span class="o">.</span><span class="n">metric</span> <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">eval_results</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">eval_task_name</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="n">metric</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/total_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metric</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;time/eval&quot;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_start_time</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_start_time</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Explorer.shutdown">

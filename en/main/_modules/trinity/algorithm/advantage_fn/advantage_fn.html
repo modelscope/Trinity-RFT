@@ -654,10 +654,7 @@ document.write(`
         <span class="k">for</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">group_exps</span> <span class="ow">in</span> <span class="n">exp_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">group_exps</span><span class="p">,</span> <span class="n">group_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_group_advantage</span><span class="p">(</span><span class="n">group_id</span><span class="p">,</span> <span class="n">group_exps</span><span class="p">)</span>
             <span class="n">metric_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_metrics</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">metrics</span> <span class="o">=</span> <span class="n">gather_metrics</span><span class="p">(</span><span class="n">metric_list</span><span class="p">,</span> <span class="s2">&quot;group_advantages&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># empty metric list causes ValueError, ignore it</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">gather_metrics</span><span class="p">(</span><span class="n">metric_list</span><span class="p">,</span> <span class="s2">&quot;group_advantages&quot;</span><span class="p">)</span>
         <span class="n">exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">exp_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>  <span class="c1"># Flatten the list</span>
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span></div>
 

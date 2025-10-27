@@ -635,6 +635,7 @@ document.write(`
 <div class="viewcode-block" id="DataJuicerClient.process_experience">
 <a class="viewcode-back" href="../../../../build_api/trinity.service.data_juicer.client.html#trinity.service.DataJuicerClient.process_experience">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DataJuicer session is not initialized.&quot;</span><span class="p">)</span>
 
@@ -659,6 +660,7 @@ document.write(`
                 <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">stats_key</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;__dj__stats__&quot;</span><span class="p">]:</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">stats_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;__dj__stats__&quot;</span><span class="p">][</span><span class="n">stats_key</span><span class="p">]</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;time/dj_process_experience&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span></div>
 
 
