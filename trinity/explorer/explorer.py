@@ -77,7 +77,6 @@ class Explorer:
         self.last_sync_successful = True
         self.eval_start_time = None
         self.explore_start_time = None
-        self.explore_step_start_time = dict()  # {step_num: start_time}
         self.logger.info("Finished initializing Explorer.")
 
     async def setup_weight_sync_group(
