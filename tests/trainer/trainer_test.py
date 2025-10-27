@@ -819,7 +819,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
-            parser.metric_values("pipeline/experience_count")[1], 16
+            parser.metric_values("experience_pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")

@@ -140,7 +140,7 @@ class ExperiencePipeline:
             if key.startswith("time/"):
                 result_metrics[key] = value
             elif isinstance(value, (int, float)):
-                result_metrics[f"pipeline/{key}"] = float(value)
+                result_metrics[f"experience_pipeline/{key}"] = float(value)
         if SELECTOR_METRIC in metrics:
             result_metrics[SELECTOR_METRIC] = metrics[SELECTOR_METRIC]
 
