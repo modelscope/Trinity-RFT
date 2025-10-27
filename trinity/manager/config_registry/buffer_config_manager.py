@@ -337,7 +337,8 @@ def parse_priority_fn_args(raw_data: str):
         if data["priority_fn"] != st.session_state["priority_fn"]:
             raise ValueError
         return data["fn_args"]
-    except Exception:
+    except (json.JSONDecodeError, KeyError, ValueError):
+        print(f"Use `default_config` for {st.session_state['priority_fn']}")
         return PRIORITY_FUNC.get(st.session_state["priority_fn"]).default_config()
 
 

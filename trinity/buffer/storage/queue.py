@@ -34,19 +34,18 @@ class PriorityFunction(ABC):
     Each priority_fn,
         Args:
             item: List[Experience], assume that all experiences in it have the same model_version and use_count
-            kwargs: storage_config.replay_buffer_kwargs (except priority_fn)
+            priority_fn_args: Dict, the arguments for priority_fn
+
         Returns:
             priority: float
             put_into_queue: bool, decide whether to put item into queue
+
     Note that put_into_queue takes effect both for new item from the explorer and for item sampled from the buffer.
     """
 
-    def __init__(self, **kwargs):
-        pass
-
     @abstractmethod
-    def __call__(self, items: List[Experience]) -> Tuple[float, bool]:
-        """Calculate the priority of items."""
+    def __call__(self, item: List[Experience]) -> Tuple[float, bool]:
+        """Calculate the priority of item."""
 
     @classmethod
     @abstractmethod
@@ -61,11 +60,11 @@ class LinearDecayPriority(PriorityFunction):
     Priority is calculated as `model_version - decay * use_count. The item is always put back into the queue for reuse (as long as `reuse_cooldown_time` is not None).
     """
 
-    def __init__(self, decay: float = 2.0, **kwargs):
+    def __init__(self, decay: float = 2.0):
         self.decay = decay
 
-    def __call__(self, items: List[Experience]) -> Tuple[float, bool]:
-        priority = float(items[0].info["model_version"] - self.decay * items[0].info["use_count"])
+    def __call__(self, item: List[Experience]) -> Tuple[float, bool]:
+        priority = float(item[0].info["model_version"] - self.decay * item[0].info["use_count"])
         put_into_queue = True
         return priority, put_into_queue
 
@@ -83,17 +82,17 @@ class LinearDecayUseCountControlPriority(PriorityFunction):
     Priority is calculated as `model_version - decay * use_count`; if `sigma` is non-zero, priority is further perturbed by random Gaussian noise with standard deviation `sigma`.  The item will be put back into the queue only if use count does not exceed `use_count_limit`.
     """
 
-    def __init__(self, decay: float = 2.0, use_count_limit: int = 3, sigma: float = 0.0, **kwargs):
+    def __init__(self, decay: float = 2.0, use_count_limit: int = 3, sigma: float = 0.0):
         self.decay = decay
         self.use_count_limit = use_count_limit
         self.sigma = sigma
 
-    def __call__(self, items: List[Experience]) -> Tuple[float, bool]:
-        priority = float(items[0].info["model_version"] - self.decay * items[0].info["use_count"])
+    def __call__(self, item: List[Experience]) -> Tuple[float, bool]:
+        priority = float(item[0].info["model_version"] - self.decay * item[0].info["use_count"])
         if self.sigma > 0.0:
             priority += float(np.random.randn() * self.sigma)
         put_into_queue = (
-            items[0].info["use_count"] < self.use_count_limit if self.use_count_limit > 0 else True
+            item[0].info["use_count"] < self.use_count_limit if self.use_count_limit > 0 else True
         )
         return priority, put_into_queue
 
@@ -203,7 +202,8 @@ class AsyncPriorityQueue(QueueBuffer):
         self.item_count = 0
         self.priority_groups = SortedDict()  # Maps priority -> deque of items
         priority_fn_cls = PRIORITY_FUNC.get(priority_fn)
-        kwargs = priority_fn_cls.default_config().update(priority_fn_args or {})
+        kwargs = priority_fn_cls.default_config()
+        kwargs.update(priority_fn_args or {})
         self.priority_fn = priority_fn_cls(**kwargs)
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
