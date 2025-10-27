@@ -61,7 +61,7 @@ buffer:
         name: math_sft
         storage_type: file
         schema_type: sft
-        path: ${oc.env:TRINITY_SFT_DATASET_PATH,open-r1/Mixture-of-Thoughts}
+        path: ${oc.env:TRINITY_SFT_DATASET_PATH}
         split: 'train'
         format:
           prompt_type: messages

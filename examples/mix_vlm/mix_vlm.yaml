@@ -3,7 +3,7 @@ name: "mix_vlm"
 checkpoint_root_dir: /mnt/yuchang/checkpoints
 algorithm:
   algorithm_type: mix_chord
-  repeat_times: 8 
+  repeat_times: 8
   optimizer:
     lr: 1e-6
   kl_loss_fn_args:
@@ -13,7 +13,7 @@ algorithm:
     expert_data_ratio: 0.20
   policy_loss_fn_args:
     mu_warmup_steps: 200
-    mu_decay_steps: 400 
+    mu_decay_steps: 400
     mu_peak: 0.1
     mu_valley: 0.1
     enable_phi_function: false
@@ -65,7 +65,7 @@ buffer:
         name: geometry_sft
         storage_type: file
         schema_type: sft
-        path: ${oc.env:TRINITY_SFT_DATASET_PATH,hiyouga/geometry_sft}
+        path: datajuicer/geometry_sft
         split: 'train'
         format:
           prompt_type: plaintext
