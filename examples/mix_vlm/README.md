@@ -24,3 +24,13 @@ We use the [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) data
 ```
 
 The config file is located in [`mix_vlm.yaml`](mix_vlm.yaml). To get better performance, feel free to try out different algorithm hyperparameters!
+
+## Run the Example
+
+Run the following command to start the training:
+```bash
+trinity run --config examples/mix_vlm/mix_vlm.yaml
+```
+
+The reward curve is shown below:
+![](../../docs/sphinx_doc/assets/mix_vlm_reward.png)
