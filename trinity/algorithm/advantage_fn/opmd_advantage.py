@@ -128,8 +128,8 @@ class OPMDGroupAdvantage(GroupAdvantage):
                     group_baseline = reward_mean
                 else:
                     group_baseline = self.tau * (
-                            torch.logsumexp(group_rewards / self.tau, dim=-1)
-                            - torch.log(torch.tensor(len(exps)))
+                        torch.logsumexp(group_rewards / self.tau, dim=-1)
+                        - torch.log(torch.tensor(len(exps)))
                     )
             for exp in exps:
                 score = exp.reward - group_baseline
