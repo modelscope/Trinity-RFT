@@ -120,15 +120,16 @@ class OPMDGroupAdvantage(GroupAdvantage):
     ) -> Tuple[List[Experience], Dict]:
         with torch.no_grad():
             group_rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
+            reward_mean = torch.mean(group_rewards)
             if len(exps) == 1:
                 group_baseline = torch.tensor(0.0)
             else:
                 if self.opmd_baseline == "mean":
-                    group_baseline = torch.mean(group_rewards)
+                    group_baseline = reward_mean
                 else:
                     group_baseline = self.tau * (
-                        torch.logsumexp(group_rewards / self.tau, dim=-1)
-                        - torch.log(torch.tensor(len(exps)))
+                            torch.logsumexp(group_rewards / self.tau, dim=-1)
+                            - torch.log(torch.tensor(len(exps)))
                     )
             for exp in exps:
                 score = exp.reward - group_baseline
@@ -136,7 +137,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
                 exp.returns = exp.advantages.clone()
             metrics = {
                 "group_baseline": group_baseline.item(),
-                "reward_mean": torch.mean(group_rewards).item(),
+                "reward_mean": reward_mean.item(),
             }
         return exps, metrics
 
