@@ -1,6 +1,6 @@
 project: "Trinity-RFT"
 name: "mix_vlm"
-checkpoint_root_dir: /mnt/yuchang/checkpoints
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: mix_chord
   repeat_times: 8

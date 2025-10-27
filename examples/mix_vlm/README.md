@@ -14,7 +14,7 @@ qwen_vl_utils
 ```
 
 ## Prepare the SFT Dataset
-We use the [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) dataset for training; we generate the [SFT dataset](https://huggingface.co/datasets/datajuicer/geometry_sft) by prompting Qwen2.5-VL-32B-Instruct model on the valiation set. Note that this dataset only showcases the format of SFT data in this example, as shown below:
+We use the [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) dataset for training; we generate the [SFT dataset](https://huggingface.co/datasets/datajuicer/geometry_sft) by prompting Qwen2.5-VL-32B-Instruct model on the validation set. Note that this dataset only showcases the format of SFT data in this example, as shown below:
 ```json
 {
     "problem": "<image>Find $x$ so that $m || n$.",
