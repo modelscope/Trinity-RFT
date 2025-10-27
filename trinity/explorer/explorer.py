@@ -32,6 +32,7 @@ from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
 from trinity.utils.plugin_loader import load_plugins
+from trinity.utils.timer import Timer
 
 
 class Explorer:
@@ -223,7 +224,6 @@ class Explorer:
             )
             await self.shutdown()
             return False
-        self.explore_step_start_time.update({self.explore_step_num + 1: time.time()})
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
         self.explore_step_num += 1
         return True
@@ -350,15 +350,12 @@ class Explorer:
             self.monitor.log(metric, step=end_step)
 
     async def _finish_explore_step(self, step: int, model_version: int) -> None:
-        statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
+        with Timer(metric, "time/wait_explore_step"):
+            statuses, exps = await self.scheduler.get_results(batch_id=step)
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
         self.taskset.update(pipeline_metrics)
         metric.update(pipeline_metrics)
-        explore_step_start_time = self.explore_step_start_time.get(step, None)
-        if explore_step_start_time is not None:
-            metric.update({"time/explore_step": time.time() - explore_step_start_time})
-            self.explore_step_start_time.pop(step)
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)
