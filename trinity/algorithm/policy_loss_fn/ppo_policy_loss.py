@@ -57,8 +57,11 @@ class PPOPolicyLossFn(PolicyLossFn):
             self.truncate_is_range_low = truncate_is_range_low
             self.truncate_is_range_high = truncate_is_range_high
             assert (
-                self.truncate_is_range_low is not None and self.truncate_is_range_high is not None
-            ), "truncate_is_range_low and truncate_is_range_high must be specified."
+                self.truncate_is_range_low is not None
+            ), "truncate_is_range_low must be specified."
+            assert (
+                self.truncate_is_range_high is not None
+            ), "truncate_is_range_high must be specified."
             assert self.truncate_is_range_low >= 0.0, "truncate_is_range_low must be non-negative."
             assert (
                 self.truncate_is_range_high > self.truncate_is_range_low
