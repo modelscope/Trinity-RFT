@@ -239,7 +239,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
-        pipeline_metrics = parser.metric_list("pipeline")
+        pipeline_metrics = parser.metric_list("experience_pipeline")
         self.assertTrue(len(pipeline_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
