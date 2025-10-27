@@ -21,8 +21,8 @@ class PPOPolicyLossFn(PolicyLossFn):
         clip_range_high: Optional[float] = None,
         loss_agg_mode: Optional[str] = "token-mean",
         truncate_large_is: bool = False,
-        truncate_is_range_low: Optional[float] = None,
-        truncate_is_range_high: Optional[float] = None,
+        truncate_is_range_low: Optional[float] = 0.0,
+        truncate_is_range_high: Optional[float] = 2.0,
     ) -> None:
         """
         Initialize PPO policy loss function.
@@ -34,7 +34,7 @@ class PPOPolicyLossFn(PolicyLossFn):
             clip_range_high: Upper bound for clipping (1.0 + clip_range_high)
             loss_agg_mode: Loss aggregation mode (default: "token-mean")
             truncate_large_is: Whether to truncate large importance sampling ratios
-                to handle computation errors between VLLM and transformer calculations
+                to handle calculation discrepancies between rollout and training engines
             truncate_is_range_low: Lower bound for IS ratio truncation (default: 0.0)
             truncate_is_range_high: Upper bound for IS ratio truncation (default: 2.0)
         """
@@ -54,19 +54,15 @@ class PPOPolicyLossFn(PolicyLossFn):
         # Truncate large IS configuration
         self.truncate_large_is = truncate_large_is
         if truncate_large_is:
-            self.truncate_is_range_low = (
-                truncate_is_range_low if truncate_is_range_low is not None else 0.0
-            )
-            self.truncate_is_range_high = (
-                truncate_is_range_high if truncate_is_range_high is not None else 2.0
-            )
+            self.truncate_is_range_low = truncate_is_range_low
+            self.truncate_is_range_high = truncate_is_range_high
+            assert (
+                self.truncate_is_range_low is not None and self.truncate_is_range_high is not None
+            ), "truncate_is_range_low and truncate_is_range_high must be specified."
             assert self.truncate_is_range_low >= 0.0, "truncate_is_range_low must be non-negative."
             assert (
                 self.truncate_is_range_high > self.truncate_is_range_low
             ), "truncate_is_range_high must be greater than truncate_is_range_low."
-        else:
-            self.truncate_is_range_low = None
-            self.truncate_is_range_high = None
 
     def __call__(  # type: ignore
         self,
@@ -81,14 +77,16 @@ class PPOPolicyLossFn(PolicyLossFn):
         ppo_kl = masked_mean(-negative_approx_kl, action_mask)
 
         # Truncate large IS ratios if enabled
-        # This helps stabilize training when there are computation errors between
-        # VLLM and transformer calculations, especially for small probabilities
+        # This helps stabilize training when there are calculation discrepancies between
+        # rollout and training engines, especially for small probabilities
         if self.truncate_large_is:
-            ratio_before_truncate = ratio.clone()
+            # Track how often truncation occurs (before actually truncating)
+            # More efficient than cloning: directly check which values fall outside bounds
+            ratio_detached = ratio.detach()
+            is_truncate_frac = masked_mean(
+                (ratio_detached < self.truncate_is_range_low).float(), action_mask
+            ) + masked_mean((ratio_detached > self.truncate_is_range_high).float(), action_mask)
             ratio = torch.clamp(ratio, self.truncate_is_range_low, self.truncate_is_range_high)
-            # Track how often truncation occurs
-            is_truncated = torch.ne(ratio, ratio_before_truncate).float()
-            is_truncate_frac = masked_mean(is_truncated, action_mask)
         else:
             is_truncate_frac = torch.tensor(0.0)
 
