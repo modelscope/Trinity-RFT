@@ -102,4 +102,5 @@ def prefix_metrics(src_metrics: dict, prefix: str, dst_metrics: dict = None) -> 
         dst_metrics = {}
     for k, v in src_metrics.items():
         dst_metrics[f"{prefix}/{k}"] = v
+
     return dst_metrics

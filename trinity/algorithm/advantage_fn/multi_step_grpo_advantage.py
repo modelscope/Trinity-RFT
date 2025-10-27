@@ -142,11 +142,8 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 cnt += len(exps)
                 result_exps.extend(exps)
 
-        try:
-            metrics = gather_metrics(metric_list, "group_advantages")
-            metrics["experience_count"] = cnt
-        except ValueError:
-            metrics = {}  # empty metric list causes ValueError, ignore it
+        metrics = gather_metrics(metric_list, "group_advantages")
+        metrics["experience_count"] = cnt
         return result_exps, metrics
 
     def __call__(self, exps, **kwargs):

@@ -108,8 +108,8 @@ class TestExplorerGSM8k(BaseExplorerCase):
         eval_metrics = parser.metric_list("eval")
         self.assertTrue(len(eval_metrics) == 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
-        self.assertTrue(parser.metric_exist("pipeline/experience_count"))
-        experience_counts = parser.metric_values("pipeline/experience_count")
+        self.assertTrue(parser.metric_exist("experience_pipeline/experience_count"))
+        experience_counts = parser.metric_values("experience_pipeline/experience_count")
         self.assertTrue(len(experience_counts) == 4)
         for count in experience_counts:
             self.assertTrue(count >= 0)
