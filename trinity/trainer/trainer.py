@@ -5,6 +5,7 @@ Trainer Class
 from __future__ import annotations
 
 import asyncio
+import time
 import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
@@ -67,6 +68,7 @@ class Trainer:
         """Train the model."""
         while self.train_step_num < self.total_steps:
             try:
+                st = time.time()
                 # sample may be blocked due to explorer does not generate enough data
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
                 sample_task = asyncio.create_task(self._sample_data())
@@ -80,6 +82,8 @@ class Trainer:
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
                 metrics.update(await self.train_step(exps))
                 if await self.need_sync():
+                    # Record the time: sample_experience + train_step (>=1)
+                    metrics.update({"time/trainer_sync_interval": time.time() - st})
                     metrics.update(await self.sync_weight())
                 if self.need_save():
                     metrics.update(self.save_checkpoint())

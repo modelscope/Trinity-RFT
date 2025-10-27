@@ -326,7 +326,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
             path=BUFFER_FILE_PATH,
             replay_buffer=ReplayBufferConfig(
                 enable=True,
-                priority_fn="linear_decay_use_count_control_randomization",
+                priority_fn="decay_limit_randomization",
                 reuse_cooldown_time=0.5,
                 priority_fn_args={"decay": 1.2, "use_count_limit": 2, "sigma": 0.0},
             ),

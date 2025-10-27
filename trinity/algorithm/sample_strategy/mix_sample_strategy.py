@@ -59,7 +59,7 @@ class MixSampleStrategy(SampleStrategy):
 
     async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
         metrics = {}
-        with Timer(metrics, "read_time"):
+        with Timer(metrics, "time/read_experience"):
             usual_exp_list = await self.usual_exp_buffer.read_async()
             for exp in usual_exp_list:
                 if exp.info is None:
@@ -85,7 +85,7 @@ class MixSampleStrategy(SampleStrategy):
             exp_list = usual_exp_list + expert_exp_list
             repr_samples = representative_sample(exp_list)
 
-        with Timer(metrics, "gather_time"):
+        with Timer(metrics, "time/gather_experience"):
             exps = Experiences.gather_experiences(
                 experiences=exp_list,
                 pad_token_id=self.pad_token_id,  # type: ignore [arg-type]

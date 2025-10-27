@@ -14,7 +14,10 @@ from trinity.algorithm.kl_fn.kl_fn import KL_FN
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
 from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
-from trinity.manager.config_registry.buffer_config_manager import get_train_batch_size
+from trinity.manager.config_registry.buffer_config_manager import (
+    get_train_batch_size,
+    parse_priority_fn_args,
+)
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
 from trinity.utils.plugin_loader import load_plugins
@@ -190,7 +193,8 @@ class ConfigManager:
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
                 self.get_configs("enable_replay_buffer")
-                self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
+                self.get_configs("reuse_cooldown_time", "priority_fn")
+                self.get_configs("priority_fn_args")
 
         # TODO: used for SQL storage
         # self.buffer_advanced_tab = st.expander("Advanced Config")
@@ -592,9 +596,7 @@ class ConfigManager:
                 "enable": st.session_state["enable_replay_buffer"],
                 "priority_fn": st.session_state["priority_fn"],
                 "reuse_cooldown_time": st.session_state["reuse_cooldown_time"],
-                "priority_fn_args": {
-                    "decay": st.session_state["priority_decay"],
-                },
+                "priority_fn_args": parse_priority_fn_args(st.session_state["priority_fn_args"]),
             }
 
         if st.session_state["mode"] != "train":

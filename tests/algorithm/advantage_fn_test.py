@@ -107,8 +107,8 @@ class TestGroupedAdvantageFn(unittest.TestCase):
 
         exps, metrics = advantage_fn(exps)
         self.assertEqual(len(exps), 0)
-        self.assertIn("group_advantages/skipped_count/mean", metrics)
-        self.assertEqual(metrics["group_advantages/skipped_count/mean"], 5)
+        self.assertIn("filtered_count", metrics)
+        self.assertEqual(metrics["filtered_count"], 15)
 
     def test_grpo_correct_bias(self):
         advantage_fn_cls = ADVANTAGE_FN.get("grpo")
