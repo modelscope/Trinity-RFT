@@ -413,9 +413,11 @@ class veRLConfig:
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
-        self.actor_rollout_ref.rollout.temperature = config.buffer.explorer_input.tasksets[
-            0
-        ].rollout_args.temperature
+        self.actor_rollout_ref.rollout.temperature = (
+            config.buffer.explorer_input.tasksets[0].rollout_args.temperature
+            if config.buffer.explorer_input.tasksets
+            else 1.0
+        )
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
         if self.actor_rollout_ref.actor.grad_clip is None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.grad_clip

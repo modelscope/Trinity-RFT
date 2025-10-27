@@ -7,7 +7,7 @@ from parameterized import parameterized
 
 from tests.tools import get_template_config
 from trinity.buffer.task_scheduler import TasksetScheduler
-from trinity.common.config import FormatConfig, StorageConfig, TaskSelectorConfig
+from trinity.common.config import FormatConfig, TaskSelectorConfig, TasksetConfig
 from trinity.common.workflows.workflow import Task
 
 
@@ -193,7 +193,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
         config.buffer.total_epochs = 2
         config.buffer.explorer_input.taskset = None
         config.buffer.explorer_input.tasksets = [
-            StorageConfig(
+            TasksetConfig(
                 name="subset_1",
                 path=os.path.join(
                     os.path.dirname(__file__),
@@ -215,7 +215,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                     **task_selector_kwargs,
                 ),
             ),
-            StorageConfig(
+            TasksetConfig(
                 name="subset_2",
                 path=os.path.join(
                     os.path.dirname(__file__),

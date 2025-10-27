@@ -53,7 +53,8 @@ buffer:
     experience_buffer:
       name: experience_buffer
       storage_type: queue
-      use_priority_queue: true
+      replay_buffer:
+        enable: true
 explorer:
   eval_interval: 10
   max_repeat_times_per_runner: 1

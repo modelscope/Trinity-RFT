@@ -4,18 +4,18 @@ import ray
 
 from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.storage.sql import SQLStorage
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
 class SQLWriter(BufferWriter):
     """Writer of the SQL buffer."""
 
-    def __init__(self, meta: StorageConfig, config: BufferConfig) -> None:
-        assert meta.storage_type == StorageType.SQL
+    def __init__(self, config: StorageConfig) -> None:
+        assert config.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
-        self.wrap_in_ray = meta.wrap_in_ray
-        self.db_wrapper = SQLStorage.get_wrapper(meta, config)
+        self.wrap_in_ray = config.wrap_in_ray
+        self.db_wrapper = SQLStorage.get_wrapper(config)
 
     def write(self, data: list) -> None:
         if self.wrap_in_ray:

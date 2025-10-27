@@ -39,9 +39,7 @@ class SampleStrategy(ABC):
 class DefaultSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
-        self.exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.experience_buffer, buffer_config  # type: ignore
-        )
+        self.exp_buffer = get_buffer_reader(buffer_config.trainer_input.experience_buffer)  # type: ignore[arg-type]
 
     async def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
         metrics = {}

@@ -27,9 +27,9 @@ from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,
     Config,
+    ExperienceBufferConfig,
     ExplorerInput,
     StageConfig,
-    StorageConfig,
     TaskSelectorConfig,
     TrainerInput,
 )
@@ -239,7 +239,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
-        pipeline_metrics = parser.metric_list("pipeline")
+        pipeline_metrics = parser.metric_list("experience_pipeline")
         self.assertTrue(len(pipeline_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
@@ -291,7 +291,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
                     batch_size=4,
                     explorer_input=ExplorerInput(taskset=get_unittest_dataset_config("gsm8k")),
                     trainer_input=TrainerInput(
-                        experience_buffer=StorageConfig(
+                        experience_buffer=ExperienceBufferConfig(
                             name="test_queue_storage",
                             max_read_timeout=20,
                             storage_type=StorageType.QUEUE,
@@ -499,11 +499,11 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.cluster.node_num = 1
         config.model.model_path = get_model_path()
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        config.buffer.trainer_input.experience_buffer = StorageConfig(
+        config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
-            use_priority_queue=self.use_priority_queue,
         )
+        config.buffer.trainer_input.experience_buffer.replay_buffer.enable = self.use_priority_queue
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
         config.synchronizer.sync_interval = 8
@@ -528,7 +528,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.cluster.node_num = 1
         explorer1_config.explorer.rollout_model.engine_num = 1
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
-        explorer1_config.buffer.trainer_input.experience_buffer = StorageConfig(
+        explorer1_config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
         )
@@ -819,7 +819,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
-            parser.metric_values("pipeline/experience_count")[1], 16
+            parser.metric_values("experience_pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")

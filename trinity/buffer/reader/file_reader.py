@@ -7,7 +7,7 @@ from datasets import Dataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.schema.formatter import FORMATTER
-from trinity.common.config import BufferConfig, StorageConfig
+from trinity.common.config import StorageConfig
 
 
 class DummyProgressBar:
@@ -97,19 +97,19 @@ class BaseFileReader(BufferReader):
 class ExperienceFileReader(BaseFileReader):
     """Reader for SFT / DPO file data."""
 
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
-        self.formatter = FORMATTER.get(meta.schema_type)(
-            tokenizer_path=config.tokenizer_path, format_config=meta.format
+    def __init__(self, config: StorageConfig):
+        self.formatter = FORMATTER.get(config.schema_type)(
+            tokenizer_path=config.tokenizer_path, format_config=config.format
         )
-        self.read_batch_size = config.train_batch_size
+        self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=meta.subset_name, split=meta.split),
-            name=meta.name,
+            load_dataset(config.path, name=config.subset_name, split=config.split),
+            name=config.name,
             default_batch_size=self.read_batch_size,
-            total_epochs=meta.total_epochs,
+            total_epochs=config.total_epochs,
             drop_last=True,
-            total_steps=meta.total_steps,
-            enable_progress_bar=meta.enable_progress_bar,
+            total_steps=config.total_steps,
+            enable_progress_bar=config.enable_progress_bar,
         )
 
     def read(self, batch_size: Optional[int] = None) -> List:
@@ -122,26 +122,25 @@ class ExperienceFileReader(BaseFileReader):
 
 
 class TaskFileReader(BaseFileReader):
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
-        self.meta = meta
-        self.name = meta.name
-        self.split = meta.split
-        subset_name = meta.subset_name
-        # disable datasets caching to avoid reuse old-version dataset
+    """A Reader for task file data."""
+
+    def __init__(self, config: StorageConfig):
+        self.config = config
+        self.name = config.name
         self.epoch = 0
         datasets.disable_caching()
         self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split),
-            name=meta.name,
+            load_dataset(self.config.path, name=self.config.subset_name, split=self.config.split),
+            name=self.config.name,
             default_batch_size=self.read_batch_size,
-            total_epochs=self.meta.total_epochs if not self.meta.is_eval else 1,
-            offset=self.meta.index,
-            drop_last=not self.meta.is_eval,
-            total_steps=meta.total_steps,
-            enable_progress_bar=meta.enable_progress_bar,
+            total_epochs=self.config.total_epochs if not self.config.is_eval else 1,
+            offset=self.config.index,
+            drop_last=not self.config.is_eval,
+            total_steps=self.config.total_steps,
+            enable_progress_bar=self.config.enable_progress_bar,
         )
-        self.formatter = FORMATTER.get("task")(meta)
+        self.formatter = FORMATTER.get("task")(config)
 
     def _get_tasks(self, samples: List, indices: List) -> List:
         tasks = []

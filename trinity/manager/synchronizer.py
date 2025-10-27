@@ -77,7 +77,7 @@ class Synchronizer:
 
     async def _find_latest_state_dict(self) -> None:
         assert self.config.trainer.trainer_type == "verl"
-        default_local_dir = self.config.trainer.trainer_config.trainer.default_local_dir
+        default_local_dir = self.config.checkpoint_job_dir
         local_latest_state_dict_iteration = os.path.join(
             default_local_dir, "latest_state_dict_iteration.txt"
         )

@@ -80,7 +80,7 @@ class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
 
 - `buffer.train_batch_size`：从 buffer 中采样用于训练的 experience 数量，可以与每次探索生成的 experience 数量不同。
 
-- `buffer.trainer_input.use_priority_queue = true`：使用 `PriorityQueue` 可使模型优先使用高优先级的 experience （默认为使用更新产生的 experience）。
+- `buffer.trainer_input.experience_buffer.replay_buffer`：使用 `PriorityQueue` 可使模型优先使用高优先级的 experience （默认为使用更新产生的 experience）。
 
 - `synchronizer.sync_style = dynamic_by_explorer`：由 explorer 决定何时与 trainer 同步模型权重。
 
@@ -124,7 +124,8 @@ buffer:
     experience_buffer:
       name: alfworld_buffer
       storage_type: queue
-      use_priority_queue: true
+      replay_buffer:
+        enable: true
 explorer:
   max_repeat_times_per_runner: 1
   runner_per_model: 16
@@ -154,11 +155,12 @@ trainer:
   ulysses_sequence_parallel_size: 1
 ```
 
-
 下面，我们提供运行 ALFWorld 任务的命令。
 
 ## 示例：多步 ALFWorld
+
 ### 环境准备
+
 要安装 ALFWorld 环境，可按照以下说明操作。
 
 1. 使用 pip 安装：`pip install alfworld[full]`

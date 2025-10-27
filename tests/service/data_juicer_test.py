@@ -14,14 +14,14 @@ import ray
 import torch
 from jsonargparse import Namespace
 
-from tests.tools import RayUnittestBase, RayUnittestBaseAysnc, get_template_config
+from tests.tools import RayUnittestBase, get_template_config
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.pipelines import ExperiencePipeline, check_and_run_task_pipeline
 from trinity.common.config import (
     DataJuicerServiceConfig,
     OperatorConfig,
-    StorageConfig,
     TaskPipelineConfig,
+    TasksetConfig,
 )
 from trinity.common.experience import Experience
 from trinity.service.data_juicer.client import DataJuicerClient
@@ -138,7 +138,10 @@ class TestDataJuicer(unittest.TestCase):
         self.assertIsNone(client.server)
 
 
-class TestDataJuicerExperiencePipeline(RayUnittestBaseAysnc):
+class TestDataJuicerExperiencePipeline(unittest.IsolatedAsyncioTestCase):
+    def tearDown(self):
+        ray.shutdown()
+
     async def test_data_juicer_operators(self):
         config = get_template_config()
         config.service.data_juicer = DataJuicerServiceConfig(
@@ -201,7 +204,7 @@ class TestDataJuicerExperiencePipeline(RayUnittestBaseAysnc):
         ]
         metrics = await pipeline.process.remote(exps)
         self.assertIsInstance(metrics, dict)
-        reader = get_buffer_reader(config.buffer.trainer_input.experience_buffer, config.buffer)
+        reader = get_buffer_reader(config.buffer.trainer_input.experience_buffer)
         filtered_exps = reader.read(batch_size=2)
         self.assertEqual(len(filtered_exps), 2)
         with self.assertRaises(TimeoutError):
@@ -257,7 +260,7 @@ class TestDataJuicerTaskPipeline(RayUnittestBase):
             ],
             target_fields=["question", "answer"],
         )
-        config.buffer.explorer_input.taskset = StorageConfig(
+        config.buffer.explorer_input.taskset = TasksetConfig(
             name="taskset",
             path=TASKSET_OUTPUT_DIR,
         )
