@@ -20,6 +20,7 @@
    tutorial/develop_algorithm.md
    tutorial/example_mix_algo.md
    tutorial/develop_operator.md
+   tutorial/develop_selector.md
    tutorial/trinity_configs.md
    tutorial/synchronizer.md
 
