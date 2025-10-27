@@ -1,3 +1,4 @@
+import time
 import traceback
 from typing import Dict, List, Optional
 
@@ -15,6 +16,7 @@ from trinity.common.constants import SELECTOR_METRIC, StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins
+from trinity.utils.timer import Timer
 
 
 def get_input_buffers(
@@ -112,25 +114,32 @@ class ExperiencePipeline:
         Returns:
             Dict: A dictionary containing metrics collected during the processing of experiences.
         """
+        st = time.time()
         if self.input_store is not None:
             await self.input_store.write_async(exps)
 
         metrics = {}
 
         # Process experiences through operators
-        for operator in self.operators:
-            exps, metric = operator.process(exps)
-            metrics.update(metric)
-
+        for idx, operator in enumerate(self.operators):
+            with Timer(
+                metrics, f"time/experience_pipeline/operator/{idx}_{operator.__class__.__name__}"
+            ):
+                exps, metric = operator.process(exps)
+                metrics.update(metric)
         metrics["experience_count"] = len(exps)
 
         # Write processed experiences to output buffer
-        await self.output.write_async(exps)
+        with Timer(metrics, "time/experience_pipeline/write"):
+            await self.output.write_async(exps)
+        metrics["time/experience_pipeline/total"] = time.time() - st
 
         # prefix metrics keys with 'pipeline/'
         result_metrics = {}
         for key, value in metrics.items():
-            if isinstance(value, (int, float)):
+            if key.startswith("time/"):
+                result_metrics[key] = value
+            elif isinstance(value, (int, float)):
                 result_metrics[f"pipeline/{key}"] = float(value)
         if SELECTOR_METRIC in metrics:
             result_metrics[SELECTOR_METRIC] = metrics[SELECTOR_METRIC]
