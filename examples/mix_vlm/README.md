@@ -19,7 +19,7 @@ We use the [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) data
 {
     "problem": "<image>Find $x$ so that $m || n$.",
     "response": "To determine the value of $ x $ ... Answer:\n\\[\n\\boxed{63}\n\\]",
-    "images": <image>
+    "images": [<image>]
 }
 ```
 
