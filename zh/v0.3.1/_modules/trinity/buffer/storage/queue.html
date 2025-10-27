@@ -553,8 +553,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
@@ -582,53 +581,105 @@ document.write(`
 
 
 <span class="n">PRIORITY_FUNC</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">)</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Each priority_fn,</span>
-<span class="sd">    Args:</span>
-<span class="sd">        item: List[Experience], assume that all experiences in it have the same model_version and use_count</span>
-<span class="sd">        kwargs: storage_config.replay_buffer_kwargs (except priority_fn)</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        priority: float</span>
-<span class="sd">        put_into_queue: bool, decide whether to put item into queue</span>
-<span class="sd">Note that put_into_queue takes effect both for new item from the explorer and for item sampled from the buffer.</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="linear_decay_priority">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.linear_decay_priority">[文档]</a>
+<div class="viewcode-block" id="PriorityFunction">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.PriorityFunction">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PriorityFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Each priority_fn,</span>
+<span class="sd">        Args:</span>
+<span class="sd">            item: List[Experience], assume that all experiences in it have the same model_version and use_count</span>
+<span class="sd">            priority_fn_args: Dict, the arguments for priority_fn</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            priority: float</span>
+<span class="sd">            put_into_queue: bool, decide whether to put item into queue</span>
+
+<span class="sd">    Note that put_into_queue takes effect both for new item from the explorer and for item sampled from the buffer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the priority of item.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PriorityFunction.default_config">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.PriorityFunction.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the default config.&quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LinearDecayPriority">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority">[文档]</a>
 <span class="nd">@PRIORITY_FUNC</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;linear_decay&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">linear_decay_priority</span><span class="p">(</span>
-    <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span>
-    <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearDecayPriority</span><span class="p">(</span><span class="n">PriorityFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate priority by linear decay.</span>
 
 <span class="sd">    Priority is calculated as `model_version - decay * use_count. The item is always put back into the queue for reuse (as long as `reuse_cooldown_time` is not None).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">priority</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;model_version&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">decay</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">])</span>
-    <span class="n">put_into_queue</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span></div>
+
+<div class="viewcode-block" id="LinearDecayPriority.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority.__init__">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">=</span> <span class="n">decay</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">priority</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;model_version&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">])</span>
+        <span class="n">put_into_queue</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span>
+
+<div class="viewcode-block" id="LinearDecayPriority.default_config">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
 
 
 
-<div class="viewcode-block" id="linear_decay_use_count_control_priority">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.linear_decay_use_count_control_priority">[文档]</a>
-<span class="nd">@PRIORITY_FUNC</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;linear_decay_use_count_control_randomization&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">linear_decay_use_count_control_priority</span><span class="p">(</span>
-    <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span>
-    <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">use_count_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<div class="viewcode-block" id="LinearDecayUseCountControlPriority">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority">[文档]</a>
+<span class="nd">@PRIORITY_FUNC</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;decay_limit_randomization&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearDecayUseCountControlPriority</span><span class="p">(</span><span class="n">PriorityFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate priority by linear decay, use count control, and randomization.</span>
 
 <span class="sd">    Priority is calculated as `model_version - decay * use_count`; if `sigma` is non-zero, priority is further perturbed by random Gaussian noise with standard deviation `sigma`.  The item will be put back into the queue only if use count does not exceed `use_count_limit`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">priority</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;model_version&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">decay</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">sigma</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="n">priority</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
-    <span class="n">put_into_queue</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">use_count_limit</span> <span class="k">if</span> <span class="n">use_count_limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span></div>
+
+<div class="viewcode-block" id="LinearDecayUseCountControlPriority.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority.__init__">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">use_count_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">=</span> <span class="n">decay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_count_limit</span> <span class="o">=</span> <span class="n">use_count_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">priority</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;model_version&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">priority</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="n">put_into_queue</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;use_count&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_count_limit</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_count_limit</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span>
+
+<div class="viewcode-block" id="LinearDecayUseCountControlPriority.default_config">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+            <span class="s2">&quot;use_count_limit&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
 
 
 
@@ -765,7 +816,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">item_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">priority_groups</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">()</span>  <span class="c1"># Maps priority -&gt; deque of items</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">priority_fn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">PRIORITY_FUNC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">priority_fn</span><span class="p">),</span> <span class="o">**</span><span class="p">(</span><span class="n">priority_fn_args</span> <span class="ow">or</span> <span class="p">{}))</span>
+        <span class="n">priority_fn_cls</span> <span class="o">=</span> <span class="n">PRIORITY_FUNC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">priority_fn</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">priority_fn_cls</span><span class="o">.</span><span class="n">default_config</span><span class="p">()</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">priority_fn_args</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority_fn</span> <span class="o">=</span> <span class="n">priority_fn_cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reuse_cooldown_time</span> <span class="o">=</span> <span class="n">reuse_cooldown_time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Condition</span><span class="p">()</span>  <span class="c1"># For thread-safe operations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">False</span></div>
