@@ -15,6 +15,7 @@ from tests.tools import (
     RayUnittestBase,
     RayUnittestBaseAysnc,
     TensorBoardParser,
+    get_api_model_path,
     get_checkpoint_path,
     get_model_path,
     get_template_config,
@@ -22,7 +23,7 @@ from tests.tools import (
 )
 from trinity.buffer import get_buffer_reader
 from trinity.cli.launcher import explore, run_stage
-from trinity.common.config import ExperienceBufferConfig
+from trinity.common.config import ExperienceBufferConfig, InferenceModelConfig
 from trinity.common.constants import StorageType
 from trinity.explorer.explorer import Explorer
 from trinity.manager.state_manager import StateManager
@@ -31,6 +32,7 @@ from trinity.manager.state_manager import StateManager
 class BaseExplorerCase(RayUnittestBase):
     def setUp(self):
         self.config = get_template_config()
+        self.config.mode = "explore"
         self.config.buffer.total_epochs = 2
         self.config.buffer.batch_size = 4
         self.config.model.model_path = get_model_path()
@@ -67,10 +69,25 @@ class TestExplorerCountdownEval(BaseExplorerCase):
         self.assertTrue("eval/eval_long/accuracy/max" in eval_metrics)
 
 
-class TestExplorerCountdownNoEval(BaseExplorerCase):
+class TestExplorerGSM8KRULERNoEval(BaseExplorerCase):
     def test_explorer(self):
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.explorer.rollout_model.engine_num = 2
+        self.config.explorer.auxiliary_models = [
+            InferenceModelConfig(
+                model_path=get_api_model_path(),
+                tensor_parallel_size=1,
+                engine_num=2,
+            )
+        ]
+        self.config.algorithm.repeat_times = 2
+        self.config.buffer.total_steps = 2
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k_ruler")
         self.config.name = f"explore-no-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        self.config.algorithm.algorithm_type = "grpo"
+        self.config.algorithm.advantage_fn = "grpo"
+        self.config.algorithm.advantage_fn_args = {
+            "std_threshold": 0.0001,
+        }
         self.config.check_and_update()
         explore(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
@@ -78,7 +95,7 @@ class TestExplorerCountdownNoEval(BaseExplorerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         eval_metrics = parser.metric_list("eval")
         self.assertTrue(len(eval_metrics) == 0)
-        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
 
 
 class TestExplorerGSM8k(BaseExplorerCase):

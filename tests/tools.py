@@ -116,6 +116,17 @@ def get_unittest_dataset_config(dataset_name: str = "countdown", split: str = "t
             default_workflow_type="math_workflow",
             default_reward_fn_type="math_reward",
         )
+    elif dataset_name == "gsm8k_ruler":
+        return TasksetConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "gsm8k"),
+            split="train",
+            format=FormatConfig(
+                prompt_key="question",
+                response_key="answer",
+            ),
+            default_workflow_type="math_ruler_workflow",
+        )
     elif dataset_name == "sft_for_gsm8k":
         # SFT dataset with 8 samples
         return ExperienceBufferConfig(

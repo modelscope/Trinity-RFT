@@ -134,10 +134,7 @@ class DummyModel(InferenceModel):
     ) -> None:
         pass
 
-    def has_api_server(self) -> bool:
-        return False
-
-    def get_api_server_url(self) -> Optional[str]:
+    async def get_api_server_url(self) -> Optional[str]:
         return None
 
 
@@ -161,10 +158,7 @@ class DummyAuxiliaryModel(InferenceModel):
     ) -> None:
         pass
 
-    def has_api_server(self) -> bool:
-        return True
-
-    def get_api_server_url(self) -> str:
+    async def get_api_server_url(self) -> str:
         return "http://localhost:12345"
 
 

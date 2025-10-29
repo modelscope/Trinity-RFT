@@ -103,6 +103,7 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
         self.api_server = None
+        self.async_lock = asyncio.Lock()
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
@@ -455,35 +456,44 @@ class vLLMRolloutModel(InferenceModel):
             ),
         )
 
-    async def run_api_server(self):
-        """Run the OpenAI API server in a Ray actor."""
-        if not (self.api_server_host is None or self.api_server_port is None):
-            raise RuntimeError("API server is already running.")
-        from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
+    async def run_api_server(self) -> bool:
+        """Run the OpenAI API server in a Ray actor.
 
-        self.api_server_host, self.api_server_port = self.get_available_address()
-        self.api_server = asyncio.create_task(
-            run_api_server_in_ray_actor(
-                self.async_llm,
-                self.api_server_host,
-                self.api_server_port,
-                self.config.model_path,
-                self.config.enable_auto_tool_choice,
-                self.config.tool_call_parser,
-                self.config.reasoning_parser,
+        Returns:
+            success (bool): Whether the API server is started successfully.
+        """
+        async with self.async_lock:
+            if not self.config.enable_openai_api:
+                return False  # Not enabled
+
+            if self.api_server_host is not None and self.api_server_port is not None:
+                return True  # already running
+
+            from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
+
+            api_server_host, api_server_port = self.get_available_address()
+            self.api_server = asyncio.create_task(
+                run_api_server_in_ray_actor(
+                    self.async_llm,
+                    api_server_host,
+                    api_server_port,
+                    self.config.model_path,
+                    self.config.enable_auto_tool_choice,
+                    self.config.tool_call_parser,
+                    self.config.reasoning_parser,
+                )
             )
-        )
+            self.api_server_host = api_server_host
+            self.api_server_port = api_server_port
+            return True
 
-    def has_api_server(self) -> bool:
-        return self.config.enable_openai_api
-
-    def get_api_server_url(self) -> Optional[str]:
+    async def get_api_server_url(self) -> Optional[str]:
         """Get the URL of the OpenAI API server.
 
         Returns:
             api_url (str): The URL of the OpenAI API server.
         """
-        if not self.has_api_server():
+        if not await self.run_api_server():
             return None
         return f"http://{self.api_server_host}:{self.api_server_port}"
 

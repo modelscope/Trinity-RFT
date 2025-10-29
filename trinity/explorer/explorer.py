@@ -150,12 +150,18 @@ class Explorer:
     async def prepare(self) -> None:
         """Preparation before running."""
         try:
+            # prepare experience pipeline
             await self.experience_pipeline.prepare.remote()
             self.logger.info("Experience pipeline is ready.")
             # make sure all rollout models are ready
-            model_ready_ref = [model.__ray_ready__.remote() for model in self.models]
-            await asyncio.gather(*model_ready_ref)
-            self.logger.info("All rollout models are ready.")
+            run_api_ref = [model.run_api_server.remote() for model in self.models]
+            run_api_ref.extend(
+                model.run_api_server.remote()
+                for models in self.auxiliary_models
+                for model in models
+            )
+            await asyncio.gather(*run_api_ref)
+            self.logger.info("All models are ready.")
 
             if not self.use_nccl_sync:
                 master_address, master_port = await self.models[0].get_available_address.remote()

@@ -45,6 +45,11 @@ class AgentScopeWorkflowAdapter(Workflow):
 
         self.chat_model: TrinityChatModel = TrinityChatModel(
             model.get_openai_async_client(),
+            generate_kwargs={
+                "temperature": self.task.rollout_args.temperature,
+                "max_tokens": self.task.rollout_args.max_tokens or 4096,
+                "top_logprobs": self.task.rollout_args.logprobs,
+            },
         )
 
     def construct_experiences(
