@@ -166,8 +166,6 @@ window.addEventListener("load", () => mermaid.run());
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.3.0/index.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.2.1/index.html">v0.2.1</a></li>
             <li class="toctree-l2 current "><a class="reference" href="scheduler.html">v0.2.0</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../../../v0.1.1/index.html">v0.1.1</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../../../v0.1.0/index.html">v0.1.0</a></li>
           </ul>
         </details>
       </li>
@@ -551,7 +549,7 @@ document.write(`
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">WorkflowRunner</span><span class="p">)</span>
             <span class="o">.</span><span class="n">options</span><span class="p">(</span>
-                <span class="n">num_cpus</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                 <span class="n">namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span>
                 <span class="n">scheduling_strategy</span><span class="o">=</span><span class="s2">&quot;SPREAD&quot;</span><span class="p">,</span>
                 <span class="n">runtime_env</span><span class="o">=</span><span class="p">{</span>

@@ -166,8 +166,6 @@ window.addEventListener("load", () => mermaid.run());
             <li class="toctree-l2 current "><a class="reference" href="trainer.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.2.1/index.html">v0.2.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.2.0/index.html">v0.2.0</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../../../v0.1.1/index.html">v0.1.1</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../../../v0.1.0/index.html">v0.1.0</a></li>
           </ul>
         </details>
       </li>
@@ -711,7 +709,7 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.Trainer.sync_weight">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync the model weight.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trainer synchronizing weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> starting..&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trainer sync_weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> started.&quot;</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/sync_weight&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="p">:</span>
@@ -719,7 +717,7 @@ document.write(`
                     <span class="s2">&quot;trainer&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Trainer synchronizing weights failed.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Trainer sync_weights failed.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
@@ -729,7 +727,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">upload_state_dict</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_trainer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trainer synchronizing weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> end.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trainer sync_weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> finished.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">metrics</span></div>
 
 
