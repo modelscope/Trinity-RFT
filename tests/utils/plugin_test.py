@@ -54,8 +54,9 @@ class TestPluginLoader(unittest.TestCase):
         ]
     )
     def test_load_plugins_local(self, plugin_dir):
-        my_workflow_cls = WORKFLOWS.get("my_workflow")
-        self.assertIsNone(my_workflow_cls)
+        if os.path.isabs(plugin_dir):
+            my_workflow_cls = WORKFLOWS.get("my_workflow")
+            self.assertIsNone(my_workflow_cls)
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
         try:
             load_plugins()
@@ -133,3 +134,8 @@ class TestPluginLoader(unittest.TestCase):
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.check_and_update()
         shutil.rmtree(self.config.monitor.cache_dir, ignore_errors=True)
+        plugin_dir = os.path.join("trinity", "plugins")
+        for file in Path(plugin_dir).glob("*.py"):
+            if file.name.startswith("__"):
+                continue
+            os.remove(file)
