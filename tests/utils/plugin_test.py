@@ -47,12 +47,12 @@ class PluginActor:
 
 
 class TestPluginLoader(unittest.TestCase):
-    @parameterized.expand(
-        [
-            (str(Path(__file__).resolve().parent / "plugins"),),
-            (os.path.join("tests", "utils", "plugins"),),
-        ]
-    )
+    PLUGIN_DIR_PARAMS = [
+        (str(Path(__file__).resolve().parent / "plugins"),),
+        (os.path.join("tests", "utils", "plugins"),),
+    ]
+
+    @parameterized.expand(PLUGIN_DIR_PARAMS)
     def test_load_plugins_local(self, plugin_dir):
         if os.path.isabs(plugin_dir):
             my_workflow_cls = WORKFLOWS.get("my_workflow")
@@ -71,12 +71,7 @@ class TestPluginLoader(unittest.TestCase):
         self.assertEqual(res[0], "Hello world")
         self.assertEqual(res[1], "Hi")
 
-    @parameterized.expand(
-        [
-            (str(Path(__file__).resolve().parent / "plugins"),),
-            (os.path.join("tests", "utils", "plugins"),),
-        ]
-    )
+    @parameterized.expand(PLUGIN_DIR_PARAMS)
     def test_load_plugins_remote(self, plugin_dir):
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
         try:
@@ -107,12 +102,7 @@ class TestPluginLoader(unittest.TestCase):
         rollout_cnt = parser.metric_values("rollout")
         self.assertEqual(rollout_cnt, [2])
 
-    @parameterized.expand(
-        [
-            (str(Path(__file__).resolve().parent / "plugins"),),
-            (os.path.join("tests", "utils", "plugins"),),
-        ]
-    )
+    @parameterized.expand(PLUGIN_DIR_PARAMS)
     def test_passing_custom_class(self, plugin_dir):
         # disable plugin and pass custom class directly
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
