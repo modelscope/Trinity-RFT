@@ -82,6 +82,7 @@ class EmailSearchWorkflow(Workflow):
                 "max_tokens": self.task.rollout_args.max_tokens or 4096,
             },
             response_structure=AnswerModel,
+            max_iters=self.max_turns,
         )
 
     async def run_async(self):
