@@ -54,7 +54,6 @@ explorer:
   rollout_model:
     engine_num: 2
     tensor_parallel_size: 1
-    use_v1: true
     enforce_eager: true
     enable_prefix_caching: false
     enable_chunked_prefill: false

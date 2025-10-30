@@ -28,38 +28,62 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
 
 * 🧠 面向 RL 算法研究者。[[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)
   - 在简洁、可插拔的类中设计和验证新的 RL 算法
-  - 示例：[SFT/GRPO混合算法](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)
+  - 示例：[SFT/RL 混合算法](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)
 
 * 📊 面向数据工程师。[[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_operator.html)
-  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景
+  - 设计针对任务定制的数据集，构建处理流水线以支持数据清洗、增强以及人类参与场景
   - 示例：[数据处理](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)
 
 # 🌟 核心特性
 
 * **灵活的 RFT 模式：**
-  - 支持同步/异步、on-policy/off-policy 以及在线/离线训练。采样与训练可分离运行，并可在多设备上独立扩展。
+  - 支持同步/异步、on-policy/off-policy 以及在线/离线强化学习
+  - 采样与训练可分离运行，并可在多设备上独立扩展
+  - 支持经验回放，进一步提升样本与时间效率
 
   <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT 支持的 RFT 模式" width="600" />
 
-* **通用 Agentic-RL：**
-  - 支持拼接式和通用多轮交互，能够直接训练使用 AgentScope 等智能体框架开发的 Agent 应用。
+* **Agentic RL 支持：**
+  - 支持拼接式多轮和通用多轮交互
+  - 能够直接训练使用 AgentScope 等智能体框架开发的 Agent 应用
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="智能体工作流" width="600" />
 
 * **全流程的数据流水线：**
-  - 支持 rollout 和经验数据的流水线处理，贯穿 RFT 生命周期实现主动管理（优先级、清洗、增强等）。
+  - 支持 rollout 任务和经验数据的流水线处理
+  - 贯穿 RFT 生命周期的主动数据管理（优先级排序、清洗、增强等）
+  - 原生支持多任务联合训练
 
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="数据流水线设计" width="600" />
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01Gk9CRw28NsL09nbOj_!!6000000007921-2-tps-2530-660.png" alt="数据流水线设计" width="600" />
 
 * **用户友好的框架设计：**
-  - 模块化、解耦架构，便于快速上手和二次开发。丰富的图形界面支持低代码使用。
+  - 即插即用模块与解耦式架构，便于快速上手和二次开发
+  - 丰富的图形界面，支持低代码使用
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="系统架构" width="600" />
 
 
+
+## 🔨 教程与指南
+
+
+| Category | Tutorial / Guideline |
+| --- | --- |
+| 运行各种 RFT 模式 | + [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)<br>+ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html)<br>+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html)<br>+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html) |
+| 多轮智能体场景 | + [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html)<br>+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)<br>+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html) |
+| 数据流水线进阶能力 | + [Rollout 任务混合与选取](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_selector.html)<br>+ [经验回放](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [高级数据处理能力 &  Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html) |
+| RL 算法开发/研究 | + [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html) ([论文](https://arxiv.org/pdf/2508.11408))<br>+ 不可验证的领域：[RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [可训练 RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) <br>+ [研究项目: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) ([论文](https://arxiv.org/abs/2509.24203)) |
+| 深入认识 Trinity-RFT | + [完整配置指南](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html)<br>+ [用于快速验证和实验的 Benchmark 工具](./benchmark/README.md)<br>+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/synchronizer.html) |
+
+
+> [!NOTE]
+> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
+
+
+
 ## 🚀 新闻
 
-* [2025-10] ✨ [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.1)] Trinity-RFT v0.3.1 发布：多阶段训练支持、改进的智能体 RL 示例、LoRA 支持、调试模式和全新 RL 算法。
+* [2025-10] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.1)] Trinity-RFT v0.3.1 发布：多阶段训练支持、改进的智能体 RL 示例、LoRA 支持、调试模式和全新 RL 算法。
 * [2025-09] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.0)] Trinity-RFT v0.3.0 发布：增强的 Buffer、FSDP2 & Megatron 支持，多模态模型，以及全新 RL 算法/示例。
 * [2025-08] 推出 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)：动态 SFT + RL 集成，实现进阶 LLM 微调（[论文](https://arxiv.org/pdf/2508.11408)）。
 * [2025-08] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.1)] Trinity-RFT v0.2.1 发布。
@@ -79,8 +103,6 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
   - [第二步：准备数据集和模型](#第二步准备数据集和模型)
   - [第三步：准备配置文件](#第三步准备配置文件)
   - [第四步：运行 RFT 流程](#第四步运行-rft-流程)
-- [更多教程](#更多教程)
-- [开发路线图](#开发路线图)
 - [贡献指南](#贡献指南)
 - [致谢](#致谢)
 - [引用](#引用)
@@ -99,7 +121,7 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
 在安装之前，请确保您的系统满足以下要求：
 
 - **Python**：版本 3.10 至 3.12（含）
-- **CUDA**：版本 12.4 至 12.8（含）
+- **CUDA**：版本 >= 12.6
 - **GPU**：至少 2 块 GPU
 
 ## 源码安装（推荐）
@@ -272,7 +294,9 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-（可选）登录 [wandb](https://docs.wandb.ai/quickstart/) 以便更好地监控 RFT 过程：
+（可选）您可以使用 [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) 等工具，更方便地监控训练流程。
+相应的配置方法请参考 [这个文档](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration)。
+比如使用 Wandb 时，您需要先登录：
 
 ```shell
 export WANDB_API_KEY=<your_api_key>
@@ -294,53 +318,6 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 对于 Studio 用户，在 Web 界面中点击“运行”。
 
 
-## 更多教程
-
-> [!NOTE]
-> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
-
-运行不同 RFT 模式的教程：
-
-+ [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)
-+ [Off-Policy RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_advanced.html)
-+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_async_mode.html)
-+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_dpo.html)
-
-
-将 Trinity-RFT 适配到新的多轮智能体场景的教程：
-
-+ [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)
-+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html)
-+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)
-
-
-数据相关功能的教程：
-
-+ [高级数据处理及 Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)
-
-
-使用 Trinity-RFT 进行 RL 算法开发/研究的教程：
-
-+ [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)
-
-
-完整配置指南：
-
-+ 请参阅[此文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)
-
-
-面向开发者和研究人员的指南：
-
-+ [用于快速验证实验的 Benchmark 工具](./benchmark/README.md)
-+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/synchronizer.html)
-
-
-
-## 开发路线图
-
-路线图：[#51](https://github.com/modelscope/Trinity-RFT/issues/51)
-
-
 
 ## 贡献指南
 
@@ -356,9 +333,9 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 本项目基于许多优秀的开源项目构建，包括：
 
-+ [verl](https://github.com/volcengine/verl) 和 [PyTorch's FSDP](https://pytorch.org/docs/stable/fsdp.html) 用于大模型训练；
++ [verl](https://github.com/volcengine/verl)，[FSDP](https://pytorch.org/docs/stable/fsdp.html) 和 [Megatron-LM](https://github.com/NVIDIA/Megatron-LM) 用于大模型训练；
 + [vLLM](https://github.com/vllm-project/vllm) 用于大模型推理；
-+ [Data-Juicer](https://github.com/modelscope/data-juicer?tab=readme-ov-file) 用于数据处理管道；
++ [Data-Juicer](https://github.com/modelscope/data-juicer?tab=readme-ov-file) 用于数据处理流水线；
 + [AgentScope](https://github.com/agentscope-ai/agentscope) 用于智能体工作流；
 + [Ray](https://github.com/ray-project/ray) 用于分布式系统；
 + 我们也从 [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF)、[TRL](https://github.com/huggingface/trl) 和 [ChatLearn](https://github.com/alibaba/ChatLearn) 等框架中汲取了灵感；

@@ -91,6 +91,8 @@ class vLLMRolloutModel(InferenceModel):
             engine_args.enable_log_requests = False
         else:
             engine_args.disable_log_requests = True
+        if get_vllm_version() >= parse_version("0.11.0"):
+            engine_args.reasoning_parser = config.reasoning_parser
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = None
         self.tokenizer = None
@@ -107,12 +109,7 @@ class vLLMRolloutModel(InferenceModel):
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
-            if self.enable_lora:
-                self.tokenizer = await self.async_llm.get_tokenizer(
-                    lora_request=self.get_lora_request()
-                )
-            else:
-                self.tokenizer = await self.async_llm.get_tokenizer()
+            self.tokenizer = await self.async_llm.get_tokenizer()
         self.tokenizer.truncation_side = "left"
 
     def _initialize_processor(self):

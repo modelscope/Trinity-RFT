@@ -5,12 +5,9 @@
 # docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft-megatron:latest
 
 
-FROM nvcr.io/nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
+FROM nvcr.io/nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 
 WORKDIR /workspace
-
-# copy the Trinity-RFT dir into the workspace
-COPY . .
 
 RUN apt update && apt install -y \
     build-essential \
@@ -22,17 +19,21 @@ RUN apt update && apt install -y \
     && ln -sf /usr/bin/pip3 /usr/bin/pip
 
 # For Aliyun users: update pip mirror to aliyun to speed up pip install
-RUN pip config set global.index-url http://mirrors.cloud.aliyuncs.com/pypi/simple/ \
-   && pip config set install.trusted-host mirrors.cloud.aliyuncs.com
+# RUN pip config set global.index-url http://mirrors.cloud.aliyuncs.com/pypi/simple/ \
+#    && pip config set install.trusted-host mirrors.cloud.aliyuncs.com
+
+# copy the Trinity-RFT dir into the workspace
+COPY . .
 
 # Install Trinity-RFT with Megatron
 RUN pip install --upgrade pip \
+    && pip install -e .[dev] \
+    && pip install flash_attn==2.8.1 --no-build-isolation \
     && pip install -e .[megatron] \
-    && pip install flash-attn==2.8.1 \
     && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
         --config-settings "--build-option=--cpp_ext" \
         --config-settings "--build-option=--cuda_ext" \
-        --resume-retries 999 git+https://github.com/NVIDIA/apex.git
+        --resume-retries 20 git+https://github.com/NVIDIA/apex.git
 
 # Set Env variables
 

@@ -276,7 +276,6 @@ class TestAPIServer(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
 
@@ -368,7 +367,6 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
 
@@ -578,7 +576,6 @@ class TestAPIServerToolCall(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
         # added for toolcalls

@@ -5,6 +5,8 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import subprocess
+
 from trinity import __version__ as version
 
 project = "Trinity-RFT"
@@ -58,11 +60,22 @@ apidoc_output_dir = "build_api"
 apidoc_excluded_paths = ["tests", "build"]
 apidoc_separate_modules = True
 
+
 # Multiversion configs
-smv_tag_whitelist = r"^v\d+\.\d+\.\d+$"  # match v1.0.0 pattern
+def get_recent_tags(n: int) -> list:
+    """Retrieve the most recent n git tags."""
+    try:
+        tags = subprocess.check_output(
+            ["git", "tag", "--sort=-creatordate"], universal_newlines=True
+        ).splitlines()
+        return tags[:n]
+    except subprocess.CalledProcessError:
+        return []
+
+
+smv_tag_whitelist = r"^(" + "|".join(get_recent_tags(4)) + r")$"
 smv_branch_whitelist = r"^(main)$"  # included branches
 smv_remote_whitelist = None
-smv_released_pattern = r"^tags/.*$"
 
 smv_prefer_remote_refs = False
 
