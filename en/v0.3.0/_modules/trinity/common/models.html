@@ -644,9 +644,7 @@ document.write(`
                 <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_openai_api</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">rollout_engines</span><span class="p">:</span>
-            <span class="n">engine</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_history</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s2">&quot;Model History recording is enabled. Please periodically extract &quot;</span>
@@ -676,10 +674,6 @@ document.write(`
                 <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">model_config</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="n">auxiliary_engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">engines</span><span class="p">)</span>
-    <span class="c1"># all auxiliary engines run api server</span>
-    <span class="k">for</span> <span class="n">engines</span> <span class="ow">in</span> <span class="n">auxiliary_engines</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">engines</span><span class="p">:</span>
-            <span class="n">engine</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">rollout_engines</span><span class="p">,</span> <span class="n">auxiliary_engines</span></div>
 
@@ -700,10 +694,10 @@ document.write(`
     <span class="n">rollout_models</span><span class="p">,</span> <span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">create_inference_models</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="c1"># make sure models are started</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">rollout_models</span><span class="p">:</span>
-        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">get_model_path</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">models</span> <span class="ow">in</span> <span class="n">auxiliary_models</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">get_model_path</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="s2">&quot;----------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="s2">&quot;Inference models started successfully for debugging.</span><span class="se">\n</span><span class="s2">&quot;</span>
