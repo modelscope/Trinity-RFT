@@ -124,8 +124,3 @@ class TestPluginLoader(unittest.TestCase):
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.check_and_update()
         shutil.rmtree(self.config.monitor.cache_dir, ignore_errors=True)
-        plugin_dir = os.path.join("trinity", "plugins")
-        for file in Path(plugin_dir).glob("*.py"):
-            if file.name.startswith("__"):
-                continue
-            os.remove(file)
