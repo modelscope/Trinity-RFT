@@ -11,6 +11,10 @@ algorithm:
   kl_penalty_fn: none
   kl_loss_fn: k2
   entropy_loss_fn: default
+  optimizer:
+    lr: 5.0e-07
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
 data_processor: {}
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-8B}
@@ -80,63 +84,9 @@ trainer:
   save_interval: 90
   enable_preview: true
   grad_clip: 1.0
-  trainer_config:
-    actor_rollout_ref:
-      hybrid_engine: true
-      model:
-        external_lib: null
-        override_config: {}
-        enable_gradient_checkpointing: true
-        use_remove_padding: true
-      actor:
-        strategy: fsdp
-        ppo_micro_batch_size_per_gpu: 4
-        use_dynamic_bsz: true
-        ppo_max_token_len_per_gpu: 4096
-        ppo_epochs: 1
-        shuffle: false
-        ulysses_sequence_parallel_size: 1
-        checkpoint:
-          load_contents:
-          - model
-          - optimizer
-          - extra
-          save_contents:
-          - model
-          - optimizer
-          - extra
-        optim:
-          lr: 5.0e-07
-          lr_warmup_steps_ratio: 0.0
-          warmup_style: constant
-          total_training_steps: -1
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-      ref:
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-        log_prob_micro_batch_size_per_gpu: 8
-        log_prob_use_dynamic_bsz: true
-        log_prob_max_token_len_per_gpu: 4096
-        ulysses_sequence_parallel_size: 1
-    trainer:
-      balance_batch: true
-      resume_mode: auto
-      resume_from_path: ''
-      default_hdfs_dir: null
-      remove_previous_ckpt_in_save: false
-      del_local_ckpt_after_load: false
-      val_before_train: false
-      max_actor_ckpt_to_keep: null
-      max_critic_ckpt_to_keep: null
+  use_dynamic_bsz: true
+  max_token_len_per_gpu: 4096
+  ulysses_sequence_parallel_size: 1
 monitor:
   monitor_type: wandb
 synchronizer:
