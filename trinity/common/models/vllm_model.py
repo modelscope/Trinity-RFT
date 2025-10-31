@@ -83,6 +83,19 @@ class vLLMRolloutModel(InferenceModel):
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
+            override_generation_config={
+                "temperature": config.temperature,
+                "top_p": config.top_p,
+                "top_k": config.top_k,
+                "max_tokens": config.max_response_tokens,
+                "min_tokens": config.min_response_tokens,
+                "truncate_prompt_tokens": config.max_prompt_tokens,
+                "skip_special_tokens": True,
+                "include_stop_str_in_output": False,
+                "output_kind": RequestOutputKind.FINAL_ONLY,
+                "logprobs": config.logprobs,
+                "ignore_eos": config.ignore_eos,
+            },
             disable_log_stats=True,
             enable_lora=config.enable_lora,
             **config.lora_kwargs,
@@ -502,15 +515,6 @@ class vLLMRolloutModel(InferenceModel):
 
     def get_model_path(self) -> str:
         return self.config.model_path
-
-    def get_default_rollout_args(self) -> dict:
-        return {
-            "temperature": self.config.temperature,
-            "top_p": self.config.top_p,
-            "top_k": self.config.top_k,
-            "max_tokens": self.config.max_response_tokens,
-            # "n": self.config.repeat_times,
-        }
 
     def get_lora_request(self, lora_path: Optional[str] = None) -> LoRARequest:
         assert self.config.lora_modules is not None

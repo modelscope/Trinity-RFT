@@ -1190,21 +1190,11 @@ class Config:
             ]
             for args in ["model_path"] + rollout_args + length_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
-            # self.explorer.rollout_model.model_path = self.model.model_path
-            # self.explorer.rollout_model.temperature = self.model.temperature
-            # self.explorer.rollout_model.max_model_len = self.model.max_model_len
-            # self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
-            # self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
-            # self.explorer.rollout_model.min_response_tokens = self.model.min_response_tokens
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
                 for args in rollout_args + length_args:
                     set_if_none(aux_model, args, getattr(self.model, args))
-                # set_if_none(aux_model, "max_model_len", self.model.max_model_len)
-                # set_if_none(aux_model, "max_prompt_tokens", self.model.max_prompt_tokens)
-                # set_if_none(aux_model, "max_response_tokens", self.model.max_response_tokens)
-                # set_if_none(aux_model, "min_response_tokens", self.model.min_response_tokens)
 
             # for lora configs
             if self.model.lora_configs is not None:
