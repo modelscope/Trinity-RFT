@@ -48,5 +48,6 @@ The results are shown in the following figure (the accuracy ranges from -0.1 to 
 
 ![](../../assets/email_rollout_accuracy.png)
 
+![](../../assets/email_reward_mean.png)
 
 ![](../../assets/email_eval_accuracy.png)
