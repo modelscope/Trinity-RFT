@@ -59,6 +59,10 @@ class InferenceModel(ABC):
         """Get the model path"""
         return None
 
+    def get_default_rollout_args(self) -> dict:
+        """Get the default rollout arguments."""
+        raise NotImplementedError
+
 
 def _history_recorder(func):
     """Decorator to record history of the model calls."""
@@ -83,7 +87,7 @@ class ModelWrapper:
 
     def __init__(
         self,
-        model: Any,
+        model: InferenceModel,
         engine_type: str = "vllm",
         enable_lora: bool = False,
         enable_history: bool = False,
@@ -99,6 +103,8 @@ class ModelWrapper:
         self.history = []
         self.status = RunningStatus.RUNNING
         self.request_count = 0
+        self.default_rollout_args = model.get_default_rollout_args()
+        self.default_rollout_args["logprobs"] = True
 
     async def prepare(self) -> None:
         """Prepare the model wrapper."""
@@ -271,10 +277,12 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = partial(self.openai_client.chat.completions.create, logprobs=True)
+            ori_create = self.openai_client.chat.completions.create
 
             def record_chat_completions(*args, **kwargs):
-                response = ori_create(*args, **kwargs)
+                default_kwargs = self.default_rollout_args.copy()
+                default_kwargs.update(kwargs)
+                response = ori_create(*args, **default_kwargs)
                 self.history.extend(convert_api_output_to_experience(response))
                 return response
 
@@ -301,10 +309,13 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = partial(self.openai_async_client.chat.completions.create, logprobs=True)
+            ori_create = self.openai_async_client.chat.completions.create
 
             async def record_chat_completions(*args, **kwargs):
-                response = await ori_create(*args, **kwargs)
+                default_kwargs = self.default_rollout_args.copy()
+                default_kwargs.update(kwargs)
+                # print(f"!!!!! {default_kwargs = }")
+                response = ori_create(*args, **default_kwargs)
                 self.history.extend(convert_api_output_to_experience(response))
                 return response
 

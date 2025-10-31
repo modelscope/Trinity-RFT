@@ -503,6 +503,15 @@ class vLLMRolloutModel(InferenceModel):
     def get_model_path(self) -> str:
         return self.config.model_path
 
+    def get_default_rollout_args(self) -> dict:
+        return {
+            "temperature": self.config.temperature,
+            "top_p": self.config.top_p,
+            "top_k": self.config.top_k,
+            "max_tokens": self.config.max_response_tokens,
+            # "n": self.config.repeat_times,
+        }
+
     def get_lora_request(self, lora_path: Optional[str] = None) -> LoRARequest:
         assert self.config.lora_modules is not None
         lora_request = LoRARequest(**self.config.lora_modules[0])
