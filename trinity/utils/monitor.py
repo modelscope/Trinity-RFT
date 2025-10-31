@@ -16,6 +16,12 @@ try:
     import mlflow
 except ImportError:
     mlflow = None
+
+try:
+    import swanlab
+except ImportError:
+    swanlab = None
+
 from torch.utils.tensorboard import SummaryWriter
 
 from trinity.common.config import Config
@@ -223,4 +229,122 @@ class MlflowMonitor(Monitor):
             "uri": "http://localhost:5000",
             "username": None,
             "password": None,
+        }
+
+
+@MONITOR.register_module("swanlab")
+class SwanlabMonitor(Monitor):
+    """Monitor with SwanLab.
+    This monitor integrates with SwanLab (https://swanlab.cn/) to track experiments.
+    """
+
+    def __init__(
+        self, project: str, group: str, name: str, role: str, config: Config = None
+    ) -> None:
+        assert (
+            swanlab is not None
+        ), "swanlab is not installed. Please install it to use SwanlabMonitor."
+
+        monitor_args = (config.monitor.monitor_args or {}) if config and getattr(config, "monitor", None) else {}
+
+        # read api key from environment variable or monitor_args
+        api_key = (
+            monitor_args.get("api_key") or os.environ.get("SWANLAB_API_KEY")
+        )
+        if api_key:
+            try:
+                swanlab.login(api_key=api_key, save=True)
+            except Exception:
+                # Best-effort login; continue to init which may still work if already logged in
+                pass
+
+        # Compose tags (ensure list and include role/group markers)
+        tags = monitor_args.get("tags") or []
+        if isinstance(tags, tuple):
+            tags = list(tags)
+        if role and role not in tags:
+            tags.append(role)
+        if group and group not in tags:
+            tags.append(group)
+
+        # Determine experiment name
+        exp_name = monitor_args.get("experiment_name") or f"{name}_{role}"
+
+        # Prepare init kwargs, passing only non-None values to respect library defaults
+        init_kwargs = {
+            "project": project,
+            "experiment_name": exp_name,
+            "description": monitor_args.get("description"),
+            "tags": tags or None,
+            "logdir": monitor_args.get("logdir"),
+            "mode": monitor_args.get("mode") or "cloud",
+            "settings": monitor_args.get("settings"),
+            "id": monitor_args.get("id"),
+            "resume": monitor_args.get("resume"),
+            "reinit": monitor_args.get("reinit"),
+        }
+        # Strip None values to avoid overriding swanlab defaults
+        init_kwargs = {k: v for k, v in init_kwargs.items() if v is not None}
+
+        # Convert config to a plain dict for SwanLab config logging
+        cfg_dict = None
+        if config is not None:
+            if hasattr(config, "flatten"):
+                try:
+                    cfg_dict = config.flatten()
+                except Exception:
+                    # Fallback: try to cast to dict if possible
+                    try:
+                        cfg_dict = dict(config)
+                    except Exception:
+                        cfg_dict = None
+            else:
+                try:
+                    cfg_dict = dict(config)
+                except Exception:
+                    cfg_dict = None
+        if cfg_dict is not None:
+            init_kwargs["config"] = cfg_dict
+
+        self.logger = swanlab.init(**init_kwargs)
+        self.console_logger = get_logger(__name__, in_ray_actor=True)
+
+    def log_table(self, table_name: str, experiences_table: pd.DataFrame, step: int):
+        # Convert pandas DataFrame to SwanLab ECharts Table
+        headers: List[str] = list(experiences_table.columns)
+        # Ensure rows are native Python types
+        rows: List[List[object]] = experiences_table.astype(object).values.tolist()
+        try:
+            tbl = swanlab.echarts.Table()
+            tbl.add(headers, rows)
+            swanlab.log({table_name: tbl}, step=step)
+        except Exception:
+            # Fallback: log as CSV string if echarts table is unavailable
+            csv_str = experiences_table.to_csv(index=False)
+            swanlab.log({table_name: csv_str}, step=step)
+
+    def log(self, data: dict, step: int, commit: bool = False) -> None:
+        """Log metrics."""
+        # SwanLab doesn't use commit flag; keep signature for compatibility
+        swanlab.log(data, step=step)
+        self.console_logger.info(f"Step {step}: {data}")
+
+    def close(self) -> None:
+        try:
+            # Prefer run.finish() if available
+            if hasattr(self, "logger") and hasattr(self.logger, "finish"):
+                self.logger.finish()
+            else:
+                # Fallback to global finish
+                swanlab.finish()
+        except Exception:
+            pass
+
+    @classmethod
+    def default_args(cls) -> Dict:
+        """Return default arguments for the monitor."""
+        return {
+            "api_key": None,
+            "mode": "cloud",
+            "logdir": None,
         }
