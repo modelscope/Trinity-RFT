@@ -22,6 +22,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         epsilon: float = 1e-6,
         enable_step_norm: bool = False,
         std_cal_level: str = "group",  # 'group' (task-level) or 'batch'
+        std_threshold: Optional[float] = None,
         **kwargs,
     ) -> None:
         """Initialize the Step-wise GRPO advantage function.
@@ -33,10 +34,13 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 'group' (default): Std is calculated per task group.
                 'batch': Std is calculated across all last-step rewards in the entire batch.
                 The mean is always calculated per task group.
+            std_threshold (Optional[float]): If provided, task groups with a reward standard deviation
+                equal or below this threshold will be skipped.
         """
         self.epsilon = epsilon
         self.enable_step_norm = enable_step_norm
         self.std_cal_level = std_cal_level
+        self.std_threshold = std_threshold
         if self.std_cal_level not in ["group", "batch"]:
             raise ValueError("std_cal_level must be either 'group' or 'batch'")
 
@@ -49,6 +53,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
 
         Args:
             exps (Dict[str, Experience]): One experience per run, keyed by run ID.
+            precomputed_std (Optional[torch.Tensor]): Precomputed standard deviation for batch-level calculation.
 
         Returns:
             Dict[str, float]: A tuple containing the scores for each run.
@@ -62,6 +67,13 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 rewards = torch.tensor([exp.reward for exp in exps.values()], dtype=torch.float32)
                 group_reward_mean = torch.mean(rewards)
                 group_reward_std = torch.std(rewards)
+
+            # Determine if this group should be skipped based on std_threshold
+            std_threshold_skipped = False
+            if self.std_threshold is not None:
+                if len(exps) == 1 or group_reward_std <= self.std_threshold:
+                    std_threshold_skipped = True
+
             scores = {}
             for rid, exp in exps.items():
                 if self.std_cal_level == "batch" and precomputed_std is not None:
@@ -72,6 +84,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             metrics = {
                 "reward_mean": group_reward_mean.item(),
                 "reward_std": group_reward_std.item(),
+                "std_threshold_skipped": std_threshold_skipped,
             }
         return scores, metrics
 
@@ -102,6 +115,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             return [], {}
         cnt = 0
         metric_list = []
+        filtered_count = 0
         # Step 1: split the experiences into sub-groups by task
         task_exps = group_by(exps, "task")
 
@@ -134,6 +148,17 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             scores, metrics = self.calculate_last_step_advantage(
                 last_step_exps, precomputed_std=precomputed_std
             )
+
+            # Skip this task group if std is below threshold
+            if metrics.get("std_threshold_skipped", False):
+                # Count all experiences in this task group as filtered
+                task_exp_count = sum(len(step_exps) for step_exps in run_exps.values())
+                filtered_count += task_exp_count
+                metrics["skipped_count_per_group"] = task_exp_count
+                metric_list.append(metrics)
+                continue
+
+            metrics["skipped_count_per_group"] = 0
             metric_list.append(metrics)
 
             # Step 4: broadcast the advantages to all previous steps
@@ -144,6 +169,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
 
         metrics = gather_metrics(metric_list, "group_advantages")
         metrics["experience_count"] = cnt
+        metrics["filtered_count"] = filtered_count
         return result_exps, metrics
 
     def __call__(self, exps, **kwargs):
@@ -160,4 +186,6 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         return {
             "epsilon": 1e-6,
             "enable_step_norm": False,
+            "std_threshold": None,
+            "std_cal_level": "group",
         }

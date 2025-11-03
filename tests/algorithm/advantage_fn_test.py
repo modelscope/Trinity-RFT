@@ -326,3 +326,34 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         expected_advantages = expected_advantage_value * target_exp.action_mask
         self.assertTrue(torch.allclose(target_exp.advantages, expected_advantages, atol=1e-6))
         self.assertTrue(torch.allclose(target_exp.returns, expected_advantages, atol=1e-6))
+
+    def test_step_wise_grpo_reward_std(self):
+        advantage_fn_cls = ADVANTAGE_FN.get("step_wise_grpo")
+        self.assertIsNotNone(advantage_fn_cls)
+        advantage_fn = advantage_fn_cls(epsilon=1e-6, std_threshold=0.0)
+        task_num = 3
+        repeat_times = 5
+        step_num = 4
+        # All runs in all tasks have the same reward, so std should be 0
+        exps = [
+            Experience(
+                eid=EID(
+                    batch=0,
+                    task=j,
+                    run=i,
+                    step=k,
+                ),
+                tokens=torch.zeros(5),
+                prompt_length=2,
+                reward=0.5,
+            )
+            for k in range(step_num)
+            for i in range(repeat_times)
+            for j in range(task_num)
+        ]
+
+        processed_exps, metrics = advantage_fn(exps)
+        # All groups should be filtered because std is 0
+        self.assertEqual(len(processed_exps), 0)
+        self.assertIn("filtered_count", metrics)
+        self.assertEqual(metrics["filtered_count"], task_num * repeat_times * step_num)
