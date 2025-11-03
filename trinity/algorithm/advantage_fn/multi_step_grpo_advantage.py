@@ -69,10 +69,10 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 group_reward_std = torch.std(rewards)
 
             # Determine if this group should be skipped based on std_threshold
-            std_threshold_skipped = False
+            std_threshold_skipped = 0
             if self.std_threshold is not None:
                 if len(exps) == 1 or group_reward_std <= self.std_threshold:
-                    std_threshold_skipped = True
+                    std_threshold_skipped = 1
 
             scores = {}
             for rid, exp in exps.items():
@@ -150,7 +150,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             )
 
             # Skip this task group if std is below threshold
-            if metrics.get("std_threshold_skipped", False):
+            if metrics.get("std_threshold_skipped", 0) == 1:
                 # Count all experiences in this task group as filtered
                 task_exp_count = sum(len(step_exps) for step_exps in run_exps.values())
                 filtered_count += task_exp_count
