@@ -1229,6 +1229,7 @@ document.write(`
     <span class="c1"># if None, automatically set to ceil(2 * model.max_model_len / ulysses_sequence_parallel_size)</span>
     <span class="n">max_token_len_per_gpu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ulysses_sequence_parallel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># sp size</span>
+    <span class="n">fix_actor_microbatch_loss_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># EXPERIMENTAL</span>
     <span class="c1"># TODO: extract more train-related params from underlying trainer engine</span>
 
     <span class="n">save_strategy</span><span class="p">:</span> <span class="n">SaveStrategy</span> <span class="o">=</span> <span class="n">SaveStrategy</span><span class="o">.</span><span class="n">UNRESTRICTED</span>

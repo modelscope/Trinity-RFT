@@ -677,6 +677,7 @@ document.write(`
     <span class="n">ppo_micro_batch_size_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">use_dynamic_bsz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ppo_max_token_len_per_gpu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fix_actor_microbatch_loss_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># EXPERIMENTAL</span>
     <span class="n">grad_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ppo_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1002,6 +1003,10 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ppo_max_token_len_per_gpu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ppo_max_token_len_per_gpu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">max_token_len_per_gpu</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">fix_actor_microbatch_loss_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">fix_actor_microbatch_loss_scale</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">fix_actor_microbatch_loss_scale</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span> <span class="o">=</span> <span class="p">(</span>
