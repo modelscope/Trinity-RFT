@@ -158,11 +158,9 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 task_exp_count = sum(len(step_exps) for step_exps in run_exps.values())
                 filtered_count += task_exp_count
                 skipped_task_groups += 1
-                metrics["skipped_count_per_group"] = task_exp_count
                 metric_list.append(metrics)
                 continue
 
-            metrics["skipped_count_per_group"] = 0
             metric_list.append(metrics)
 
             # Step 4: broadcast the advantages to all previous steps
