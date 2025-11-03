@@ -386,6 +386,11 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         self.assertIn("filtered_count", metrics)
         self.assertEqual(metrics["filtered_count"], expected_filtered)
 
+        # Verify skipped group ratio: 2 out of 3 tasks were skipped
+        self.assertIn("skipped_group_ratio", metrics)
+        expected_ratio = 2.0 / 3.0  # task 0 and task 1 skipped out of 3 total tasks
+        self.assertAlmostEqual(metrics["skipped_group_ratio"], expected_ratio, places=6)
+
         # Verify that all remaining experiences are from task 2
         for exp in processed_exps:
             self.assertEqual(exp.eid.task, 2)

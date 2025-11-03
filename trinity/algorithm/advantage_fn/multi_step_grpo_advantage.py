@@ -48,7 +48,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         self,
         exps: Dict[str, Experience],
         precomputed_std: Optional[torch.Tensor] = None,
-    ) -> Tuple[Dict[str, float], Dict[str, float]]:
+    ) -> Tuple[Dict[str, float], Dict[str, float], bool]:
         """Calculate group advantage for a given group of experiences.
 
         Args:
@@ -56,8 +56,9 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             precomputed_std (Optional[torch.Tensor]): Precomputed standard deviation for batch-level calculation.
 
         Returns:
-            Dict[str, float]: A tuple containing the scores for each run.
+            Dict[str, float]: Scores for each run.
             Dict[str, float]: Metrics for logging.
+            bool: Whether this group should be skipped.
         """
         with torch.no_grad():
             if len(exps) == 1:
@@ -69,10 +70,10 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 group_reward_std = torch.std(rewards)
 
             # Determine if this group should be skipped based on std_threshold
-            std_threshold_skipped = 0
+            should_skip = False
             if self.std_threshold is not None:
                 if len(exps) == 1 or group_reward_std <= self.std_threshold:
-                    std_threshold_skipped = 1
+                    should_skip = True
 
             scores = {}
             for rid, exp in exps.items():
@@ -84,9 +85,8 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             metrics = {
                 "reward_mean": group_reward_mean.item(),
                 "reward_std": group_reward_std.item(),
-                "std_threshold_skipped": std_threshold_skipped,
             }
-        return scores, metrics
+        return scores, metrics, should_skip
 
     def broadcast_advantages(
         self, run_exps: Dict[str, List[Experience]], scores: Dict[str, float]
@@ -140,20 +140,24 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
 
         # Step 2: further split each task's experiences into sub-groups by run
         result_exps = []
+        total_task_groups = len(task_exps)
+        skipped_task_groups = 0
+
         for task_exp in task_exps.values():
             run_exps = group_by(task_exp, "run")
 
             # Step3: extract the last experience (last step) from each run and calculate scores
             last_step_exps = {run_id: step_exps[-1] for run_id, step_exps in run_exps.items()}
-            scores, metrics = self.calculate_last_step_advantage(
+            scores, metrics, should_skip = self.calculate_last_step_advantage(
                 last_step_exps, precomputed_std=precomputed_std
             )
 
             # Skip this task group if std is below threshold
-            if metrics.get("std_threshold_skipped", 0) == 1:
+            if should_skip:
                 # Count all experiences in this task group as filtered
                 task_exp_count = sum(len(step_exps) for step_exps in run_exps.values())
                 filtered_count += task_exp_count
+                skipped_task_groups += 1
                 metrics["skipped_count_per_group"] = task_exp_count
                 metric_list.append(metrics)
                 continue
@@ -170,6 +174,13 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         metrics = gather_metrics(metric_list, "group_advantages")
         metrics["experience_count"] = cnt
         metrics["filtered_count"] = filtered_count
+
+        # Calculate the ratio of skipped task groups
+        if total_task_groups > 0:
+            metrics["skipped_group_ratio"] = skipped_task_groups / total_task_groups
+        else:
+            metrics["skipped_group_ratio"] = 0.0
+
         return result_exps, metrics
 
     def __call__(self, exps, **kwargs):
