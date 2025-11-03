@@ -596,6 +596,12 @@ document.write(`
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
             <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
+            <span class="n">override_generation_config</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># TODO: find a way to unittest this</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
+                <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_k</span><span class="p">,</span>
+                <span class="s2">&quot;max_new_tokens&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">,</span>
+            <span class="p">},</span>
             <span class="n">disable_log_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
             <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
