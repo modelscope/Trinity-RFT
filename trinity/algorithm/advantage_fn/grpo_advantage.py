@@ -144,7 +144,7 @@ class GRPOGroupedAdvantage(GroupAdvantage):
                 )  # check this value (use exps[0].reward may be better)
                 group_reward_std = torch.tensor(1.0)  # set to 1.0 to avoid division by zero
                 if self.std_threshold is not None:
-                    metrics["skipped_count"] = 1
+                    metrics["skipped_count_per_group"] = 1
                     exps.clear()  # Clear experiences if only one experience
             else:
                 rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
@@ -161,10 +161,16 @@ class GRPOGroupedAdvantage(GroupAdvantage):
                 group_reward_mean = torch.mean(rewards)
                 group_reward_std = torch.std(rewards)
 
-                # If the reward standard deviation is below a threshold, skip the group
-                if self.std_threshold is not None and group_reward_std <= self.std_threshold:
-                    metrics["skipped_count"] = len(exps)
-                    exps.clear()
+                # Concisely handle group skipping and reward statistics
+                if self.std_threshold is not None:
+                    if group_reward_std <= self.std_threshold:
+                        metrics["skipped_count_per_group"] = len(exps)
+                        exps.clear()
+                    else:
+                        metrics["skipped_count_per_group"] = 0
+
+                metrics["all_positive_reward_percentage"] = int(group_reward_mean >= 1.0)
+                metrics["all_negative_reward_percentage"] = int(group_reward_mean <= 0.0)
 
             for exp in exps:
                 if self.std_cal_level == "batch" and precomputed_std is not None:
@@ -216,7 +222,7 @@ class GRPOGroupedAdvantage(GroupAdvantage):
             metric_list.append(group_metrics)
 
         # Update the filtered_count metric
-        filtered_count = sum(metric.pop("skipped_count", 0) for metric in metric_list)
+        filtered_count = sum(metric.pop("skipped_count_per_group", 0) for metric in metric_list)
         metrics = gather_metrics(metric_list, "group_advantages")
         metrics["filtered_count"] = filtered_count
         if self.duplicate_experiences and self.std_threshold is not None:
