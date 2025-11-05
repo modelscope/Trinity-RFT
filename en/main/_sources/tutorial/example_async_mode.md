@@ -31,7 +31,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: 'openai/gsm8k'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       split: train
       format:
@@ -79,7 +79,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: 'openai/gsm8k'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       format:
         prompt_key: 'question'
@@ -143,7 +143,7 @@ buffer:
     taskset:  # important
       name: gsm8k
       storage_type: file
-      path: 'openai/gsm8k'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       format:
         prompt_key: 'question'
