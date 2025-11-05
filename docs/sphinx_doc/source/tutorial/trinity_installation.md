@@ -6,7 +6,7 @@ For installing Trinity-RFT, you have three options: from source (recommended), v
 Before installing, ensure your system meets the following requirements:
 
 - **Python**: Version 3.10 to 3.12 (inclusive)
-- **CUDA**: Version 12.4 to 12.8 (inclusive)
+- **CUDA**: Version >= 12.6
 - **GPUs**: At least 2 GPUs
 
 ---
@@ -65,14 +65,14 @@ uv sync --extra dev --extra flash_attn
 If you just want to use the package without modifying the code:
 
 ```bash
-pip install trinity-rft==0.3.1
+pip install trinity-rft
 pip install flash-attn==2.8.1
 ```
 
 Or with `uv`:
 
 ```bash
-uv pip install trinity-rft==0.3.1
+uv pip install trinity-rft
 uv pip install flash-attn==2.8.1
 ```
 

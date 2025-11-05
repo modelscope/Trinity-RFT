@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.4.0.dev0"
+version = "0.3.2"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -23,7 +23,7 @@ requires-python = ">=3.10,<3.13"
 dependencies = [
     "verl==0.5.0",
     "ray[default]>=2.48.0",
-    "vllm>=0.9.1,<=0.10.2",
+    "vllm>=0.9.1,<=0.11.0",
     "tensordict",
     "wandb",
     "omegaconf",
@@ -73,7 +73,7 @@ dev = [
 ]
 megatron = [
     "megatron-core[mlm]==0.13.1",
-    "transformer_engine[pytorch]==2.6.0.post1",
+    "transformer_engine[pytorch]==2.8.0",
     "mbridge>=0.13.0",
 ]
 
@@ -85,6 +85,10 @@ doc = [
     "sphinxcontrib-apidoc",
     "sphinx-multiversion",
     "sphinxcontrib-mermaid",
+]
+
+mm = [
+    "qwen-vl-utils",
 ]
 
 flash_attn = [

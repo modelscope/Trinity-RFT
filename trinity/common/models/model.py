@@ -4,7 +4,7 @@ import asyncio
 import socket
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import httpx
 import numpy as np
@@ -83,7 +83,7 @@ class ModelWrapper:
 
     def __init__(
         self,
-        model: Any,
+        model: InferenceModel,
         engine_type: str = "vllm",
         enable_lora: bool = False,
         enable_history: bool = False,

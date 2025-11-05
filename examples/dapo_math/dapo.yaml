@@ -43,8 +43,8 @@ buffer:
     eval_tasksets:
     - name: AIME2024
       storage_type: file
-      path: ${oc.env:TRINITY_TASKSET_PATH}  # e.g. path to AIME2024
-      split: 'test'
+      path: HuggingFaceH4/aime_2024  # Path to the AIME2024 dataset
+      split: 'train'
       repeat_times: 32
       format:
         prompt_key: 'question'

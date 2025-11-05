@@ -88,6 +88,16 @@ class DataParallelPPOActor(DPActor):
 
         mini_batches = data.split(self.config.ppo_mini_batch_size)
 
+        # EXPERIMENTAL: apply loss scale fix
+        loss_agg_mode = (
+            self.policy_loss_fn.loss_agg_mode
+            if hasattr(self.policy_loss_fn, "loss_agg_mode")
+            else "token-mean"
+        )
+        do_fix_actor_microbatch_loss_scale = self.config.fix_actor_microbatch_loss_scale and (
+            loss_agg_mode == "token-mean"
+        )
+
         metrics = {}
         for _ in range(self.config.ppo_epochs):
             for batch_idx, mini_batch in enumerate(mini_batches):
@@ -103,6 +113,12 @@ class DataParallelPPOActor(DPActor):
                         self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu
                     )
                     micro_batches = mini_batch.split(self.config.ppo_micro_batch_size_per_gpu)
+
+                if do_fix_actor_microbatch_loss_scale:
+                    # calculate the total number of response tokens in the minibatch
+                    mini_batch_token_num = torch.sum(
+                        mini_batch.batch["response_mask"].to(get_device_id())
+                    ).item()
 
                 self.actor_optimizer.zero_grad()
 
@@ -156,13 +172,19 @@ class DataParallelPPOActor(DPActor):
                     )
                     policy_loss = policy_loss + kl_loss
 
-                    if self.config.use_dynamic_bsz:
-                        # relative to the dynamic bsz
-                        loss = policy_loss * (
-                            response_mask.shape[0] / self.config.ppo_mini_batch_size
-                        )
+                    # set loss scale for the microbatch
+                    if not do_fix_actor_microbatch_loss_scale:
+                        # original implementation of microbatch loss scale
+                        if self.config.use_dynamic_bsz:
+                            loss_scale = response_mask.shape[0] / self.config.ppo_mini_batch_size
+                        else:
+                            loss_scale = 1.0 / self.gradient_accumulation
                     else:
-                        loss = policy_loss / self.gradient_accumulation
+                        # EXPERIMENTAL: fix for token-mean loss aggregation
+                        # scale microbatch loss according to the number of tokens (rather than sequences)
+                        loss_scale = torch.sum(response_mask).item() / (mini_batch_token_num + 1e-6)
+
+                    loss = policy_loss * loss_scale
                     loss.backward()
 
                     append_to_dict(metrics, micro_batch_metrics)

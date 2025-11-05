@@ -78,10 +78,10 @@ class FormatConfig:
 
 @dataclass
 class GenerationConfig:
-    temperature: float = 1.0
-    top_p: float = 1.0
-    top_k: int = -1
-    logprobs: int = 0  # vLLM return `logprobs + 1` elements
+    temperature: Optional[float] = None  # 1.0
+    top_p: Optional[float] = None  # 1.0
+    top_k: Optional[int] = None  # -1
+    logprobs: Optional[int] = None  # 0  # vLLM return `logprobs + 1` elements
     max_tokens: Optional[int] = None  # if None, use model.max_response_tokens
     # repeat each task for `n` times
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
@@ -97,6 +97,7 @@ class OptimizerConfig:
     warmup_style: str = "constant"
     optimizer_type: str = "adam"
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
+    weight_decay: float = 0.01
 
 
 @dataclass
@@ -412,6 +413,12 @@ class ModelConfig:
 
     custom_chat_template: Optional[str] = None
 
+    # rollout args
+    temperature: float = 1.0
+    top_p: float = 1.0
+    top_k: int = -1
+    logprobs: int = 0
+
     # the total number of tokens the model can handle
     max_model_len: Optional[int] = None
 
@@ -446,6 +453,12 @@ class InferenceModelConfig:
     gpu_memory_utilization: float = 0.9
     dtype: str = "bfloat16"
     seed: int = 42
+
+    # rollout args, ! DO NOT SET
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
+    top_k: Optional[int] = None
+    logprobs: Optional[int] = None
 
     # if not set, use `model.max_model_len`
     max_model_len: Optional[int] = None
@@ -634,6 +647,7 @@ class TrainerConfig:
     # if None, automatically set to ceil(2 * model.max_model_len / ulysses_sequence_parallel_size)
     max_token_len_per_gpu: Optional[int] = None
     ulysses_sequence_parallel_size: int = 1  # sp size
+    fix_actor_microbatch_loss_scale: bool = False  # EXPERIMENTAL
     # TODO: extract more train-related params from underlying trainer engine
 
     save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
@@ -853,6 +867,10 @@ class Config:
             set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
             set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
             set_if_none(taskset, "ray_namespace", self.ray_namespace)
+            set_if_none(taskset.rollout_args, "temperature", self.model.temperature)
+            set_if_none(taskset.rollout_args, "top_p", self.model.top_p)
+            set_if_none(taskset.rollout_args, "top_k", self.model.top_k)
+            set_if_none(taskset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
@@ -868,6 +886,10 @@ class Config:
             set_if_none(dataset, "default_workflow_type", explorer_input.default_workflow_type)
             set_if_none(dataset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
             set_if_none(dataset, "ray_namespace", self.ray_namespace)
+            set_if_none(dataset.rollout_args, "temperature", self.model.temperature)
+            set_if_none(dataset.rollout_args, "top_p", self.model.top_p)
+            set_if_none(dataset.rollout_args, "top_k", self.model.top_k)
+            set_if_none(dataset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
     def _check_trainer_input(self) -> None:
@@ -1161,18 +1183,20 @@ class Config:
 
         # check explorer
         if self.explorer is not None:
-            self.explorer.rollout_model.model_path = self.model.model_path
-            self.explorer.rollout_model.max_model_len = self.model.max_model_len
-            self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
-            self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
-            self.explorer.rollout_model.min_response_tokens = self.model.min_response_tokens
+            rollout_args = ["temperature", "top_p", "top_k", "logprobs"]
+            length_args = [
+                "max_model_len",
+                "max_prompt_tokens",
+                "max_response_tokens",
+                "min_response_tokens",
+            ]
+            for args in ["model_path"] + rollout_args + length_args:
+                setattr(self.explorer.rollout_model, args, getattr(self.model, args))
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
-                set_if_none(aux_model, "max_model_len", self.model.max_model_len)
-                set_if_none(aux_model, "max_prompt_tokens", self.model.max_prompt_tokens)
-                set_if_none(aux_model, "max_response_tokens", self.model.max_response_tokens)
-                set_if_none(aux_model, "min_response_tokens", self.model.min_response_tokens)
+                for args in rollout_args + length_args:
+                    set_if_none(aux_model, args, getattr(self.model, args))
 
             # for lora configs
             if self.model.lora_configs is not None:
