@@ -190,7 +190,7 @@ class TasksetScheduler:
         """
         if SELECTOR_METRIC not in pipeline_metrics:
             return
-        selector_metric = pipeline_metrics[SELECTOR_METRIC]
+        selector_metric = pipeline_metrics.pop(SELECTOR_METRIC, {})
         for taskset_id, taskset_kwargs in selector_metric.items():
             selector = self.selectors[taskset_id]
             selector.update(**taskset_kwargs)
