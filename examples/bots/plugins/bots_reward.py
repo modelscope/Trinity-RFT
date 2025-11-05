@@ -1,23 +1,21 @@
 # Adapted from Reasoning360: https://github.com/LLM360/Reasoning360/blob/main/verl/utils/reward_score/naive_dapo.py
 
-import re
-import signal
-from typing import Optional, Union
-import math
-from math import isclose
 import contextlib
+import math
+import re
+from math import isclose
+from typing import Optional, Union
 
 import sympy
 from pylatexenc import latex2text
+from sympy import N, simplify
 from sympy.parsing import sympy_parser
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.sympy_parser import parse_expr
-from sympy import N, simplify
-import os
-
 from verl.utils.py_functional import timeout_limit
 
-def handle_base(x) -> str:
+
+def handle_base(x):
     if isinstance(x, str) and "_" in x:
         # Due to base
         x = x.split("_")[0]
@@ -49,13 +47,16 @@ def handle_pi(string, pi):
 
     return string
 
+
 def normalize(answer, pi) -> str:
     # checking if answer is $<number> and removing $ in that case to compare
     if isinstance(answer, str) and bool(re.match(r"\$\d+(\.\d+)?", answer)):
         return answer[1:]
 
     # checking if answer is <number>% or <number>\\% and removing %
-    if isinstance(answer, str) and (bool(re.match(r"^\d+(\.\d+)?%$", answer)) or bool(re.match(r"^\d+(\.\d+)?\\%$", answer))):
+    if isinstance(answer, str) and (
+        bool(re.match(r"^\d+(\.\d+)?%$", answer)) or bool(re.match(r"^\d+(\.\d+)?\\%$", answer))
+    ):
         return answer.replace("\\%", "").replace("%", "")
 
     # handle base
@@ -66,6 +67,7 @@ def normalize(answer, pi) -> str:
 
     return answer
 
+
 def is_digit(s):
     try:
         if "{,}" in str(s):
@@ -75,9 +77,10 @@ def is_digit(s):
         num = float(str(s).replace(",", ""))
         return True, num
     except ValueError:
-        return False, None
+        return False, 0.0
 
-def format_intervals(prediction):
+
+def format_intervals(prediction) -> str:
     patterns = {
         "Interval(": r"^Interval\((.*)\)$",
         "Interval.Ropen(": r"^Interval\.Ropen\((.*)\)$",
@@ -99,7 +102,7 @@ def format_intervals(prediction):
             elif key == "Interval.open(":  # Intarval.open(a, b) == (a, b)
                 return f"({inner_content})"
 
-    return prediction
+    return str(prediction)
 
 
 def symbolic_equal(a, b, tolerance, timeout=10.0):
@@ -140,7 +143,7 @@ def symbolic_equal(a, b, tolerance, timeout=10.0):
     return False
 
 
-def math_equal(
+def math_equal(  # noqa
     prediction: Union[bool, float, str],
     reference: Union[float, str],
     include_percentage: bool = True,
@@ -172,10 +175,14 @@ def math_equal(
             prediction = is_digit(prediction)[1]
             reference = is_digit(reference)[1]
             # number questions
-            gt_result = [reference / 100, reference, reference * 100] if include_percentage else [reference]
+            gt_result = (
+                [float(reference) / 100.0, float(reference), float(reference) * 100.0]
+                if include_percentage
+                else [float(reference)]
+            )
             for item in gt_result:
                 try:
-                    if isclose(item, prediction, rel_tol=tolerance):
+                    if isclose(float(item), float(prediction), rel_tol=tolerance):
                         return True
                 except Exception:
                     continue
@@ -194,7 +201,11 @@ def math_equal(
     prediction = format_intervals(prediction)
 
     pred_str, ref_str = prediction, reference
-    if (prediction.startswith("[") and prediction.endswith("]") and not reference.startswith("(")) or (prediction.startswith("(") and prediction.endswith(")") and not reference.startswith("[")):
+    if (
+        prediction.startswith("[") and prediction.endswith("]") and not reference.startswith("(")
+    ) or (
+        prediction.startswith("(") and prediction.endswith(")") and not reference.startswith("[")
+    ):
         pred_str = pred_str.strip("[]()")
         ref_str = ref_str.strip("[]()")
     for s in ["{", "}", "(", ")"]:
@@ -204,10 +215,22 @@ def math_equal(
         return True
 
     ## [a, b] vs. [c, d], return a==c and b==d
-    if prediction and reference and prediction[0] in "([" and prediction[-1] in ")]" and prediction[0] == reference[0] and prediction[-1] == reference[-1]:
+    if (
+        prediction
+        and reference
+        and prediction[0] in "(["
+        and prediction[-1] in ")]"
+        and prediction[0] == reference[0]
+        and prediction[-1] == reference[-1]
+    ):
         pred_parts = prediction[1:-1].split(",")
         ref_parts = reference[1:-1].split(",")
-        if len(pred_parts) == len(ref_parts) and all([math_equal(pred_pt, ref_pt, include_percentage, tolerance) for pred_pt, ref_pt in zip(pred_parts, ref_parts)]):
+        if len(pred_parts) == len(ref_parts) and all(
+            [
+                math_equal(pred_pt, ref_pt, include_percentage, tolerance)
+                for pred_pt, ref_pt in zip(pred_parts, ref_parts)
+            ]
+        ):
             return True
 
     if "," in prediction and "," in reference:
@@ -215,13 +238,25 @@ def math_equal(
         ref_parts = [item.strip() for item in reference.split(",")]
 
         if len(pred_parts) == len(ref_parts):
-            return bool(all([math_equal(pred_parts[i], ref_parts[i], include_percentage, tolerance) for i in range(len(pred_parts))]))
+            return bool(
+                all(
+                    [
+                        math_equal(pred_parts[i], ref_parts[i], include_percentage, tolerance)
+                        for i in range(len(pred_parts))
+                    ]
+                )
+            )
 
     # if we have point == tuple of values
     if prediction.startswith("Point") and reference[0] == "(" and reference[-1] == ")":
         pred_parts = prediction[prediction.find("(") + 1 : -1].split(",")
         ref_parts = reference[1:-1].split(",")
-        if len(pred_parts) == len(ref_parts) and all([math_equal(pred_pt, ref_pt, include_percentage, tolerance) for pred_pt, ref_pt in zip(pred_parts, ref_parts)]):
+        if len(pred_parts) == len(ref_parts) and all(
+            [
+                math_equal(pred_pt, ref_pt, include_percentage, tolerance)
+                for pred_pt, ref_pt in zip(pred_parts, ref_parts)
+            ]
+        ):
             return True
 
     # if reference is a matrix
@@ -229,7 +264,12 @@ def math_equal(
         try:
             pred_matrix = parse_expr(prediction)
             ref_matrix_items = reference.split()[1:-1:2]
-            if len(pred_matrix) == len(ref_matrix_items) and all([math_equal(pred, ref, include_percentage, tolerance) for ref, pred in zip(ref_matrix_items, pred_matrix)]):
+            if len(pred_matrix) == len(ref_matrix_items) and all(
+                [
+                    math_equal(pred, ref, include_percentage, tolerance)
+                    for ref, pred in zip(ref_matrix_items, pred_matrix)
+                ]
+            ):
                 return True
         except Exception:
             pass
@@ -238,31 +278,27 @@ def math_equal(
             try:
                 pred_matrix = eval(prediction)
                 # ref_matrix_items = reference.split()[1:-1:2]
-                ref_matrix_items = reference.lstrip("\\begin{pmatrix}").lstrip("\begin{pmatrix}").rstrip("\\end{pmatrix}").rstrip("\\end{pmatrix}")  # noqa: B005
+                ref_matrix_items = (
+                    reference.lstrip("\\begin{pmatrix}")
+                    .lstrip("\begin{pmatrix}")
+                    .rstrip("\\end{pmatrix}")
+                    .rstrip("\\end{pmatrix}")
+                )  # noqa: B005
                 ref_matrix_items = ref_matrix_items.split("\\")
-                ref_matrix_items = [row.split("&") if "&" in row else row for row in ref_matrix_items]
-                if len(pred_matrix) == len(ref_matrix_items) and all([math_equal(pred, ref, include_percentage, tolerance) for ref, pred in zip(ref_matrix_items, pred_matrix)]):
+                # ref_matrix_items = [
+                #     row.split("&") if "&" in row else row for row in ref_matrix_items
+                # ]
+                if len(pred_matrix) == len(ref_matrix_items) and all(
+                    [
+                        math_equal(pred, ref, include_percentage, tolerance)
+                        for ref, pred in zip(ref_matrix_items, pred_matrix)
+                    ]
+                ):
                     return True
             except Exception:
                 pass
 
     return symbolic_equal(prediction, reference, tolerance, timeout)
-
-class timeout:
-
-    def __init__(self, seconds=1, error_message="Timeout"):
-        self.seconds = seconds
-        self.error_message = error_message
-
-    def handle_timeout(self, signum, frame):
-        raise TimeoutError(self.error_message)
-
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
-
-    def __exit__(self, type, value, traceback):
-        signal.alarm(0)
 
 
 # Constants for normalization
@@ -367,35 +403,8 @@ def normalize_final_answer(final_answer: str) -> str:
 
 # sympy might hang -- we don't care about trying to be lenient in these cases
 BAD_SUBSTRINGS = ["^{", "^("]
-BAD_REGEXES = ["\^[0-9]+\^", "\^[0-9][0-9]+"]
+BAD_REGEXES = [r"\^[0-9]+\^", r"\^[0-9][0-9]+"]
 TUPLE_CHARS = "()[]"
-
-
-def timeout(timeout_seconds: int = 8):
-    if os.name == "posix":
-        import signal
-
-        def decorator(func):
-
-            def handler(signum, frame):
-                raise TimeoutError("Operation timed out!")
-
-            def wrapper(*args, **kwargs):
-                old_handler = signal.getsignal(signal.SIGALRM)
-                signal.signal(signal.SIGALRM, handler)
-                signal.alarm(timeout_seconds)
-
-                try:
-                    return func(*args, **kwargs)
-                finally:
-                    signal.alarm(0)
-                    signal.signal(signal.SIGALRM, old_handler)
-
-            return wrapper
-
-        return decorator
-    else:
-        raise NotImplementedError(f"Unsupported OS: {os.name}")
 
 
 def _sympy_parse(expr: str):
@@ -403,7 +412,10 @@ def _sympy_parse(expr: str):
     py_expr = expr.replace("^", "**")
     return sympy_parser.parse_expr(
         py_expr,
-        transformations=(sympy_parser.standard_transformations + (sympy_parser.implicit_multiplication_application,)),
+        transformations=(
+            sympy_parser.standard_transformations
+            + (sympy_parser.implicit_multiplication_application,)
+        ),
     )
 
 
@@ -436,7 +448,7 @@ def _is_float(num: str) -> bool:
 def _is_int(x: float) -> bool:
     try:
         return abs(x - int(round(x))) <= 1e-7
-    except:
+    except Exception:
         return False
 
 
@@ -447,13 +459,12 @@ def _is_frac(expr: str) -> bool:
 def _str_is_int(x: str) -> bool:
     try:
         x = _strip_properly_formatted_commas(x)
-        x = float(x)
-        return abs(x - int(round(x))) <= 1e-7
-    except:
+        return abs(float(x) - int(round(float(x)))) <= 1e-7
+    except Exception:
         return False
 
 
-def _str_to_int(x: str) -> bool:
+def _str_to_int(x: str) -> int:
     x = x.replace(",", "")
     x = float(x)
     return int(x)
@@ -465,13 +476,13 @@ def _inject_implicit_mixed_number(step: str):
     e.g. 7 3/4 => 7+3/4
     """
     p1 = re.compile("([0-9]) +([0-9])")
-    step = p1.sub("\\1+\\2", step)  ## implicit mults
+    step = p1.sub("\\1+\\2", step)  # implicit mults
     return step
 
 
 def _strip_properly_formatted_commas(expr: str):
     # We want to be careful because we don't want to strip tuple commas
-    p1 = re.compile("(\d)(,)(\d\d\d)($|\D)")
+    p1 = re.compile(r"(\d)(,)(\d\d\d)($|\D)")
     while True:
         next_expr = p1.sub("\\1\\3\\4", expr)
         if next_expr == expr:
@@ -486,7 +497,7 @@ def _normalize(expr: str) -> str:
         return None
 
     # Remove enclosing `\text{}`.
-    m = re.search("^\\\\text\{(?P<text>.+?)\}$", expr)
+    m = re.search(r"^\\\\text\{(?P<text>.+?)\}$", expr)
     if m is not None:
         expr = m.group("text")
 
@@ -520,8 +531,8 @@ def _normalize(expr: str) -> str:
         "yard",
         "liter",
     ]:
-        expr = re.sub(f"{unit}(es)?(s)? *(\^[0-9]+)?", "", expr)
-    expr = re.sub(f"\^ *\\\\circ", "", expr)
+        expr = re.sub(r"{}(es)?(s)? *(\^[0-9]+)?".format(unit), "", expr)
+    expr = re.sub(r"\^ *\\\\circ", "", expr)
 
     if len(expr) > 0 and expr[0] == "{" and expr[-1] == "}":
         expr = expr[1:-1]
@@ -532,7 +543,7 @@ def _normalize(expr: str) -> str:
     if "\\" in expr:
         try:
             expr = _parse_latex(expr)
-        except:
+        except Exception:
             pass
 
     # edge case with mixed numbers and negative signs
@@ -582,7 +593,7 @@ def are_equal_under_sympy(ground_truth_normalized: str, given_normalized: str):
             simplified = sympy.simplify(sympy_diff)
             if simplified == 0:
                 are_equal = True
-    except:
+    except Exception:
         pass
     return are_equal
 
@@ -594,12 +605,17 @@ def split_tuple(expr: str):
     expr = _strip_properly_formatted_commas(expr)
     if len(expr) == 0:
         return []
-    if (len(expr) > 2 and expr[0] in TUPLE_CHARS and expr[-1] in TUPLE_CHARS and
-            all([ch not in expr[1:-1] for ch in TUPLE_CHARS])):
+    if (
+        len(expr) > 2
+        and expr[0] in TUPLE_CHARS
+        and expr[-1] in TUPLE_CHARS
+        and all([ch not in expr[1:-1] for ch in TUPLE_CHARS])
+    ):
         elems = [elem.strip() for elem in expr[1:-1].split(",")]
     else:
         elems = [expr]
     return elems
+
 
 def _fix_fracs(string):
     substrs = string.split("\\frac")
@@ -737,9 +753,9 @@ def _strip_string(string):
     return string
 
 
-def normalize_answer(answer: Optional[str]) -> Optional[str]:
+def normalize_answer(answer: Optional[str]) -> str:
     if answer is None:
-        return None
+        return ""
     answer = answer.strip()
     try:
         # Remove enclosing `\text{}`.
@@ -749,6 +765,7 @@ def normalize_answer(answer: Optional[str]) -> Optional[str]:
         return _strip_string(answer)
     except:  # noqa: E722
         return answer
+
 
 def grade_answer(given_answer: str, ground_truth: str) -> tuple[bool, str]:
     """
@@ -782,8 +799,10 @@ def grade_answer(given_answer: str, ground_truth: str) -> tuple[bool, str]:
     ground_truth_elems = split_tuple(ground_truth_normalized)
     given_elems = split_tuple(given_normalized)
 
-    if len(ground_truth_elems) > 1 and (ground_truth_normalized[0] != given_normalized[0] or
-                                        ground_truth_normalized[-1] != given_normalized[-1]):
+    if len(ground_truth_elems) > 1 and (
+        ground_truth_normalized[0] != given_normalized[0]
+        or ground_truth_normalized[-1] != given_normalized[-1]
+    ):
         is_correct = False
     elif len(ground_truth_elems) != len(given_elems):
         is_correct = False
@@ -831,7 +850,7 @@ def _last_boxed_only_string(string):
     if left_brace_idx is None or right_brace_idx is None:
         return None
 
-    return string[left_brace_idx + 1:right_brace_idx].strip()
+    return string[left_brace_idx + 1 : right_brace_idx].strip()
 
 
 def match_answer(response):
@@ -847,11 +866,7 @@ def match_answer(response):
     return is_matched, response
 
 
-import math
-
-
-def compute_score(solution_str: str,
-                  ground_truth: str) -> float:
+def compute_score(solution_str: str, ground_truth: Optional[str]) -> float:
     """Compute the reward score for a solution. This draws heavily from the LLM-as-judge and PRIME reward functions
 
     Args:
@@ -879,14 +894,16 @@ def compute_score(solution_str: str,
             if "\\pi" in extracted_model_output or "\\pi" in ground_truth:
                 equivs = []
                 for pi in [math.pi, 3.14]:
-                    equivs.append(math_equal(extracted_model_output, ground_truth, tiemout=True, pi=pi))
+                    equivs.append(
+                        math_equal(extracted_model_output, ground_truth, timeout=True, pi=pi)
+                    )
                     correct = any(equivs)
             else:
                 correct = math_equal(extracted_model_output, ground_truth, timeout=True)
-        except:
+        except Exception:
             correct = False
 
     # reward = 1.0 if correct else -1.0
-    reward = 1.0 if correct else 0.
+    reward = 1.0 if correct else 0.0
 
     return reward

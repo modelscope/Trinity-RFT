@@ -10,10 +10,10 @@
 
 <img src="https://gw.alicdn.com/imgextra/i2/O1CN01MO34b71y4VQnD3WRp_!!6000000006525-2-tps-1247-567.png" alt="Agentic workflows" width="700" />
 
-BOTS operates in a continuous loop of task selection, model training, and posterior updating.  
-(1) **Selection**: Thompson sampling from the posterior beliefs selects a batch of tasks whose estimated success probabilities are near a target difficulty (e.g., $p^*=0.5$).  
-(2) **Training \& Evidence Collection**: The LLM is finetuned, yielding direct success/failure counts (_explicit evidence_) for the selected batch.  
-For unselected tasks, predicted counts (_implicit evidence_) are produced by a plug-in; We introduce an ultra-lightweight interpolation-based variant with negligible overhead.  
+BOTS operates in a continuous loop of task selection, model training, and posterior updating.
+(1) **Selection**: Thompson sampling from the posterior beliefs selects a batch of tasks whose estimated success probabilities are near a target difficulty (e.g., $p^*=0.5$).
+(2) **Training \& Evidence Collection**: The LLM is finetuned, yielding direct success/failure counts (_explicit evidence_) for the selected batch.
+For unselected tasks, predicted counts (_implicit evidence_) are produced by a plug-in; We introduce an ultra-lightweight interpolation-based variant with negligible overhead.
 (3) **Posterior Updating**: Explicit and implicit evidence are fused using our generalized Bayesian update rule.
 
 ### Usage
@@ -58,12 +58,12 @@ If you find the repo helpful, please cite:
 }
 
 @misc{BOTS,
-      title={BOTS: A Unified Framework for Bayesian Online Task Selection in LLM Reinforcement Finetuning}, 
+      title={BOTS: A Unified Framework for Bayesian Online Task Selection in LLM Reinforcement Finetuning},
       author={Qianli Shen and Daoyuan Chen and Yilun Huang and Zhenqing Ling and Yaliang Li and Bolin Ding and Jingren Zhou},
       year={2025},
       eprint={2510.26374},
       archivePrefix={arXiv},
       primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2510.26374}, 
+      url={https://arxiv.org/abs/2510.26374},
 }
 ```

@@ -5,6 +5,7 @@ from trinity.utils.eval_utils import validate_think_pattern
 
 from .bots_reward import compute_score
 
+
 @REWARD_FUNCTIONS.register_module("bots_math_boxed_reward")
 class BOTSMathBoxedRewardFn(RewardFn):
     """A reward function that rewards for math task for BOTS."""
