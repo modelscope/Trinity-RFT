@@ -19,6 +19,23 @@ from trinity.utils.registry import Registry
 WORKFLOWS = Registry("workflows")
 
 
+def nested_query(query_key: str, query_obj: Union[dict, None]):
+    # support nested query for a dict given query_keys split by '.'
+    if query_obj is None:
+        return None
+    if "." in query_key:
+        query_keys = query_key.split(".")
+    else:
+        query_keys = [query_key]
+    ret = query_obj
+    for key in query_keys:
+        if isinstance(ret, dict) and key in ret:
+            ret = ret[key]
+        else:
+            return None
+    return ret
+
+
 @dataclass
 class Task(dict):
     """A Task class that defines a task and its associated reward function / workflow."""
@@ -64,13 +81,13 @@ class Task(dict):
     @property
     def task_desc(self) -> Union[str, None]:
         prompt_key = self.format_args.prompt_key
-        return self.raw_task[prompt_key] if prompt_key in self.raw_task else None  # type: ignore
+        return nested_query(prompt_key, self.raw_task)  # type: ignore
 
     # Deprecated property, will be removed in the future
     @property
     def truth(self) -> Union[str, None]:
         response_key = self.format_args.response_key
-        return self.raw_task[response_key] if response_key in self.raw_task else None  # type: ignore
+        return nested_query(response_key, self.raw_task)
 
     def to_dict(self) -> dict:
         return self.raw_task  # type: ignore
