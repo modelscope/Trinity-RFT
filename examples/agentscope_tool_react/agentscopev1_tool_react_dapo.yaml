@@ -21,7 +21,7 @@ buffer:
     taskset:
       name: dapo
       storage_type: file
-      path: open-r1/DAPO-Math-17k-Processed
+      path: ${oc.env:TRINITY_TASKSET_PATH,open-r1/DAPO-Math-17k-Processed}
       subset_name: en
       split: train
       format:
