@@ -12,10 +12,10 @@ BOTS是一个统一的LLM强化微调的**贝叶斯在线任务选择**框架。
 
 <img src="https://gw.alicdn.com/imgextra/i2/O1CN01MO34b71y4VQnD3WRp_!!6000000006525-2-tps-1247-567.png" alt="Agentic workflows" width="700" />
 
-BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。  
-(1) **任务选择**：从后验概率信念中采用汤普森采样选择一批估计成功概率接近目标难度（例如，$p^*=0.5$）的任务。  
+BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。
+(1) **任务选择**：从后验概率信念中采用汤普森采样选择一批估计成功概率接近目标难度（例如，$p^*=0.5$）的任务。
 (2) **模型训练和证据收集**：对 LLM 模型进行微调，从而获得所选任务批次的直接成功/失败计数（显式证据）。
-对于未选择的任务，预测计数（隐式证据）由插件生成；我们引入了一种基于插值的超轻量级变体，其开销可忽略不计。  
+对于未选择的任务，预测计数（隐式证据）由插件生成；我们引入了一种基于插值的超轻量级变体，其开销可忽略不计。
 (3) **后验概率更新**：使用我们提出的广义贝叶斯更新规则融合显式和隐式证据。
 ### 使用
 
@@ -25,9 +25,9 @@ BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。
 
 ##### 第二步：模型和数据准备
 
-下载你想要训练的模型（例如：[Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)）。  
+下载你想要训练的模型（例如：[Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)）。
 下载[GURU](https://huggingface.co/datasets/LLM360/guru-RL-92k)数据集，
-请参考LLM360提供的[数据准备指南](https://github.com/LLM360/Reasoning360?tab=readme-ov-file#data-preparation)和[技术报告](https://www.arxiv.org/pdf/2506.14965)。  
+请参考LLM360提供的[数据准备指南](https://github.com/LLM360/Reasoning360?tab=readme-ov-file#data-preparation)和[技术报告](https://www.arxiv.org/pdf/2506.14965)。
 请修改`bots.yaml`和`random.yaml`中相应的模型/数据路径。
 
 ##### 第三步：训练
