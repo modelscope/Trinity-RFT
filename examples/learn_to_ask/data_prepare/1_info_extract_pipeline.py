@@ -1,3 +1,4 @@
+import argparse
 import json
 import time
 
@@ -9,13 +10,11 @@ def process_jsonl_file(
     input_file, output_file, model_call_mode="online_api", max_retries=3, **kwargs
 ):
     """
-    Process all sessions in a JSONL file and save results based on specified output mode.
+    Process all sessions in a JSONL file and save results to output file.
 
     Args:
         input_file (str): Path to input JSONL file
-        output_mode (str): Either "single_file" or "multiple_files"
-        output_file (str): Path to output file (required if output_mode="single_file")
-        output_dir (str): Path to output directory (required if output_mode="multiple_files")
+        output_file (str): Path to output JSONL file
         model_call_mode (str): Either "online_api" or "local_vllm"
         max_retries (int): Maximum number of retries for LLM calls
         **kwargs: Additional parameters for API calls
@@ -25,7 +24,9 @@ def process_jsonl_file(
     """
     try:
         # Read and process each session
-        with open(input_file, "r", encoding="utf-8") as infile:
+        with open(input_file, "r", encoding="utf-8") as infile, open(
+            output_file, "w", encoding="utf-8"
+        ) as outfile:
             for line_num, line in enumerate(infile, 1):
                 if line.strip():
                     try:
@@ -38,9 +39,8 @@ def process_jsonl_file(
                         processed_lines = process_session(
                             session, model_call_mode, max_retries, **kwargs
                         )
-                        for line in processed_lines:
-                            with open(output_file, "a", encoding="utf-8") as outfile:
-                                outfile.write(line + "\n")
+                        for processed_line in processed_lines:
+                            outfile.write(processed_line + "\n")
 
                     except json.JSONDecodeError as e:
                         print(f"Warning: Skipping invalid JSON at line {line_num}: {e}")
@@ -109,6 +109,12 @@ def process_session(session, model_call_mode="online_api", max_retries=3, **kwar
 
 # Example usage:
 if __name__ == "__main__":
-    input_file_path = "data_prepare_learn2ask/test_origin.jsonl"
-    output_file_path = "data_prepare_learn2ask/test_processed.jsonl"
-    process_jsonl_file(input_file=input_file_path, output_file=output_file_path)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--input_file", type=str, default="examples/learn_to_ask/data_raw/train_origin.jsonl"
+    )
+    parser.add_argument(
+        "--output_file", type=str, default="examples/learn_to_ask/data_raw/train_processed.jsonl"
+    )
+    args = parser.parse_args()
+    process_jsonl_file(input_file=args.input_file, output_file=args.output_file)

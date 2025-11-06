@@ -3,22 +3,20 @@ This script is used to use VLLM to generate rollout samples from the converted c
 The associated submit_rollout.sh script is used to submit the job to Nebula.
 """
 
+import argparse
 import copy
 import gc
 import json
+import os
 import re
 import time
-from datetime import datetime
 
 import torch
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
-# from prompt_eval import deploy_prompt_v3a0 as sys_prompt
-from trinity.plugins.prompt_learn2ask import reward_prompt_med as grader_prompt
-from trinity.plugins.prompt_learn2ask import rollout_prompt_med as rollout_prompt
-
-today = datetime.now().strftime("%Y%m%d")
+from trinity.common.constants import PLUGIN_DIRS_ENV_VAR
+from trinity.utils.plugin_loader import load_plugins
 
 
 def init_llm(model_path):
@@ -40,14 +38,16 @@ def init_llm(model_path):
 
 
 def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, rollout_repeat=3):
+    from trinity.plugins.prompt_learn2ask import rollout_prompt_med as rollout_prompt
+
     with open(input_file_path, "r") as lines:
         sample_list = [json.loads(line.strip()) for line in lines]
     print(f"loaded samples: {len(sample_list)}")
 
-    for index, sample in enumerate(sample_list[:700]):
+    for index, sample in enumerate(sample_list):
         record = copy.deepcopy(sample)
         print(f"index: {index}, session_id: {sample['session_id']}")
-        user_content = "# 对话记录\n" + sample["input"]
+        user_content = "# Dialog History\n" + sample["input"]
         print(f"user_content: {user_content}")
         messages = [
             {"role": "system", "content": rollout_prompt},
@@ -75,6 +75,8 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
 
 
 def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_path):
+    from trinity.plugins.prompt_learn2ask import reward_prompt_med as grader_prompt
+
     print(f"input_file_path: {input_file_path}")
     print(f"output_file_path: {output_file_path}")
 
@@ -135,7 +137,7 @@ def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_pa
                     try:
                         format_score = float(res_dict.get("format_score", 0.0))
                         content_score = float(res_dict.get("content_score", 0.0))
-                        res_think = res_dict.get("think", "无")
+                        res_think = res_dict.get("think", "None")
                     except Exception as e:
                         print(e)
                 else:
@@ -158,21 +160,43 @@ def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_pa
 
 
 if __name__ == "__main__":
-    rollout_repeat = 3
-    test_file_path = "path/to/your/input_file.jsonl"  # <<< Your test sample path
-    rollout_file_path = "path/to/your/rollout_file.jsonl"  # <<< rollout results given test samples
-    eval_model_path = "path/to/your/ckpt/or/model"  # <<< ckpt for testing
-    grader_model_path = "path/to/your/qwen2.5-32b-instruct"  # <<< model to empower the grading
-    eval_file_path = (
-        "path/to/your/rollout_eval_result_file.jsonl"  # <<< final output given rollout results
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rollout_repeat", type=int, default=3)
+
+    # Your test sample path
+    parser.add_argument("--test_file_path", type=str, required=True)
+
+    # Rollout results given test samples
+    parser.add_argument("--rollout_file_path", type=str, required=True)
+
+    # Ckpt for testing
+    parser.add_argument("--eval_model_path", type=str, required=True)
+
+    # Model to empower the grading, Qwen2.5-32b-instruct is recommended
+    parser.add_argument("--grader_model_path", type=str, required=True)
+
+    # Final output given rollout results
+    parser.add_argument("--eval_file_path", type=str, required=True)
+
+    args = parser.parse_args()
+
+    os.environ[PLUGIN_DIRS_ENV_VAR] = os.path.join(os.path.dirname(__file__), "..", "workflow")
+    load_plugins()
+
     # rollout stage
-    llm, tokenizer, sampling_params = init_llm(eval_model_path)
-    rollout(llm, tokenizer, sampling_params, test_file_path, rollout_file_path, rollout_repeat)
+    llm, tokenizer, sampling_params = init_llm(args.eval_model_path)
+    rollout(
+        llm,
+        tokenizer,
+        sampling_params,
+        args.test_file_path,
+        args.rollout_file_path,
+        args.rollout_repeat,
+    )
     del llm  # clean up the memory after the inference
     gc.collect()
     torch.cuda.empty_cache()  # release gpu memory
 
     # eval stage
-    llm2, tokenizer2, sampling_params2 = init_llm(grader_model_path)
-    eval_sample(llm2, tokenizer2, sampling_params2, rollout_file_path, eval_file_path)
+    llm2, tokenizer2, sampling_params2 = init_llm(args.grader_model_path)
+    eval_sample(llm2, tokenizer2, sampling_params2, args.rollout_file_path, args.eval_file_path)
