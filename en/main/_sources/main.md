@@ -12,7 +12,7 @@ Trinity-RFT is a flexible, general-purpose framework for reinforcement fine-tuni
 
 * 📊 For data engineers. [[tutorial]](/tutorial/develop_operator.md)
   - Create datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios.
-  - Example: [Data Processing](/tutorial/example_data_functionalities.md)
+  - Example: [Data Processing Foundations](/tutorial/example_data_functionalities.md), [Online Task Curriculum](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)
 
 
 ## 🌟 Key Features
@@ -52,7 +52,7 @@ Trinity-RFT is a flexible, general-purpose framework for reinforcement fine-tuni
 | --- | --- |
 | Run diverse RFT modes | + [Quick example: GRPO on GSM8k](/tutorial/example_reasoning_basic.md)<br>+ [Off-policy RFT](/tutorial/example_reasoning_advanced.md)<br>+ [Fully asynchronous RFT](/tutorial/example_async_mode.md)<br>+ [Offline learning by DPO or SFT](/tutorial/example_dpo.md) |
 | Multi-step agentic scenarios | + [Concatenated multi-turn workflow](/tutorial/example_multi_turn.md)<br>+ [General multi-step workflow](/tutorial/example_step_wise.md)<br>+ [ReAct workflow with an agent framework](/tutorial/example_react.md) |
-| Advanced data pipelines | + [Rollout task mixing and selection](/tutorial/develop_selector.md)<br>+ [Experience replay](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [Advanced data processing & human-in-the-loop](/tutorial/example_data_functionalities.md) |
+| Advanced data pipelines | + [Rollout task mixing and selection](/tutorial/develop_selector.md)<br>+ [Online task curriculum](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) ([paper](https://arxiv.org/pdf/2510.26374))<br>+ [Experience replay](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [Advanced data processing & human-in-the-loop](/tutorial/example_data_functionalities.md) |
 | Algorithm development / research | + [RL algorithm development with Trinity-RFT](/tutorial/example_mix_algo.md) ([paper](https://arxiv.org/pdf/2508.11408))<br>+ Non-verifiable domains: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [trainable RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) <br>+ [Research project: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) ([paper](https://arxiv.org/abs/2509.24203))|
 | Going deeper into Trinity-RFT | + [Full configurations](/tutorial/trinity_configs.md)<br>+ [Benchmark toolkit for quick verification and experimentation](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/README.md)<br>+ [Understand the coordination between explorer and trainer](/tutorial/synchronizer.md) |
 

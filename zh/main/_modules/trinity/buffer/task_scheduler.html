@@ -761,7 +761,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">SELECTOR_METRIC</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pipeline_metrics</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="n">selector_metric</span> <span class="o">=</span> <span class="n">pipeline_metrics</span><span class="p">[</span><span class="n">SELECTOR_METRIC</span><span class="p">]</span>
+        <span class="n">selector_metric</span> <span class="o">=</span> <span class="n">pipeline_metrics</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">SELECTOR_METRIC</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">for</span> <span class="n">taskset_id</span><span class="p">,</span> <span class="n">taskset_kwargs</span> <span class="ow">in</span> <span class="n">selector_metric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span>
             <span class="n">selector</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">taskset_kwargs</span><span class="p">)</span></div>

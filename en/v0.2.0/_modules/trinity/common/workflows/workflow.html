@@ -554,18 +554,6 @@ document.write(`
         <span class="p">)</span></div>
 
 
-    <span class="c1"># Deprecated property, will be removed in the future</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">task_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="n">prompt_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">prompt_key</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span><span class="p">[</span><span class="n">prompt_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">prompt_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-
-    <span class="c1"># Deprecated property, will be removed in the future</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">truth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="n">response_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">response_key</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span><span class="p">[</span><span class="n">response_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">response_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-
 <div class="viewcode-block" id="Task.to_dict">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.Task.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
