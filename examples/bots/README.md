@@ -8,6 +8,8 @@
 
 ### Overview
 
+BOTS is a unified framework for **B**ayesian **O**nline **T**ask **S**election in LLM reinforcement finetuning.
+
 <img src="https://gw.alicdn.com/imgextra/i2/O1CN01MO34b71y4VQnD3WRp_!!6000000006525-2-tps-1247-567.png" alt="Agentic workflows" width="700" />
 
 BOTS operates in a continuous loop of task selection, model training, and posterior updating.
@@ -22,9 +24,9 @@ For unselected tasks, predicted counts (_implicit evidence_) are produced by a p
 
 Ensure Trinity-RFT is well installed ([Installation Guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)). No extra dependence is required.
 
-##### Step 2: Prepare Model & Dataset
+##### Step 2: Model & Dataset Preparation
 
-Download the model your want to train (e.g. [Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)).
+Download the model your want to train (e.g., [Qwen2.5-1.5B-Instruct](https://www.modelscope.cn/models/Qwen/Qwen2.5-1.5B-Instruct)).
 
 Download the [GURU](https://huggingface.co/datasets/LLM360/guru-RL-92k) dataset.
 Also refer to the [Data Preparation Guide](https://github.com/LLM360/Reasoning360?tab=readme-ov-file#data-preparation) and the [Tech Report](https://www.arxiv.org/pdf/2506.14965) provided by the LLM360 team.
@@ -34,11 +36,11 @@ Remember to modify the model/data path in `bots.yaml` and `random.yaml` accordin
 ##### Step 3: Training
 Launch training by executing:
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/plugins
+trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
 ```
 The improvement over random selection baseline can be stably obtained 🤖🤖🤖.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN016wQqpG1wFq00KWzV7_!!6000000006279-2-tps-1894-1066.png" alt="Agentic workflows" width="700" />
+<img src="https://gw.alicdn.com/imgextra/i2/O1CN0127XIYA1FHBgkXCKQ5_!!6000000000461-2-tps-947-533.png" alt="Agentic workflows" width="700" />
 
 ### Complete Reproduction
 
