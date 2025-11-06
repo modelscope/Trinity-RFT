@@ -41,7 +41,7 @@ trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
 
 ### 完整复现
 
-想要完整复线我们论文中的结果，请从[这里](https://dail-wlcb.oss-cn-wulanchabu.aliyuncs.com/public/BOTS_verl_version.zip)下载verl版本的框架。
+想要完整复现我们论文中的结果，请从[这里](https://dail-wlcb.oss-cn-wulanchabu.aliyuncs.com/public/BOTS_verl_version.zip)下载verl版本的框架。
 
 ### 引用
 如果你觉得这个代码仓库有帮助，请引用：
