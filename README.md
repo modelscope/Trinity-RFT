@@ -32,7 +32,7 @@ Trinity-RFT is a flexible, general-purpose framework for reinforcement fine-tuni
 
 * 📊 For data engineers. [[tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_operator.html)
   - Create datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios.
-  - Example: [Data Processing](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html)
+  - Example: [Data Processing Foundations](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html), [Online Task Curriculum](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)
 
 
 ## 🌟 Key Features
