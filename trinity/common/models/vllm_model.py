@@ -51,6 +51,15 @@ class vLLMRolloutModel(InferenceModel):
             os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.use_v1))
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
+        if get_vllm_version() >= parse_version("0.11.0"):
+            os.environ["VLLM_ALLREDUCE_USE_SYMM_MEM"] = "0"
+        if not config.enforce_eager:
+            # To avoid torch compile conflicts when multiple model are started simultaneously.
+            # remove this when the following PR is released:
+            # https://github.com/vllm-project/vllm/pull/27616
+            os.environ["VLLM_CACHE_ROOT"] = os.path.expanduser(
+                f"~/.cache/vllm/{config.bundle_indices}"
+            )
         self.default_sampling_params = vllm.SamplingParams(
             n=1,
             temperature=0.0,
@@ -83,6 +92,12 @@ class vLLMRolloutModel(InferenceModel):
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
+            override_generation_config={  # TODO: find a way to unittest this
+                "temperature": config.temperature,
+                "top_p": config.top_p,
+                "top_k": config.top_k,
+                "max_new_tokens": config.max_response_tokens,
+            },
             disable_log_stats=True,
             enable_lora=config.enable_lora,
             **config.lora_kwargs,

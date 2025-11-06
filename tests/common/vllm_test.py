@@ -261,11 +261,13 @@ class TestModelLen(RayUnittestBaseAysnc):
 
         response = openai_client.chat.completions.create(model=model_id, messages=messages[1:], n=1)
         self.assertEqual(len(response.choices), 1)
-        print(response.choices[0].message.content)
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
-        # only generate max_model_len - prompt_len tokens
-        self.assertEqual(len(exps[0].tokens), self.max_model_len)
+        # only generate max_response_tokens tokens
+        self.assertEqual(
+            len(exps[0].tokens),
+            response.usage.prompt_tokens + self.config.model.max_response_tokens,
+        )
 
 
 class TestAPIServer(RayUnittestBaseAysnc):

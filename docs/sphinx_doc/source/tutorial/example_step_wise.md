@@ -140,7 +140,7 @@ explorer:
     engine_num: 2
     tensor_parallel_size: 2
     enable_prefix_caching: false
-    enforce_eager: true
+    enforce_eager: false
     dtype: bfloat16
     seed: 42
     gpu_memory_utilization: 0.7

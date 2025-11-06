@@ -47,7 +47,9 @@ class AgentScopeWorkflowAdapter(Workflow):
             model.get_openai_async_client(),
             generate_kwargs={
                 "temperature": self.task.rollout_args.temperature,
+                "top_p": self.task.rollout_args.top_p,
                 "max_tokens": self.task.rollout_args.max_tokens or 4096,
+                "logprobs": True,
                 "top_logprobs": self.task.rollout_args.logprobs,
             },
         )

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.4.0.dev0"
+version = "0.3.2"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -85,6 +85,10 @@ doc = [
     "sphinxcontrib-apidoc",
     "sphinx-multiversion",
     "sphinxcontrib-mermaid",
+]
+
+mm = [
+    "qwen-vl-utils",
 ]
 
 flash_attn = [
