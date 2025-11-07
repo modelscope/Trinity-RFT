@@ -141,18 +141,32 @@ class TestConfig(unittest.TestCase):
         config = get_template_config()
         config.algorithm.optimizer.lr = 1e-4
         config.algorithm.optimizer.weight_decay = 0.05
+        config.algorithm.optimizer.clip_grad = 2.0
+        config.algorithm.optimizer.lr_decay_steps = 1000
+        config.algorithm.optimizer.lr_decay_style = "cosine"
+        config.algorithm.optimizer.lr_warmup_init = 1e-7
+        config.algorithm.optimizer.min_lr = 1e-6
         config.check_and_update()
         self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr, 1e-4)
         self.assertEqual(
             config.trainer.trainer_config.actor_rollout_ref.actor.optim.weight_decay, 0.05
         )
+        self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.clip_grad, 2.0)
         self.assertEqual(
-            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_decay_style, "constant"
-        )  # default value
+            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_decay_steps, 1000
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_decay_style, "cosine"
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_warmup_init, 1e-7
+        )
+        self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.min_lr, 1e-6)
         # critic optimizer should not be affected
         self.assertEqual(config.trainer.trainer_config.critic.optim.lr, 1e-5)
         self.assertEqual(config.trainer.trainer_config.critic.optim.weight_decay, 0.01)
         self.assertEqual(config.trainer.trainer_config.critic.optim.lr_decay_style, "constant")
+        self.assertEqual(config.trainer.trainer_config.critic.optim.clip_grad, 1.0)
 
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):

@@ -98,6 +98,11 @@ class OptimizerConfig:
     optimizer_type: str = "adam"
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     weight_decay: float = 0.01
+    clip_grad: float = 1.0
+    lr_warmup_init: float = 0.0
+    lr_decay_steps: Optional[int] = None
+    lr_decay_style: str = "constant"
+    min_lr: float = 0.0
 
 
 @dataclass
