@@ -59,6 +59,8 @@ algorithm:
     lr: 1e-5
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
+  max_response_tokens: 1024
+  max_model_len: 2048
 cluster:
   node_num: 1
   gpu_per_node: 2
