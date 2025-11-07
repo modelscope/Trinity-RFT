@@ -155,10 +155,8 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="example_async_mode.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.3.2/tutorial/example_async_mode.html">v0.3.2</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.1/tutorial/example_async_mode.html">v0.3.1</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../v0.3.0/tutorial/example_async_mode.html">v0.3.0</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../v0.2.1/tutorial/example_async_mode.html">v0.2.1</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../v0.2.0/tutorial/example_async_mode.html">v0.2.0</a></li>
           </ul>
         </details>
       </li>
@@ -613,6 +611,8 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
+<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+<span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
@@ -659,6 +659,8 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="w">    </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
 <span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
+<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+<span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
@@ -713,6 +715,8 @@ We are continuously investigating other RL algorithms (e.g., <a class="reference
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
+<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+<span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="nt">cluster</span><span class="p">:</span><span class="w">  </span><span class="c1"># important</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>

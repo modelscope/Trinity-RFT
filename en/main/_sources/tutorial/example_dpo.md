@@ -66,6 +66,8 @@ algorithm:
 checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
+  max_response_tokens: 1024
+  max_model_len: 1536
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -114,6 +116,8 @@ algorithm:
 checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
+  max_response_tokens: 10240
+  max_model_len: 10752
 cluster:
   node_num: 1
   gpu_per_node: 2
