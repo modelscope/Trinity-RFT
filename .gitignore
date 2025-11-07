@@ -98,3 +98,4 @@ wandb/
 
 # checkpoints
 checkpoints/
+launcher_record

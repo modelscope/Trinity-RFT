@@ -16,6 +16,10 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
         from trinity.buffer.reader.queue_reader import QueueReader
 
         return QueueReader(storage_config, buffer_config)
+    elif storage_config.storage_type == StorageType.ENV_SERVICE:
+        from trinity.buffer.reader.file_reader import EnvServiceTaskReader
+
+        return EnvServiceTaskReader(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.reader.file_reader import (
             ExperienceFileReader,

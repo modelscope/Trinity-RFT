@@ -79,8 +79,9 @@ class WorkflowRunner:
             or not self.workflow_instance.resettable
         ):
             self.workflow_instance = task.to_workflow(
-                self.model_wrapper,
-                (
+                config=self.config,
+                model=self.model_wrapper,
+                auxiliary_models=(
                     self.auxiliary_model_async_clients
                     if task.workflow.is_async
                     else self.auxiliary_model_clients

@@ -155,3 +155,50 @@ class TaskFileReader(BaseFileReader):
             task = self.formatter.format(sample)
             tasks.append(task)
         return tasks
+
+
+class EnvServiceTaskReader(BaseFileReader):
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
+        from agentopia.client.env_client_ng import EnvClient
+        self.meta = meta
+        self.env_url = self.meta.path
+        self.env_type = self.meta.subset_name
+        self.split = self.meta.split
+
+        self.env = EnvClient(base_url=meta.path)
+        self.env_params = {}
+        dataframes = []
+
+        env_service_client = EnvClient(base_url=self.env_url)
+        task_id_array = env_service_client.get_env_profile(self.env_type, split=self.split)
+        if len(task_id_array) == 0:
+            raise ValueError(f"No task_id found for self.env_type: {self.env_type}, split: {self.split}, Please check connection to {self.env_url}")
+        data = {
+            'task_selector': [task_id for task_id in task_id_array],
+            # 'reward_model': [{} for task_id in task_id_array],
+            # 'extras': [{'task_id': task_id} for task_id in task_id_array],
+        }
+        dataframe = Dataset.from_dict(data)
+        dataframes.append(dataframe)
+
+        self.read_batch_size = config.batch_size
+        self.dataset = _HFBatchReader(
+            datasets.concatenate_datasets(dataframes),
+            name=meta.name,
+            default_batch_size=self.read_batch_size,
+            total_epochs=self.meta.total_epochs if not self.meta.is_eval else 1,
+            offset=self.meta.index,
+            drop_last=not self.meta.is_eval,
+            total_steps=meta.total_steps,
+            enable_progress_bar=meta.enable_progress_bar,
+        )
+        self.formatter = FORMATTER.get("task")(meta)
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        batch_size = batch_size or self.read_batch_size
+        tasks = []
+        samples = self.dataset.read_batch(batch_size)
+        for sample in samples:
+            task = self.formatter.format(sample)
+            tasks.append(task)
+        return tasks

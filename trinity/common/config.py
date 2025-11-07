@@ -146,7 +146,7 @@ class StorageConfig:
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
-    workflow_args: dict = field(default_factory=dict)
+    workflow_args: dict = field(default_factory=dict)   # qingxu: TODO
     reward_fn_args: dict = field(default_factory=dict)
 
     # enable progress bar (tqdm) for _HFBatchReader
@@ -568,6 +568,11 @@ class StageConfig:
     explorer: Optional[ExplorerConfig] = None
     trainer: Optional[TrainerConfig] = None
 
+@dataclass
+class AgentopiaConfiguration:
+    """Configs for a stage."""
+    config_path: str = ""
+
 
 @dataclass
 class Config:
@@ -597,6 +602,7 @@ class Config:
     synchronizer: SynchronizerConfig = field(default_factory=SynchronizerConfig)
     service: ServiceConfig = field(default_factory=ServiceConfig)
     log: LogConfig = field(default_factory=LogConfig)
+    agentopia_configuration: AgentopiaConfiguration = field(default_factory=AgentopiaConfiguration)
 
     # configurations for different training stages
     stages: List[StageConfig] = field(default_factory=list)

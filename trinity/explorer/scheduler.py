@@ -81,7 +81,7 @@ class RunnerWrapper:
             for attempt in range(self.retry_times + 1):
                 try:
                     status, exps = await asyncio.wait_for(
-                        self.runner.run_task.remote(task.task, task.repeat_times, task.run_id_base),
+                        self.runner.run_task.remote(task.task, task.repeat_times, task.run_id_base),    # Here we call the runner's run_task()
                         self.timeout,
                     )
                     if status.ok:

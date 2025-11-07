@@ -60,6 +60,7 @@ class StorageType(CaseInsensitiveEnum):
     SQL = "sql"
     QUEUE = "queue"
     FILE = "file"
+    ENV_SERVICE = "env_service"
 
 
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):

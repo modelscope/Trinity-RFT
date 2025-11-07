@@ -163,6 +163,9 @@ def run_stage(config: Config) -> None:
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
+    if os.path.exists(".env"):
+        from dotenv import load_dotenv
+        load_dotenv(".env")
     if plugin_dir:
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
     load_plugins()

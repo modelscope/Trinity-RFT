@@ -146,7 +146,7 @@ pip install -e ".[flash_attn]"
 [`uv`](https://github.com/astral-sh/uv) 是现代的 Python 包管理工具。
 
 ```bash
-uv sync --extra dev --extra flash_attn
+uv sync --extra dev --extra flash_attn -i https://mirrors.aliyun.com/pypi/simple/ --no-build-isolation
 ```
 
 ## 通过 PyPI 安装
@@ -163,6 +163,7 @@ pip install flash-attn==2.8.1
 ```bash
 uv pip install trinity-rft==0.3.1
 uv pip install flash-attn==2.8.1
+uv pip install --verbose flash-attn -i https://mirrors.aliyun.com/pypi/simple/ --no-deps --no-build-isolation
 ```
 
 ## 使用 Docker
