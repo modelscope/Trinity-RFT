@@ -245,18 +245,22 @@ class SwanlabMonitor(Monitor):
             swanlab is not None
         ), "swanlab is not installed. Please install it to use SwanlabMonitor."
 
-        monitor_args = (config.monitor.monitor_args or {}) if config and getattr(config, "monitor", None) else {}
+        monitor_args = (
+            (config.monitor.monitor_args or {})
+            if config and getattr(config, "monitor", None)
+            else {}
+        )
 
         # read api key from environment variable or monitor_args
-        api_key = (
-            monitor_args.get("api_key") or os.environ.get("SWANLAB_API_KEY")
-        )
+        api_key = monitor_args.get("api_key") or os.environ.get("SWANLAB_API_KEY")
         if api_key:
             try:
                 swanlab.login(api_key=api_key, save=True)
-            except Exception:
+            except Exception as e:
                 # Best-effort login; continue to init which may still work if already logged in
-                pass
+                get_logger(__name__).warning(
+                    f"Swanlab login failed, but continuing initialization: {e}"
+                )
 
         # Compose tags (ensure list and include role/group markers)
         tags = monitor_args.get("tags") or []
@@ -334,11 +338,12 @@ class SwanlabMonitor(Monitor):
             # Prefer run.finish() if available
             if hasattr(self, "logger") and hasattr(self.logger, "finish"):
                 self.logger.finish()
-            else:
+            elif swanlab:
                 # Fallback to global finish
                 swanlab.finish()
-        except Exception:
-            pass
+        except Exception as e:
+            logger = getattr(self, "console_logger", get_logger(__name__))
+            logger.warning(f"Error closing Swanlab monitor: {e}")
 
     @classmethod
     def default_args(cls) -> Dict:
