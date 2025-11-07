@@ -38,6 +38,9 @@ buffer:
       rollout_args:
         temperature: 1.0
         logprobs: 0
+      workflow_args:
+        train_mode: "Ra+Rs"
+        fusion_mode: "default"
     eval_tasksets: [ ]
     default_workflow_type: learn2ask_workflow
     default_reward_fn_type: math_reward

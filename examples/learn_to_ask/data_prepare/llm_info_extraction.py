@@ -1,6 +1,11 @@
 import os
 
 import openai
+import torch
+import transformers
+
+tokenizer = None
+llm = None
 
 
 def LLM_info_extraction(remaining_chat, model_call_mode, **kwargs):
@@ -19,12 +24,12 @@ def LLM_info_extraction(remaining_chat, model_call_mode, **kwargs):
     # Create messages format with system and user roles
     system_message = """
     # Task:
-    You are a medical information assistant. Given a dialogue between a physician (assistant) and a patient (user), extract the clinical attributes of interest to the physician based on their questions. The target fields include: symptom, symptom nature, symptom location, symptom severity, and symptom trigger. Then, identify the corresponding specific information from the patient’s responses and pair it with the respective field.
+    You are a medical information assistant. Given a dialogue between a physician (assistant) and a patient (user), extract the clinical attributes of interest to the physician based on their questions. The target fields include: symptom, symptom nature, symptom location, symptom severity, and symptom trigger. Then, identify the corresponding specific information from the patient's responses and pair it with the respective field.
     # Requirements:
         - Do not fabricate information or introduce new fields not listed above. Ignore patient-reported information regarding prior medication use, allergies, or underlying comorbidities; do not include such details in the output.
         - Only include fields explicitly inquired about by the physician. Omit any fields not addressed in the dialogue. Avoid outputting vague terms (e.g., "unspecified" or "unknown").
         - Prevent duplication: if a symptom description already includes anatomical location, do not separately list the location field.
-        - Format each entry as a string enclosed in single quotes ('), and separate multiple entries with commas. Enclose the entire output within square brackets to form a list. If the dialogue is unrelated to the aforementioned clinical attributes, output only "[]".
+        - Format each entry as a string enclosed in single quotes ('), and separate multiple entries with commas, ensuring any necessary escape characters within the strings. Enclose the entire output within square brackets to form a list. If the dialogue is unrelated to the aforementioned clinical attributes, output only "[]".
         - Do not include reasoning steps or additional commentary outside the specified format. Condense colloquial patient expressions into concise, standardized, and clinically appropriate terminology.
     # Example output format:
     ['symptom: diarrhea', 'symptom nature: watery stool', 'symptom severity: 4-5 times per day']
@@ -33,7 +38,7 @@ def LLM_info_extraction(remaining_chat, model_call_mode, **kwargs):
 
     messages = [
         {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message},
+        {"role": "user", "content": "```\n" + user_message + "\n```\n"},
     ]
 
     try:
@@ -66,22 +71,6 @@ def _call_online_api(messages, **kwargs):
     return response.choices[0].message.content
 
 
-def _convert_messages_to_prompt(messages):
-    """Convert messages format to a single prompt string"""
-    prompt = ""
-    for message in messages:
-        role = message["role"]
-        content = message["content"]
-        if role == "system":
-            prompt += f"System: {content}\n"
-        elif role == "user":
-            prompt += f"User: {content}\n"
-        elif role == "assistant":
-            prompt += f"Assistant: {content}\n"
-    prompt += "Assistant:"
-    return prompt
-
-
 def _call_local_vllm(messages, **kwargs):
     """Handle local vLLM calls"""
     try:
@@ -97,21 +86,23 @@ def _call_local_vllm(messages, **kwargs):
         repetition_penalty = kwargs.get("repetition_penalty", 1.1)
 
         # GPU/CUDA related parameters for vLLM
-        tensor_parallel_size = kwargs.get("tensor_parallel_size", 1)
+        tensor_parallel_size = kwargs.get("tensor_parallel_size", torch.cuda.device_count())
         gpu_memory_utilization = kwargs.get("gpu_memory_utilization", 0.9)
         enforce_eager = kwargs.get("enforce_eager", False)
         dtype = kwargs.get("dtype", "auto")
         max_model_len = kwargs.get("max_model_len", 4096)
 
         # Initialize the LLM with the provided model path and GPU parameters
-        llm = LLM(
-            model=model_path,
-            tensor_parallel_size=tensor_parallel_size,
-            gpu_memory_utilization=gpu_memory_utilization,
-            enforce_eager=enforce_eager,
-            dtype=dtype,
-            max_model_len=max_model_len,
-        )
+        global llm, tokenizer
+        if llm is None:
+            llm = LLM(
+                model=model_path,
+                tensor_parallel_size=tensor_parallel_size,
+                gpu_memory_utilization=gpu_memory_utilization,
+                enforce_eager=enforce_eager,
+                dtype=dtype,
+                max_model_len=max_model_len,
+            )
 
         sampling_params = SamplingParams(
             temperature=temperature,
@@ -121,7 +112,9 @@ def _call_local_vllm(messages, **kwargs):
         )
 
         # Convert messages to a single prompt string
-        prompt = _convert_messages_to_prompt(messages)
+        if tokenizer is None:
+            tokenizer = transformers.AutoTokenizer.from_pretrained(model_path)
+        prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         outputs = llm.generate([prompt], sampling_params)
 
@@ -152,4 +145,4 @@ def parse_llm_output(output_str):
 
         return result
     except Exception as e:
-        return f"Error parsing output: {str(e)}"
+        return f"Error parsing output: [{repr(output_str)}] error = {str(e)}"

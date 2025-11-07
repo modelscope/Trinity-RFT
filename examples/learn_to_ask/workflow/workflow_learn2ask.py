@@ -17,18 +17,15 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 """
-For ablation studies, you may set the train_type to:
+For ablation studies, you may set the `taskset.workflow_args.train_mode` to:
 - Ra+Rs: the default setting,
 - Ra: without Rs,
 - Rs: without Ra.
 
-Also, you can choose the reward fusion_mode to:
+Also, you can choose the reward `taskset.workflow_args.fusion_mode` to:
 - default: using the multiplicative fusion function,
 - sum: using the sum fusion function.
 """
-
-train_mode = "Ra+Rs"
-fusion_mode = "default"
 
 
 @WORKFLOWS.register_module("learn2ask_workflow")
@@ -42,7 +39,11 @@ class Learn2AskWorkflow(SimpleWorkflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
-        self.reset(task)
+        self.train_mode = task.workflow_args.get("train_mode", "Ra+Rs")
+        self.fusion_mode = task.workflow_args.get("fusion_mode", "default")
+        assert (
+            auxiliary_models is not None and len(auxiliary_models) == 1
+        ), "Please provide one `auxiliary_models` in explorer config for `learn2ask_workflow`."
         super().__init__(
             task=task,
             model=model,
@@ -54,7 +55,7 @@ class Learn2AskWorkflow(SimpleWorkflow):
         return True
 
     def reset(self, task: Task):
-        if train_mode == "Ra":  # we have a different system prompt for this training mode.
+        if self.train_mode == "Ra":  # we have a different system prompt for this training mode.
             from trinity.plugins.prompt_learn2ask import (
                 rollout_prompt_med_Ra as system_prompt,
             )
@@ -186,13 +187,13 @@ class Learn2AskWorkflow(SimpleWorkflow):
         else:
             action_score, format_score, content_score = 0.0, 0.0, 0.0
 
-        if train_mode == "Ra+Rs":  # the default setting
+        if self.train_mode == "Ra+Rs":  # the default setting
             final_reward = (
                 action_score * (1 + 2 * content_score) + format_score
-                if fusion_mode != "sum"
+                if self.fusion_mode != "sum"
                 else action_score + content_score + format_score
             )
-        elif train_mode == "Ra":  # for Ra only (without Rs)
+        elif self.train_mode == "Ra":  # for Ra only (without Rs)
             final_reward = 2 * content_score + format_score
         else:  # for Rs only (without Ra)
             final_reward = action_score * 3 + format_score

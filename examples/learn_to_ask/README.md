@@ -24,12 +24,12 @@ Download the [RealMedConv](https://huggingface.co/datasets/datajuicer/RealMedCon
 You need to perform the following preprocessing steps to turn the log in to training/testing samples for our `learn_to_ask` framework, there are two simple steps:
 - Segment the original conversation log (session) into context–future pairs, then extract `info_truth` labels from the `remaining_chat` field.
 ```bash
-python examples/learn_to_ask/workflow/data_prepare/1_info_extract_pipeline.py --input_file /path/to/RealMedConv/train.jsonl --output_file examples/learn_to_ask/data_raw/train_processed.jsonl
+python examples/learn_to_ask/data_prepare/1_info_extract_pipeline.py --input_file /path/to/RealMedConv/train.jsonl --output_file examples/learn_to_ask/data_raw/train_processed.jsonl
 ```
 
 - Convert these samples into final training/testing datasets.
 ```bash
-python examples/learn_to_ask/workflow/data_prepare/2_build_dataset.py --input_file examples/learn_to_ask/data_raw/train_processed.jsonl --output_file examples/learn_to_ask/data/train.jsonl
+python examples/learn_to_ask/data_prepare/2_build_dataset.py --input_file examples/learn_to_ask/data_raw/train_processed.jsonl --output_file examples/learn_to_ask/data/train.jsonl
 ```
 
 These scripts are implementations of the following procedures.
@@ -76,7 +76,7 @@ Update `examples/learn_to_ask/train.yaml` with paths to:
 Then, launch training:
 ```bash
 trinity run --config examples/learn_to_ask/train.yaml --plugin-dir examples/learn_to_ask/workflow
-````
+```
 ---
 
 ## Step 3. Evaluate
@@ -86,5 +86,7 @@ Use the rollout-n-evaluate pipeline:
 
 You may configure the settings then run the pipeline by launching:
 ```bash
-python examples/learn_to_ask/workflow/data_prepare/3_rollout_then_evaluate.py
+python examples/learn_to_ask/data_prepare/3_rollout_then_evaluate.py --eval_model_path path/to/trained/model --grader_model_path path/to/qwen2.5-32b-instruct  --test_file_path examples/learn_to_ask/data/test.jsonl --rollout_file_path path/to/rollout.jsonl --eval_file_path path/to/output.jsonl
 ```
+
+Note: `eval_model_path` is the location of the model you want to evaluate. This model must first be converted into the HuggingFace format. For instructions on converting FSDP checkpoints, see [this guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/faq.html).

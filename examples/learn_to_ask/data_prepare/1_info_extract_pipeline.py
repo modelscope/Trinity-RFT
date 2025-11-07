@@ -116,5 +116,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_file", type=str, default="examples/learn_to_ask/data_raw/train_processed.jsonl"
     )
+    parser.add_argument(
+        "--model_call_mode", type=str, choices=["online_api", "local_vllm"], default="local_vllm"
+    )
+    parser.add_argument("--model_path", type=str, required=True)
     args = parser.parse_args()
-    process_jsonl_file(input_file=args.input_file, output_file=args.output_file)
+    print(
+        process_jsonl_file(
+            input_file=args.input_file,
+            output_file=args.output_file,
+            model_call_mode=args.model_call_mode,
+            model_path=args.model_path,
+            # Additional parameters for API calls
+        )
+    )

@@ -3,12 +3,13 @@ import json
 
 
 def process_message(json_obj):
-    info_set_str = ", ".join(json_obj["info_set"])
+    info_set = json_obj.get("info_set")
+    info_set_str = ", ".join(info_set) if isinstance(info_set, list) else ""
     if "user: " not in json_obj["remaining_chat"]:
         decision_str = "stop"
     else:
         decision_str = "continue"
-    if info_set_str == "" and decision_str == "continue":
+    if not info_set_str and decision_str == "continue":
         if_keep = False
     else:
         if_keep = True

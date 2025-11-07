@@ -1,6 +1,5 @@
 """
 This script is used to use VLLM to generate rollout samples from the converted checkpoints.
-The associated submit_rollout.sh script is used to submit the job to Nebula.
 """
 
 import argparse
@@ -47,12 +46,7 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
     for index, sample in enumerate(sample_list):
         record = copy.deepcopy(sample)
         print(f"index: {index}, session_id: {sample['session_id']}")
-        user_content = "# Dialog History\n" + sample["input"]
-        print(f"user_content: {user_content}")
-        messages = [
-            {"role": "system", "content": rollout_prompt},
-            {"role": "user", "content": user_content},
-        ]
+        messages = [{"role": "system", "content": rollout_prompt}] + sample["messages"]
 
         prompt = tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
@@ -63,7 +57,6 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
             time_probe = time.perf_counter()
             outputs = llm.generate([prompt], sampling_params=sampling_params)
             print(f"time cost: {time.perf_counter() - time_probe}")
-            # print(json.dumps(outputs, ensure_ascii=False, indent=2))
             for output in outputs:
                 response = output.outputs[0].text
                 response_list.append(response)
@@ -163,19 +156,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rollout_repeat", type=int, default=3)
 
-    # Your test sample path
-    parser.add_argument("--test_file_path", type=str, required=True)
-
-    # Rollout results given test samples
-    parser.add_argument("--rollout_file_path", type=str, required=True)
-
     # Ckpt for testing
     parser.add_argument("--eval_model_path", type=str, required=True)
 
     # Model to empower the grading, Qwen2.5-32b-instruct is recommended
     parser.add_argument("--grader_model_path", type=str, required=True)
 
-    # Final output given rollout results
+    # Your test sample path [input]
+    parser.add_argument("--test_file_path", type=str, required=True)
+
+    # Rollout results given test samples [output]
+    parser.add_argument("--rollout_file_path", type=str, required=True)
+
+    # Final output given rollout results [output]
     parser.add_argument("--eval_file_path", type=str, required=True)
 
     args = parser.parse_args()
