@@ -173,31 +173,42 @@ class AgentopiatWorkflowWrap(Workflow):
             # cmt_tokenized["step_reward"] = self.reward_structure.step_reward[index]
 
             logprobs = sample.response_logprobs
-            reward = cmt.reward_structure.raw_reward
+            try:
+                reward = cmt.reward_structure.step_reward
+                if isinstance(reward, list):
+                    reward = reward[0]
+            except Exception as e:
+                reward = cmt.reward_structure.raw_reward
+            if not isinstance(reward, (float, int)): # if reward is still not a float or int, set it to 0.0
+                reward = cmt.reward_structure.raw_reward
 
-            exp = Experience(
-                # eid=uuid.uuid4().hex,
-                tokens = input_ids,     # [seq_length] prompt + response
-                prompt_length = len(prompt_ids),  # Length of the prompt in tokens, used for generating attention masks
-                logprobs = logprobs,   # [resp_length]
-                reward = reward,  #
-                # advantages=None,
-                # returns=None,
-                info = {},
-                metrics = {},   # for wandb logging (must be string:float)
-                response_text = "", # optional
-                prompt_text = "", # optional
-                #### for multi-turn experiences
-                action_mask = response_loss_mask,  # 1 是训练
-                messages=sample.messages,    #
-                # tools,
-                #### for dpo experiences
-                # chosen,
-                # rejected,
-                # chosen_messages,
-                # rejected_messages,
-                #### for multi-modal data
-                # multi_modal_inputs
-            )
-            exps += [exp]
+            if len(response_ids) + len(prompt_ids) == len(input_ids) and len(logprobs) == len(response_ids) and len(logprobs) > 0:
+                exp = Experience(
+                    # eid=uuid.uuid4().hex,
+                    tokens = input_ids,     # [seq_length] prompt + response
+                    prompt_length = len(prompt_ids),  # Length of the prompt in tokens, used for generating attention masks
+                    logprobs = logprobs,   # [resp_length]
+                    reward = reward,  #
+                    # advantages=None,
+                    # returns=None,
+                    info = {},
+                    metrics = {},   # for wandb logging (must be string:float)
+                    response_text = "", # optional
+                    prompt_text = "", # optional
+                    #### for multi-turn experiences
+                    action_mask = response_loss_mask,  # 1 是训练
+                    messages=sample.messages,    #
+                    # tools,
+                    #### for dpo experiences
+                    # chosen,
+                    # rejected,
+                    # chosen_messages,
+                    # rejected_messages,
+                    #### for multi-modal data
+                    # multi_modal_inputs
+                )
+                exps += [exp]
+            else:
+                from vsdb import bp
+                bp("BUGX")
         return exps
