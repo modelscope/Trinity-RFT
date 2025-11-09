@@ -173,24 +173,27 @@ def read_astune_config(yaml_fp):
 
 class AstuneTaskReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.meta = meta
+        self.read_batch_size = config.batch_size
+        self.split = meta.split
+
         yaml_path = os.environ.get('ASTUNE_CONFIG_REDIRECT', None)
         if yaml_path is None:
             raise ValueError("ASTUNE_CONFIG_REDIRECT is not set in environment variables")
-        config = read_astune_config(os.path.relpath(yaml_path, os.path.dirname(__file__)))
+        astune_config = read_astune_config(os.path.relpath(yaml_path, os.path.dirname(__file__)))
 
-        from vsdb import bp
-        bp("XXX")
+        # from vsdb import bp
+        # bp("XXX")
 
         from astune.task_reader.task_reader_base import TaskReaderRouter, task_to_standard_dataset
-        task_reader = TaskReaderRouter(config)
+        task_reader = TaskReaderRouter(astune_config)
         if 'train' in self.split:
             train_dataset = task_to_standard_dataset(task_reader.get_training_tasks())
         if 'val' in self.split:
             train_dataset = task_to_standard_dataset(task_reader.get_validation_tasks())
 
-        self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            datasets.concatenate_datasets(train_dataset),
+            datasets.concatenate_datasets([train_dataset]),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=self.meta.total_epochs if not self.meta.is_eval else 1,
