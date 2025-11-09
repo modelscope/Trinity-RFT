@@ -255,16 +255,15 @@ class SwanlabMonitor(Monitor):
         monitor_args = (config.monitor.monitor_args or {}) if config and getattr(config, "monitor", None) else {}
 
         # Optional API login via code if provided; otherwise try environment, then rely on prior `swanlab login`.
-        api_key = (
-            monitor_args.get("api_key")
-            or os.environ.get("SWANLAB_API_KEY")
-        )
+        api_key = os.environ.get("SWANLAB_API_KEY")
         if api_key:
             try:
                 swanlab.login(api_key=api_key, save=True)
             except Exception:
                 # Best-effort login; continue to init which may still work if already logged in
                 pass
+        else:
+            raise RuntimeError("Swanlab API key not found in environment variable SWANLAB_API_KEY.")
 
         # Compose tags (ensure list and include role/group markers)
         tags = monitor_args.get("tags") or []
@@ -296,30 +295,12 @@ class SwanlabMonitor(Monitor):
         # Strip None values to avoid overriding swanlab defaults
         init_kwargs = {k: v for k, v in init_kwargs.items() if v is not None}
 
-        # Convert config to a plain dict for SwanLab config logging
-        cfg_dict = None
-        if config is not None:
-            if hasattr(config, "flatten"):
-                try:
-                    cfg_dict = config.flatten()
-                except Exception:
-                    # Fallback: try to cast to dict if possible
-                    try:
-                        cfg_dict = dict(config)
-                    except Exception:
-                        cfg_dict = None
-            else:
-                try:
-                    cfg_dict = dict(config)
-                except Exception:
-                    cfg_dict = None
-        if cfg_dict is not None:
-            init_kwargs["config"] = cfg_dict
-
         self.logger = swanlab.init(**init_kwargs)
         self.console_logger = get_logger(__name__, in_ray_actor=True)
 
     def log_table(self, table_name: str, experiences_table: pd.DataFrame, step: int):
+        assert swanlab is not None, "swanlab is not installed. Please install it to use SwanlabMonitor."
+
         # Convert pandas DataFrame to SwanLab ECharts Table
         headers: List[str] = list(experiences_table.columns)
         # Ensure rows are native Python types
@@ -336,6 +317,7 @@ class SwanlabMonitor(Monitor):
     def log(self, data: dict, step: int, commit: bool = False) -> None:
         """Log metrics."""
         # SwanLab doesn't use commit flag; keep signature for compatibility
+        assert swanlab is not None, "swanlab is not installed. Please install it to use SwanlabMonitor."
         swanlab.log(data, step=step)
         self.console_logger.info(f"Step {step}: {data}")
         with open(f"{self.exp_name}.log", "a") as f:
@@ -356,15 +338,4 @@ class SwanlabMonitor(Monitor):
     @classmethod
     def default_args(cls) -> Dict:
         """Return default arguments for the monitor."""
-        return {
-            "api_key": None,
-            "workspace": None,
-            "mode": "cloud",
-            "logdir": None,
-            "experiment_name": None,
-            "description": None,
-            "tags": None,
-            "id": None,
-            "resume": None,
-            "reinit": None,
-        }
+        return {}
