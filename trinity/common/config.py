@@ -568,10 +568,6 @@ class StageConfig:
     explorer: Optional[ExplorerConfig] = None
     trainer: Optional[TrainerConfig] = None
 
-@dataclass
-class AgentopiaConfiguration:
-    """Configs for a stage."""
-    config_path: str = ""
 
 
 @dataclass
@@ -602,7 +598,6 @@ class Config:
     synchronizer: SynchronizerConfig = field(default_factory=SynchronizerConfig)
     service: ServiceConfig = field(default_factory=ServiceConfig)
     log: LogConfig = field(default_factory=LogConfig)
-    agentopia_configuration: AgentopiaConfiguration = field(default_factory=AgentopiaConfiguration)
 
     # configurations for different training stages
     stages: List[StageConfig] = field(default_factory=list)

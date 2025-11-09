@@ -31,7 +31,7 @@ from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
 from trinity.utils.plugin_loader import load_plugins
-from agentopia.backbone_trinity import *
+from astune.backbone_trinity import *
 
 class Explorer:
     """Responsible for exploring the taskset."""

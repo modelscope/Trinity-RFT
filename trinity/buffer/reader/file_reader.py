@@ -157,33 +157,40 @@ class TaskFileReader(BaseFileReader):
         return tasks
 
 
-class EnvServiceTaskReader(BaseFileReader):
+import os
+def read_astune_config(yaml_fp):
+    from hydra import initialize, compose
+    from omegaconf import DictConfig
+
+    def load_hydra_config(config_path: str, config_name: str) -> DictConfig:
+        with initialize(config_path=config_path, version_base=None):
+            cfg = compose(config_name=config_name, overrides=[])
+            return cfg
+
+    dir_path = os.path.dirname(yaml_fp)
+    file_name = os.path.basename(yaml_fp)
+    return load_hydra_config(config_path=dir_path, config_name=file_name)
+
+class AstuneTaskReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
-        from agentopia.client.env_client_ng import EnvClient
-        self.meta = meta
-        self.env_url = self.meta.path
-        self.env_type = self.meta.subset_name
-        self.split = self.meta.split
+        yaml_path = os.environ.get('ASTUNE_CONFIG_REDIRECT', None)
+        if yaml_path is None:
+            raise ValueError("ASTUNE_CONFIG_REDIRECT is not set in environment variables")
+        config = read_astune_config(os.path.relpath(yaml_path, os.path.dirname(__file__)))
 
-        self.env = EnvClient(base_url=meta.path)
-        self.env_params = {}
-        dataframes = []
+        from vsdb import bp
+        bp("XXX")
 
-        env_service_client = EnvClient(base_url=self.env_url)
-        task_id_array = env_service_client.get_env_profile(self.env_type, split=self.split)
-        if len(task_id_array) == 0:
-            raise ValueError(f"No task_id found for self.env_type: {self.env_type}, split: {self.split}, Please check connection to {self.env_url}")
-        data = {
-            'task_selector': [task_id for task_id in task_id_array],
-            # 'reward_model': [{} for task_id in task_id_array],
-            # 'extras': [{'task_id': task_id} for task_id in task_id_array],
-        }
-        dataframe = Dataset.from_dict(data)
-        dataframes.append(dataframe)
+        from astune.task_reader.task_reader_base import TaskReaderRouter, task_to_standard_dataset
+        task_reader = TaskReaderRouter(config)
+        if 'train' in self.split:
+            train_dataset = task_to_standard_dataset(task_reader.get_training_tasks())
+        if 'val' in self.split:
+            train_dataset = task_to_standard_dataset(task_reader.get_validation_tasks())
 
         self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            datasets.concatenate_datasets(dataframes),
+            datasets.concatenate_datasets(train_dataset),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=self.meta.total_epochs if not self.meta.is_eval else 1,

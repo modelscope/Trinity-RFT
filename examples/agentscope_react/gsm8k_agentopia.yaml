@@ -65,5 +65,3 @@ trainer:
   ulysses_sequence_parallel_size: 2
 monitor:
   monitor_type: tensorboard
-agentopia_configuration:
-  config_path: '/mnt/data/qingxu.fu/ba-verl-advance/launcher/appworld_linear_base/git-appworld-qwen2-agentscope-bz32-tp4-linear.yaml'
