@@ -73,6 +73,40 @@ Update `examples/learn_to_ask/train.yaml` with paths to:
 - Base model,
 - Checkpoint output directory.
 
+Here is an example configuration:
+```yaml
+mode: both
+project: learn2ask
+name: learn2ask_example
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}  # Checkpoint output directory
+# some configs...
+model:
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}  # Base model
+# some configs...
+buffer:
+  batch_size: 64
+  total_epochs: 4
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: ${oc.env:TRINITY_TASKSET_PATH,examples/learn_to_ask/data}  # Your processed datasets
+      split: train
+      subset_name: null
+      format:
+        prompt_key: messages
+        response_key: action_truth
+      workflow_args:  # Workflow arguments
+        train_mode: "Ra+Rs"
+        fusion_mode: "default"
+# some configs...
+explorer:
+  # some configs...
+  auxiliary_models:
+    - model_path: ${oc.env:TRINITY_AUX_MODEL_PATH,Qwen/Qwen2.5-32B-Instruct}  # Auxiliary model path
+# some configs...
+```
+
 Then, launch training:
 ```bash
 trinity run --config examples/learn_to_ask/train.yaml --plugin-dir examples/learn_to_ask/workflow

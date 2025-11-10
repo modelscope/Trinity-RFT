@@ -16,9 +16,11 @@ algorithm:
     warmup_style: constant
 data_processor: {}
 model:
-  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-8B}
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
   max_prompt_tokens: 2048
   max_response_tokens: 1024
+  temperature: 1.0
+  logprobs: 0
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -35,9 +37,6 @@ buffer:
       format:
         prompt_key: messages
         response_key: action_truth
-      rollout_args:
-        temperature: 1.0
-        logprobs: 0
       workflow_args:
         train_mode: "Ra+Rs"
         fusion_mode: "default"
