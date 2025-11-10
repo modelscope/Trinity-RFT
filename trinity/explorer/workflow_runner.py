@@ -36,10 +36,16 @@ def group_metrics(statuses: List[Status]):
         else:
             for k, v in metric.items():
                 task2metrics[task_id][k] += v  # type: ignore
-    metric_list = [
-        {k: sum(v) / len(v) if isinstance(v, list) else v for k, v in metrics.items()}
-        for metrics in task2metrics.values()
-    ]
+
+    metric_list = []
+    for metrics in task2metrics.values():
+        agg_metrics = {}
+        for k, v in metrics.items():
+            if isinstance(v, list):
+                agg_metrics[k] = sum(v) / len(v)
+            else:
+                agg_metrics[k] = v
+        metric_list.append(agg_metrics)
     return metric_list
 
 
