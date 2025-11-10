@@ -42,7 +42,6 @@ buffer:
         fusion_mode: "default"
     eval_tasksets: [ ]
     default_workflow_type: learn2ask_workflow
-    default_reward_fn_type: math_reward
   trainer_input:
     experience_buffer:
       name: experience_buffer
