@@ -131,10 +131,13 @@ Note: `eval_model_path` is the location of the model you want to evaluate. This 
 If you find this code useful, please consider citing our papers:
 
 ```bibtex
-@article{wei2025grounded,
-         title={Grounded in Reality: Learning and Deploying Proactive LLM from Offline Logs},
-         author={Wei, Fei and Chen, Daoyuan and Wang, Ce and Huang, Yilun and Chen, Yushuo and Pan, Xuchen and Li, Yaliang and Ding, Bolin},
-         journal={arXiv preprint arXiv:2510.25441},
-         year={2025}
+@misc{learn2ask,
+      title={Grounded in Reality: Learning and Deploying Proactive LLM from Offline Logs},
+      author={Fei Wei and Daoyuan Chen and Ce Wang and Yilun Huang and Yushuo Chen and Xuchen Pan and Yaliang Li and Bolin Ding},
+      year={2025},
+      eprint={2510.25441},
+      archievePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2510.25441}
 }
 ```
