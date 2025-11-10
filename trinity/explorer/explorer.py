@@ -26,6 +26,7 @@ from trinity.common.constants import (
 from trinity.common.models import create_inference_models
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.explorer.scheduler import Scheduler
+from trinity.explorer.workflow_runner import group_metrics
 from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.annotations import Experimental
@@ -362,7 +363,7 @@ class Explorer:
         self.taskset.update(pipeline_metrics)
         metric.update(pipeline_metrics)
         if statuses:
-            metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
+            metric.update(gather_metrics(group_metrics(statuses), "rollout"))
             self.monitor.log(metric, step=step)
 
     async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
@@ -376,11 +377,7 @@ class Explorer:
                 return
             self.pending_eval_tasks.popleft()
             eval_results, _ = await self.scheduler.get_results(f"{step}/{eval_task_name}")
-            metric.update(
-                gather_metrics(
-                    [status.metric for status in eval_results], f"{prefix}/{eval_task_name}"
-                )
-            )
+            metric.update(gather_metrics(group_metrics(eval_results), f"{prefix}/{eval_task_name}"))
         if self.eval_start_time is not None:
             metric.update({"time/eval": time.time() - self.eval_start_time})
             self.eval_start_time = None
