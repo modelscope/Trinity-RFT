@@ -132,9 +132,9 @@ If you find this code useful, please consider citing our papers:
 
 ```bibtex
 @article{wei2025grounded,
-  title={Grounded in Reality: Learning and Deploying Proactive LLM from Offline Logs},
-  author={Wei, Fei and Chen, Daoyuan and Wang, Ce and Huang, Yilun and Chen, Yushuo and Pan, Xuchen and Li, Yaliang and Ding, Bolin},
-  journal={arXiv preprint arXiv:2510.25441},
-  year={2025}
+         title={Grounded in Reality: Learning and Deploying Proactive LLM from Offline Logs},
+         author={Wei, Fei and Chen, Daoyuan and Wang, Ce and Huang, Yilun and Chen, Yushuo and Pan, Xuchen and Li, Yaliang and Ding, Bolin},
+         journal={arXiv preprint arXiv:2510.25441},
+         year={2025}
 }
 ```
