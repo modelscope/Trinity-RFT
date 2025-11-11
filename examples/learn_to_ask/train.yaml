@@ -1,0 +1,94 @@
+mode: both
+project: learn2ask
+name: learn2ask_example
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 5
+  policy_loss_fn: ppo
+  advantage_fn: grpo
+  kl_penalty_fn: none
+  kl_loss_fn: k2
+  entropy_loss_fn: default
+  optimizer:
+    lr: 5.0e-07
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
+data_processor: {}
+model:
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
+  max_prompt_tokens: 2048
+  max_response_tokens: 1024
+  temperature: 1.0
+  logprobs: 0
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  batch_size: 64
+  total_epochs: 4
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: ${oc.env:TRINITY_TASKSET_PATH,examples/learn_to_ask/data}
+      split: train
+      subset_name: null
+      format:
+        prompt_key: messages
+        response_key: action_truth
+      workflow_args:
+        train_mode: "Ra+Rs"
+        fusion_mode: "default"
+    eval_tasksets: [ ]
+    default_workflow_type: learn2ask_workflow
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      path: ''
+      replay_buffer:
+        enable: true
+        priority_fn: linear_decay
+        priority_fn_args:
+          decay: 0.1
+explorer:
+  runner_per_model: 32
+  max_timeout: 900
+  max_retry_times: 2
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 4
+    tensor_parallel_size: 1
+    use_v1: true
+    enforce_eager: true
+    enable_prefix_caching: false
+    enable_chunked_prefill: false
+    gpu_memory_utilization: 0.9
+    dtype: bfloat16
+    seed: 42
+    enable_thinking: false
+    enable_openai_api: true
+  auxiliary_models:
+    - model_path: ${oc.env:TRINITY_AUX_MODEL_PATH,Qwen/Qwen2.5-32B-Instruct}
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 2048
+      max_response_tokens: 1024
+  eval_interval: 10000
+  bench_on_latest_checkpoint: false
+trainer:
+  trainer_type: verl
+  save_interval: 90
+  enable_preview: true
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  max_token_len_per_gpu: 4096
+  ulysses_sequence_parallel_size: 1
+monitor:
+  monitor_type: wandb
+synchronizer:
+  sync_method: nccl
+  sync_interval: 10
+  sync_timeout: 7200
