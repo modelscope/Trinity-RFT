@@ -29,6 +29,7 @@ from trinity.common.workflows.envs.alfworld.RAFT_reflect_alfworld_workflow impor
     RAFTReflectAlfworldWorkflow,
 )
 from trinity.common.workflows.envs.email_searcher.workflow import EmailSearchWorkflow
+from trinity.common.workflows.envs.frozen_lake.workflow import FrozenLakeWorkflow
 from trinity.common.workflows.envs.sciworld.sciworld_workflow import SciWorldWorkflow
 from trinity.common.workflows.envs.webshop.webshop_workflow import WebShopWorkflow
 from trinity.common.workflows.eval_workflow import (
@@ -94,4 +95,5 @@ __all__ = [
     "SimpleMMWorkflow",
     "RubricJudgeWorkflow",
     "AgentScopeWorkflowAdapter",
+    "FrozenLakeWorkflow",
 ]

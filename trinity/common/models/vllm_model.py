@@ -361,6 +361,7 @@ class vLLMRolloutModel(InferenceModel):
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
             await self._initialize_tokenizer()
+        is_truncated = False
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
@@ -370,12 +371,24 @@ class vLLMRolloutModel(InferenceModel):
             chat_template=self.chat_template,
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
+
+        if len(token_ids) > self.config.max_model_len - 1:
+            is_truncated = True
+            self.logger.warning(
+                f"Warning: {len(token_ids) = } exceeds the length limit {self.config.max_model_len-1 = }"
+            )
+            token_ids = token_ids[: self.config.max_model_len - 1]
+            action_mask = action_mask[: self.config.max_model_len - 1]
+
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
         return Experience(
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
             prompt_length=prompt_length,
             action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
+            info={"is_truncated": is_truncated},
+            prompt_text=self.tokenizer.decode(token_ids[:prompt_length]),
+            response_text=self.tokenizer.decode(token_ids[prompt_length:]),
         )
 
     async def shutdown(self):
