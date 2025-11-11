@@ -17,7 +17,14 @@ from gymnasium.envs.toy_text.frozen_lake import FrozenLakeEnv as GymFrozenLakeEn
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.envs.frozen_lake.utils import *
+from trinity.common.workflows.envs.frozen_lake.utils import (
+    GRID_LOOKUP,
+    MAP_LOOKUP,
+    MULTI_SHOT_SYSTEM_PROMPT,
+    SYSTEM_PROMPT,
+    generate_random_map,
+    get_goal_position,
+)
 from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
 
 
@@ -93,7 +100,8 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         self.use_multistep_prompt = workflow_args.get("use_multistep_prompt", False)
         self.desc = workflow_args.get("desc", None)
         self.is_slippery = workflow_args.get("is_slippery", False)
-        self.max_model_len = workflow_args.get("max_model_len", 14434)  # TODO
+        print(f"{self.rollout_args =}")
+        self.max_response_tokens = self.rollout_args.get("max_response_tokens", 10240)
 
         # Extract task-specific arguments
         self.raw_task = task.raw_task if hasattr(task, "raw_task") else {}
@@ -233,11 +241,17 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         room_state = self.render(mode="state").tolist()
 
         if mode == "list":
-            lookup = lambda cell: GRID_LOOKUP.get(cell, "?").strip("\t").strip()
+
+            def lookup(cell):
+                return GRID_LOOKUP.get(cell, "?").strip("\t").strip()
+
             return [" ".join(lookup(cell) for cell in row) for row in room_state]
 
         if mode == "tiny_rgb_array":
-            lookup = lambda cell: GRID_LOOKUP.get(cell, "?")
+
+            def lookup(cell):
+                return GRID_LOOKUP.get(cell, "?").strip("\t").strip()
+
             result = "\n".join("".join(lookup(cell) for cell in row) for row in room_state)
             return result
 
@@ -285,13 +299,31 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
             messages.append({"role": "user", "content": user_prompt_content})
 
+            messages_token_len = await self.model.get_message_token_len(messages)
+            if step == 0:
+                max_tokens = self.max_response_tokens
+                init_prompt_token_len = messages_token_len
+            else:
+                response_token_len = messages_token_len - init_prompt_token_len
+                max_tokens = self.max_response_tokens - response_token_len
+            print(
+                f"!!!Debug: {max_tokens=} used_response_tokens = {self.max_response_tokens-max_tokens} {messages_token_len=} {init_prompt_token_len=}"
+            )
+
+            if max_tokens <= 0:
+                self.done = False
+                self.final_reward = 0
+                break
+
             # Get action from the model
             rollout_args = self.rollout_args.copy()
             rollout_args["n"] = 1
+            rollout_args["max_tokens"] = max_tokens
+            print("Current step: ", step, rollout_args)
             responses = await self.model.chat_async(messages, **rollout_args)
             response_text = responses[0].response_text
             messages.append({"role": "assistant", "content": response_text})
-            # print("step: ", step)
+
             # Parse action from response
             _, action_str = self._parse_model_response(response_text)
             action = int(action_str) if action_str.isdigit() else self.invalid_action
@@ -319,14 +351,14 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 "success": 1 if self.final_reward == 1.0 else 0,
             },
         )
-        # print("\n\n\n")
-        # print("experience.tokens: ", len(experience.tokens))
-        # print("experience.logprobs: ", len(experience.logprobs))
-        # print("experience.action_mask: ", len(experience.action_mask))
-        # print("experience.prompt_length: ", experience.prompt_length)
-        # print("experience.reward: ", experience.reward)
-        # print("experience.prompt_text: ", experience.prompt_text)
-        # print("experience.response_text: ", experience.response_text, "\n\n\n")
+        print("\n\n\n")
+        print("experience.tokens: ", len(experience.tokens))
+        print("experience.logprobs: ", len(experience.logprobs))
+        print("experience.action_mask: ", len(experience.action_mask))
+        print("experience.prompt_length: ", experience.prompt_length)
+        print("experience.reward: ", experience.reward)
+        print("experience.prompt_text: ", experience.prompt_text)
+        print("experience.response_text: ", experience.response_text, "\n\n\n")
         return [experience]
 
     def _parse_model_response(self, response: str) -> tuple[str, str]:

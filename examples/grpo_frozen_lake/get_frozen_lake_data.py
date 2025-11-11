@@ -8,8 +8,9 @@ import pandas as pd
 
 from trinity.common.constants import TASKSET_PATH_ENV_VAR
 
-if os.environ.get(TASKSET_PATH_ENV_VAR) is not None:
-    DATA_ROOT_DIR = os.path.dirname(os.environ.get(TASKSET_PATH_ENV_VAR))
+path_from_env = os.environ.get(TASKSET_PATH_ENV_VAR)
+if path_from_env is not None:
+    DATA_ROOT_DIR = os.path.dirname(path_from_env)
 else:
     DATA_ROOT_DIR = os.path.join(os.path.dirname(__file__), "data")
 

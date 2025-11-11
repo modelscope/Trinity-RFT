@@ -65,7 +65,6 @@ class vLLMRolloutModel(InferenceModel):
             temperature=0.0,
             max_tokens=config.max_response_tokens,
             min_tokens=config.min_response_tokens,
-            truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
@@ -180,9 +179,9 @@ class vLLMRolloutModel(InferenceModel):
         """
         if self.tokenizer is None:
             await self._initialize_tokenizer()
-        token_ids = self.tokenizer(  # type: ignore
-            prompt, truncation=True, max_length=self.config.max_prompt_tokens, return_tensors="pt"
-        )["input_ids"][0].tolist()
+        token_ids = self.tokenizer(prompt, truncation=False, return_tensors="pt")[  # type: ignore
+            "input_ids"
+        ][0].tolist()
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids}, lora_request=lora_request, **kwargs
         )
@@ -361,7 +360,6 @@ class vLLMRolloutModel(InferenceModel):
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
             await self._initialize_tokenizer()
-        is_truncated = False
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
@@ -371,22 +369,12 @@ class vLLMRolloutModel(InferenceModel):
             chat_template=self.chat_template,
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
-
-        if len(token_ids) > self.config.max_model_len - 1:
-            is_truncated = True
-            self.logger.warning(
-                f"Warning: {len(token_ids) = } exceeds the length limit {self.config.max_model_len-1 = }"
-            )
-            token_ids = token_ids[: self.config.max_model_len - 1]
-            action_mask = action_mask[: self.config.max_model_len - 1]
-
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
         return Experience(
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
             prompt_length=prompt_length,
-            action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
-            info={"is_truncated": is_truncated},
+            action_mask=action_mask[prompt_length:],  # Exclude the prompt
             prompt_text=self.tokenizer.decode(token_ids[:prompt_length]),
             response_text=self.tokenizer.decode(token_ids[prompt_length:]),
         )
@@ -538,6 +526,23 @@ class vLLMRolloutModel(InferenceModel):
             self.config.lora_modules[0]["lora_path"] = lora_path  # for consistency
             lora_request.lora_path = lora_path
         return lora_request
+
+    async def get_message_token_len(self, messages) -> int:
+        if self.tokenizer is None:
+            await self._initialize_tokenizer()
+        if self.chat_template is None:
+            self.chat_template = self.tokenizer.get_chat_template()
+        prompt = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            chat_template=self.chat_template,
+            enable_thinking=self.enable_thinking,
+        )
+        prompt_token = self.tokenizer(  # type: ignore
+            prompt, truncation=False, return_tensors="pt"
+        )["input_ids"][0].tolist()
+        return len(prompt_token)
 
     async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)

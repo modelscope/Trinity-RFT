@@ -412,6 +412,7 @@ class ModelConfig:
     critic_model_path: str = ""
 
     custom_chat_template: Optional[str] = None
+    chat_template_path: Optional[str] = None
 
     # rollout args
     temperature: float = 1.0
@@ -925,6 +926,7 @@ class Config:
         experience_buffer.batch_size = self.buffer.train_batch_size
         experience_buffer.tokenizer_path = self.model.model_path
         set_if_none(experience_buffer, "ray_namespace", self.ray_namespace)
+        # TODO: this cannot apply chat_template_path, as check_model is later than this line
         set_if_none(experience_buffer.format, "chat_template", self.model.custom_chat_template)
         for aux_name, aux_buffer in trainer_input.auxiliary_buffers.items():
             aux_buffer.batch_size = self.buffer.train_batch_size
@@ -1066,6 +1068,11 @@ class Config:
         if not model.critic_model_path:
             model.critic_model_path = model.model_path
 
+        # check template
+        if model.chat_template_path:
+            with open(model.chat_template_path, "r") as f:
+                model.custom_chat_template = f.read()
+
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
         # if all three are set, check if they are valid
@@ -1192,6 +1199,7 @@ class Config:
             ]
             for args in ["model_path"] + rollout_args + length_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
+            setattr(self.explorer.rollout_model, "chat_template", self.model.custom_chat_template)
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")

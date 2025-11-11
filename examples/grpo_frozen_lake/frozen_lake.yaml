@@ -15,9 +15,10 @@ algorithm:
     kl_coef: 0.0
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-0.6B}
-  max_prompt_tokens: 20480
-  max_response_tokens: 4096
+  max_response_tokens: 10240
+  max_model_len: 14436
   temperature: 0.7
+  chat_template_path: trinity/common/workflows/envs/frozen_lake/qwen3_reserve_think.j2 # TODO: check path
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -47,12 +48,12 @@ buffer:
           top_k: 20
     default_workflow_type: 'frozen_lake_workflow'
 explorer:
-  eval_on_startup: false
+  eval_on_startup: true
   eval_interval: 10
   runner_per_model: 8
   rollout_model:
-    engine_num: 2
-    tensor_parallel_size: 2
+    engine_num: 6
+    tensor_parallel_size: 1
     enable_thinking: true
     enable_chunked_prefill: true
     enforce_eager: false
@@ -63,8 +64,8 @@ trainer:
   trainer_type: 'verl'
   save_interval: 40
   use_dynamic_bsz: true
-  max_token_len_per_gpu: 16384
-  ulysses_sequence_parallel_size: 2
+  max_token_len_per_gpu: 16384 # TODO 24000
+  ulysses_sequence_parallel_size: 1
   trainer_config:
     actor_rollout_ref:
       hybrid_engine: true
@@ -72,7 +73,6 @@ trainer:
         use_remove_padding: true
         enable_gradient_checkpointing: true
       actor:
-        clip_ratio_high: 0.28
         fsdp_config:
           param_offload: true
           optimizer_offload: true
