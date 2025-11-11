@@ -167,7 +167,7 @@ class WorkflowRunner:
                     exp.metrics = {}
                 for k, v in exp.metrics.items():
                     metrics[k].append(v)
-            # We get the average of metrics into the state
+
             metric: dict[str, Union[float, List[float]]] = {"time_per_task": time.time() - st}
             metric.update(metrics)
 
