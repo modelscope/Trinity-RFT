@@ -785,17 +785,11 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="SimpleWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;simple_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for simple single-round task.&quot;&quot;&quot;</span>
-
-    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-
-<div class="viewcode-block" id="SimpleWorkflow.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.__init__">[文档]</a>
+<div class="viewcode-block" id="BaseSimpleWorkflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.BaseSimpleWorkflow">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseSimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseSimpleWorkflow.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.BaseSimpleWorkflow.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -811,8 +805,8 @@ document.write(`
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SimpleWorkflow.reset">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.reset">[文档]</a>
+<div class="viewcode-block" id="BaseSimpleWorkflow.reset">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.BaseSimpleWorkflow.reset">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span>
@@ -830,8 +824,8 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`reward_fn` must be a subclass of `RewardFn`&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SimpleWorkflow.set_repeat_times">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.set_repeat_times">[文档]</a>
+<div class="viewcode-block" id="BaseSimpleWorkflow.set_repeat_times">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.BaseSimpleWorkflow.set_repeat_times">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">repeat_times</span>
@@ -842,8 +836,8 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">rollout_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SimpleWorkflow.format_messages">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.format_messages">[文档]</a>
+<div class="viewcode-block" id="BaseSimpleWorkflow.format_messages">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.BaseSimpleWorkflow.format_messages">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Format messages for the instruct model.&quot;&quot;&quot;</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
@@ -853,7 +847,18 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">:</span>
             <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">messages</span></div>
+</div>
 
+
+
+<div class="viewcode-block" id="SimpleWorkflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow">[文档]</a>
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;simple_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleWorkflow</span><span class="p">(</span><span class="n">BaseSimpleWorkflow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for simple single-round task.&quot;&quot;&quot;</span>
+
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="SimpleWorkflow.run">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.run">[文档]</a>
@@ -887,7 +892,7 @@ document.write(`
 <div class="viewcode-block" id="AsyncSimpleWorkflow">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.AsyncSimpleWorkflow">[文档]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_simple_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AsyncSimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncSimpleWorkflow</span><span class="p">(</span><span class="n">BaseSimpleWorkflow</span><span class="p">):</span>
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncSimpleWorkflow.run_async">
