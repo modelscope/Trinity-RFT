@@ -12,9 +12,7 @@ from trinity.common.config import Config
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from trinity.buffer.reader.file_reader import AstuneTaskReader
+from trinity.buffer.reader.file_reader import AstuneTaskReader
 
 
 @Experimental
