@@ -17,6 +17,7 @@ class AgentScopeReActAgent:
         system_prompt: str,
         generate_kwargs: dict,
         response_structure: Type[BaseModel],
+        max_iters: int = 10,
         toolkit: Toolkit | None = None,
     ):
         """Initialize the AgentScope ReAct agent with specified tools and model.
@@ -44,6 +45,7 @@ class AgentScopeReActAgent:
             # we enable agentscope's meta tool to allow agent to call tools dynamically without pre-registration
             enable_meta_tool=True,
             toolkit=toolkit,
+            max_iters=max_iters,
         )
         self.response_structure = response_structure
 

@@ -44,7 +44,7 @@ explorer:
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
-    enforce_eager: true
+    enforce_eager: false
     enable_openai_api: true
     enable_history: true
     dtype: bfloat16

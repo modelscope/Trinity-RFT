@@ -28,7 +28,7 @@ buffer:
       name: dpo_buffer
       storage_type: file
       enable_progress_bar: True
-      path: ${oc.env:TRINITY_TASKSET_PATH}
+      path: ${oc.env:TRINITY_TASKSET_PATH} # Path to the DPO dataset
       format:
         prompt_type: plaintext # plaintext/messages
         prompt_key: prompt

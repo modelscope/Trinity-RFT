@@ -272,7 +272,7 @@ buffer:
   - `file`: 数据集存储在 `jsonl`/`parquet` 文件中。数据文件组织需符合 HuggingFace 标准。*建议大多数情况下使用此存储类型。*
   - `sql`: 数据集存储在 SQL 数据库中。*此类型尚不稳定，将在未来版本中优化。*
 - `path`: 任务数据集的路径。
-  - 对于 `file` 类型，路径指向包含任务数据集文件的目录。
+  - 对于 `file` 类型，路径指向包含任务数据集文件的目录。它支持使用与 [`datasets.load_dataset()`](https://huggingface.co/docs/datasets/main/en/package_reference/loading_methods#datasets.load_dataset) 函数兼容的格式加载本地和远程数据文件。
   - 对于 `sql` 类型，路径指向 sqlite 数据库文件。
 - `subset_name`: 任务数据集的子集名称，对应 huggingface datasets `load_dataset` 函数中的 `name` 参数。默认为 `None`。
 - `split`: 任务数据集的划分。对应 huggingface datasets `load_dataset` 函数中的 `split` 参数。默认为 `train`。

@@ -21,7 +21,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: 'openai/gsm8k'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       split: 'train'
       format:
@@ -44,7 +44,7 @@ explorer:
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
-    enforce_eager: true
+    enforce_eager: false
     enable_openai_api: true
     enable_history: true
     dtype: bfloat16

@@ -190,13 +190,7 @@ class MultiTurnWorkflow(Workflow):
         return experience
 
 
-@WORKFLOWS.register_module("simple_workflow")
-class SimpleWorkflow(Workflow):
-    """A workflow for simple single-round task."""
-
-    can_reset: bool = True
-    can_repeat: bool = True
-
+class BaseSimpleWorkflow(Workflow):
     def __init__(
         self,
         *,
@@ -246,6 +240,14 @@ class SimpleWorkflow(Workflow):
             messages.append({"role": "assistant", "content": self.reply_prefix})
         return messages
 
+
+@WORKFLOWS.register_module("simple_workflow")
+class SimpleWorkflow(BaseSimpleWorkflow):
+    """A workflow for simple single-round task."""
+
+    can_reset: bool = True
+    can_repeat: bool = True
+
     def run(self) -> List[Experience]:
         # TODO: Optimize the generate function
         messages = self.format_messages()
@@ -272,7 +274,7 @@ class SimpleWorkflow(Workflow):
 
 
 @WORKFLOWS.register_module("async_simple_workflow")
-class AsyncSimpleWorkflow(Workflow):
+class AsyncSimpleWorkflow(BaseSimpleWorkflow):
     is_async: bool = True
 
     async def run_async(self) -> List[Experience]:

@@ -137,6 +137,23 @@ class TestConfig(unittest.TestCase):
             expected_max_token_len,
         )
 
+    def test_optimizer_config_propagation(self):
+        config = get_template_config()
+        config.algorithm.optimizer.lr = 1e-4
+        config.algorithm.optimizer.weight_decay = 0.05
+        config.check_and_update()
+        self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr, 1e-4)
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.actor.optim.weight_decay, 0.05
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_decay_style, "constant"
+        )  # default value
+        # critic optimizer should not be affected
+        self.assertEqual(config.trainer.trainer_config.critic.optim.lr, 1e-5)
+        self.assertEqual(config.trainer.trainer_config.critic.optim.weight_decay, 0.01)
+        self.assertEqual(config.trainer.trainer_config.critic.optim.lr_decay_style, "constant")
+
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):
             shutil.rmtree(CHECKPOINT_ROOT_DIR)
