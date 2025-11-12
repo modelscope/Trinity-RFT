@@ -257,7 +257,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         """
         # Reset environment and state for a new episode
         # But this only resets the player position, not the environment configuration.
-        observation, info = self.gym_env.reset(self.seed)
+        observation, info = self.gym_env.reset(seed=self.seed)
         self.current_observation = self.render()
         self.last_observation = self.current_observation
         self.done = False
