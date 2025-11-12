@@ -5,6 +5,7 @@ Trainer Class
 from __future__ import annotations
 
 import asyncio
+import time
 import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
@@ -67,6 +68,7 @@ class Trainer:
         """Train the model."""
         while self.train_step_num < self.total_steps:
             try:
+                st = time.time()
                 # sample may be blocked due to explorer does not generate enough data
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
                 sample_task = asyncio.create_task(self._sample_data())
@@ -80,6 +82,8 @@ class Trainer:
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
                 metrics.update(await self.train_step(exps))
                 if await self.need_sync():
+                    # Record the time: sample_experience + train_step (>=1)
+                    metrics.update({"time/trainer_sync_interval": time.time() - st})
                     metrics.update(await self.sync_weight())
                 if self.need_save():
                     metrics.update(self.save_checkpoint())
@@ -149,7 +153,7 @@ class Trainer:
 
     async def sync_weight(self) -> Dict:
         """Sync the model weight."""
-        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} starting..")
+        self.logger.info(f"Trainer sync_weights at step {self.train_step_num} started.")
         metrics = {}
         with Timer(metrics, "time/sync_weight"):
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
@@ -157,7 +161,7 @@ class Trainer:
                     "trainer", self.train_step_num
                 )
                 if result is None:
-                    self.logger.error("Trainer synchronizing weights failed.")
+                    self.logger.error("Trainer sync_weights failed.")
                 else:
                     self.engine.sync_weight()
                     self.last_trainer_sync_step = self.train_step_num
@@ -167,7 +171,7 @@ class Trainer:
                 self.engine.upload_state_dict()
             self.last_sync_step = self.train_step_num
             await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
-        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} end.")
+        self.logger.info(f"Trainer sync_weights at step {self.train_step_num} finished.")
         return metrics
 
     def _log_experiences(self, samples: List[Dict]) -> None:

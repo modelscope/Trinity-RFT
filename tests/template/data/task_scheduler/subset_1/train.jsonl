@@ -1,0 +1,5 @@
+{"question": "Question 1 in subset 1.", "answer": "Answer 1 in subset 1.", "feature_offline": 0.5, "feat_1": 0.4, "feat_2": 0.3}
+{"question": "Question 2 in subset 1.", "answer": "Answer 2 in subset 1.", "feature_offline": 0.1, "feat_1": 0.1, "feat_2": 0.1}
+{"question": "Question 3 in subset 1.", "answer": "Answer 3 in subset 1.", "feature_offline": 0.4, "feat_1": 0.5, "feat_2": 0.3}
+{"question": "Question 4 in subset 1.", "answer": "Answer 4 in subset 1.", "feature_offline": 0.5, "feat_1": 0.3, "feat_2": 0.5}
+{"question": "Question 5 in subset 1.", "answer": "Answer 5 in subset 1.", "feature_offline": 0.2, "feat_1": 0.1, "feat_2": 0.5}

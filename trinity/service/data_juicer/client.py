@@ -77,6 +77,7 @@ class DataJuicerClient:
         self.session_id = response.json().get("session_id")
 
     def process_experience(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
+        st = time.time()
         if not self.session_id:
             raise ValueError("DataJuicer session is not initialized.")
 
@@ -101,6 +102,7 @@ class DataJuicerClient:
                 exp.info = {}
             for stats_key in sample["__dj__stats__"]:
                 exp.info[stats_key] = sample["__dj__stats__"][stats_key]
+        metrics["time/dj_process_experience"] = time.time() - st
         return exps, metrics
 
     def process_task(self) -> Dict:

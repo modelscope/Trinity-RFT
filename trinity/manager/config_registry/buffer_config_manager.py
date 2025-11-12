@@ -1,3 +1,6 @@
+import json
+
+import pandas as pd
 import streamlit as st
 
 from trinity.buffer.storage.queue import PRIORITY_FUNC
@@ -298,12 +301,12 @@ def set_storage_type(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=False)
-def set_use_priority_queue(**kwargs):
-    st.checkbox("Use Priority Queue", **kwargs)
+def set_enable_replay_buffer(**kwargs):
+    st.checkbox("Enable Replay Buffer", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=None, visible=lambda: st.session_state["use_priority_queue"]
+    default_value=None, visible=lambda: st.session_state["enable_replay_buffer"]
 )
 def set_reuse_cooldown_time(**kwargs):
     st.number_input(
@@ -317,7 +320,7 @@ def set_reuse_cooldown_time(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value="linear_decay", visible=lambda: st.session_state["use_priority_queue"]
+    default_value="linear_decay", visible=lambda: st.session_state["enable_replay_buffer"]
 )
 def set_priority_fn(**kwargs):
     candidates = list(PRIORITY_FUNC.modules.keys())
@@ -328,13 +331,31 @@ def set_priority_fn(**kwargs):
     )
 
 
+def parse_priority_fn_args(raw_data: str):
+    try:
+        data = json.loads(raw_data)
+        if data["priority_fn"] != st.session_state["priority_fn"]:
+            raise ValueError
+        return data["fn_args"]
+    except (json.JSONDecodeError, KeyError, ValueError):
+        print(f"Use `default_config` for {st.session_state['priority_fn']}")
+        return PRIORITY_FUNC.get(st.session_state["priority_fn"]).default_config()
+
+
 @CONFIG_GENERATORS.register_config(
-    default_value=0.1, visible=lambda: st.session_state["use_priority_queue"]
+    default_value="", visible=lambda: st.session_state["enable_replay_buffer"]
 )
-def set_priority_decay(**kwargs):
-    st.number_input(
-        "Priority Decay",
-        **kwargs,
+def set_priority_fn_args(**kwargs):
+    key = kwargs.get("key")
+    df = pd.DataFrame([parse_priority_fn_args(st.session_state[key])])
+    df.index = [st.session_state["priority_fn"]]
+    st.caption("Priority Function Args")
+    df = st.data_editor(df)
+    st.session_state[key] = json.dumps(
+        {
+            "fn_args": df.to_dict(orient="records")[0],
+            "priority_fn": st.session_state["priority_fn"],
+        }
     )
 
 

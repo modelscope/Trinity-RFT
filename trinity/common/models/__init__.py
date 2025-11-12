@@ -106,9 +106,7 @@ def create_inference_models(
                 config=config.explorer.rollout_model,
             )
         )
-    if config.explorer.rollout_model.enable_openai_api:
-        for engine in rollout_engines:
-            engine.run_api_server.remote()
+
     if config.explorer.rollout_model.enable_history:
         logger.info(
             "Model History recording is enabled. Please periodically extract "
@@ -138,10 +136,6 @@ def create_inference_models(
                 .remote(config=model_config)
             )
         auxiliary_engines.append(engines)
-    # all auxiliary engines run api server
-    for engines in auxiliary_engines:
-        for engine in engines:
-            engine.run_api_server.remote()
 
     return rollout_engines, auxiliary_engines
 
@@ -159,10 +153,10 @@ def create_debug_inference_model(config: Config) -> None:
     rollout_models, auxiliary_models = create_inference_models(config)
     # make sure models are started
     for m in rollout_models:
-        ray.get(m.get_model_path.remote())
+        ray.get(m.run_api_server.remote())
     for models in auxiliary_models:
         for m in models:
-            ray.get(m.get_model_path.remote())
+            ray.get(m.run_api_server.remote())
     logger.info(
         "----------------------------------------------------\n"
         "Inference models started successfully for debugging.\n"

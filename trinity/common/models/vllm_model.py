@@ -51,6 +51,15 @@ class vLLMRolloutModel(InferenceModel):
             os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.use_v1))
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
+        if get_vllm_version() >= parse_version("0.11.0"):
+            os.environ["VLLM_ALLREDUCE_USE_SYMM_MEM"] = "0"
+        if not config.enforce_eager:
+            # To avoid torch compile conflicts when multiple model are started simultaneously.
+            # remove this when the following PR is released:
+            # https://github.com/vllm-project/vllm/pull/27616
+            os.environ["VLLM_CACHE_ROOT"] = os.path.expanduser(
+                f"~/.cache/vllm/{config.bundle_indices}"
+            )
         self.default_sampling_params = vllm.SamplingParams(
             n=1,
             temperature=0.0,
@@ -83,6 +92,12 @@ class vLLMRolloutModel(InferenceModel):
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
+            override_generation_config={  # TODO: find a way to unittest this
+                "temperature": config.temperature,
+                "top_p": config.top_p,
+                "top_k": config.top_k,
+                "max_new_tokens": config.max_response_tokens,
+            },
             disable_log_stats=True,
             enable_lora=config.enable_lora,
             **config.lora_kwargs,
@@ -91,6 +106,8 @@ class vLLMRolloutModel(InferenceModel):
             engine_args.enable_log_requests = False
         else:
             engine_args.disable_log_requests = True
+        if get_vllm_version() >= parse_version("0.11.0"):
+            engine_args.reasoning_parser = config.reasoning_parser
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = None
         self.tokenizer = None
@@ -103,15 +120,11 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
         self.api_server = None
+        self.async_lock = asyncio.Lock()
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
-            if self.enable_lora:
-                self.tokenizer = await self.async_llm.get_tokenizer(
-                    lora_request=self.get_lora_request()
-                )
-            else:
-                self.tokenizer = await self.async_llm.get_tokenizer()
+            self.tokenizer = await self.async_llm.get_tokenizer()
         self.tokenizer.truncation_side = "left"
 
     def _initialize_processor(self):
@@ -455,35 +468,44 @@ class vLLMRolloutModel(InferenceModel):
             ),
         )
 
-    async def run_api_server(self):
-        """Run the OpenAI API server in a Ray actor."""
-        if not (self.api_server_host is None or self.api_server_port is None):
-            raise RuntimeError("API server is already running.")
-        from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
+    async def run_api_server(self) -> bool:
+        """Run the OpenAI API server in a Ray actor.
 
-        self.api_server_host, self.api_server_port = self.get_available_address()
-        self.api_server = asyncio.create_task(
-            run_api_server_in_ray_actor(
-                self.async_llm,
-                self.api_server_host,
-                self.api_server_port,
-                self.config.model_path,
-                self.config.enable_auto_tool_choice,
-                self.config.tool_call_parser,
-                self.config.reasoning_parser,
+        Returns:
+            success (bool): Whether the API server is started successfully.
+        """
+        async with self.async_lock:
+            if not self.config.enable_openai_api:
+                return False  # Not enabled
+
+            if self.api_server_host is not None and self.api_server_port is not None:
+                return True  # already running
+
+            from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
+
+            api_server_host, api_server_port = self.get_available_address()
+            self.api_server = asyncio.create_task(
+                run_api_server_in_ray_actor(
+                    self.async_llm,
+                    api_server_host,
+                    api_server_port,
+                    self.config.model_path,
+                    self.config.enable_auto_tool_choice,
+                    self.config.tool_call_parser,
+                    self.config.reasoning_parser,
+                )
             )
-        )
+            self.api_server_host = api_server_host
+            self.api_server_port = api_server_port
+            return True
 
-    def has_api_server(self) -> bool:
-        return self.config.enable_openai_api
-
-    def get_api_server_url(self) -> Optional[str]:
+    async def get_api_server_url(self) -> Optional[str]:
         """Get the URL of the OpenAI API server.
 
         Returns:
             api_url (str): The URL of the OpenAI API server.
         """
-        if not self.has_api_server():
+        if not await self.run_api_server():
             return None
         return f"http://{self.api_server_host}:{self.api_server_port}"
 

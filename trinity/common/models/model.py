@@ -3,7 +3,8 @@
 import asyncio
 import socket
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from functools import partial
+from typing import List, Optional, Sequence, Tuple, Union
 
 import httpx
 import numpy as np
@@ -50,11 +51,7 @@ class InferenceModel(ABC):
             port = s.getsockname()[1]
         return address, port
 
-    def has_api_server(self) -> bool:
-        """Check if the model has an API server."""
-        return False
-
-    def get_api_server_url(self) -> Optional[str]:
+    async def get_api_server_url(self) -> Optional[str]:
         """Get the API server URL if available."""
         return None
 
@@ -86,7 +83,7 @@ class ModelWrapper:
 
     def __init__(
         self,
-        model: Any,
+        model: InferenceModel,
         engine_type: str = "vllm",
         enable_lora: bool = False,
         enable_history: bool = False,
@@ -105,26 +102,24 @@ class ModelWrapper:
 
     async def prepare(self) -> None:
         """Prepare the model wrapper."""
-        if await self.model.has_api_server.remote():
-            self.api_address = await self.model.get_api_server_url.remote()
-            if self.api_address is None:
-                raise RuntimeError(
-                    "Failed to connect to the API server. Please set `enable_openai_api` to `True`."
-                )
-            max_retries = 30
-            interval = 2  # seconds
-            for i in range(max_retries):
-                try:
-                    async with httpx.AsyncClient() as client:
-                        response = await client.get(self.api_address + "/health", timeout=5)
-                        if response.status_code == 200:
-                            return
-                except Exception as e:
-                    self.logger.info(f"API server not ready (attempt {i + 1}/{max_retries}): {e}")
-                await asyncio.sleep(interval)
-            raise RuntimeError(
-                f"API server at {self.api_address} not ready after {max_retries} attempts."
-            )
+        self.api_address = await self.model.get_api_server_url.remote()
+        if self.api_address is None:
+            self.logger.info("API server is not enabled for inference model.")
+            return
+        max_retries = 30
+        interval = 2  # seconds
+        for i in range(max_retries):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(self.api_address + "/health", timeout=5)
+                    if response.status_code == 200:
+                        return
+            except Exception as e:
+                self.logger.info(f"API server not ready (attempt {i + 1}/{max_retries}): {e}")
+            await asyncio.sleep(interval)
+        raise RuntimeError(
+            f"API server at {self.api_address} not ready after {max_retries} attempts."
+        )
 
     def _record_history(self, exps: Union[Experience, List[Experience]]) -> None:
         """Record experiences to history."""
@@ -276,7 +271,7 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = self.openai_client.chat.completions.create
+            ori_create = partial(self.openai_client.chat.completions.create, logprobs=True)
 
             def record_chat_completions(*args, **kwargs):
                 response = ori_create(*args, **kwargs)
@@ -306,7 +301,7 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = self.openai_async_client.chat.completions.create
+            ori_create = partial(self.openai_async_client.chat.completions.create, logprobs=True)
 
             async def record_chat_completions(*args, **kwargs):
                 response = await ori_create(*args, **kwargs)

@@ -42,7 +42,6 @@ explorer:
     enforce_eager: true
     dtype: bfloat16
     seed: 42
-    use_v1: true
 trainer:
   trainer_type: verl
   save_interval: 100

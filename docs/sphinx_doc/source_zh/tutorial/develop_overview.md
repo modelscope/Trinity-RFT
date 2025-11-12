@@ -11,6 +11,7 @@ Trinity-RFT 将 RL 训练过程拆分为了三个模块：**Explorer**、**Train
 | `Workflow`   | 智能体应用开发者 | 提升 Agent 在指定环境中完成任务的能力  | [🔗](./develop_workflow.md) |
 | `Algorithm`  | RL 算法研究者   | 设计新的 RL 算法                    | [🔗](./develop_algorithm.md) |
 | `Operator`   | 数据工程师      | 设计新的数据清洗、增强策略            | [🔗](./develop_operator.md) |
+| `Selector`   | 数据工程师      | 设计新的数据选择策略                  | [🔗](./develop_selector.md) |
 
 ```{tip}
 Trinity-RFT 提供了插件化的开发方式，可以在不修改框架代码的前提下，灵活地添加自定义模块。

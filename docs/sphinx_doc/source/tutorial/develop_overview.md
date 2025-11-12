@@ -11,6 +11,7 @@ The table below lists the main functions of each extension interface, its target
 | `Workflow`          | Agent Application Developers | Enhance agent's ability to complete tasks in a specified environment | [🔗](./develop_workflow.md) |
 | `Algorithm`         | RL Algorithm Researchers | Design new RL algorithms                 | [🔗](./develop_algorithm.md) |
 | `Operator`          | Data Engineers    | Design new data cleaning and augmentation strategies | [🔗](./develop_operator.md) |
+| `Selector`          | Data Engineers    | Design new task selection strategies           | [🔗](./develop_selector.md) |
 
 ```{tip}
 Trinity-RFT provides a modular development approach, allowing you to flexibly add custom modules without modifying the framework code.

@@ -9,7 +9,7 @@ algorithm:
 model:
   model_path: '/mnt/data/model_cache/modelscope/hub/Qwen/Qwen/Qwen2___5-1___5B-Instruct'
   max_response_tokens: 1024
-  max_model_len: 1280
+  max_model_len: 2048
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: '/root/.cache/huggingface/hub/datasets--gsm8k/snapshots/e53f048856ff4f594e959d75785d2c2d37b678ee'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       split: 'train'
       format:
@@ -31,7 +31,7 @@ buffer:
     eval_tasksets:
     - name: gsm8k-eval
       storage_type: file
-      path: '/root/.cache/huggingface/hub/datasets--gsm8k/snapshots/e53f048856ff4f594e959d75785d2c2d37b678ee'
+      path: ${oc.env:TRINITY_TASKSET_PATH,openai/gsm8k}
       subset_name: 'main'
       split: 'test'
       format:

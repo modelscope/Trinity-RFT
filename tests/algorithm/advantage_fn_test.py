@@ -107,8 +107,8 @@ class TestGroupedAdvantageFn(unittest.TestCase):
 
         exps, metrics = advantage_fn(exps)
         self.assertEqual(len(exps), 0)
-        self.assertIn("group_advantages/skipped_count/mean", metrics)
-        self.assertEqual(metrics["group_advantages/skipped_count/mean"], 5)
+        self.assertIn("filtered_count", metrics)
+        self.assertEqual(metrics["filtered_count"], 15)
 
     def test_grpo_correct_bias(self):
         advantage_fn_cls = ADVANTAGE_FN.get("grpo")
@@ -326,3 +326,71 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         expected_advantages = expected_advantage_value * target_exp.action_mask
         self.assertTrue(torch.allclose(target_exp.advantages, expected_advantages, atol=1e-6))
         self.assertTrue(torch.allclose(target_exp.returns, expected_advantages, atol=1e-6))
+
+    def test_step_wise_grpo_with_std_threshold(self):
+        advantage_fn_cls = ADVANTAGE_FN.get("step_wise_grpo")
+        self.assertIsNotNone(advantage_fn_cls)
+        advantage_fn = advantage_fn_cls(epsilon=1e-6, std_threshold=0.0001)
+        repeat_times = 5
+        step_num = 4
+
+        # Create experiences with mixed reward patterns:
+        # - task 0: all runs have same reward (0.5) -> should be filtered
+        # - task 1: all runs have same reward (1.0) -> should be filtered
+        # - task 2: runs have different rewards (0, 1, 2, 3, 4) -> should NOT be filtered
+        exps = []
+
+        # Task 0: constant reward 0.5
+        for k in range(step_num):
+            for i in range(repeat_times):
+                exps.append(
+                    Experience(
+                        eid=EID(batch=0, task=0, run=i, step=k),
+                        tokens=torch.zeros(5),
+                        prompt_length=2,
+                        reward=0.5,
+                    )
+                )
+
+        # Task 1: constant reward 1.0
+        for k in range(step_num):
+            for i in range(repeat_times):
+                exps.append(
+                    Experience(
+                        eid=EID(batch=0, task=1, run=i, step=k),
+                        tokens=torch.zeros(5),
+                        prompt_length=2,
+                        reward=1.0,
+                    )
+                )
+
+        # Task 2: varying rewards
+        for k in range(step_num):
+            for i in range(repeat_times):
+                exps.append(
+                    Experience(
+                        eid=EID(batch=0, task=2, run=i, step=k),
+                        tokens=torch.zeros(5),
+                        prompt_length=2,
+                        reward=float(i),
+                    )
+                )
+
+        processed_exps, metrics = advantage_fn(exps)
+
+        # Only task 2 should remain (task 0 and task 1 filtered due to zero std)
+        expected_remaining = repeat_times * step_num  # task 2 only
+        expected_filtered = 2 * repeat_times * step_num  # task 0 and task 1
+
+        self.assertEqual(len(processed_exps), expected_remaining)
+        self.assertIn("filtered_count", metrics)
+        self.assertEqual(metrics["filtered_count"], expected_filtered)
+
+        # Verify skipped group ratio: 2 out of 3 tasks were skipped
+        self.assertIn("skipped_group_ratio", metrics)
+        expected_ratio = 2.0 / 3.0  # task 0 and task 1 skipped out of 3 total tasks
+        self.assertAlmostEqual(metrics["skipped_group_ratio"], expected_ratio, places=6)
+
+        # Verify that all remaining experiences are from task 2
+        for exp in processed_exps:
+            self.assertEqual(exp.eid.task, 2)

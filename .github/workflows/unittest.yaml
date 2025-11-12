@@ -97,6 +97,22 @@ jobs:
           fi
         fi
 
+    - name: Convert report.json time to ms
+      working-directory: trinity-${{ github.run_id }}
+      if: env.tests_run == 'true' || failure()
+      run: |
+        REPORT=report.json
+        if [ -f "$REPORT" ]; then
+          jq '(.results.tests[] | .duration, .start, .stop) |= (. * 1000) | (.results.summary.start, .results.summary.stop) |= (. * 1000)' "$REPORT" > "$REPORT.tmp" && mv "$REPORT.tmp" "$REPORT"
+        fi
+
+    - name: Clean checkpoint dir
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      if: always()
+      run: |
+        docker compose exec trinity-node-1 rm -rf /mnt/checkpoints/*
+      continue-on-error: true
+
     - name: Upload test results
       if: env.tests_run == 'true' || failure()
       uses: actions/upload-artifact@v4

@@ -7,7 +7,7 @@ import ray
 import torch
 
 from tests.tools import get_template_config
-from trinity.common.config import StorageConfig
+from trinity.common.config import ExperienceBufferConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import EID, Experience
 from trinity.common.models.model import InferenceModel
@@ -134,10 +134,7 @@ class DummyModel(InferenceModel):
     ) -> None:
         pass
 
-    def has_api_server(self) -> bool:
-        return False
-
-    def get_api_server_url(self) -> Optional[str]:
+    async def get_api_server_url(self) -> Optional[str]:
         return None
 
 
@@ -161,10 +158,7 @@ class DummyAuxiliaryModel(InferenceModel):
     ) -> None:
         pass
 
-    def has_api_server(self) -> bool:
-        return True
-
-    def get_api_server_url(self) -> str:
+    async def get_api_server_url(self) -> str:
         return "http://localhost:12345"
 
 
@@ -237,7 +231,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.config.buffer.pad_token_id = 0
         self.config.buffer.explorer_output = (
             self.config.buffer.trainer_input.experience_buffer
-        ) = StorageConfig(
+        ) = ExperienceBufferConfig(
             name="test",
             storage_type=StorageType.QUEUE,
             schema_type="experience",

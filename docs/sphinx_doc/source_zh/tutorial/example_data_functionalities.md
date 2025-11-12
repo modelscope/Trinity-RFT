@@ -14,7 +14,7 @@ Trinity-RFT 提供了一个统一的数据处理器，用于处理 task 流水�
 数据处理器的整体架构如下图所示：
 
 <div align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT Data Processor">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01Gk9CRw28NsL09nbOj_!!6000000007921-2-tps-2530-660.png" alt="Trinity-RFT Data Processor">
 </div>
 
 ## 示例：Task 流水线的数据处理器

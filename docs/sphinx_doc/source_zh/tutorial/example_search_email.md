@@ -44,4 +44,6 @@ trinity run --config examples/grpo_email_search/email_search.yaml
 
 ![](../../assets/email_rollout_accuracy.png)
 
+![](../../assets/email_reward_mean.png)
+
 ![](../../assets/email_eval_accuracy.png)

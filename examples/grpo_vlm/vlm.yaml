@@ -21,7 +21,7 @@ buffer:
     taskset:
       name: geometry3k
       storage_type: file
-      path: hiyouga/geometry3k
+      path: ${oc.env:TRINITY_TASKSET_PATH,hiyouga/geometry3k}
       subset_name: 'default'
       split: 'train'
       format:

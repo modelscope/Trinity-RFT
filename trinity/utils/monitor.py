@@ -30,15 +30,20 @@ MONITOR = Registry("monitor")
 
 
 def gather_metrics(metric_list: List[Dict], prefix: str) -> Dict:
-    df = pd.DataFrame(metric_list)
-    numeric_df = df.select_dtypes(include=[np.number])
-    stats_df = numeric_df.agg(["mean", "max", "min"])
-    metric = {}
-    for col in stats_df.columns:
-        metric[f"{prefix}/{col}/mean"] = stats_df.loc["mean", col].item()
-        metric[f"{prefix}/{col}/max"] = stats_df.loc["max", col].item()
-        metric[f"{prefix}/{col}/min"] = stats_df.loc["min", col].item()
-    return metric
+    if not metric_list:
+        return {}
+    try:
+        df = pd.DataFrame(metric_list)
+        numeric_df = df.select_dtypes(include=[np.number])
+        stats_df = numeric_df.agg(["mean", "max", "min"])
+        metric = {}
+        for col in stats_df.columns:
+            metric[f"{prefix}/{col}/mean"] = stats_df.loc["mean", col].item()
+            metric[f"{prefix}/{col}/max"] = stats_df.loc["max", col].item()
+            metric[f"{prefix}/{col}/min"] = stats_df.loc["min", col].item()
+        return metric
+    except Exception as e:
+        raise ValueError(f"Failed to gather metrics: {e}") from e
 
 
 class Monitor(ABC):
@@ -193,6 +198,7 @@ class MlflowMonitor(Monitor):
             os.environ["MLFLOW_TRACKING_PASSWORD"] = password
         mlflow.set_tracking_uri(config.monitor.monitor_args.get("uri", "http://localhost:5000"))
         mlflow.set_experiment(project)
+        mlflow.enable_system_metrics_logging()
         mlflow.start_run(
             run_name=f"{name}_{role}",
             tags={

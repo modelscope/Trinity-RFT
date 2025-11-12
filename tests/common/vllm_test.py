@@ -261,11 +261,13 @@ class TestModelLen(RayUnittestBaseAysnc):
 
         response = openai_client.chat.completions.create(model=model_id, messages=messages[1:], n=1)
         self.assertEqual(len(response.choices), 1)
-        print(response.choices[0].message.content)
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
-        # only generate max_model_len - prompt_len tokens
-        self.assertEqual(len(exps[0].tokens), self.max_model_len)
+        # only generate max_response_tokens tokens
+        self.assertEqual(
+            len(exps[0].tokens),
+            response.usage.prompt_tokens + self.config.model.max_response_tokens,
+        )
 
 
 class TestAPIServer(RayUnittestBaseAysnc):
@@ -276,7 +278,6 @@ class TestAPIServer(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
 
@@ -327,7 +328,28 @@ class TestAPIServer(RayUnittestBaseAysnc):
         )
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 4)
+        for exp in exps:
+            self.assertTrue(len(exp.tokens) > 0)
+            self.assertTrue(len(exp.logprobs) > 0)
+            self.assertTrue(exp.prompt_length + len(exp.logprobs) == len(exp.tokens))
         self.assertEqual(len(self.model_wrapper.extract_experience_from_history()), 0)
+        response = openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertTrue(len(exps[0].tokens) > 0)
+        self.assertTrue(len(exps[0].logprobs) > 0)
+        self.assertTrue(exps[0].prompt_length + len(exps[0].logprobs) == len(exps[0].tokens))
+        response = openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            logprobs=False,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertTrue(len(exps[0].logprobs) == 0)
         response = self.model_wrapper_no_history.get_openai_client().chat.completions.create(
             model=model_id, messages=messages, n=2
         )
@@ -347,7 +369,6 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
 
@@ -400,7 +421,28 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         )
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 4)
+        for exp in exps:
+            self.assertTrue(len(exp.tokens) > 0)
+            self.assertTrue(len(exp.logprobs) > 0)
+            self.assertTrue(exp.prompt_length + len(exp.logprobs) == len(exp.tokens))
         self.assertEqual(len(self.model_wrapper.extract_experience_from_history()), 0)
+        response = await openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertTrue(len(exps[0].tokens) > 0)
+        self.assertTrue(len(exps[0].logprobs) > 0)
+        self.assertTrue(exps[0].prompt_length + len(exps[0].logprobs) == len(exps[0].tokens))
+        response = await openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            logprobs=False,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertTrue(len(exps[0].logprobs) == 0)
         response = (
             await self.model_wrapper_no_history.get_openai_async_client().chat.completions.create(
                 model=model_id, messages=messages, n=2
@@ -536,7 +578,6 @@ class TestAPIServerToolCall(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
-        self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
         # added for toolcalls

@@ -288,7 +288,7 @@ def read_email_tool(message_id: str) -> Optional[Email]:
 ############ LLM-as-a-judge ############
 
 
-def judge_correctness(
+async def judge_correctness(
     answer: str,
     query: QueryModel,
     judger: Any,
@@ -318,7 +318,7 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt},
     ]
-    completion = judger.chat.completions.create(
+    completion = await judger.chat.completions.create(
         model=judger.model_path, messages=messages, stream=False
     )
     result = completion.choices[0].message.content

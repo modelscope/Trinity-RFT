@@ -14,7 +14,10 @@ from trinity.algorithm.kl_fn.kl_fn import KL_FN
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
 from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
-from trinity.manager.config_registry.buffer_config_manager import get_train_batch_size
+from trinity.manager.config_registry.buffer_config_manager import (
+    get_train_batch_size,
+    parse_priority_fn_args,
+)
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
 from trinity.utils.plugin_loader import load_plugins
@@ -189,8 +192,9 @@ class ConfigManager:
             with st.expander("Experience Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
-                self.get_configs("use_priority_queue")
-                self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
+                self.get_configs("enable_replay_buffer")
+                self.get_configs("reuse_cooldown_time", "priority_fn")
+                self.get_configs("priority_fn_args")
 
         # TODO: used for SQL storage
         # self.buffer_advanced_tab = st.expander("Advanced Config")
@@ -588,11 +592,11 @@ class ConfigManager:
                 del buffer_config["train_batch_size"]
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
-            experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
-            experience_buffer["reuse_cooldown_time"] = st.session_state["reuse_cooldown_time"]
-            experience_buffer["replay_buffer_kwargs"] = {
+            experience_buffer["replay_buffer"] = {
+                "enable": st.session_state["enable_replay_buffer"],
                 "priority_fn": st.session_state["priority_fn"],
-                "decay": st.session_state["priority_decay"],
+                "reuse_cooldown_time": st.session_state["reuse_cooldown_time"],
+                "priority_fn_args": parse_priority_fn_args(st.session_state["priority_fn_args"]),
             }
 
         if st.session_state["mode"] != "train":

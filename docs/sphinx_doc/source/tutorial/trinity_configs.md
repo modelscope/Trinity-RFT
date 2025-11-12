@@ -273,14 +273,12 @@ The configuration for each task dataset is defined as follows:
 - `name`: Name of the dataset. This name will be used as the Ray actor's name, so it must be unique.
 - `storage_type`: How the dataset is stored. Options: `file`, `queue`, `sql`.
   - `file`: The dataset is stored in `jsonl`/`parquet` files. The data file organization is required to meet the huggingface standard. *We recommand using this storage type for most cases.*
-  - `queue`: The dataset is stored in a queue. The queue is a simple FIFO queue that stores the task dataset. *Do not use this storage type for task dataset unless you know what you are doing.*
   - `sql`: The dataset is stored in a SQL database. *This type is unstable and will be optimized in the future versions.*
 - `path`: The path to the task dataset.
-  - For `file` storage type, the path points to the directory that contains the task dataset files.
-  - For `queue` storage type, the path is optional. You can back up the data in the queue by specifying a sqlite database path here.
+  - For `file` storage type, the path points to the directory that contains the task dataset files. It supports loading both local and remote data files in a compatible format with [`datasets.load_dataset()`](https://huggingface.co/docs/datasets/main/en/package_reference/loading_methods#datasets.load_dataset) function.
   - For `sql` storage type, the path points to the sqlite database file.
-- `subset_name`: The subset name of the task dataset. Default is `None`.
-- `split`: The split of the task dataset. Default is `train`.
+- `subset_name`: The subset name of the task dataset, corresponding to the `name` parameter in huggingface datasets `load_dataset` function. Default is `None`.
+- `split`: The split of the task dataset, corresponding to the `split` parameter in huggingface datasets `load_dataset` function. Default is `train`.
 - `repeat_times`: The number of rollouts generated for a task. If not set, it will be automatically set to `algorithm.repeat_times` for `taskset`, and `1` for `eval_tasksets`.
 - `rollout_args`: The parameters for rollout.
   - `temperature`: The temperature for sampling.
@@ -324,7 +322,7 @@ buffer:
     - For `queue` storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.
     - For `file` storage type, the path points to the directory containing the dataset files.
     - For `sql` storage type, the path points to the SQLite database file.
-  - `format`: Defines keys for prompts and responses in the dataset.
+  - `format`: Mainly for SFT and DPO algorithm datasets, used to format the extracted data.
     - `prompt_type`: Specifies the type of prompts in the dataset. We support `plaintext`, `messages` for now.
       - `plaintext`: The prompt is in string format.
       - `messages`: The prompt is organized as a message list.
@@ -339,8 +337,11 @@ buffer:
     - `enable_concatenated_multi_turn`: Enable concatenated multi-turn SFT data preprocess. Only for `messages` and only take effect with SFT algorithm.
     - `chat_template`: Specifies the chat template in string format. If not provided, use `model.custom_chat_template`.
   - `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
-  - `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
-  - `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
+  - `replay_buffer`: Only take effect when `storage_type` is `queue`. Used to configure the replay buffer for experience reuse.
+    - `enable`: Whether to enable the replay buffer. Default is `false`.
+    - `reuse_cooldown_time`: Cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
+    - `priority_fn`: Experience priority function used to determine the order of experience reuse. Currently supports `linear_decay` and `linear_decay_use_count_control_randomization`.
+    - `priority_fn_args`: A dictionary of arguments passed to the priority function, specific parameters depend on the selected priority function.
 - `auxiliary_buffers`: Optional buffers used for trainer. It is a dictionary where each key is the buffer name and the value is the buffer configuration. Each buffer configuration is similar to the `experience_buffer`.
 
 ---

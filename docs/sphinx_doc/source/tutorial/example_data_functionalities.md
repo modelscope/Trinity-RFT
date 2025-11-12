@@ -14,7 +14,7 @@ To support the data processing of Data-Juicer and RFT-related operators, Trinity
 An overview of the data processor is shown in the following figure.
 
 <div align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT Data Processor">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01Gk9CRw28NsL09nbOj_!!6000000007921-2-tps-2530-660.png" alt="Trinity-RFT Data Processor">
 </div>
 
 ## Example: Data Processor for Task Pipeline
