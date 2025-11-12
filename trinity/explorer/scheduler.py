@@ -381,21 +381,23 @@ class Scheduler:
         statuses = []
         experiences = []
         completed_queue = self.completed_tasks.get(batch_id, deque())
-        completed_count = len(completed_queue)
+        for _ in range(min_num):
+            if completed_queue:
+                status, exps = completed_queue.pop()
+                statuses.append(status)
+                if isinstance(exps, list):
+                    experiences.extend(exps)
+                else:
+                    experiences.append(exps)
+
+        if batch_id in self.completed_tasks and not self.completed_tasks[batch_id]:
+            del self.completed_tasks[batch_id]
+
+        completed_count = len(statuses)
         if completed_count < min_num:
             self.logger.warning(
                 f"Timeout reached, only {completed_count}/{min_num} tasks completed"
             )
-        while completed_queue:
-            status, exps = completed_queue.pop()
-            statuses.append(status)
-            if isinstance(exps, list):
-                experiences.extend(exps)
-            else:
-                experiences.append(exps)
-
-        if batch_id in self.completed_tasks and not self.completed_tasks[batch_id]:
-            del self.completed_tasks[batch_id]
 
         return statuses, experiences
 

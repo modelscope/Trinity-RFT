@@ -24,10 +24,9 @@ from tests.tools import (
 from trinity.buffer import get_buffer_reader
 from trinity.cli.launcher import explore, run_stage
 from trinity.common.config import ExperienceBufferConfig, InferenceModelConfig
-from trinity.common.constants import PLUGIN_DIRS_ENV_VAR, StorageType
+from trinity.common.constants import StorageType
 from trinity.explorer.explorer import Explorer
 from trinity.manager.state_manager import StateManager
-from trinity.utils.plugin_loader import load_plugins
 
 
 class BaseExplorerCase(RayUnittestBase):
@@ -44,22 +43,6 @@ class BaseExplorerCase(RayUnittestBase):
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.synchronizer.sync_interval = 2
         self.config.explorer.eval_interval = 4
-
-
-class TestExplorerCountdownMaxRepeatTimes(BaseExplorerCase):
-    def test_explorer(self):
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        self.config.buffer.explorer_input.taskset.default_workflow_type = "custom_workflow"
-        self.config.algorithm.repeat_times = 4
-        self.config.explorer.max_repeat_times_per_runner = 3
-        self.config.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        self.config.check_and_update()
-        os.environ[PLUGIN_DIRS_ENV_VAR] = os.path.join("tests", "utils", "plugins")
-        load_plugins()
-        explore(self.config)
-        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
-        custom_metric_mean = parser.metric_values("rollout/custom_metric/mean")
-        self.assertEqual(custom_metric_mean, [0.75] * 8)
 
 
 class TestExplorerCountdownEval(BaseExplorerCase):

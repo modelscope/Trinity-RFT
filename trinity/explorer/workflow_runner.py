@@ -5,7 +5,7 @@ import time
 import traceback
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
@@ -21,32 +21,8 @@ class Status:
     """Status of the task running result."""
 
     ok: bool
-    metric: dict[str, Union[float, List[float]]]
+    metric: dict[str, float]
     message: Optional[str] = None
-    task_id: Union[int, str] = ""
-
-
-def group_metrics(statuses: List[Status]):
-    task2metrics = {}
-    for status in statuses:
-        task_id = status.task_id
-        metric = status.metric
-        if task_id not in task2metrics:
-            task2metrics[task_id] = metric
-        else:
-            for k, v in metric.items():
-                task2metrics[task_id][k] += v  # type: ignore
-
-    metric_list = []
-    for metrics in task2metrics.values():
-        agg_metrics = {}
-        for k, v in metrics.items():
-            if isinstance(v, list):
-                agg_metrics[k] = sum(v) / len(v)
-            else:
-                agg_metrics[k] = v
-        metric_list.append(agg_metrics)
-    return metric_list
 
 
 class WorkflowRunner:
@@ -167,28 +143,23 @@ class WorkflowRunner:
                     exp.metrics = {}
                 for k, v in exp.metrics.items():
                     metrics[k].append(v)
-
-            metric: dict[str, Union[float, List[float]]] = {"time_per_task": time.time() - st}
-            metric.update(metrics)
+            # We get the average of metrics into the state
+            metric = {}
+            metric["time_per_task"] = time.time() - st
+            if metrics:
+                for k, v in metrics.items():
+                    metric[k] = sum(v) / len(v)  # type: ignore
 
             if task.is_eval:
                 # If the task is an evaluation task, we do not record the experiences to the buffer
-                return Status(True, metric=metric, task_id=task.task_id), []
+                return Status(True, metric=metric), []
             else:
-                return Status(True, metric=metric, task_id=task.task_id), exps
+                return Status(True, metric=metric), exps
 
         except Exception as e:
             error_trace_back = traceback.format_exc()
             self.logger.error(f"WorkflowRunner run task error: {e}\nTraceback:\n{error_trace_back}")
-            return (
-                Status(
-                    False,
-                    metric={"time_per_task": time.time() - st},
-                    message=str(e),
-                    task_id=task.task_id,
-                ),
-                [],
-            )
+            return Status(False, metric={"time_per_task": time.time() - st}, message=str(e)), []
 
 
 class DebugWorkflowRunner(WorkflowRunner):
