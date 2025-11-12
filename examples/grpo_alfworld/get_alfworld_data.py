@@ -28,27 +28,37 @@ def create_dataset_files(output_dir, train_size=None, test_size=None):
     train_game_files = sorted(train_game_files)
     test_game_files = sorted(test_game_files)
 
+    print(f"Total train game files found: {len(train_game_files)}")
+    print(f"Total test game files found: {len(test_game_files)}")
+
     # if size is None, use all files
     if train_size is None:
         train_size = len(train_game_files)
     if test_size is None:
         test_size = len(test_game_files)
 
-    # randomly sellect the game files
-    sellected_train_files = random.sample(train_game_files, train_size)
-    sellected_test_files = random.sample(test_game_files, test_size)
+    # check sizes
+    assert train_size <= len(
+        train_game_files
+    ), f"train_size {train_size} > available {len(train_game_files)}"
+    assert test_size <= len(
+        test_game_files
+    ), f"test_size {test_size} > available {len(test_game_files)}"
+
+    # randomly select the game files
+    selected_train_files = random.sample(train_game_files, train_size)
+    selected_test_files = random.sample(test_game_files, test_size)
 
     # make the output directory
     os.makedirs(output_dir, exist_ok=True)
 
     # create train and test data
-    train_data = []
-    for game_file_path in sellected_train_files:
-        train_data.append({"game_file": game_file_path, "target": ""})
-
-    test_data = []
-    for game_file_path in sellected_test_files:
-        test_data.append({"game_file": game_file_path, "target": ""})
+    train_data = [
+        {"game_file": game_file_path, "target": ""} for game_file_path in selected_train_files
+    ]
+    test_data = [
+        {"game_file": game_file_path, "target": ""} for game_file_path in selected_test_files
+    ]
 
     # create dataset_dict
     dataset_dict = {"train": train_data, "test": test_data}
@@ -71,6 +81,8 @@ def create_dataset_files(output_dir, train_size=None, test_size=None):
 
     with open(os.path.join(output_dir, "dataset_dict.json"), "w") as f:
         json.dump(dataset_info, f, indent=2)
+
+    print(f"Created dataset with {len(train_data)} train and {len(test_data)} test examples.")
 
 
 if __name__ == "__main__":
