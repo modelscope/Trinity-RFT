@@ -370,7 +370,7 @@ class vLLMRolloutModel(InferenceModel):
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
-        return Experience(
+        exp = Experience(
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
             prompt_length=prompt_length,
@@ -378,6 +378,11 @@ class vLLMRolloutModel(InferenceModel):
             prompt_text=self.tokenizer.decode(token_ids[:prompt_length]),
             response_text=self.tokenizer.decode(token_ids[prompt_length:]),
         )
+        import torch 
+        torch.set_printoptions(threshold=float('inf'))
+        print(f"!!!Debug: {exp.tokens=} {exp.logprobs=} {exp.prompt_length=} {exp.action_mask=} {exp.prompt_text=} {exp.response_text=}")
+        print("sum(action_mask): ", torch.sum(exp.action_mask))
+        return exp
 
     async def shutdown(self):
         """Shutdown the vLLM v1 engine. This kills child processes forked

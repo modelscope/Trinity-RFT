@@ -241,17 +241,11 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         room_state = self.render(mode="state").tolist()
 
         if mode == "list":
-
-            def lookup(cell):
-                return GRID_LOOKUP.get(cell, "?").strip("\t").strip()
-
+            lookup = lambda cell: GRID_LOOKUP.get(cell, "?").strip("\t").strip()
             return [" ".join(lookup(cell) for cell in row) for row in room_state]
 
         if mode == "tiny_rgb_array":
-
-            def lookup(cell):
-                return GRID_LOOKUP.get(cell, "?").strip("\t").strip()
-
+            lookup = lambda cell: GRID_LOOKUP.get(cell, "?")
             result = "\n".join("".join(lookup(cell) for cell in row) for row in room_state)
             return result
 
@@ -263,7 +257,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         """
         # Reset environment and state for a new episode
         # But this only resets the player position, not the environment configuration.
-        observation, info = self.gym_env.reset()
+        observation, info = self.gym_env.reset(self.seed)
         self.current_observation = self.render()
         self.last_observation = self.current_observation
         self.done = False
@@ -277,6 +271,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         # Run episode until done or max_steps reached
         for step in range(self.max_steps):
+            print("Current step: ", step)
             # Format observation for the model
             current_obs_str = str(self.current_observation)
             user_prompt_content = (
@@ -319,10 +314,13 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             rollout_args = self.rollout_args.copy()
             rollout_args["n"] = 1
             rollout_args["max_tokens"] = max_tokens
-            print("Current step: ", step, rollout_args)
+            # print("Current step: ", step, rollout_args)
             responses = await self.model.chat_async(messages, **rollout_args)
             response_text = responses[0].response_text
             messages.append({"role": "assistant", "content": response_text})
+            print(
+                "raw response: ", response_text
+            )  # sometimes has <think></think> and <action>, somtimes not
 
             # Parse action from response
             _, action_str = self._parse_model_response(response_text)
@@ -352,13 +350,14 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             },
         )
         print("\n\n\n")
-        print("experience.tokens: ", len(experience.tokens))
-        print("experience.logprobs: ", len(experience.logprobs))
-        print("experience.action_mask: ", len(experience.action_mask))
-        print("experience.prompt_length: ", experience.prompt_length)
-        print("experience.reward: ", experience.reward)
-        print("experience.prompt_text: ", experience.prompt_text)
-        print("experience.response_text: ", experience.response_text, "\n\n\n")
+        print("full messages: ", messages)
+        # print("experience.tokens: ", len(experience.tokens))
+        # print("experience.logprobs: ", len(experience.logprobs))
+        # print("experience.action_mask: ", len(experience.action_mask))
+        # print("experience.prompt_length: ", experience.prompt_length)
+        # print("experience.reward: ", experience.reward)
+        # print("experience.prompt_text: ", experience.prompt_text)
+        # print("experience.response_text: ", experience.response_text, "\n\n\n")
         return [experience]
 
     def _parse_model_response(self, response: str) -> tuple[str, str]:
