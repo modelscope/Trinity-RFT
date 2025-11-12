@@ -15,8 +15,12 @@ def create_dataset_files(output_dir, train_size=None, test_size=None):
     from alfworld.info import ALFWORLD_DATA
 
     # get all matched game files from train and valid_seen directories
-    train_game_files = glob.glob(os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/train/*/*/game.tw-pddl"))
-    test_game_files = glob.glob(os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/valid_seen/*/*/game.tw-pddl"))
+    train_game_files = glob.glob(
+        os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/train/*/*/game.tw-pddl")
+    )
+    test_game_files = glob.glob(
+        os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/valid_seen/*/*/game.tw-pddl")
+    )
 
     # get absolute path
     train_game_files = [os.path.abspath(file) for file in train_game_files]
