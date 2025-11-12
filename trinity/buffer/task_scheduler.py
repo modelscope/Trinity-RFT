@@ -12,6 +12,10 @@ from trinity.common.config import Config
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from trinity.buffer.reader.file_reader import AstuneTaskReader
+
 
 @Experimental
 class TasksetScheduler:
@@ -62,7 +66,7 @@ class TasksetScheduler:
         for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config)
-            if not isinstance(taskset, TaskFileReader):
+            if not isinstance(taskset, TaskFileReader) or isinstance(taskset, AstuneTaskReader):
                 raise TypeError(
                     f"Taskset '{taskset_config.name}' has an unsupported type '{type(taskset).__name__}'."
                     f"Currently, only 'TaskFileReader' is supported by TasksetScheduler."
