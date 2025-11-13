@@ -6,6 +6,7 @@ from trinity.buffer import get_buffer_reader
 from trinity.common.config import BufferConfig
 from trinity.common.experience import Experiences
 from trinity.utils.annotations import Deprecated
+from trinity.utils.monitor import gather_metrics
 from trinity.utils.registry import Registry
 from trinity.utils.timer import Timer
 
@@ -46,6 +47,8 @@ class DefaultSampleStrategy(SampleStrategy):
         with Timer(metrics, "time/read_experience"):
             exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
+        metric_list = [{"model_version": exp.info["model_version"]} for exp in exp_list]
+        metrics.update(gather_metrics(metric_list, "sample"))
         with Timer(metrics, "time/gather_experience"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
         return exps, metrics, repr_samples
