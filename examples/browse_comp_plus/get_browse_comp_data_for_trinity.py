@@ -176,7 +176,7 @@ def main():
     print(f"1. Set environment variable: export TRINITY_TASKSET_PATH={output_dir.absolute()}")
     print("2. Make sure BROWSECOMP_PATH environment variable is set")
     print(
-        "3. Run training with: python -m trinity.train --config examples/browse_comp_plus/bcp_config.yaml"
+        "3. Run training with: trinity run --config examples/browse_comp_plus/bcp_config.yaml"
     )
 
 
