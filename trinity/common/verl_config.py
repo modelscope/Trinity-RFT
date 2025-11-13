@@ -81,6 +81,7 @@ class FSDPConfig:
     wrap_policy: WrapPolicy = field(default_factory=WrapPolicy)
     fsdp_size: int = -1
     forward_prefetch: bool = False
+    model_dtype: Optional[str] = "fp32"
 
 
 @dataclass
