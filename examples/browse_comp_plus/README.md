@@ -121,7 +121,7 @@ The `workflow_args` section controls the agent's behavior:
 
 ## Results
 
-From the below curve you can see that the agent learns for leverage more search calls to gain more accurate answers.
+From the below curve you can see that the agent learns to leverage more search calls to gain more accurate answers.
 
 Reward curve:
 
