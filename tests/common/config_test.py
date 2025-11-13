@@ -154,6 +154,19 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.trainer.trainer_config.critic.optim.weight_decay, 0.01)
         self.assertEqual(config.trainer.trainer_config.critic.optim.lr_decay_style, "constant")
 
+    def test_chat_template_path(self):
+        config = get_template_config()
+        config.model.chat_template_path = "tests/template/custom_chat_template.j2"
+        config.check_and_update()
+        self.assertIsNotNone(config.model.custom_chat_template)
+        self.assertEqual(
+            config.model.custom_chat_template,
+            config.buffer.explorer_input.tasksets[0].format.chat_template,
+        )
+        self.assertEqual(
+            config.model.custom_chat_template, config.explorer.rollout_model.chat_template
+        )
+
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):
             shutil.rmtree(CHECKPOINT_ROOT_DIR)

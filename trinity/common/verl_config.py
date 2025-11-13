@@ -35,7 +35,7 @@ class ActorModel:
     custom_chat_template: Optional[str] = None
     enable_activation_offload: bool = False
     use_shm: bool = False
-    trust_remote_code: bool = False  # # Whether to enable loading a remote code model
+    trust_remote_code: bool = False  # Whether to enable loading a remote code model
 
     # lora configs
     lora_rank: int = 0  # The rank of the LoRA model, default to 0. If lora_rank > 0, LoRA module is enabled in trainer

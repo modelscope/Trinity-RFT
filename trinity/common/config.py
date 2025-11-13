@@ -873,6 +873,7 @@ class Config:
             set_if_none(taskset.rollout_args, "top_k", self.model.top_k)
             set_if_none(taskset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
+            set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
 
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
             if not dataset.path:
