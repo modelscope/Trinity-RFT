@@ -85,6 +85,7 @@ class MixSampleStrategy(SampleStrategy):
             exp_list = usual_exp_list + expert_exp_list
             repr_samples = representative_sample(exp_list)
 
+        self.set_model_version_metric(exp_list, metrics)
         with Timer(metrics, "time/gather_experience"):
             exps = Experiences.gather_experiences(
                 experiences=exp_list,

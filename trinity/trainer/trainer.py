@@ -56,6 +56,7 @@ class Trainer:
         )
         self.save_interval = config.trainer.save_interval
         self.last_sync_step = None
+        self.last_sync_time = None
         self.total_steps = config.trainer.total_steps or float("inf")
 
     async def prepare(self) -> None:
@@ -68,22 +69,20 @@ class Trainer:
         """Train the model."""
         while self.train_step_num < self.total_steps:
             try:
-                st = time.time()
+                metrics = {}
                 # sample may be blocked due to explorer does not generate enough data
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
                 sample_task = asyncio.create_task(self._sample_data())
                 while not sample_task.done():
                     # sync weight to make sure the explorer can continue to explore and generate enough data
                     if await self.need_sync():
-                        # Currently, we do not record the metrics of sync_weight here
-                        await self.sync_weight()
+                        metrics.update(await self.sync_weight())
                     await asyncio.sleep(1)
-                exps, metrics, repr_samples = await sample_task
+                exps, sample_metrics, repr_samples = await sample_task
+                metrics.update(sample_metrics)
                 self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
                 metrics.update(await self.train_step(exps))
                 if await self.need_sync():
-                    # Record the time: sample_experience + train_step (>=1)
-                    metrics.update({"time/trainer_sync_interval": time.time() - st})
                     metrics.update(await self.sync_weight())
                 if self.need_save():
                     metrics.update(self.save_checkpoint())
@@ -126,7 +125,7 @@ class Trainer:
             List[Dict]: A list of representative samples for logging.
         """
         batch, metrics, repr_samples = await self.sample_strategy.sample(self.train_step_num + 1)
-        metrics["sample/task_count"] = len(set(eid.task for eid in batch.eids))
+        metrics["sample/task_count"] = len(set(eid.tid for eid in batch.eids))
         return batch, metrics, repr_samples
 
     async def need_sync(self) -> bool:
@@ -155,6 +154,8 @@ class Trainer:
         """Sync the model weight."""
         self.logger.info(f"Trainer sync_weights at step {self.train_step_num} started.")
         metrics = {}
+        if self.last_sync_time is not None:
+            metrics["time/trainer_sync_interval"] = time.time() - self.last_sync_time
         with Timer(metrics, "time/sync_weight"):
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
                 result = await self.synchronizer.ready_to_nccl_sync.remote(
@@ -170,6 +171,7 @@ class Trainer:
             elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
                 self.engine.upload_state_dict()
             self.last_sync_step = self.train_step_num
+            self.last_sync_time = time.time()
             await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
         self.logger.info(f"Trainer sync_weights at step {self.train_step_num} finished.")
         return metrics

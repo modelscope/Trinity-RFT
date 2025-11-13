@@ -63,6 +63,7 @@ class vLLMRolloutModel(InferenceModel):
         self.default_sampling_params = vllm.SamplingParams(
             n=1,
             temperature=config.temperature,
+            temperature=config.temperature,
             max_tokens=config.max_response_tokens,
             min_tokens=config.min_response_tokens,
             skip_special_tokens=True,

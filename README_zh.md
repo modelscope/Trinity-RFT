@@ -20,21 +20,43 @@
 
 ## 💡 什么是 Trinity-RFT ?
 
-Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。 其将 RFT 流程解耦为三个关键模块：**Explorer**、**Trainer** 和 **Buffer**，并面向不同背景和目标的用户提供相应功能：
+Trinity-RFT 是一个通用、灵活、用户友好的大语言模型（LLM）强化微调（RFT）框架。 其将 RFT 流程解耦为三个协同运行的关键模块：
 
-* 🤖 面向智能体应用开发者。[[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_workflow.html)
-  - 训练智能体应用，以增强其在指定环境中完成任务的能力
-  - 示例：[多轮交互](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)，[ReAct 智能体](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)
+* **Explorer** 负责执行智能体-环境交互，并生成经验数据；
 
-* 🧠 面向 RL 算法研究者。[[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)
-  - 在简洁、可插拔的类中设计和验证新的 RL 算法
-  - 示例：[SFT/RL 混合算法](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)
+* **Trainer** 在经验数据上最小化损失函数，以此更新模型参数；
 
-* 📊 面向数据工程师。[[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_operator.html)
-  - 设计针对任务定制的数据集，构建处理流水线以支持数据清洗、增强以及人类参与场景
-  - 示例：[数据处理基础](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)，[在线任务选择](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)
+* **Buffer** 负责协调整个 RFT 生命周期中的数据处理流水线。
 
-# 🌟 核心特性
+
+Trinity-RFT 面向不同背景和目标的用户提供相应功能：
+
+* 🤖 **智能体应用开发者:** 训练智能体应用，以增强其在特定领域中完成任务的能力 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_workflow.html)
+
+* 🧠 **强化学习算法研究者:** 通过定制化简洁、可插拔的模块，设计、实现与验证新的强化学习算法 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)
+
+* 📊 **数据工程师:** 设计针对任务定制的数据集，构建处理流水线以支持数据清洗、增强以及人类参与场景 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_operator.html)
+
+
+
+## 🔨 教程与指南
+
+
+| 类别 | 教程 / 指南  |
+| --- | ----|
+| *运行各种 RFT 模式* | + [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)<br>+ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_advanced.html)<br>+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_async_mode.html)<br>+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_dpo.html)     |
+| *多轮智能体强化学习* | + [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)<br>+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html)<br>+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)  <br>+ [例子：训练一个网络搜索智能体](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
+| *全生命周期的数据流水线* | + [Rollout 任务混合与选取](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_selector.html)<br>+ [在线任务选择](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) (📝 [论文](https://arxiv.org/pdf/2510.26374))<br>+ [研究项目：learn-to-ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask) (📝 [论文](https://arxiv.org/pdf/2510.25441)) <br>+ [经验回放机制](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [高级数据处理能力 &  Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)  |
+| *强化学习算法开发* | + [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html) (📝 [论文](https://arxiv.org/pdf/2508.11408))<br>+ [研究项目: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) (📝 [论文](https://arxiv.org/abs/2509.24203)) <br>+ 不可验证的领域: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [可训练 RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
+| *深入认识 Trinity-RFT* | + [完整配置指南](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)<br>+ [用于快速验证和实验的 Benchmark 工具](./benchmark/README.md)<br>+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/synchronizer.html)   |
+
+
+> [!NOTE]
+> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
+
+
+
+## 🌟 核心特性
 
 * **灵活的 RFT 模式：**
   - 支持同步/异步、on-policy/off-policy 以及在线/离线强化学习
@@ -45,14 +67,14 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
 
 * **Agentic RL 支持：**
   - 支持拼接式多轮和通用多轮交互
-  - 能够直接训练使用 AgentScope 等智能体框架开发的 Agent 应用
+  - 能够直接训练使用 [AgentScope](https://github.com/agentscope-ai/agentscope) 等智能体框架开发的 Agent 应用
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="智能体工作流" width="600" />
 
-* **全流程的数据流水线：**
+* **全生命周期的数据流水线：**
   - 支持 rollout 任务和经验数据的流水线处理
   - 贯穿 RFT 生命周期的主动数据管理（优先级排序、清洗、增强等）
-  - 原生支持多任务联合训练
+  - 原生支持多任务联合训练与课程学习
 
   <img src="https://img.alicdn.com/imgextra/i2/O1CN01Gk9CRw28NsL09nbOj_!!6000000007921-2-tps-2530-660.png" alt="数据流水线设计" width="600" />
 
@@ -64,25 +86,9 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
 
 
 
-## 🔨 教程与指南
-
-
-| Category | Tutorial / Guideline                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 运行各种 RFT 模式 | + [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)<br>+ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html)<br>+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html)<br>+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html)                                                                                                                                                                                       |
-| 多轮智能体场景 | + [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html)<br>+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)<br>+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html)                                                                                                                                                                                                                                                                                                                            |
-| 数据流水线进阶能力 | + [Rollout 任务混合与选取](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_selector.html)<br>+ [在线任务选择](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) ([论文](https://arxiv.org/pdf/2510.26374))<br>+ [经验回放](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [高级数据处理能力 &  Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html)                                                                                                                                                               |
-| RL 算法开发/研究 | + [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html) ([论文](https://arxiv.org/pdf/2508.11408))<br>+ 不可验证的领域：[RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [可训练 RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) <br>+ [研究项目: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) ([论文](https://arxiv.org/abs/2509.24203)) |
-| 深入认识 Trinity-RFT | + [完整配置指南](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html)<br>+ [用于快速验证和实验的 Benchmark 工具](./benchmark/README.md)<br>+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/synchronizer.html)                                                                                                                                                                                                                                                                                                                                                                     |
-
-
-> [!NOTE]
-> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
-
-
-
 ## 🚀 新闻
 
+* [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
 * [2025-11] 推出 [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)：在线 RL 任务选择，实现高效 LLM 微调（[论文](https://arxiv.org/pdf/2510.26374)）。
 * [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.2)] Trinity-RFT v0.3.2 发布：修复若干 Bug 并支持进阶的任务选择和调度。
 * [2025-10] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.1)] Trinity-RFT v0.3.1 发布：多阶段训练支持、改进的智能体 RL 示例、LoRA 支持、调试模式和全新 RL 算法。

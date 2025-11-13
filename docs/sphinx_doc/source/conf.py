@@ -73,7 +73,7 @@ def get_recent_tags(n: int) -> list:
         return []
 
 
-smv_tag_whitelist = r"^(" + "|".join(get_recent_tags(4)) + r")$"
+smv_tag_whitelist = r"^(" + "|".join(get_recent_tags(2)) + r")$"
 smv_branch_whitelist = r"^(main)$"  # included branches
 smv_remote_whitelist = None
 
