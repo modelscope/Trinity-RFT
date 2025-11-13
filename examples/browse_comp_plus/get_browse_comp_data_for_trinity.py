@@ -7,7 +7,7 @@ This script converts the BrowseComp-Plus decrypted JSONL dataset into the format
 expected by Trinity-RFT for RL training and evaluation.
 
 Usage:
-    python get_browser_comp_data_for_trinity.py --input path/to/browsecomp_plus_decrypted.jsonl --output_dir data/trinity_format
+    python get_browse_comp_data_for_trinity.py --input path/to/browsecomp_plus_decrypted.jsonl --output_dir data/trinity_format
 
 Environment Variables:
     BROWSECOMP_PATH: Path to BrowseComp-Plus directory (optional if --browsecomp_path is provided)
