@@ -62,14 +62,14 @@ class vLLMRolloutModel(InferenceModel):
             )
         self.default_sampling_params = vllm.SamplingParams(
             n=1,
-            temperature=0.0,
+            temperature=config.temperature,
             max_tokens=config.max_response_tokens,
             min_tokens=config.min_response_tokens,
             truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
-            logprobs=0,
+            logprobs=config.logprobs,
             ignore_eos=config.ignore_eos,
         )
         self.enable_thinking = config.enable_thinking
