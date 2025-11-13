@@ -412,6 +412,7 @@ class ModelConfig:
     critic_model_path: str = ""
 
     custom_chat_template: Optional[str] = None
+    chat_template_path: Optional[str] = None
 
     # rollout args
     temperature: float = 1.0
@@ -1066,6 +1067,11 @@ class Config:
         if not model.critic_model_path:
             model.critic_model_path = model.model_path
 
+        # check template
+        if model.chat_template_path and model.custom_chat_template is None:
+            with open(model.chat_template_path, "r") as f:
+                model.custom_chat_template = f.read()
+
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
         # if all three are set, check if they are valid
@@ -1192,6 +1198,7 @@ class Config:
             ]
             for args in ["model_path"] + rollout_args + length_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
+            setattr(self.explorer.rollout_model, "chat_template", self.model.custom_chat_template)
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")

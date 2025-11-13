@@ -15,6 +15,7 @@ logger = get_logger(__name__)
 @dataclass
 class Data:
     train_batch_size: int = 1024  # kept to pass RayPPOTrainer._validate_config
+    trust_remote_code: bool = False
 
 
 @dataclass
@@ -34,6 +35,7 @@ class ActorModel:
     custom_chat_template: Optional[str] = None
     enable_activation_offload: bool = False
     use_shm: bool = False
+    trust_remote_code: bool = False  # # Whether to enable loading a remote code model
 
     # lora configs
     lora_rank: int = 0  # The rank of the LoRA model, default to 0. If lora_rank > 0, LoRA module is enabled in trainer
@@ -219,6 +221,7 @@ class CriticModel:
     tokenizer_path: str = ""
     override_config: Dict[str, str] = field(default_factory=dict)
     external_lib: Optional[str] = None
+    trust_remote_code: bool = False  # Whether to enable loading a remote code model
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = True
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
