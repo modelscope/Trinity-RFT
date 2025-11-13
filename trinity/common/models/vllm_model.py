@@ -62,13 +62,15 @@ class vLLMRolloutModel(InferenceModel):
             )
         self.default_sampling_params = vllm.SamplingParams(
             n=1,
-            temperature=0.0,
+            temperature=config.temperature,
             max_tokens=config.max_response_tokens,
             min_tokens=config.min_response_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
-            logprobs=0,
+            logprobs=config.logprobs,
+            top_p=config.top_p,
+            top_k=config.top_k,
             ignore_eos=config.ignore_eos,
         )
         self.enable_thinking = config.enable_thinking
@@ -98,6 +100,7 @@ class vLLMRolloutModel(InferenceModel):
                 "max_new_tokens": config.max_response_tokens,
             },
             disable_log_stats=True,
+            logprobs_mode="processed_logprobs",
             enable_lora=config.enable_lora,
             **config.lora_kwargs,
         )
@@ -210,6 +213,11 @@ class vLLMRolloutModel(InferenceModel):
             )
             for i in range(len(output.outputs))
         ]
+        prompt_length = experiences[0].prompt_length
+        print(
+            "In def generate: logprobs",
+            experiences[0].logprobs[prompt_length - 1 : prompt_length + 10],
+        )
         return experiences
 
     async def chat_mm(
@@ -319,6 +327,7 @@ class vLLMRolloutModel(InferenceModel):
         Returns:
             A tensor of logprobs (seq_length - 1).
         """
+        print("!!!Begin compute logprobs !!!")
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids},
             lora_request=lora_request,
@@ -370,6 +379,7 @@ class vLLMRolloutModel(InferenceModel):
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
+        print("Final logprobs", logprobs[:10])
         return Experience(
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
