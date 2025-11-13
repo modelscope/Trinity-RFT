@@ -3,9 +3,6 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import Task, Workflow
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)  # TODO: delete this after debugging
 
 
 class StepWiseRewardWorkflow(Workflow):
@@ -149,7 +146,6 @@ class RewardPropagationWorkflow(Workflow):
             experiences.extend(exps)
             if not continue_run:
                 break
-        logger.info(f"Experiences[0]: {experiences[0].response_text}")
         reward = self.reward(experiences)
         for exp in experiences:
             exp.reward = reward

@@ -100,7 +100,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         self.use_multistep_prompt = workflow_args.get("use_multistep_prompt", False)
         self.desc = workflow_args.get("desc", None)
         self.is_slippery = workflow_args.get("is_slippery", False)
-        print(f"{self.rollout_args =}")
         self.max_response_tokens = self.rollout_args.get("max_response_tokens", 10240)
 
         # Extract task-specific arguments
@@ -108,7 +107,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         self.size = self.raw_task.get("size", 1)
         self.p = self.raw_task.get("p", 0.8)
         self.seed = self.raw_task.get("seed", 42)
-        print("self.size: ", self.size, "self.p: ", self.p, "self.seed: ", self.seed)
 
         if self.desc is None:
             random_map, goal_position = generate_random_map(
@@ -241,11 +239,17 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         room_state = self.render(mode="state").tolist()
 
         if mode == "list":
-            lookup = lambda cell: GRID_LOOKUP.get(cell, "?").strip("\t").strip()
+
+            def lookup(cell):
+                return GRID_LOOKUP.get(cell, "?").strip("\t").strip()
+
             return [" ".join(lookup(cell) for cell in row) for row in room_state]
 
         if mode == "tiny_rgb_array":
-            lookup = lambda cell: GRID_LOOKUP.get(cell, "?")
+
+            def lookup(cell):
+                return GRID_LOOKUP.get(cell, "?")
+
             result = "\n".join("".join(lookup(cell) for cell in row) for row in room_state)
             return result
 
@@ -271,7 +275,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         # Run episode until done or max_steps reached
         for step in range(self.max_steps):
-            print("Current step: ", step)
             # Format observation for the model
             current_obs_str = str(self.current_observation)
             user_prompt_content = (
@@ -301,11 +304,9 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             else:
                 response_token_len = messages_token_len - init_prompt_token_len
                 max_tokens = self.max_response_tokens - response_token_len
-            print(
-                f"!!!Debug: {max_tokens=} used_response_tokens = {self.max_response_tokens-max_tokens} {messages_token_len=} {init_prompt_token_len=}"
-            )
 
             if max_tokens <= 0:
+                # messages = messages[:-1] # TODO: apply this?
                 self.done = False
                 self.final_reward = 0
                 break
@@ -314,13 +315,9 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             rollout_args = self.rollout_args.copy()
             rollout_args["n"] = 1
             rollout_args["max_tokens"] = max_tokens
-            # print("Current step: ", step, rollout_args)
             responses = await self.model.chat_async(messages, **rollout_args)
             response_text = responses[0].response_text
             messages.append({"role": "assistant", "content": response_text})
-            print(
-                "raw response: ", response_text
-            )  # sometimes has <think></think> and <action>, somtimes not
 
             # Parse action from response
             _, action_str = self._parse_model_response(response_text)
@@ -349,15 +346,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 "success": 1 if self.final_reward == 1.0 else 0,
             },
         )
-        print("\n\n\n")
-        print("full messages: ", messages)
-        # print("experience.tokens: ", len(experience.tokens))
-        # print("experience.logprobs: ", len(experience.logprobs))
-        # print("experience.action_mask: ", len(experience.action_mask))
-        # print("experience.prompt_length: ", experience.prompt_length)
-        # print("experience.reward: ", experience.reward)
-        # print("experience.prompt_text: ", experience.prompt_text)
-        # print("experience.response_text: ", experience.response_text, "\n\n\n")
         return [experience]
 
     def _parse_model_response(self, response: str) -> tuple[str, str]:
