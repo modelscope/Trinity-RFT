@@ -52,7 +52,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
     The episode starts with the player at random location
 
     ## Rewards
-    NOTE added -1 as penalty for invalid action
     Reward schedule:
     - Reach goal: +1
     - Reach hole: 0
@@ -133,9 +132,9 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         # Agent-related state
         self.step_count: int = 0
+        self.step_rewards: List[float] = []
         self.current_observation: Optional[str] = None
         self.done: bool = False
-        self.final_reward: float = 0.0
         self.last_observation: Optional[str] = None
 
     @property
@@ -261,12 +260,14 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         """
         # Reset environment and state for a new episode
         # But this only resets the player position, not the environment configuration.
-        observation, info = self.gym_env.reset(seed=self.seed)
-        self.current_observation = self.render()
-        self.last_observation = self.current_observation
+        self.gym_env.reset(seed=self.seed)
+        observation = self.render()
+        self.current_observation = str(observation)
         self.done = False
-        self.final_reward = 0.0
+        self.step_rewards = []
         self.step_count = 0
+        self.action = None
+        terminate_reason = None
 
         # Initialize messages
         messages = []
@@ -276,21 +277,16 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         # Run episode until done or max_steps reached
         for step in range(self.max_steps):
             # Format observation for the model
-            current_obs_str = str(self.current_observation)
             user_prompt_content = (
                 f"Current Observation ({self.step_count}): \n"
-                + current_obs_str
+                + self.current_observation
                 + "\n"
                 + "You have not achieved the goal, P has not reached G yet. Please give the next action."
             )
 
-            # Check if the observation is the same as the previous step's observation
-            if (
-                self.last_observation is not None
-                and self.last_observation == current_obs_str
-                and self.step_count > 0
-            ):
-                user_prompt_content += "\nYour last response is invalid. Your position didn't change at all. You may need to recheck your thinking process, action outputted, and the format of response. Remember, you should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```."
+            if self.step_count > 0 and self.action is not None:
+                if self.last_observation == self.current_observation:
+                    user_prompt_content += "\nYour last response is invalid. Your position didn't change at all. You may need to recheck your thinking process, action outputted, and the format of response. Remember, you should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```."
 
             if self.max_steps is not None and self.max_steps - self.step_count > 0:
                 user_prompt_content += f"\nThe maximum number of steps remaining is {self.max_steps - self.step_count}."
@@ -306,9 +302,10 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 max_tokens = self.max_response_tokens - response_token_len
 
             if max_tokens <= 0:
-                # messages = messages[:-1] # TODO: apply this?
-                self.done = False
-                self.final_reward = 0
+                messages = messages[:-1]  # TODO: check if this is correct
+                self.done = True
+                self.step_rewards.append(0)
+                terminate_reason = "max_tokens_reached"
                 break
 
             # Get action from the model
@@ -322,6 +319,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             # Parse action from response
             _, action_str = self._parse_model_response(response_text)
             action = int(action_str) if action_str.isdigit() else self.invalid_action
+            self.action = action
 
             # Execute action in the environment
             observation, reward, done, info = self.env_step(action)
@@ -330,20 +328,25 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             self.last_observation = self.current_observation
             self.current_observation = str(observation)
             self.done = done
+            self.step_rewards.append(reward)
             self.step_count += 1
 
             if self.done:
-                self.final_reward = reward
+                terminate_reason = "success"
                 break
+        if not self.done:
+            terminate_reason = "max_steps_reached"
 
         # Create experience from messages
+        final_reward = sum(self.step_rewards)
+        # print(f"final_reward: {final_reward}, terminate_reason: {terminate_reason}")
         experience = self.process_messages_to_experience(
             messages=messages,
-            reward=self.final_reward,
+            reward=final_reward,
             info={
                 "env_steps": self.step_count,
                 "env_done": 1 if self.done else 0,
-                "success": 1 if self.final_reward == 1.0 else 0,
+                "test_score": final_reward,
             },
         )
         return [experience]
