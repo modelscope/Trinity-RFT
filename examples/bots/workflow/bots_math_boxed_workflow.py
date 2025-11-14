@@ -3,8 +3,6 @@ from typing import Union
 from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow, Task
 from trinity.common.workflows.workflow import WORKFLOWS
 
-from .bots_math_boxed_reward import BOTSMathBoxedRewardFn
-
 
 @WORKFLOWS.register_module("bots_math_boxed_workflow")
 class BOTSMathBoxedWorkflow(MathBoxedWorkflow):
@@ -12,21 +10,15 @@ class BOTSMathBoxedWorkflow(MathBoxedWorkflow):
 
     def reset(self, task: Task):
         super().reset(task)
+        from trinity.plugins.bots_math_boxed_reward import BOTSMathBoxedRewardFn
+
         self.reward_fn = BOTSMathBoxedRewardFn(**self.reward_fn_args)
+        self.task_desc = nested_query(self.format_args.prompt_key, self.raw_task)
+        self.truth = nested_query(self.format_args.response_key, self.raw_task)
 
     def format_messages(self):
         # the prompts are already in message format
         return self.task_desc
-
-    @property
-    def task_desc(self) -> Union[str, None]:  # type: ignore [override]
-        prompt_key = self.format_args.prompt_key
-        return nested_query(prompt_key, self.raw_task)  # type: ignore
-
-    @property
-    def truth(self) -> Union[str, None]:  # type: ignore [override]
-        response_key = self.format_args.response_key
-        return nested_query(response_key, self.raw_task)
 
 
 def nested_query(query_key: str, query_obj: Union[dict, None]):
