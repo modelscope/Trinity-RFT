@@ -90,6 +90,13 @@ class TasksetScheduler:
         self.epoch = self.step * self.read_batch_size // len(self.base_taskset_ids)
         self.orders = self.build_orders(self.epoch)
 
+        if self.config.buffer.total_steps:
+            self.max_steps = self.config.buffer.total_steps
+        else:
+            self.max_steps = (
+                self.config.buffer.total_epochs * len(self.base_taskset_ids) // self.read_batch_size
+            )
+
     def build_orders(self, epoch: int):
         """
         Creates a shuffled sequence of taskset IDs to control sampling priority per step.
@@ -109,13 +116,7 @@ class TasksetScheduler:
         return taskset_ids
 
     def _should_stop(self) -> bool:
-        if self.config.buffer.total_steps:
-            if self.step >= self.config.buffer.total_steps:
-                return True
-        else:
-            if self.epoch >= self.config.buffer.total_epochs:
-                return True
-        return False
+        return self.step >= self.max_steps
 
     async def read_async(self) -> List:
         """
