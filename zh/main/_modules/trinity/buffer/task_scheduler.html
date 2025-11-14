@@ -649,7 +649,14 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty tasksets provided!&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_taskset_ids</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">orders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_orders</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_orders</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_taskset_ids</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TasksetScheduler.build_orders">
@@ -673,6 +680,9 @@ document.write(`
         <span class="k">return</span> <span class="n">taskset_ids</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span>
+
 <div class="viewcode-block" id="TasksetScheduler.read_async">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetScheduler.read_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -692,12 +702,8 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            List[Task]: A batch of tasks from potentially multiple tasksets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">StopAsyncIteration</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">StopAsyncIteration</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_stop</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">StopAsyncIteration</span>
 
         <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span>
         <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_taskset_ids</span><span class="p">)</span>
@@ -710,8 +716,6 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">taskset_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">StopAsyncIteration</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">orders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_orders</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
             <span class="n">taskset_ids</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="p">[:</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_taskset_ids</span><span class="p">))]</span>
 
