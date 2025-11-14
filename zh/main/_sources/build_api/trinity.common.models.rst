@@ -1,6 +1,14 @@
 trinity.common.models package
 =============================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.common.models.vllm_patch
+
 Submodules
 ----------
 

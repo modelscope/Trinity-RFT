@@ -44,7 +44,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'build_api/trinity.common.models';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="trinity.common.models.mm_utils module" href="trinity.common.models.mm_utils.html" />
+    <link rel="next" title="trinity.common.models.vllm_patch package" href="trinity.common.models.vllm_patch.html" />
     <link rel="prev" title="trinity.common package" href="trinity.common.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
@@ -351,6 +351,7 @@
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="trinity.common.html">trinity.common package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">trinity.common.models package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.model.html">trinity.common.models.model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
@@ -592,6 +593,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.common.models">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.create_inference_models"><code class="docutils literal notranslate"><span class="pre">create_inference_models()</span></code></a></li>
@@ -612,6 +614,37 @@ document.write(`
                   
   <section id="trinity-common-models-package">
 <h1>trinity.common.models package<a class="headerlink" href="#trinity-common-models-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_patch.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html">trinity.common.models.vllm_patch.api_patch module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.PatchedChatCompletionResponseChoice"><code class="docutils literal notranslate"><span class="pre">PatchedChatCompletionResponseChoice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.PatchedChatCompletionResponse"><code class="docutils literal notranslate"><span class="pre">PatchedChatCompletionResponse</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.chat_completion_full_generator"><code class="docutils literal notranslate"><span class="pre">chat_completion_full_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.run_server_in_ray"><code class="docutils literal notranslate"><span class="pre">run_server_in_ray()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.dummy_add_signal_handler"><code class="docutils literal notranslate"><span class="pre">dummy_add_signal_handler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.patch_and_serve_http"><code class="docutils literal notranslate"><span class="pre">patch_and_serve_http()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.run_api_server_in_ray_actor"><code class="docutils literal notranslate"><span class="pre">run_api_server_in_ray_actor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.worker_patch.html">trinity.common.models.vllm_patch.worker_patch module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.worker_patch.html#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs"><code class="docutils literal notranslate"><span class="pre">patch_vllm_prompt_logprobs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_patch.html#module-trinity.common.models.vllm_patch">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.html#trinity.common.models.vllm_patch.get_vllm_version"><code class="docutils literal notranslate"><span class="pre">get_vllm_version()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -759,11 +792,11 @@ The models must be created by <cite>create_debug_inference_model</cite> in anoth
       </div>
     </a>
     <a class="right-next"
-       href="trinity.common.models.mm_utils.html"
+       href="trinity.common.models.vllm_patch.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">trinity.common.models.mm_utils module</p>
+        <p class="prev-next-title">trinity.common.models.vllm_patch package</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -783,6 +816,7 @@ The models must be created by <cite>create_debug_inference_model</cite> in anoth
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.common.models">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.create_inference_models"><code class="docutils literal notranslate"><span class="pre">create_inference_models()</span></code></a></li>
