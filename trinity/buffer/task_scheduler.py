@@ -143,7 +143,7 @@ class TasksetScheduler:
         else:
             taskset_ids = self.orders[start:]
             self.epoch += 1
-            if self.epoch >= self.config.buffer.total_epochs:
+            if not self.config.buffer.total_steps and self.epoch >= self.config.buffer.total_epochs:
                 raise StopAsyncIteration
             self.orders = self.build_orders(self.epoch)
             taskset_ids += self.orders[: (end - len(self.base_taskset_ids))]
