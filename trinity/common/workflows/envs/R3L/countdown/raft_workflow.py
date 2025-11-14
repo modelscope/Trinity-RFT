@@ -12,7 +12,7 @@ from trinity.common.workflows.envs.R3L.countdown import utils
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 
 
-@WORKFLOWS.register_module("raft_baseline_countdown_workflow")
+@WORKFLOWS.register_module("RAFT_baseline_countdown_workflow")
 class RAFTBaselineCountdownWorkflow(Workflow):
     """
     RAFT Baseline workflow for Countdown environment.

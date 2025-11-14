@@ -36,7 +36,7 @@ buffer:
           prompt_key: 'task_id'
         rollout_args:
           temperature: 0.4
-    default_workflow_type: 'raft_baseline_webshop_workflow'
+    default_workflow_type: 'RAFT_baseline_webshop_workflow'
   trainer_input:
     experience_buffer:
       name: webshop_raft_baseline_7B_buffer

@@ -101,7 +101,7 @@ buffer:
           response_key: 'answer'
         rollout_args:
           temperature: 0.4
-    default_workflow_type: 'raft_baseline_dapo_workflow'
+    default_workflow_type: 'RAFT_baseline_dapo_workflow'
   trainer_input:
     experience_buffer:
       name: dapo_raft_baseline_1.5B_buffer

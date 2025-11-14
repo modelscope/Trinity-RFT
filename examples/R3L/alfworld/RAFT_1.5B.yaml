@@ -36,7 +36,7 @@ buffer:
           prompt_key: 'task_id'
         rollout_args:
           temperature: 0.4
-    default_workflow_type: 'raft_baseline_alfworld_workflow'
+    default_workflow_type: 'RAFT_baseline_alfworld_workflow'
   trainer_input:
     experience_buffer:
       name: alfworld_raft_baseline_1.5B_buffer

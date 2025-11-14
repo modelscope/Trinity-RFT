@@ -38,7 +38,7 @@ buffer:
           response_key: 'target'
         rollout_args:
           temperature: 0.4
-    default_workflow_type: 'raft_baseline_countdown_workflow'
+    default_workflow_type: 'RAFT_baseline_countdown_workflow'
   trainer_input:
     experience_buffer:
       name: countdown_raft_baseline_7B_buffer

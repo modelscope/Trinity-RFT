@@ -12,7 +12,7 @@ from trinity.common.workflows.envs.R3L.scienceworld import utils
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 
 
-@WORKFLOWS.register_module("raft_baseline_scienceworld_workflow")
+@WORKFLOWS.register_module("RAFT_baseline_scienceworld_workflow")
 class RAFTBaselineScienceWorldWorkflow(Workflow):
     """
     RAFT Baseline workflow for ScienceWorld environment.
