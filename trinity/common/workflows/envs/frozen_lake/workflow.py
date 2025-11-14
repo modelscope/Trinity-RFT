@@ -303,7 +303,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
             if max_tokens <= 0:
                 messages = messages[:-1]  # TODO: check if this is correct
-                self.done = True
+                self.done = False
                 self.step_rewards.append(0)
                 terminate_reason = "max_tokens_reached"
                 break
@@ -334,7 +334,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             if self.done:
                 terminate_reason = "success"
                 break
-        if not self.done:
+        if terminate_reason is None:
             terminate_reason = "max_steps_reached"
 
         # Create experience from messages
