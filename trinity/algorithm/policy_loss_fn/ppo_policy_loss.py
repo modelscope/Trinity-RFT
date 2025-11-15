@@ -20,7 +20,24 @@ class PPOPolicyLossFn(PolicyLossFn):
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
         loss_agg_mode: Optional[str] = "token-mean",
+        truncate_large_is: bool = False,
+        truncate_is_range_low: Optional[float] = 0.0,
+        truncate_is_range_high: Optional[float] = 2.0,
     ) -> None:
+        """
+        Initialize PPO policy loss function.
+
+        Args:
+            backend: Backend framework (default: "verl")
+            clip_range: Symmetric clipping range for PPO
+            clip_range_low: Lower bound for clipping (1.0 - clip_range_low)
+            clip_range_high: Upper bound for clipping (1.0 + clip_range_high)
+            loss_agg_mode: Loss aggregation mode (default: "token-mean")
+            truncate_large_is: Whether to truncate large importance sampling ratios
+                to handle calculation discrepancies between rollout and training engines
+            truncate_is_range_low: Lower bound for IS ratio truncation (default: 0.0)
+            truncate_is_range_high: Upper bound for IS ratio truncation (default: 2.0)
+        """
         super().__init__(backend=backend)
         if clip_range_low is None:
             self.clip_range_low = clip_range
@@ -34,6 +51,22 @@ class PPOPolicyLossFn(PolicyLossFn):
         assert self.clip_range_high is not None, "clip_range_high must be specified."
         self.loss_agg_mode = loss_agg_mode
 
+        # Truncate large IS configuration
+        self.truncate_large_is = truncate_large_is
+        if truncate_large_is:
+            self.truncate_is_range_low = truncate_is_range_low
+            self.truncate_is_range_high = truncate_is_range_high
+            assert (
+                self.truncate_is_range_low is not None
+            ), "truncate_is_range_low must be specified."
+            assert (
+                self.truncate_is_range_high is not None
+            ), "truncate_is_range_high must be specified."
+            assert self.truncate_is_range_low >= 0.0, "truncate_is_range_low must be non-negative."
+            assert (
+                self.truncate_is_range_high > self.truncate_is_range_low
+            ), "truncate_is_range_high must be greater than truncate_is_range_low."
+
     def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
@@ -45,6 +78,18 @@ class PPOPolicyLossFn(PolicyLossFn):
         negative_approx_kl = logprob - old_logprob
         ratio = torch.exp(negative_approx_kl)
         ppo_kl = masked_mean(-negative_approx_kl, action_mask)
+
+        # Truncate large IS ratios if enabled
+        # This helps stabilize training when there are calculation discrepancies between
+        # rollout and training engines, especially for small probabilities
+        if self.truncate_large_is:
+            # Track how often truncation occurs (before actually truncating)
+            # More efficient than cloning: directly check which values fall outside bounds
+            ratio_detached = ratio.detach()
+            is_truncate_frac = masked_mean(
+                (ratio_detached < self.truncate_is_range_low).float(), action_mask
+            ) + masked_mean((ratio_detached > self.truncate_is_range_high).float(), action_mask)
+            ratio = torch.clamp(ratio, self.truncate_is_range_low, self.truncate_is_range_high)
 
         pg_losses = -advantages * ratio
         pg_losses2 = -advantages * torch.clamp(
@@ -60,6 +105,11 @@ class PPOPolicyLossFn(PolicyLossFn):
             "ppo_kl": ppo_kl.detach().item(),
             "pg_loss": pg_loss.detach().item(),
         }
+
+        # Add IS truncation metrics if enabled
+        if self.truncate_large_is:
+            metrics["is_truncate_frac"] = is_truncate_frac.detach().item()
+
         return pg_loss, metrics
 
     @classmethod
@@ -67,4 +117,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         return {
             "clip_range": 0.2,
             "loss_agg_mode": "token-mean",
+            "truncate_large_is": False,
+            "truncate_is_range_low": 0.0,
+            "truncate_is_range_high": 2.0,
         }
