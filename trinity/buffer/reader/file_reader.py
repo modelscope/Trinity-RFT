@@ -179,7 +179,7 @@ def read_astune_config(yaml_fp):
     file_name = os.path.basename(yaml_fp)
     return load_hydra_config(config_path=dir_path, config_name=file_name)
 
-class AstuneTaskReader(BaseFileReader):
+class AstuneTaskReader(TaskFileReader):
     def __init__(self, config):
         self.config = config
         self.read_batch_size = config.batch_size
@@ -193,7 +193,7 @@ class AstuneTaskReader(BaseFileReader):
         # from vsdb import bp
         # bp("XXX")
 
-        from astune.task_reader.task_reader_base import TaskReaderRouter, task_to_standard_dataset
+        from astune.task_reader import TaskReaderRouter, task_to_standard_dataset
         task_reader = TaskReaderRouter(astune_config)
         if 'train' in self.split:
             train_dataset = task_to_standard_dataset(task_reader.get_training_tasks())
