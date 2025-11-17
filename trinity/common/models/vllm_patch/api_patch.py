@@ -10,7 +10,6 @@ import time
 from typing import Optional, Union
 
 import vllm
-from packaging.version import InvalidVersion
 from packaging.version import parse as parse_version
 from pydantic import Field, TypeAdapter
 from vllm.entrypoints.launcher import serve_http
@@ -39,6 +38,7 @@ from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import MistralTokenizer
 from vllm.utils import FlexibleArgumentParser, set_ulimit
 
+from trinity.common.models.vllm_patch import get_vllm_version
 from trinity.utils.log import get_logger
 
 
@@ -325,16 +325,6 @@ async def patch_and_serve_http(app, sock, args):
     finally:
         loop.add_signal_handler = original_add_signal_handler
         sock.close()
-
-
-def get_vllm_version():
-    try:
-        vllm_version = parse_version(vllm.__version__)
-    except InvalidVersion:
-        # for self-compiled vllm,
-        # we cannot parse the version, trait it as the lowest version we support
-        vllm_version = parse_version("0.8.5")
-    return vllm_version
 
 
 async def run_api_server_in_ray_actor(
