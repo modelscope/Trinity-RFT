@@ -109,9 +109,9 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_model_path()
+        self.config.model.custom_chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.engine_num = self.engine_num
         self.config.explorer.rollout_model.tensor_parallel_size = self.tensor_parallel_size
-        self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.algorithm.repeat_times = self.repeat_times
         self.config.explorer.rollout_model.enable_history = self.enable_history
         self.config.check_and_update()

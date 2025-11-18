@@ -412,7 +412,9 @@ class ModelConfig:
     critic_model_path: str = ""
 
     custom_chat_template: Optional[str] = None
-    chat_template_path: Optional[str] = None  # path to the chat template file, e.g., jinja2 type; overrides `custom_chat_template` if set
+    chat_template_path: Optional[
+        str
+    ] = None  # path to the chat template file, e.g., jinja2 type; overrides `custom_chat_template` if set
 
     # rollout args
     temperature: float = 1.0
@@ -1199,7 +1201,11 @@ class Config:
             ]
             for args in ["model_path"] + rollout_args + length_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
-            setattr(self.explorer.rollout_model, "chat_template", self.model.custom_chat_template)
+            if (
+                self.explorer.rollout_model.chat_template is None
+                and self.model.custom_chat_template is not None
+            ):
+                self.explorer.rollout_model.chat_template = self.model.custom_chat_template
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
