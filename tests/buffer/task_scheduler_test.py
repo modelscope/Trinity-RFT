@@ -41,6 +41,54 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
     @parameterized.expand(
         [
             (
+                {"batch_size": 5, "total_steps": 3},
+                {"selector_type": "sequential"},
+                [
+                    {"index": 0, "taskset_id": 1},
+                    {"index": 1, "taskset_id": 1},
+                    {"index": 2, "taskset_id": 1},
+                    {"index": 0, "taskset_id": 0},
+                    {"index": 1, "taskset_id": 0},
+                    {"index": 3, "taskset_id": 1},
+                    {"index": 4, "taskset_id": 1},
+                    {"index": 5, "taskset_id": 1},
+                    {"index": 2, "taskset_id": 0},
+                    {"index": 3, "taskset_id": 0},
+                    {"index": 6, "taskset_id": 1},
+                    {"index": 0, "taskset_id": 1},
+                    {"index": 1, "taskset_id": 1},
+                    {"index": 4, "taskset_id": 0},
+                    {"index": 0, "taskset_id": 0},
+                ],
+            ),
+            (
+                {"batch_size": 5, "total_epochs": 2},
+                {"selector_type": "sequential"},
+                [
+                    {"index": 0, "taskset_id": 1},
+                    {"index": 1, "taskset_id": 1},
+                    {"index": 2, "taskset_id": 1},
+                    {"index": 0, "taskset_id": 0},
+                    {"index": 1, "taskset_id": 0},
+                    {"index": 3, "taskset_id": 1},
+                    {"index": 4, "taskset_id": 1},
+                    {"index": 5, "taskset_id": 1},
+                    {"index": 2, "taskset_id": 0},
+                    {"index": 3, "taskset_id": 0},
+                    {"index": 6, "taskset_id": 1},
+                    {"index": 0, "taskset_id": 1},
+                    {"index": 1, "taskset_id": 1},
+                    {"index": 4, "taskset_id": 0},
+                    {"index": 0, "taskset_id": 0},
+                    {"index": 2, "taskset_id": 1},
+                    {"index": 3, "taskset_id": 1},
+                    {"index": 4, "taskset_id": 1},
+                    {"index": 1, "taskset_id": 0},
+                    {"index": 2, "taskset_id": 0},
+                ],
+            ),
+            (
+                {"batch_size": 2, "total_epochs": 2},
                 {"selector_type": "sequential"},
                 [
                     {"index": 0, "taskset_id": 1},
@@ -70,6 +118,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ],
             ),
             (
+                {"batch_size": 2, "total_epochs": 2},
                 {"selector_type": "shuffle", "seed": 42},
                 [
                     {"index": 3, "taskset_id": 1},
@@ -99,6 +148,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ],
             ),
             (
+                {"batch_size": 2, "total_epochs": 2},
                 {"selector_type": "random", "seed": 42},
                 [
                     {"index": 0, "taskset_id": 1},
@@ -128,6 +178,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ],
             ),
             (
+                {"batch_size": 2, "total_epochs": 2},
                 {"selector_type": "offline_easy2hard", "feature_keys": ["feature_offline"]},
                 [
                     {"index": 3, "taskset_id": 1},
@@ -157,6 +208,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
                 ],
             ),
             (
+                {"batch_size": 2, "total_epochs": 2},
                 {"selector_type": "difficulty_based", "feature_keys": ["feat_1", "feat_2"]},
                 [
                     {"index": 3, "taskset_id": 1},
@@ -187,10 +239,13 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
             ),
         ]
     )
-    async def test_task_scheduler(self, task_selector_kwargs, batch_tasks_orders) -> None:
+    async def test_task_scheduler(
+        self, buffer_config_kwargs, task_selector_kwargs, batch_tasks_orders
+    ) -> None:
         config = get_template_config()
-        config.buffer.batch_size = 2
-        config.buffer.total_epochs = 2
+        config.mode = "explore"
+        for key, value in buffer_config_kwargs.items():
+            setattr(config.buffer, key, value)
         config.buffer.explorer_input.taskset = None
         config.buffer.explorer_input.tasksets = [
             TasksetConfig(

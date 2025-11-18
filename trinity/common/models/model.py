@@ -31,11 +31,16 @@ class InferenceModel(ABC):
         """Generate experiences from a list of history chat messages in async."""
         raise NotImplementedError
 
-    async def logprobs(self, tokens: List[int]) -> Tensor:
+    async def logprobs(self, token_ids: List[int], **kwargs) -> Tensor:
         """Generate logprobs for a list of tokens in async."""
         raise NotImplementedError
 
-    async def convert_messages_to_experience(self, messages: List[dict]) -> Experience:
+    async def convert_messages_to_experience(
+        self,
+        messages: List[dict],
+        tools: Optional[List[dict]] = None,
+        temperature: Optional[float] = None,
+    ) -> Experience:
         """Convert a list of messages into an experience in async."""
         raise NotImplementedError
 
@@ -205,21 +210,39 @@ class ModelWrapper:
     ) -> List[Experience]:
         return await self.model.chat_mm.remote(messages, images=images, videos=videos, **kwargs)
 
-    def logprobs(self, tokens: List[int]) -> Tensor:
+    def logprobs(self, tokens: List[int], temperature: Optional[float] = None) -> Tensor:
         """Calculate the logprobs of the given tokens."""
-        return ray.get(self.model.logprobs.remote(tokens))
+        return ray.get(self.model.logprobs.remote(tokens, temperature=temperature))
 
-    async def logprobs_async(self, tokens: List[int]) -> Tensor:
+    async def logprobs_async(
+        self, tokens: List[int], temperature: Optional[float] = None
+    ) -> Tensor:
         """Calculate the logprobs of the given tokens in async."""
-        return await self.model.logprobs.remote(tokens)
+        return await self.model.logprobs.remote(tokens, temperature=temperature)
 
-    def convert_messages_to_experience(self, messages: List[dict]) -> Experience:
+    def convert_messages_to_experience(
+        self,
+        messages: List[dict],
+        tools: Optional[List[dict]] = None,
+        temperature: Optional[float] = None,
+    ) -> Experience:
         """Convert a list of messages into an experience."""
-        return ray.get(self.model.convert_messages_to_experience.remote(messages))
+        return ray.get(
+            self.model.convert_messages_to_experience.remote(
+                messages, tools=tools, temperature=temperature
+            )
+        )
 
-    async def convert_messages_to_experience_async(self, messages: List[dict]) -> Experience:
+    async def convert_messages_to_experience_async(
+        self,
+        messages: List[dict],
+        tools: Optional[List[dict]] = None,
+        temperature: Optional[float] = None,
+    ) -> Experience:
         """Convert a list of messages into an experience in async."""
-        return await self.model.convert_messages_to_experience.remote(messages)
+        return await self.model.convert_messages_to_experience.remote(
+            messages, tools=tools, temperature=temperature
+        )
 
     @property
     def model_version(self) -> int:

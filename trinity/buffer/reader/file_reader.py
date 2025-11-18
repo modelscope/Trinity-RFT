@@ -80,6 +80,7 @@ class _HFBatchReader:
         for i in indices:
             assert 0 <= i < self.dataset_size
             batch.append(self.dataset[int(i)])
+        self.progress_bar.update(len(batch))  # update progress bar
         return batch
 
 

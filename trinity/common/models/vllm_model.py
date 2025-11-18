@@ -16,13 +16,13 @@ from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import InferenceModelConfig
 from trinity.common.experience import Experience
-from trinity.common.models.api.vllm_patch import get_vllm_version
 from trinity.common.models.mm_utils import (
     build_multi_modal_inputs,
     convert_messages_to_mm_format,
 )
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import get_action_mask_method
+from trinity.common.models.vllm_patch.api_patch import get_vllm_version
 from trinity.utils.log import get_logger
 
 
@@ -100,6 +100,7 @@ class vLLMRolloutModel(InferenceModel):
             },
             disable_log_stats=True,
             enable_lora=config.enable_lora,
+            logprobs_mode="processed_logprobs",
             **config.lora_kwargs,
         )
         if get_vllm_version() > parse_version("0.10.0"):
@@ -307,8 +308,11 @@ class vLLMRolloutModel(InferenceModel):
         ]
         return experiences
 
-    async def logprobs(
-        self, token_ids: List[int], lora_request: LoRARequest = None
+    async def logprobs(  # type: ignore [override]
+        self,
+        token_ids: List[int],
+        lora_request: LoRARequest = None,
+        temperature: Optional[float] = None,
     ) -> torch.Tensor:
         """Calculate the logprobs of the given tokens in async. Please slice the result carefully
         to align with the actual response length.
@@ -316,16 +320,22 @@ class vLLMRolloutModel(InferenceModel):
         Args:
             token_ids (List[int]): The input token ids (seq_length). Please make sure the length of
                 it does not exceed `max_model_len - 1`.
+            lora_request (LoRARequest, optional): The LoRA request. Defaults to None.
+            temperature (float): The temperature for scaling logits.
 
         Returns:
             A tensor of logprobs (seq_length - 1).
         """
+        temperature = temperature if temperature is not None else self.config.temperature
+        if temperature is None:
+            temperature = 1.0
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids},
             lora_request=lora_request,
             n=1,
             max_tokens=1,
             prompt_logprobs=0,  # vLLM return `prompt_logprobs + 1` logrpobs for each token
+            temperature=temperature,
         )
         return torch.tensor(
             [list(logprob_dict.values())[0].logprob for logprob_dict in output.prompt_logprobs[1:]],
@@ -357,6 +367,7 @@ class vLLMRolloutModel(InferenceModel):
         self,
         messages: List[dict],
         tools: Optional[List[dict]] = None,
+        temperature: Optional[float] = None,
     ) -> Experience:
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
@@ -370,7 +381,10 @@ class vLLMRolloutModel(InferenceModel):
             chat_template=self.chat_template,
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
-        logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
+        temperature = temperature if temperature is not None else self.config.temperature
+        logprobs = await self.logprobs(
+            token_ids=token_ids.tolist(), temperature=temperature
+        )  # (seq_length - 1,)
         return Experience(
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
@@ -481,7 +495,9 @@ class vLLMRolloutModel(InferenceModel):
             if self.api_server_host is not None and self.api_server_port is not None:
                 return True  # already running
 
-            from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
+            from trinity.common.models.vllm_patch.api_patch import (
+                run_api_server_in_ray_actor,
+            )
 
             api_server_host, api_server_port = self.get_available_address()
             self.api_server = asyncio.create_task(
