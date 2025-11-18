@@ -437,6 +437,10 @@ class ModelConfig:
     fully_sharded_loras: bool = False
     max_cpu_loras: Optional[int] = None
 
+    # rope config
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
+
 
 @dataclass
 class InferenceModelConfig:
@@ -497,6 +501,10 @@ class InferenceModelConfig:
     enable_lora: bool = False
     lora_modules: Optional[List[Dict]] = None
     lora_kwargs: Optional[dict] = field(default_factory=dict)
+
+    # ! DO NOT SET, rope config
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
 
 
 @dataclass
@@ -1190,12 +1198,14 @@ class Config:
                 "max_response_tokens",
                 "min_response_tokens",
             ]
-            for args in ["model_path"] + rollout_args + length_args:
+            rope_args = ["rope_scaling", "rope_theta"]
+            model_args = rollout_args + length_args + rope_args
+            for args in ["model_path"] + model_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
-                for args in rollout_args + length_args:
+                for args in model_args:
                     set_if_none(aux_model, args, getattr(self.model, args))
 
             # for lora configs

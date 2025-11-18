@@ -40,6 +40,10 @@ class ActorModel:
     lora_alpha: int = 32
     target_modules: Optional[str] = "all-linear"
 
+    # rope configs
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
+
 
 @dataclass
 class Optim:
@@ -412,6 +416,8 @@ class veRLConfig:
         # Actor / Rollout Config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
+        self.actor_rollout_ref.model.rope_scaling = config.model.rope_scaling
+        self.actor_rollout_ref.model.rope_theta = config.model.rope_theta
         self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
         self.actor_rollout_ref.rollout.temperature = (
