@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import ray
@@ -935,3 +936,59 @@ class TestAPIServerToolCall(RayUnittestBaseAysnc):
         print_debug(
             "\n" + "=" * 28 + f" test_api_tool_calls PASSED in {total_time:.2f}s " + "=" * 28 + "\n"
         )
+
+
+class TestSuperLongGeneration(RayUnittestBaseAysnc):
+    def setUp(self):
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = 81920
+        self.config.model.max_prompt_tokens = 61440
+        self.config.model.max_response_tokens = 20480
+        self.config.model.rope_scaling = {
+            "rope_type": "yarn",
+            "factor": 2.0,
+            "original_max_position_embeddings": 40960,
+        }
+        self.config.explorer.rollout_model.engine_type = "vllm"
+        self.config.explorer.rollout_model.engine_num = 1
+        self.config.explorer.rollout_model.tensor_parallel_size = 1
+        self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
+
+        self.config.check_and_update()
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+
+    async def test_generate(self):
+        base_dir = os.path.dirname(__file__)
+        target_dir = os.path.join(base_dir, "..", "..", "trinity", "trainer", "verl")
+        with open(os.path.join(target_dir, "fsdp_workers.py")) as f:
+            fsdp_code = f.read()
+        with open(os.path.join(target_dir, "megatron_workers.py")) as f:
+            megatron_code = f.read()
+        target_dir = os.path.join(base_dir, "..", "..", "trinity", "common")
+        with open(os.path.join(target_dir, "config.py")) as f:
+            config_code = f.read()
+        target_dir = os.path.join(base_dir, "..", "..", "trinity", "manager")
+        with open(os.path.join(target_dir, "config_manager.py")) as f:
+            config_manager_code = f.read()
+
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {
+                "role": "user",
+                "content": """# Please add comments and documentation for these following code, """
+                """make sure the code is well-structured and easy to read, """
+                """and the complete code must be shown, do not omit any parts.\n"""
+                f"""## fsdp_workers.py\n{fsdp_code}\n"""
+                f"""## megatron_workers.py\n{megatron_code}\n"""
+                f"""## config.py\n{config_code}\n"""
+                f"""## config_manager.py\n{config_manager_code}\n""",
+            },
+        ]
+        response = self.model_wrapper.chat(messages, n=1, temperature=0.7, logprobs=True)[0]
+        self.assertGreater(
+            response.prompt_length, 40960
+        )  # If not long enough, please add more files to prompt
+        self.assertGreater(response.logprobs.shape[0], 1000)
