@@ -100,7 +100,6 @@ class vLLMRolloutModel(InferenceModel):
                 "max_new_tokens": config.max_response_tokens,
             },
             disable_log_stats=True,
-            logprobs_mode="processed_logprobs",
             enable_lora=config.enable_lora,
             logprobs_mode="processed_logprobs",
             **config.lora_kwargs,

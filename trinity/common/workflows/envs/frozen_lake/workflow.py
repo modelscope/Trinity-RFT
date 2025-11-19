@@ -20,7 +20,6 @@ from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.envs.frozen_lake.utils import (
     GRID_LOOKUP,
     MAP_LOOKUP,
-    MULTI_SHOT_SYSTEM_PROMPT,
     SYSTEM_PROMPT,
     generate_random_map,
     get_goal_position,
@@ -96,7 +95,6 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         # Extract workflow-specific arguments
         workflow_args = task.workflow_args if hasattr(task, "workflow_args") else {}
         self.max_steps = workflow_args.get("max_steps", 10)
-        self.use_multistep_prompt = workflow_args.get("use_multistep_prompt", False)
         self.desc = workflow_args.get("desc", None)
         self.is_slippery = workflow_args.get("is_slippery", False)
         self.max_response_tokens = self.rollout_args.get("max_response_tokens", 10240)
@@ -271,7 +269,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         # Initialize messages
         messages = []
-        system_prompt = MULTI_SHOT_SYSTEM_PROMPT if self.use_multistep_prompt else SYSTEM_PROMPT
+        system_prompt = SYSTEM_PROMPT
         messages.append({"role": "system", "content": system_prompt})
 
         # Run episode until done or max_steps reached

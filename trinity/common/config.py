@@ -892,6 +892,7 @@ class Config:
             set_if_none(dataset.rollout_args, "top_k", self.model.top_k)
             set_if_none(dataset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
+            set_if_none(dataset.format, "chat_template", self.model.custom_chat_template)
 
     def _check_trainer_input(self) -> None:
         trainer_input = self.buffer.trainer_input
@@ -1068,9 +1069,15 @@ class Config:
             model.critic_model_path = model.model_path
 
         # check template
-        if model.chat_template_path and model.custom_chat_template is None:
-            with open(model.chat_template_path, "r") as f:
-                model.custom_chat_template = f.read()
+        if model.chat_template_path is not None and model.custom_chat_template is None:
+            try:
+                with open(model.chat_template_path, "r") as f:
+                    model.custom_chat_template = f.read()
+            except Exception as e:
+                logger.error(
+                    f"Failed to read chat template from {model.chat_template_path}, please check if the file exists. Error: {e}"
+                )
+                raise e
 
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
@@ -1198,7 +1205,11 @@ class Config:
             ]
             for args in ["model_path"] + rollout_args + length_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
-            setattr(self.explorer.rollout_model, "chat_template", self.model.custom_chat_template)
+            if (
+                self.explorer.rollout_model.chat_template is None
+                and self.model.custom_chat_template is not None
+            ):
+                self.explorer.rollout_model.chat_template = self.model.custom_chat_template
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")

@@ -429,37 +429,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 batch.batch["attention_mask"], dim=-1
             ).tolist()
 
-            # verl_logprobs_tensor = self.actor_rollout_wg.compute_log_prob(batch).batch[
-            #     "old_log_probs"
-            # ][0]
-            # original_logprobs_tensor = batch.batch["old_log_probs"][0]
-            # print("!!!Debug: Compare")
-
-            # if original_logprobs_tensor.shape != verl_logprobs_tensor.shape:
-            #     print(f"!! 警告: 两个 Tensors 的形状不匹配。")
-            #     print(f"   - Trinity: {original_logprobs_tensor.shape}")
-            #     print(f"   - Verl: {verl_logprobs_tensor.shape}")
-            # else:
-            #     # 检查它们是否完全相同
-            #     are_equal = torch.allclose(original_logprobs_tensor, verl_logprobs_tensor)
-            #     print(f"两个 Tensor 是否完全相同: {are_equal}")
-
-            #     if not are_equal:
-            #         print("\n--- 发现差异！详细对比 (前 40 个值) ---")
-
-            #         # 打印对比表
-            #         print(f"{'索引':<5} | {'Trinity':<15} | {'Verl':<15} | {'是否相同':<10}")
-            #         print("-" * 50)
-
-            #         num_to_compare = min(40, len(original_logprobs_tensor))
-
-            #         for i in range(num_to_compare):
-            #             orig_val = original_logprobs_tensor[i].item()
-            #             corr_val = verl_logprobs_tensor[i].item()
-            #             is_same = "✅" if orig_val == corr_val else "❌"
-            #             print(f"{i+1:<5} | {orig_val:<15.4f} | {corr_val:<15.4f} | {is_same:<10}")
-            # print("--------------------------------")
-
             if self.algorithm.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
                 with marked_timer("ref", timing_raw):
