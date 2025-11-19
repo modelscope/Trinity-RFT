@@ -168,7 +168,10 @@ class ActorRolloutRefWorker(Worker):
                     self.config.actor.ppo_micro_batch_size
                 )
 
-            if self.config.actor.ppo_micro_batch_size_per_gpu is not None:
+            if (
+                not self.config.actor.use_dynamic_bsz
+                and self.config.actor.ppo_micro_batch_size_per_gpu is not None
+            ):
                 assert (
                     self.config.actor.ppo_mini_batch_size
                     % self.config.actor.ppo_micro_batch_size_per_gpu
@@ -181,7 +184,11 @@ class ActorRolloutRefWorker(Worker):
                 ), f"normalized ppo_mini_batch_size {self.config.actor.ppo_mini_batch_size} should be larger than ppo_micro_batch_size_per_gpu {self.config.actor.ppo_micro_batch_size_per_gpu}"
 
         # normalize ref config
-        if self._is_ref and self.config.ref.log_prob_micro_batch_size is not None:
+        if (
+            self._is_ref
+            and not self.config.ref.log_prob_use_dynamic_bsz
+            and self.config.ref.log_prob_micro_batch_size is not None
+        ):
             self.config.ref.log_prob_micro_batch_size //= (
                 self.device_mesh.size() // self.ulysses_sequence_parallel_size
             )
@@ -968,7 +975,7 @@ class CriticWorker(Worker):
             self.config.ppo_micro_batch_size_per_gpu = self.config.ppo_micro_batch_size
             self.config.forward_micro_batch_size_per_gpu = self.config.forward_micro_batch_size
 
-        if self.config.ppo_micro_batch_size_per_gpu is not None:
+        if not self.config.use_dynamic_bsz and self.config.ppo_micro_batch_size_per_gpu is not None:
             assert (
                 self.config.ppo_mini_batch_size % self.config.ppo_micro_batch_size_per_gpu == 0
             ), f"normalized ppo_mini_batch_size {self.config.ppo_mini_batch_size} should be divisible by ppo_micro_batch_size_per_gpu {self.config.ppo_micro_batch_size_per_gpu}"
