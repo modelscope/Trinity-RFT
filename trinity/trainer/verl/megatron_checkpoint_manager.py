@@ -273,11 +273,11 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                         logger=logger,
                         log_only_rank_0=True,
                     )
-            except Exception as e:
+            except Exception:
                 logger.error(
-                    f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it."
+                    f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it.",
+                    exc_info=True,
                 )
-                logger.error(e)
 
         ray.get(
             self.checkpoint_monitor.register_thread_count.remote(
