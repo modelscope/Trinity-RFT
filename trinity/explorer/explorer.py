@@ -24,7 +24,7 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models import create_inference_models
-from trinity.common.models.utils import get_checkpoint_dir_with_step_num
+from trinity.common.models.utils import get_latest_state_dict
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
@@ -82,7 +82,6 @@ class Explorer:
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
     ):
-        # In checkpoint mode, we use explorer to store the model weights which has no rank
         base_offset = 1 if self.use_nccl_sync else 0
         world_size = (
             len(self.models) * self.config.explorer.rollout_model.tensor_parallel_size + base_offset
@@ -107,6 +106,30 @@ class Explorer:
             )
             for i, model in enumerate(self.models)
         ]
+        await asyncio.gather(*refs)
+
+    async def setup_model_level_weight_sync_group(self):
+        """Setup process group for each model, only used in serve mode."""
+        refs = []
+        world_size = self.config.explorer.rollout_model.tensor_parallel_size
+        for model in self.models:
+            master_address, master_port = await model.get_available_address.remote()
+            self.logger.info(
+                f"Initialize process group for model weight synchronization, "
+                f"master_address={master_address}, master_port={master_port}, "
+                f"world_size={world_size}"
+            )
+            refs.append(
+                model.init_process_group.remote(
+                    master_address=master_address,
+                    master_port=master_port,
+                    rank_offset=0,
+                    world_size=world_size,
+                    group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
+                    explorer_name=self.config.explorer.name,
+                    timeout=self.config.synchronizer.sync_timeout,
+                )
+            )
         await asyncio.gather(*refs)
 
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> int:
@@ -164,8 +187,14 @@ class Explorer:
             self.logger.info("All models are ready.")
 
             if not self.use_nccl_sync:
-                master_address, master_port = await self.models[0].get_available_address.remote()
-                await self.setup_weight_sync_group(master_address, master_port)
+                if self.config.mode == "serve":
+                    # In serving mode, each engine will setup its own process group
+                    await self.setup_model_level_weight_sync_group()
+                else:
+                    master_address, master_port = await self.models[
+                        0
+                    ].get_available_address.remote()
+                    await self.setup_weight_sync_group(master_address, master_port)
             if self.config.mode != "serve":
                 self.scheduler = Scheduler(self.config, self.models, self.auxiliary_models)
                 await self.scheduler.start()
@@ -223,9 +252,11 @@ class Explorer:
             await self.save_checkpoint(sync_weight=False)
             await self.synchronizer.set_explorer_status.remote(
                 RunningStatus.STOPPED,
-                old_status=RunningStatus.RUNNING
-                if self.last_sync_successful
-                else RunningStatus.REQUIRE_SYNC,
+                old_status=(
+                    RunningStatus.RUNNING
+                    if self.last_sync_successful
+                    else RunningStatus.REQUIRE_SYNC
+                ),
             )
             await self.shutdown()
             return False
@@ -464,8 +495,9 @@ class Explorer:
             metrics.update(self.service.collect_metrics())
             self.monitor.log(metrics, self.explore_step_num)
             # get the latest checkpoint
-            _, step_num = get_checkpoint_dir_with_step_num(
-                self.config.checkpoint_job_dir, raise_error=False
+            _, step_num = get_latest_state_dict(
+                self.config.checkpoint_job_dir,
+                self.config.trainer.trainer_type,
             )
             self.service.set_latest_model_version(step_num)
 
