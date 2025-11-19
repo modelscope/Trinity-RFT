@@ -853,8 +853,8 @@ class Config:
                 )
 
     def _check_explorer_input(self) -> None:
-        if self.mode == "train":
-            # no need to check explorer_input in train mode
+        if self.mode in {"train", "bench", "serve"}:
+            # no need to check explorer_input in train/bench/serve mode
             return
 
         explorer_input = self.buffer.explorer_input
@@ -866,9 +866,8 @@ class Config:
             explorer_input.taskset = None
         elif len(explorer_input.tasksets) == 0:
             raise ValueError("At least one taskset should be provided in explorer_input!")
-        tasksets = explorer_input.tasksets
 
-        for i, taskset in enumerate(tasksets):
+        for i, taskset in enumerate(explorer_input.tasksets):
             if self.mode != "train" and not taskset.path:
                 raise ValueError(
                     "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
@@ -914,6 +913,10 @@ class Config:
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
     def _check_trainer_input(self) -> None:
+        if self.mode in {"explore", "bench", "serve"}:
+            # no need to check trainer_input in train/bench/serve mode
+            return
+
         trainer_input = self.buffer.trainer_input
         experience_buffer = trainer_input.experience_buffer
 
@@ -973,7 +976,7 @@ class Config:
     def _check_data_processor(self) -> None:
         # check input/output buffers in pipelines
         experience_pipeline = self.data_processor.experience_pipeline
-        if experience_pipeline is not None:
+        if experience_pipeline is not None and self.mode in {"explore", "both", "serve"}:
             if experience_pipeline.save_input and experience_pipeline.input_save_path is None:
                 experience_pipeline.input_save_path = os.path.join(
                     self.buffer.cache_dir, "explorer_output.jsonl"  # type: ignore[arg-type]
@@ -983,7 +986,7 @@ class Config:
                 )
 
         task_pipeline = self.data_processor.task_pipeline
-        if task_pipeline is not None:
+        if task_pipeline is not None and self.mode in {"explore", "both"}:
             if task_pipeline.output is None:
                 if self.mode != "train":
                     task_pipeline.output = self.buffer.explorer_input.tasksets[0]

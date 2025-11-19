@@ -52,7 +52,9 @@ class Explorer:
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
         self.taskset = (
-            TasksetScheduler(explorer_state, config) if self.config.mode != "serve" else None
+            TasksetScheduler(explorer_state, config)
+            if self.config.mode not in {"bench", "serve"}
+            else None
         )
         self.scheduler = None
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
@@ -406,6 +408,8 @@ class Explorer:
 
     def _init_experience_pipeline(self) -> ray.actor.ActorHandle:
         """Init experience pipeline for the explorer."""
+        if self.config.mode == "bench":
+            return None
         node_id = ray.get_runtime_context().get_node_id()
         return (
             ray.remote(ExperiencePipeline)
