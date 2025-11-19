@@ -914,7 +914,7 @@ class Config:
 
     def _check_trainer_input(self) -> None:
         if self.mode in {"explore", "bench", "serve"}:
-            # no need to check trainer_input in train/bench/serve mode
+            # no need to check trainer_input in explore/bench/serve mode
             return
 
         trainer_input = self.buffer.trainer_input

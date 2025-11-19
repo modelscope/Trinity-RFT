@@ -153,7 +153,8 @@ class Explorer:
         """Preparation before running."""
         try:
             # prepare experience pipeline
-            await self.experience_pipeline.prepare.remote()
+            if self.experience_pipeline:
+                await self.experience_pipeline.prepare.remote()
             self.logger.info("Experience pipeline is ready.")
             # make sure all rollout models are ready
             run_api_ref = [model.run_api_server.remote() for model in self.models]

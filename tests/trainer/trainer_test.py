@@ -113,6 +113,8 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 8)
         actor_kl_metrics = parser.metric_list("actor/kl")
         self.assertTrue(len(actor_kl_metrics) > 0)
+        actor_kl_loss = parser.metric_values("actor/kl_loss")
+        self.assertEqual(actor_kl_loss[0], 0.0)
         critic_kl_metrics = parser.metric_list("critic/kl")
         self.assertTrue(len(critic_kl_metrics) > 0)
         response_metrics = parser.metric_list("response_length")
