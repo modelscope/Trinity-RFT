@@ -597,8 +597,9 @@ document.write(`
         <span class="n">ngpus_trainer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_usual</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_expert</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">sft_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
-        <span class="n">grpo_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+        <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+        <span class="n">sft_loss_agg_mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grpo_loss_agg_mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">mu</span>
@@ -611,9 +612,9 @@ document.write(`
             <span class="n">clip_range</span><span class="o">=</span><span class="n">clip_range</span><span class="p">,</span>
             <span class="n">clip_range_low</span><span class="o">=</span><span class="n">clip_range_low</span><span class="p">,</span>
             <span class="n">clip_range_high</span><span class="o">=</span><span class="n">clip_range_high</span><span class="p">,</span>
-            <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">grpo_loss_agg_mode</span><span class="p">,</span>
+            <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">grpo_loss_agg_mode</span> <span class="ow">or</span> <span class="n">loss_agg_mode</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">sft_loss_agg_mode</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">sft_loss_agg_mode</span> <span class="ow">or</span> <span class="n">loss_agg_mode</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -688,6 +689,7 @@ document.write(`
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
             <span class="s2">&quot;clip_range&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+            <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 

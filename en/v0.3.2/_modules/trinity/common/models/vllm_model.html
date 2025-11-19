@@ -636,6 +636,11 @@ document.write(`
         <span class="n">max_model_len</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;default_lora_path&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">rope_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rope_scaling&quot;</span><span class="p">,</span> <span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">}</span>
         <span class="n">engine_args</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncEngineArgs</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
             <span class="n">enforce_eager</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enforce_eager</span><span class="p">,</span>
@@ -660,6 +665,7 @@ document.write(`
             <span class="n">disable_log_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
             <span class="n">logprobs_mode</span><span class="o">=</span><span class="s2">&quot;processed_logprobs&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">rope_kwargs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>

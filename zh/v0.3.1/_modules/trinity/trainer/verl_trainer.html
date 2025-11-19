@@ -774,9 +774,10 @@ document.write(`
         <span class="n">local_path</span> <span class="o">=</span> <span class="n">copy_local_path_from_hdfs</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># instantiate tokenizer</span>
-        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+        <span class="n">trust_remote_code</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trust_remote_code&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">)</span>
         <span class="c1"># processor for multimodal LLM, could be None</span>
-        <span class="n">processor</span> <span class="o">=</span> <span class="n">hf_processor</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">use_fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">processor</span> <span class="o">=</span> <span class="n">hf_processor</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">,</span> <span class="n">use_fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># define worker classes</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]:</span>

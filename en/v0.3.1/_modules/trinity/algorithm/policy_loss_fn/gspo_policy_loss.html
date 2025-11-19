@@ -556,7 +556,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
 
 
 <div class="viewcode-block" id="GSPOLossFn">
@@ -607,7 +607,7 @@ document.write(`
             <span class="n">ratio</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_low</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_high</span>
         <span class="p">)</span>  <span class="c1"># [batch_size, seq_len]</span>
 
-        <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span>
+        <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span>
             <span class="n">values</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">pg_losses_clipped</span><span class="p">),</span>
             <span class="n">mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">,</span>
             <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">,</span>

@@ -572,7 +572,8 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.Data">[文档]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">:</span>
-    <span class="n">train_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span>  <span class="c1"># kept to pass RayPPOTrainer._validate_config</span></div>
+    <span class="n">train_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span>  <span class="c1"># kept to pass RayPPOTrainer._validate_config</span>
+    <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 
@@ -598,11 +599,16 @@ document.write(`
     <span class="n">custom_chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">enable_activation_offload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_shm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Whether to enable loading a remote code model</span>
 
     <span class="c1"># lora configs</span>
     <span class="n">lora_rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># The rank of the LoRA model, default to 0. If lora_rank &gt; 0, LoRA module is enabled in trainer</span>
     <span class="n">lora_alpha</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
-    <span class="n">target_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all-linear&quot;</span></div>
+    <span class="n">target_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all-linear&quot;</span>
+
+    <span class="c1"># rope configs</span>
+    <span class="n">rope_scaling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rope_theta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -819,6 +825,7 @@ document.write(`
     <span class="n">tokenizer_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">override_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">external_lib</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Whether to enable loading a remote code model</span>
     <span class="n">enable_gradient_checkpointing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">use_remove_padding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">fsdp_config</span><span class="p">:</span> <span class="n">FSDPConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FSDPConfig</span><span class="p">)</span></div>
@@ -1035,6 +1042,8 @@ document.write(`
         <span class="c1"># Actor / Rollout Config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_training_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="p">(</span>

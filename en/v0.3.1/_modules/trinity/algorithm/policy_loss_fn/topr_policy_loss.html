@@ -554,7 +554,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
 
 
 <div class="viewcode-block" id="TOPRPolicyLossFn">
@@ -609,7 +609,7 @@ document.write(`
         <span class="n">topr_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">alpha</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">rewards</span> <span class="o">*</span> <span class="n">logprob</span>  <span class="c1"># detach alpha as it&#39;s used with stop-grad</span>
 
         <span class="c1"># Apply masking and compute mean</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span><span class="n">topr_loss</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span><span class="n">topr_loss</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
 
         <span class="c1"># Average alpha value for monitoring</span>
         <span class="n">avg_alpha</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>

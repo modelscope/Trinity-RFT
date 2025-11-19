@@ -555,9 +555,9 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 
-<div class="viewcode-block" id="masked_loss">
-<a class="viewcode-back" href="../../../build_api/trinity.algorithm.utils.html#trinity.algorithm.utils.masked_loss">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">masked_loss</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="s2">&quot;token-mean&quot;</span><span class="p">,</span> <span class="n">normalizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="aggregate_loss">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.utils.html#trinity.algorithm.utils.aggregate_loss">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aggregate_loss</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="s2">&quot;token-mean&quot;</span><span class="p">,</span> <span class="n">normalizer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute loss from values and mask with various aggregation modes.</span>
 <span class="sd">    Modified from: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py</span>
@@ -605,7 +605,8 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.utils.html#trinity.algorithm.utils.masked_sum">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">masked_sum</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute mean of tensor with a masked values.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">values</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+    <span class="n">valid_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">valid_values</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
 
 
 
@@ -613,7 +614,7 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.utils.html#trinity.algorithm.utils.masked_mean">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">masked_mean</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute mean of tensor with a masked values.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">values</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">masked_sum</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span></div>
 
 
 

@@ -615,6 +615,7 @@ document.write(`
 <div class="viewcode-block" id="DataParallelPPOActor.set_algorithm">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.dp_actor.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.set_algorithm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm_config</span><span class="p">:</span> <span class="n">AlgorithmConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">algorithm_config</span><span class="o">.</span><span class="n">loss_agg_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">policy_loss_fn</span> <span class="o">=</span> <span class="n">POLICY_LOSS_FN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">policy_loss_fn</span><span class="p">)(</span>
             <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">policy_loss_fn_args</span>
         <span class="p">)</span>
@@ -652,13 +653,8 @@ document.write(`
         <span class="n">mini_batches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span><span class="p">)</span>
 
         <span class="c1"># EXPERIMENTAL: apply loss scale fix</span>
-        <span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">policy_loss_fn</span><span class="o">.</span><span class="n">loss_agg_mode</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy_loss_fn</span><span class="p">,</span> <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">)</span>
-            <span class="k">else</span> <span class="s2">&quot;token-mean&quot;</span>
-        <span class="p">)</span>
         <span class="n">do_fix_actor_microbatch_loss_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">fix_actor_microbatch_loss_scale</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">loss_agg_mode</span> <span class="o">==</span> <span class="s2">&quot;token-mean&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">==</span> <span class="s2">&quot;token-mean&quot;</span>
         <span class="p">)</span>
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -712,6 +708,7 @@ document.write(`
                     <span class="n">entropy_loss</span><span class="p">,</span> <span class="n">entropy_loss_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_loss_fn</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
                         <span class="n">entropy</span><span class="o">=</span><span class="n">entropy</span><span class="p">,</span>
                         <span class="n">action_mask</span><span class="o">=</span><span class="n">response_mask</span><span class="p">,</span>
+                        <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">,</span>
                         <span class="o">**</span><span class="n">model_inputs</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">prefix_metrics</span><span class="p">(</span>
@@ -727,6 +724,7 @@ document.write(`
                         <span class="n">logprob</span><span class="o">=</span><span class="n">log_prob</span><span class="p">,</span>
                         <span class="n">ref_logprob</span><span class="o">=</span><span class="n">model_inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref_log_prob&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                         <span class="n">response_mask</span><span class="o">=</span><span class="n">response_mask</span><span class="p">,</span>
+                        <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">prefix_metrics</span><span class="p">(</span>
                         <span class="n">src_metrics</span><span class="o">=</span><span class="n">kl_loss_metrics</span><span class="p">,</span>
@@ -748,6 +746,7 @@ document.write(`
                         <span class="n">loss_scale</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">response_mask</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">mini_batch_token_num</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span>
 
                     <span class="n">loss</span> <span class="o">=</span> <span class="n">policy_loss</span> <span class="o">*</span> <span class="n">loss_scale</span>
+                    <span class="n">micro_batch_metrics</span><span class="p">[</span><span class="s2">&quot;actor/final_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
                     <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 
                     <span class="n">append_to_dict</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">micro_batch_metrics</span><span class="p">)</span>

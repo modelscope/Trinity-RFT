@@ -810,6 +810,12 @@ document.write(`
             <span class="n">local_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">,</span> <span class="n">attn_implementation</span><span class="o">=</span><span class="s2">&quot;flash_attention_2&quot;</span>
         <span class="p">)</span>
 
+        <span class="c1"># patch for rope</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">actor_model_config</span><span class="o">.</span><span class="n">rope_scaling</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">actor_model_config</span><span class="o">.</span><span class="n">rope_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span>
+
         <span class="c1"># patch for kimi-vl</span>
         <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">actor_model_config</span><span class="p">,</span> <span class="s2">&quot;model_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;kimi_vl&quot;</span><span class="p">:</span>
             <span class="n">actor_model_config</span><span class="o">.</span><span class="n">text_config</span><span class="o">.</span><span class="n">topk_method</span> <span class="o">=</span> <span class="s2">&quot;greedy&quot;</span>

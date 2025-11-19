@@ -585,7 +585,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_loss"><code class="docutils literal notranslate"><span class="pre">masked_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.aggregate_loss"><code class="docutils literal notranslate"><span class="pre">aggregate_loss()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_sum"><code class="docutils literal notranslate"><span class="pre">masked_sum()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_mean"><code class="docutils literal notranslate"><span class="pre">masked_mean()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_var"><code class="docutils literal notranslate"><span class="pre">masked_var()</span></code></a></li>
@@ -607,8 +607,8 @@ document.write(`
 <p>Common utils for algorithm module.</p>
 <p>Modified from <a class="github reference external" href="https://github.com/volcengine/verl/blob/main/verl/utils/torch_functional.py">volcengine/verl</a></p>
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.algorithm.utils.masked_loss">
-<span class="sig-prename descclassname"><span class="pre">trinity.algorithm.utils.</span></span><span class="sig-name descname"><span class="pre">masked_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'token-mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/utils.html#masked_loss"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.utils.masked_loss" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.algorithm.utils.aggregate_loss">
+<span class="sig-prename descclassname"><span class="pre">trinity.algorithm.utils.</span></span><span class="sig-name descname"><span class="pre">aggregate_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'token-mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/utils.html#aggregate_loss"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.utils.aggregate_loss" title="Link to this definition">#</a></dt>
 <dd><p>Compute loss from values and mask with various aggregation modes.
 Modified from: <a class="github reference external" href="https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py">volcengine/verl</a></p>
 <dl class="field-list simple">
@@ -725,7 +725,7 @@ if False, the original mean is re-added after scaling.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_loss"><code class="docutils literal notranslate"><span class="pre">masked_loss()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.aggregate_loss"><code class="docutils literal notranslate"><span class="pre">aggregate_loss()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_sum"><code class="docutils literal notranslate"><span class="pre">masked_sum()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_mean"><code class="docutils literal notranslate"><span class="pre">masked_mean()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_var"><code class="docutils literal notranslate"><span class="pre">masked_var()</span></code></a></li>

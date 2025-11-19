@@ -558,7 +558,7 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 <span class="n">ENTROPY_LOSS_FN</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">)</span>
@@ -619,9 +619,10 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">entropy</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">action_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">loss_agg_mode</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">entropy_loss</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_coef</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;entropy_loss&quot;</span><span class="p">:</span> <span class="n">entropy_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span></div>
 
 
@@ -645,6 +646,7 @@ document.write(`
         <span class="n">entropy</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">action_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">expert_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">expert_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -654,7 +656,7 @@ document.write(`
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">expert_mask</span><span class="p">)</span><span class="si">=}</span><span class="s2"> != </span><span class="si">{</span><span class="n">entropy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span>
         <span class="n">entropy</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">[</span><span class="o">~</span><span class="n">expert_mask</span><span class="p">]</span>
         <span class="n">action_mask</span> <span class="o">=</span> <span class="n">action_mask</span><span class="p">[</span><span class="o">~</span><span class="n">expert_mask</span><span class="p">]</span>
-        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">entropy_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span><span class="n">entropy</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">loss_agg_mode</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">entropy_loss</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy_coef</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;entropy_loss&quot;</span><span class="p">:</span> <span class="n">entropy_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span></div>
 
 
