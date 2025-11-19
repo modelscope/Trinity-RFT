@@ -194,9 +194,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         local_path = copy_local_path_from_hdfs(config.actor_rollout_ref.model.path)
 
         # instantiate tokenizer
-        tokenizer = hf_tokenizer(local_path)
+        trust_remote_code = config.data.get("trust_remote_code", False)
+        tokenizer = hf_tokenizer(local_path, trust_remote_code=trust_remote_code)
         # processor for multimodal LLM, could be None
-        processor = hf_processor(local_path, use_fast=True)
+        processor = hf_processor(local_path, trust_remote_code=trust_remote_code, use_fast=True)
 
         # define worker classes
         if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:

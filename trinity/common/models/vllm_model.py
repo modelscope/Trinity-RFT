@@ -78,6 +78,11 @@ class vLLMRolloutModel(InferenceModel):
         max_model_len = config.max_model_len
         self.enable_lora = config.enable_lora
         self.default_lora_path = config.lora_kwargs.pop("default_lora_path", None)
+        rope_kwargs = {
+            key: getattr(config, key)
+            for key in ["rope_scaling", "rope_theta"]
+            if getattr(config, key) is not None
+        }
         engine_args = vllm.AsyncEngineArgs(
             model=config.model_path,
             enforce_eager=config.enforce_eager,
@@ -102,6 +107,7 @@ class vLLMRolloutModel(InferenceModel):
             disable_log_stats=True,
             enable_lora=config.enable_lora,
             logprobs_mode="processed_logprobs",
+            **rope_kwargs,
             **config.lora_kwargs,
         )
         if get_vllm_version() > parse_version("0.10.0"):
