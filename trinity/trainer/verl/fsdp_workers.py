@@ -246,7 +246,7 @@ class ActorRolloutRefWorker(Worker):
             else:
                 self.tokenizer.chat_template = self.config.model.custom_chat_template
 
-        torch_dtype = fsdp_config.get("model_dtype", None)
+        torch_dtype = fsdp_config.model_dtype
         if torch_dtype is None:
             torch_dtype = torch.float32 if self._is_actor else torch.bfloat16
         else:
@@ -1014,7 +1014,7 @@ class CriticWorker(Worker):
         if self.rank == 0:
             print(f"Critic overriding config {override_config_kwargs}")
 
-        torch_dtype = self.config.model.fsdp_config.get("model_dtype", "fp32")
+        torch_dtype = self.config.model.fsdp_config.model_dtype or "fp32"
         torch_dtype = PrecisionType.to_dtype(torch_dtype)
 
         from transformers import AutoConfig
