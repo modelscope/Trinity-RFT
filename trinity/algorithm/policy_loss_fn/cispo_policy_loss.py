@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_loss, masked_mean
+from trinity.algorithm.utils import aggregate_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("cispo")
@@ -63,7 +63,7 @@ class CISPOPolicyLossFn(PolicyLossFn):
 
         cispo_loss = -advantages * ratio_clamped.detach() * mask.detach() * logprob
 
-        loss = masked_loss(cispo_loss, action_mask, loss_agg_mode=self.loss_agg_mode)
+        loss = aggregate_loss(cispo_loss, action_mask, loss_agg_mode=self.loss_agg_mode)
         unmasked_frac = masked_mean(mask, action_mask)
 
         metrics = {

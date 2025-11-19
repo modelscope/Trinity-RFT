@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_loss, masked_mean
+from trinity.algorithm.utils import aggregate_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("gspo")
@@ -54,7 +54,7 @@ class GSPOLossFn(PolicyLossFn):
             ratio, 1.0 - self.clip_range_low, 1.0 + self.clip_range_high
         )  # [batch_size, seq_len]
 
-        pg_loss = masked_loss(
+        pg_loss = aggregate_loss(
             values=torch.max(pg_losses, pg_losses_clipped),
             mask=action_mask,
             loss_agg_mode=self.loss_agg_mode,

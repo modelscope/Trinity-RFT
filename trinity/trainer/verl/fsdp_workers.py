@@ -257,6 +257,12 @@ class ActorRolloutRefWorker(Worker):
             local_path, trust_remote_code=trust_remote_code, attn_implementation="flash_attention_2"
         )
 
+        # patch for rope
+        if self.config.model.rope_scaling is not None:
+            actor_model_config.rope_scaling = OmegaConf.to_container(self.config.model.rope_scaling)
+        if self.config.model.rope_theta is not None:
+            actor_model_config.rope_theta = self.config.model.rope_theta
+
         # patch for kimi-vl
         if getattr(actor_model_config, "model_type", None) == "kimi_vl":
             actor_model_config.text_config.topk_method = "greedy"

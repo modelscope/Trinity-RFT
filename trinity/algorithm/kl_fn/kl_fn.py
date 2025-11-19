@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import torch
 
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import aggregate_loss, masked_mean
 from trinity.utils.registry import Registry
 
 KL_FN = Registry("kl_fn")
@@ -81,10 +81,11 @@ class KLFn(ABC):
         logprob: torch.Tensor,
         ref_logprob: torch.Tensor,
         response_mask: torch.Tensor,
+        loss_agg_mode: str,
     ) -> Tuple[torch.Tensor, Dict]:
         """Compute KL loss."""
         kl = self.calculate_kl(logprob, ref_logprob)
-        kl_loss = masked_mean(kl, response_mask)
+        kl_loss = aggregate_loss(kl, response_mask, loss_agg_mode=loss_agg_mode)
         metrics = {
             "kl_loss": kl_loss.detach().item(),
             "kl_coef": self.kl_coef,
@@ -119,6 +120,7 @@ class DummyKLFn(KLFn):
         logprob: torch.Tensor,
         ref_logprob: torch.Tensor,
         response_mask: torch.Tensor,
+        loss_agg_mode: str,
     ) -> Tuple[torch.Tensor, Dict]:
         # return a zero tensor
         return torch.tensor(0.0), {}
@@ -153,6 +155,20 @@ class K3Fn(KLFn):
     def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
         logr = ref_logprob - logprob
         return logr.exp() - 1 - logr
+
+
+@KL_FN.register_module("low_var_kl")
+class LowVarKLFn(KLFn):
+    """
+    Low Variance KL function.
+    """
+
+    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+        kl = ref_logprob - logprob
+        kl = torch.clamp(kl, min=-20, max=20)
+        ratio = torch.exp(kl)
+        kld = (ratio - kl - 1).contiguous()
+        return torch.clamp(kld, min=-10, max=10)
 
 
 @KL_FN.register_module("abs")

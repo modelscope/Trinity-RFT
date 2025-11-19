@@ -64,6 +64,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
         self.entropy_loss_fn = None
 
     def set_algorithm(self, algorithm_config: AlgorithmConfig):
+        self.loss_agg_mode = algorithm_config.loss_agg_mode
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
             backend="verl", **algorithm_config.policy_loss_fn_args
         )
@@ -187,6 +188,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
                         entropy=entropy,
                         action_mask=response_mask,
+                        loss_agg_mode=self.loss_agg_mode,
                         **data,
                     )
                     prefix_metrics(
@@ -207,6 +209,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     logprob=log_prob,
                     ref_logprob=data.get("ref_log_prob", None),
                     response_mask=response_mask,
+                    loss_agg_mode=self.loss_agg_mode,
                 )
                 prefix_metrics(
                     src_metrics=kl_loss_metrics,

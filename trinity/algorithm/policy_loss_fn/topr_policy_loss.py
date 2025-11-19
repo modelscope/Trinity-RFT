@@ -6,7 +6,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_loss, masked_mean
+from trinity.algorithm.utils import aggregate_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("topr")
@@ -56,7 +56,7 @@ class TOPRPolicyLossFn(PolicyLossFn):
         topr_loss = -alpha.detach() * rewards * logprob  # detach alpha as it's used with stop-grad
 
         # Apply masking and compute mean
-        loss = masked_loss(topr_loss, action_mask, loss_agg_mode=self.loss_agg_mode)
+        loss = aggregate_loss(topr_loss, action_mask, loss_agg_mode=self.loss_agg_mode)
 
         # Average alpha value for monitoring
         avg_alpha = masked_mean(alpha, action_mask)

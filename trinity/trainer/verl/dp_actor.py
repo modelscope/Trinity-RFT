@@ -53,6 +53,7 @@ class DataParallelPPOActor(DPActor):
         self.entropy_loss_fn = None
 
     def set_algorithm(self, algorithm_config: AlgorithmConfig):
+        self.loss_agg_mode = algorithm_config.loss_agg_mode
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
             backend="verl", **algorithm_config.policy_loss_fn_args
         )
@@ -89,13 +90,8 @@ class DataParallelPPOActor(DPActor):
         mini_batches = data.split(self.config.ppo_mini_batch_size)
 
         # EXPERIMENTAL: apply loss scale fix
-        loss_agg_mode = (
-            self.policy_loss_fn.loss_agg_mode
-            if hasattr(self.policy_loss_fn, "loss_agg_mode")
-            else "token-mean"
-        )
         do_fix_actor_microbatch_loss_scale = self.config.fix_actor_microbatch_loss_scale and (
-            loss_agg_mode == "token-mean"
+            self.loss_agg_mode == "token-mean"
         )
 
         metrics = {}
@@ -149,6 +145,7 @@ class DataParallelPPOActor(DPActor):
                     entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
                         entropy=entropy,
                         action_mask=response_mask,
+                        loss_agg_mode=self.loss_agg_mode,
                         **model_inputs,
                     )
                     prefix_metrics(
@@ -164,6 +161,7 @@ class DataParallelPPOActor(DPActor):
                         logprob=log_prob,
                         ref_logprob=model_inputs.get("ref_log_prob", None),
                         response_mask=response_mask,
+                        loss_agg_mode=self.loss_agg_mode,
                     )
                     prefix_metrics(
                         src_metrics=kl_loss_metrics,
@@ -185,6 +183,7 @@ class DataParallelPPOActor(DPActor):
                         loss_scale = torch.sum(response_mask).item() / (mini_batch_token_num + 1e-6)
 
                     loss = policy_loss * loss_scale
+                    micro_batch_metrics["actor/final_loss"] = loss.detach().item()
                     loss.backward()
 
                     append_to_dict(metrics, micro_batch_metrics)

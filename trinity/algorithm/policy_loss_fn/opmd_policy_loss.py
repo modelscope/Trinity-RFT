@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_loss
+from trinity.algorithm.utils import aggregate_loss
 
 
 @POLICY_LOSS_FN.register_module("opmd")
@@ -25,7 +25,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         pg_losses = -advantages * logprob
-        opmd_loss = masked_loss(pg_losses, action_mask, loss_agg_mode=self.loss_agg_mode)
+        opmd_loss = aggregate_loss(pg_losses, action_mask, loss_agg_mode=self.loss_agg_mode)
         opmd_loss = opmd_loss / (1.0 + self.tau)  # for regularization (w.r.t. current pi_theta)
         return opmd_loss, {"opmd_loss": opmd_loss.detach().item()}
 

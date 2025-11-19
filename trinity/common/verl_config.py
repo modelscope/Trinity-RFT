@@ -15,6 +15,7 @@ logger = get_logger(__name__)
 @dataclass
 class Data:
     train_batch_size: int = 1024  # kept to pass RayPPOTrainer._validate_config
+    trust_remote_code: bool = False
 
 
 @dataclass
@@ -34,11 +35,16 @@ class ActorModel:
     custom_chat_template: Optional[str] = None
     enable_activation_offload: bool = False
     use_shm: bool = False
+    trust_remote_code: bool = False  # Whether to enable loading a remote code model
 
     # lora configs
     lora_rank: int = 0  # The rank of the LoRA model, default to 0. If lora_rank > 0, LoRA module is enabled in trainer
     lora_alpha: int = 32
     target_modules: Optional[str] = "all-linear"
+
+    # rope configs
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
 
 
 @dataclass
@@ -220,6 +226,7 @@ class CriticModel:
     tokenizer_path: str = ""
     override_config: Dict[str, str] = field(default_factory=dict)
     external_lib: Optional[str] = None
+    trust_remote_code: bool = False  # Whether to enable loading a remote code model
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = True
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
@@ -413,6 +420,8 @@ class veRLConfig:
         # Actor / Rollout Config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
+        self.actor_rollout_ref.model.rope_scaling = config.model.rope_scaling
+        self.actor_rollout_ref.model.rope_theta = config.model.rope_theta
         self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
         self.actor_rollout_ref.rollout.temperature = (

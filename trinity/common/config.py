@@ -98,6 +98,11 @@ class OptimizerConfig:
     optimizer_type: str = "adam"
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     weight_decay: float = 0.01
+    clip_grad: float = 1.0
+    lr_warmup_init: float = 0.0
+    lr_decay_steps: Optional[int] = None
+    lr_decay_style: str = "constant"
+    min_lr: float = 0.0
 
 
 @dataclass
@@ -412,6 +417,9 @@ class ModelConfig:
     critic_model_path: str = ""
 
     custom_chat_template: Optional[str] = None
+    chat_template_path: Optional[
+        str
+    ] = None  # path to the chat template file, e.g., jinja2 type; overrides `custom_chat_template` if set
 
     # rollout args
     temperature: float = 1.0
@@ -436,6 +444,10 @@ class ModelConfig:
     lora_configs: Optional[List[LoRAConfig]] = None
     fully_sharded_loras: bool = False
     max_cpu_loras: Optional[int] = None
+
+    # rope config
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
 
 
 @dataclass
@@ -498,6 +510,10 @@ class InferenceModelConfig:
     lora_modules: Optional[List[Dict]] = None
     lora_kwargs: Optional[dict] = field(default_factory=dict)
 
+    # ! DO NOT SET, rope config
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
+
 
 @dataclass
 class AlgorithmConfig:
@@ -532,6 +548,10 @@ class AlgorithmConfig:
     entropy_loss_fn: Optional[str] = None  # "default"
     # If not set, use entropy_loss_fn.default_args()
     entropy_loss_fn_args: Optional[dict] = None
+
+    # aggregation mode for losses: 'token-mean' or 'seq-mean-token-sum' or 'seq-mean-token-mean' or 'seq-mean-token-sum-norm'
+    # If not set, use 'token-mean'
+    loss_agg_mode: Optional[str] = None
 
 
 @dataclass
@@ -872,6 +892,7 @@ class Config:
             set_if_none(taskset.rollout_args, "top_k", self.model.top_k)
             set_if_none(taskset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
+            set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
 
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
             if not dataset.path:
@@ -1042,6 +1063,7 @@ class Config:
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
+            "loss_agg_mode": "token-mean",
         }
         default_config.update(algorithm.default_config())
         for key, value in default_config.items():
@@ -1060,11 +1082,19 @@ class Config:
         check_and_set("kl_loss_fn", KL_FN, "kl_loss_fn_args")
         check_and_set("kl_penalty_fn", KL_FN, "kl_penalty_fn_args")
         check_and_set("entropy_loss_fn", ENTROPY_LOSS_FN, "entropy_loss_fn_args")
+        if "loss_agg_mode" in self.algorithm.policy_loss_fn_args:  # type: ignore [operator]
+            # override loss_agg_mode in policy_loss_fn_args
+            self.algorithm.policy_loss_fn_args["loss_agg_mode"] = self.algorithm.loss_agg_mode  # type: ignore [index]
 
     def _check_model(self) -> None:
         model = self.model
         if not model.critic_model_path:
             model.critic_model_path = model.model_path
+
+        # check template
+        if model.chat_template_path and model.custom_chat_template is None:
+            with open(model.chat_template_path, "r") as f:
+                model.custom_chat_template = f.read()
 
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
@@ -1190,12 +1220,19 @@ class Config:
                 "max_response_tokens",
                 "min_response_tokens",
             ]
-            for args in ["model_path"] + rollout_args + length_args:
+            rope_args = ["rope_scaling", "rope_theta"]
+            model_args = rollout_args + length_args + rope_args
+            for args in ["model_path"] + model_args:
                 setattr(self.explorer.rollout_model, args, getattr(self.model, args))
+            if (
+                self.explorer.rollout_model.chat_template is None
+                and self.model.custom_chat_template is not None
+            ):
+                self.explorer.rollout_model.chat_template = self.model.custom_chat_template
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
-                for args in rollout_args + length_args:
+                for args in model_args:
                     set_if_none(aux_model, args, getattr(self.model, args))
 
             # for lora configs

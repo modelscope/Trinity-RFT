@@ -6,7 +6,7 @@ Modified from https://github.com/volcengine/verl/blob/main/verl/utils/torch_func
 import torch
 
 
-def masked_loss(values, mask, loss_agg_mode="token-mean", normalizer=None):
+def aggregate_loss(values, mask, loss_agg_mode="token-mean", normalizer=None):
     """
     Compute loss from values and mask with various aggregation modes.
     Modified from: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
@@ -51,12 +51,13 @@ def masked_loss(values, mask, loss_agg_mode="token-mean", normalizer=None):
 
 def masked_sum(values, mask, axis=None):
     """Compute mean of tensor with a masked values."""
-    return (values * mask).sum(axis=axis)
+    valid_values = torch.where(mask.bool(), values, 0.0)
+    return (valid_values * mask).sum(axis=axis)
 
 
 def masked_mean(values, mask, axis=None):
     """Compute mean of tensor with a masked values."""
-    return (values * mask).sum(axis=axis) / (mask.sum(axis=axis) + 1e-8)
+    return masked_sum(values, mask, axis=axis) / (mask.sum(axis=axis) + 1e-8)
 
 
 def masked_var(values, mask, unbiased=True):

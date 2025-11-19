@@ -157,6 +157,8 @@ monitor:
 model:
   model_path: ${oc.env:MODEL_PATH}  # MODEL_PATH 是预先设置的环境变量
   critic_model_path: ${model.model_path}  # 使用 model.model_path 的值
+  custom_chat_template: None
+  chat_template_path: None
   max_model_len: 20480
   max_prompt_tokens: 4096
   max_response_tokens: 16384
@@ -165,6 +167,8 @@ model:
 
 - `model_path`: 被训练模型的路径。
 - `critic_model_path`: 可选的独立 critic 模型路径。若为空，则默认为 `model_path`。
+- `custom_chat_template`: 可选的自定义 chat template 字符串格式。若未指定，系统会使用 tokenizer 的默认 chat template。
+- `chat_template_path`: 可选的 chat template 文件路径，类型通常为 jinja2；若设置，则覆盖 `custom_chat_template`。若未指定，系统会使用 tokenizer 的默认 chat template。
 - `max_model_len`: 表示模型所支持的单个序列最大 token 数。如未指定，系统会尝试将其设为 `max_prompt_tokens` + `max_response_tokens`。但前提是这两个值都必须已设置，否则将引发错误。
 - `max_prompt_tokens`: 输入 prompt 中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `max_response_tokens`: 模型生成的回复中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。

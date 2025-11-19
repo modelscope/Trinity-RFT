@@ -73,6 +73,12 @@ class TestTrainerCountdown(BaseTrainerCase):
     def test_trainer(self):
         """Test the both and bench mode."""
         # test both mode
+        self.config.model.rope_scaling = {
+            "rope_type": "yarn",
+            "factor": 2.0,
+            "original_max_position_embeddings": 16384,
+        }
+        self.config.model.rope_theta = 10000
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         self.config.buffer.explorer_input.taskset.task_selector = TaskSelectorConfig(
             selector_type="shuffle", seed=42

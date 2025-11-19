@@ -21,6 +21,10 @@ jobs:
       OS: ${{ matrix.os }}
       PYTHON: '3.10'
     steps:
+    - name: Free up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android
+        docker system prune -af
     - name: Checkout PR branch
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
@@ -28,7 +32,6 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.ref }}
         fetch-depth: 0
-
     - name: Checkout main branch
       if: github.event_name != 'pull_request'
       uses: actions/checkout@v4
@@ -41,7 +44,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
-        pip install -q -e .[doc]
+        pip install -e .[doc]
     - id: build
       name: Build Documentation
       run: |
