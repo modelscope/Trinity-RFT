@@ -219,11 +219,6 @@ class vLLMRolloutModel(InferenceModel):
             )
             for i in range(len(output.outputs))
         ]
-        prompt_length = experiences[0].prompt_length
-        # print(
-        #     "In def generate: logprobs",
-        #     experiences[0].logprobs[prompt_length - 1 : prompt_length + 10],
-        # )
         return experiences
 
     async def chat_mm(

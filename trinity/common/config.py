@@ -1092,9 +1092,14 @@ class Config:
             model.critic_model_path = model.model_path
 
         # check template
-        if model.chat_template_path and model.custom_chat_template is None:
-            with open(model.chat_template_path, "r") as f:
-                model.custom_chat_template = f.read()
+        if model.chat_template_path is not None and model.custom_chat_template is None:
+            try:
+                with open(model.chat_template_path, "r") as f:
+                    model.custom_chat_template = f.read()
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to read chat template from {model.chat_template_path}: {e}"
+                )
 
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
