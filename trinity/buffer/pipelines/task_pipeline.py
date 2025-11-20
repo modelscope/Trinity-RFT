@@ -5,6 +5,8 @@ from trinity.utils.log import get_logger
 
 
 def check_and_run_task_pipeline(config: Config) -> Dict:
+    if config.mode not in {"explore", "train", "both"}:
+        return {}
     if config.data_processor.task_pipeline is None:
         return {}
 

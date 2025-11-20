@@ -853,8 +853,8 @@ class Config:
                 )
 
     def _check_explorer_input(self) -> None:
-        if self.mode in {"train", "bench", "serve"}:
-            # no need to check explorer_input in train/bench/serve mode
+        if self.mode == "serve":
+            # no need to check explorer_input in serve mode
             return
 
         explorer_input = self.buffer.explorer_input
@@ -864,7 +864,7 @@ class Config:
                 raise ValueError("Do not support setting `taskset` and `tasksets` simultaneously!")
             explorer_input.tasksets = [explorer_input.taskset]
             explorer_input.taskset = None
-        elif len(explorer_input.tasksets) == 0:
+        elif self.mode not in {"bench", "train"} and len(explorer_input.tasksets) == 0:
             raise ValueError("At least one taskset should be provided in explorer_input!")
 
         for i, taskset in enumerate(explorer_input.tasksets):
@@ -913,8 +913,8 @@ class Config:
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
     def _check_trainer_input(self) -> None:
-        if self.mode in {"explore", "bench", "serve"}:
-            # no need to check trainer_input in explore/bench/serve mode
+        if self.mode in {"bench", "serve"}:
+            # no need to check trainer_input in bench/serve mode
             return
 
         trainer_input = self.buffer.trainer_input
@@ -986,10 +986,15 @@ class Config:
                 )
 
         task_pipeline = self.data_processor.task_pipeline
-        if task_pipeline is not None and self.mode in {"explore", "both"}:
+        if task_pipeline is not None and self.mode in {"explore", "train", "both"}:
             if task_pipeline.output is None:
                 if self.mode != "train":
-                    task_pipeline.output = self.buffer.explorer_input.tasksets[0]
+                    if len(self.buffer.explorer_input.tasksets) > 0:
+                        task_pipeline.output = self.buffer.explorer_input.tasksets[0]
+                    else:
+                        raise ValueError(
+                            "At least one taskset should be provided in explorer_input!"
+                        )
                 elif self.mode == "train" and self.algorithm.algorithm_type in {"dpo", "sft"}:
                     task_pipeline.output = self.buffer.trainer_input.experience_buffer
                 else:

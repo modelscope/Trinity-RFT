@@ -37,7 +37,6 @@ def bench(config: Config) -> None:
 
 def explore(config: Config) -> None:
     """Run explorer."""
-    check_and_run_task_pipeline(config)
     try:
         explorer = Explorer.get_actor(config)
         ray.get(explorer.prepare.remote())
@@ -82,7 +81,6 @@ def both(config: Config) -> None:
     the latest step. The specific number of experiences may vary for different
     algorithms and tasks.
     """
-    check_and_run_task_pipeline(config)
     try:
         explorer = Explorer.get_actor(config)
         trainer = Trainer.get_actor(config)
@@ -153,6 +151,7 @@ def run_stage(config: Config) -> None:
     )
     pprint(config)
     try:
+        check_and_run_task_pipeline(config)
         MODE_MAP[config.mode](config)
     finally:
         if config.monitor.enable_ray_timeline:

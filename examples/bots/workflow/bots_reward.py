@@ -1,8 +1,10 @@
 # Adapted from Reasoning360: https://github.com/LLM360/Reasoning360/blob/main/verl/utils/reward_score/naive_dapo.py
 
+import concurrent
 import contextlib
 import math
 import re
+import resource
 from math import isclose
 from typing import Optional, Union
 
@@ -585,17 +587,25 @@ def should_allow_eval(expr: str):
 
 # @timeout(timeout_seconds=10)
 def are_equal_under_sympy(ground_truth_normalized: str, given_normalized: str):
-    are_equal = False
-    try:
+    def check_equal():
+        memory_size = 1024**3
+        resource.setrlimit(resource.RLIMIT_AS, (memory_size, memory_size))
+
         expr = f"({ground_truth_normalized})-({given_normalized})"
         if should_allow_eval(expr):
             sympy_diff = _sympy_parse(expr)
             simplified = sympy.simplify(sympy_diff)
             if simplified == 0:
-                are_equal = True
-    except Exception:
-        pass
-    return are_equal
+                return True
+        return False
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(check_equal)
+        try:
+            return future.result(timeout=10)
+        except (concurrent.futures.TimeoutError, Exception):
+            future.cancel()
+            return False
 
 
 def split_tuple(expr: str):
