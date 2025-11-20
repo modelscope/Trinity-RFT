@@ -523,6 +523,7 @@ window.addEventListener("load", initFullscreen);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -853,27 +854,28 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load_dataset</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">READER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">FORMATTER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageConfig</span>
 
 
 <div class="viewcode-block" id="DummyProgressBar">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.DummyProgressBar">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyProgressBar</span><span class="p">:</span>
 <div class="viewcode-block" id="DummyProgressBar.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.DummyProgressBar.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="DummyProgressBar.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.DummyProgressBar.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="DummyProgressBar.close">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.close">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.DummyProgressBar.close">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 </div>
@@ -944,13 +946,10 @@ document.write(`
 
 
 <div class="viewcode-block" id="BaseFileReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.BaseFileReader">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.BaseFileReader">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseFileReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">dataset_size</span>
-
 <div class="viewcode-block" id="BaseFileReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.BaseFileReader.read_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.BaseFileReader.read_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
@@ -960,13 +959,65 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="FileReader">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader">[文档]</a>
+<span class="nd">@READER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide a unified interface for Experience and Task file readers.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FileReader.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.__init__">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">schema_type</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">!=</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">ExperienceFileReader</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">TaskFileReader</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileReader.read">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.read">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileReader.read_with_indices">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.read_with_indices">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_with_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read tasks with indices.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read_with_indices</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileReader.read_with_indices_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.read_with_indices_async">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_with_indices_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read tasks with indices asynchronously.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read_with_indices_async</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileReader.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FileReader.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.FileReader.load_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+
+
+
 <div class="viewcode-block" id="ExperienceFileReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.ExperienceFileReader">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExperienceFileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for SFT / DPO file data.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ExperienceFileReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.ExperienceFileReader.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
             <span class="n">tokenizer_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">format</span>
@@ -984,7 +1035,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ExperienceFileReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader.read">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.ExperienceFileReader.read">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="n">samples</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">)</span>
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -992,17 +1043,32 @@ document.write(`
             <span class="n">experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
             <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exp_list</span></div>
-</div>
+
+
+<div class="viewcode-block" id="ExperienceFileReader.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.ExperienceFileReader.state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">current_offset</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ExperienceFileReader.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.ExperienceFileReader.load_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;current_index&quot;</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">dataset_size</span></div>
 
 
 
 <div class="viewcode-block" id="TaskFileReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TaskFileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Reader for task file data.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TaskFileReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">name</span>
@@ -1031,7 +1097,7 @@ document.write(`
         <span class="k">return</span> <span class="n">tasks</span>
 
 <div class="viewcode-block" id="TaskFileReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.read">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.read">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span>
         <span class="n">samples</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
@@ -1039,7 +1105,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="TaskFileReader.read_with_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.read_with_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_with_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read tasks with indices.&quot;&quot;&quot;</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">select_batch</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
@@ -1047,11 +1113,26 @@ document.write(`
 
 
 <div class="viewcode-block" id="TaskFileReader.read_with_indices_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.read_with_indices_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_with_indices_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read tasks with indices asynchronously.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_with_indices</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span></div>
-</div>
+
+
+<div class="viewcode-block" id="TaskFileReader.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">current_offset</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="TaskFileReader.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.TaskFileReader.load_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;current_index&quot;</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">dataset_size</span></div>
 
 </pre></div>
 

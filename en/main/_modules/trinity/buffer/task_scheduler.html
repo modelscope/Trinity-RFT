@@ -522,6 +522,7 @@ window.addEventListener("load", initFullscreen);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -859,10 +860,112 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experimental</span>
 
 
+<div class="viewcode-block" id="get_taskset_scheduler">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.get_taskset_scheduler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_taskset_scheduler</span><span class="p">(</span><span class="n">explorer_state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TasksetSchedulerBase&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a taskset scheduler according to the config.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        explorer_state (Dict): Restoration state from checkpoint (may include progress info)</span>
+<span class="sd">        config (Config): Full system configuration containing buffer and taskset settings</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        TasksetSchedulerBase: The taskset scheduler instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">taskset_configs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">taskset_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">taskset_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task_selector</span><span class="o">.</span><span class="n">selector_type</span> <span class="o">==</span> <span class="s2">&quot;sequential&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SimpleTasksetScheduler</span><span class="p">(</span><span class="n">explorer_state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TasksetScheduler</span><span class="p">(</span><span class="n">explorer_state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="TasksetSchedulerBase">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TasksetSchedulerBase</span><span class="p">:</span>
+<div class="viewcode-block" id="TasksetSchedulerBase.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">explorer_state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">explorer_state</span> <span class="o">=</span> <span class="n">explorer_state</span></div>
+
+
+<div class="viewcode-block" id="TasksetSchedulerBase.read_async">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.read_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Asynchronously reads a batch of tasks according to the current schedule.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="TasksetSchedulerBase.state_dict">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.state_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;return persistent state for checkpointing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Dict]: State dicts for all selectors (one per taskset)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="TasksetSchedulerBase.update">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update selectors using feedback from the training pipeline.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SimpleTasksetScheduler">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleTasksetScheduler</span><span class="p">(</span><span class="n">TasksetSchedulerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple taskset scheduler that only reads from one taskset without task selection strategies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SimpleTasksetScheduler.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">explorer_state</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">explorer_state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;latest_task_index&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">explorer_state</span><span class="p">[</span><span class="s2">&quot;taskset_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="n">explorer_state</span><span class="p">[</span><span class="s2">&quot;latest_task_index&quot;</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;taskset_states&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;current_index&quot;</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="SimpleTasksetScheduler.read_async">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.read_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SimpleTasksetScheduler.state_dict">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.state_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()]</span></div>
+
+
+<div class="viewcode-block" id="SimpleTasksetScheduler.update">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># do nothing here</span>
+        <span class="k">return</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="TasksetScheduler">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetScheduler">[docs]</a>
 <span class="nd">@Experimental</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TasksetScheduler</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TasksetScheduler</span><span class="p">(</span><span class="n">TasksetSchedulerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coordinates multiple datasets (tasksets) with customizable task selection strategies per taskset.</span>
 
@@ -888,7 +991,7 @@ document.write(`
 <span class="sd">            explorer_state (Dict): Restoration state from checkpoint (may include progress info)</span>
 <span class="sd">            config (Config): Full system configuration containing buffer and taskset settings</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">explorer_state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
 
         <span class="c1"># Backward compatibility: old format stored &#39;latest_task_index&#39; directly</span>
         <span class="k">if</span> <span class="s2">&quot;latest_task_index&quot;</span> <span class="ow">in</span> <span class="n">explorer_state</span><span class="p">:</span>
@@ -902,7 +1005,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="n">taskset_configs</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskFileReader</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileReader</span>
 
         <span class="n">taskset_states</span> <span class="o">=</span> <span class="n">explorer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="s2">&quot;taskset_states&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">taskset_configs</span><span class="p">)</span>
@@ -912,15 +1015,15 @@ document.write(`
         <span class="k">for</span> <span class="n">taskset_config</span><span class="p">,</span> <span class="n">taskset_state</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">taskset_configs</span><span class="p">,</span> <span class="n">taskset_states</span><span class="p">):</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">taskset_config</span><span class="o">.</span><span class="n">is_eval</span>  <span class="c1"># assume drop last</span>
             <span class="n">taskset</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">taskset_config</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">taskset</span><span class="p">,</span> <span class="n">TaskFileReader</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">taskset</span><span class="p">,</span> <span class="n">FileReader</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Taskset &#39;</span><span class="si">{</span><span class="n">taskset_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; has an unsupported type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">taskset</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Currently, only &#39;TaskFileReader&#39; is supported by TasksetScheduler.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Currently, only &#39;FileReader&#39; is supported by TasksetScheduler.&quot;</span>
                 <span class="p">)</span>
 
             <span class="c1"># Create selector based on type specified in config (e.g., &#39;sequential&#39;, &#39;shuffle&#39;)</span>
             <span class="n">selector</span> <span class="o">=</span> <span class="n">SELECTORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span><span class="o">.</span><span class="n">selector_type</span><span class="p">)(</span>
-                <span class="n">taskset</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span>
+                <span class="n">taskset</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span>
             <span class="p">)</span>
             <span class="n">selector</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">taskset_state</span><span class="p">)</span>  <span class="c1"># Restore any prior state</span>
 

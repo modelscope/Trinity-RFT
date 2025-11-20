@@ -523,6 +523,7 @@ window.addEventListener("load", initFullscreen);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -861,7 +862,7 @@ document.write(`
 <div class="viewcode-block" id="JSONWriter.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.file_writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">FileStorage</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">wrap_in_ray</span></div>
 

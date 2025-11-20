@@ -839,31 +839,33 @@ document.write(`
   <h1>trinity.buffer.reader.sql_reader 源代码</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Reader of the SQL buffer.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">READER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.storage.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLStorage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 
 
 <div class="viewcode-block" id="SQLReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.sql_reader.SQLReader">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader">[文档]</a>
+<span class="nd">@READER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sql&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SQLReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader of the SQL buffer.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SQLReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.sql_reader.SQLReader.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">wrap_in_ray</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">SQLStorage</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SQLReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.sql_reader.SQLReader.read">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader.read">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span>
@@ -872,7 +874,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SQLReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.sql_reader.SQLReader.read_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader.read_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -881,6 +883,20 @@ document.write(`
                 <span class="k">raise</span> <span class="ne">StopAsyncIteration</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SQLReader.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader.state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="c1"># SQL Not supporting state dict yet</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="SQLReader.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.SQLReader.load_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="c1"># SQL Not supporting state dict yet</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 </div>
 
 </pre></div>

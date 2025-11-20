@@ -1235,12 +1235,12 @@ document.write(`
             <span class="k">if</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.sql_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLWriter</span>
 
-                <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span>
+                <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">SQLWriter</span><span class="p">(</span><span class="n">st_config</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">is_json_file</span><span class="p">(</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.file_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONWriter</span>
 
-                <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
+                <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">JSONWriter</span><span class="p">(</span><span class="n">st_config</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknown supported storage path: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -1248,7 +1248,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.file_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONWriter</span>
 
-            <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
+            <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">JSONWriter</span><span class="p">(</span><span class="n">st_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Save experiences in </span><span class="si">{</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_count</span> <span class="o">=</span> <span class="mi">0</span>

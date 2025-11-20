@@ -225,6 +225,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -633,7 +634,12 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.buffer_reader.BufferReader.state_dict">
 <span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_reader.html#BufferReader.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_reader.BufferReader.state_dict" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Return the state of the reader as a dict.
+:returns: A dict containing the reader state. At minimum, it should contain</p>
+<blockquote>
+<div><p>the <cite>current_index</cite> field.</p>
+</div></blockquote>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.buffer_reader.BufferReader.load_state_dict">

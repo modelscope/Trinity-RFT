@@ -522,6 +522,7 @@ window.addEventListener("load", initFullscreen);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -875,13 +876,18 @@ document.write(`
 <div class="viewcode-block" id="BufferReader.state_dict">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.buffer_reader.html#trinity.buffer.BufferReader.state_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{}</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the state of the reader as a dict.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A dict containing the reader state. At minimum, it should contain</span>
+<span class="sd">            the `current_index` field.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BufferReader.load_state_dict">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.buffer_reader.html#trinity.buffer.BufferReader.load_state_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </div>
 
 </pre></div>

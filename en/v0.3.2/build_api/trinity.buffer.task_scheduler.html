@@ -591,6 +591,21 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.get_taskset_scheduler"><code class="docutils literal notranslate"><span class="pre">get_taskset_scheduler()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.__init__"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.read_async"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.read_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.state_dict"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.update"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.read_async"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.read_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.state_dict"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.update"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.update()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler.__init__"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler.build_orders"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler.build_orders()</span></code></a></li>
@@ -613,10 +628,105 @@ document.write(`
   <section id="module-trinity.buffer.task_scheduler">
 <span id="trinity-buffer-task-scheduler-module"></span><h1>trinity.buffer.task_scheduler module<a class="headerlink" href="#module-trinity.buffer.task_scheduler" title="Link to this heading">#</a></h1>
 <p>The taskset scheduler.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.get_taskset_scheduler">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.task_scheduler.</span></span><span class="sig-name descname"><span class="pre">get_taskset_scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase" title="trinity.buffer.task_scheduler.TasksetSchedulerBase"><span class="pre">TasksetSchedulerBase</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#get_taskset_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.get_taskset_scheduler" title="Link to this definition">#</a></dt>
+<dd><p>Get a taskset scheduler according to the config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>explorer_state</strong> (<em>Dict</em>) – Restoration state from checkpoint (may include progress info)</p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><em>Config</em></a>) – Full system configuration containing buffer and taskset settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The taskset scheduler instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase" title="trinity.buffer.task_scheduler.TasksetSchedulerBase">TasksetSchedulerBase</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetSchedulerBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.task_scheduler.</span></span><span class="sig-name descname"><span class="pre">TasksetSchedulerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetSchedulerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetSchedulerBase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetSchedulerBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetSchedulerBase.read_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetSchedulerBase.read_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.read_async" title="Link to this definition">#</a></dt>
+<dd><p>Asynchronously reads a batch of tasks according to the current schedule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetSchedulerBase.state_dict">
+<span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetSchedulerBase.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.state_dict" title="Link to this definition">#</a></dt>
+<dd><p>return persistent state for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State dicts for all selectors (one per taskset)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetSchedulerBase.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetSchedulerBase.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.update" title="Link to this definition">#</a></dt>
+<dd><p>Update selectors using feedback from the training pipeline.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.SimpleTasksetScheduler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.task_scheduler.</span></span><span class="sig-name descname"><span class="pre">SimpleTasksetScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#SimpleTasksetScheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase" title="trinity.buffer.task_scheduler.TasksetSchedulerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TasksetSchedulerBase</span></code></a></p>
+<p>A simple taskset scheduler that only reads from one taskset without task selection strategies.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.SimpleTasksetScheduler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#SimpleTasksetScheduler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.SimpleTasksetScheduler.read_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#SimpleTasksetScheduler.read_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.read_async" title="Link to this definition">#</a></dt>
+<dd><p>Asynchronously reads a batch of tasks according to the current schedule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.SimpleTasksetScheduler.state_dict">
+<span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#SimpleTasksetScheduler.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.state_dict" title="Link to this definition">#</a></dt>
+<dd><p>return persistent state for checkpointing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>State dicts for all selectors (one per taskset)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.task_scheduler.SimpleTasksetScheduler.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#SimpleTasksetScheduler.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.update" title="Link to this definition">#</a></dt>
+<dd><p>Update selectors using feedback from the training pipeline.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.task_scheduler.TasksetScheduler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.task_scheduler.</span></span><span class="sig-name descname"><span class="pre">TasksetScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">explorer_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/task_scheduler.html#TasksetScheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.task_scheduler.TasksetScheduler" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase" title="trinity.buffer.task_scheduler.TasksetSchedulerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TasksetSchedulerBase</span></code></a></p>
 <p>Coordinates multiple datasets (tasksets) with customizable task selection strategies per taskset.</p>
 <dl class="simple">
 <dt>The scheduler:</dt><dd><ul class="simple">
@@ -780,6 +890,21 @@ ensuring balanced exposure while introducing randomness in selection order.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.get_taskset_scheduler"><code class="docutils literal notranslate"><span class="pre">get_taskset_scheduler()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.__init__"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.read_async"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.read_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.state_dict"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetSchedulerBase.update"><code class="docutils literal notranslate"><span class="pre">TasksetSchedulerBase.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.read_async"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.read_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.state_dict"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.SimpleTasksetScheduler.update"><code class="docutils literal notranslate"><span class="pre">SimpleTasksetScheduler.update()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler.__init__"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.task_scheduler.TasksetScheduler.build_orders"><code class="docutils literal notranslate"><span class="pre">TasksetScheduler.build_orders()</span></code></a></li>

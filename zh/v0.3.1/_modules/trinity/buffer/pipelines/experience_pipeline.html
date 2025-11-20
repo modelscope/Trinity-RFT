@@ -905,7 +905,7 @@ document.write(`
             <span class="k">elif</span> <span class="n">is_json_file</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
                     <span class="n">StorageConfig</span><span class="p">(</span>
-                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">,</span>
+                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>
@@ -913,7 +913,7 @@ document.write(`
             <span class="k">elif</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
                     <span class="n">StorageConfig</span><span class="p">(</span>
-                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">,</span>
+                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>

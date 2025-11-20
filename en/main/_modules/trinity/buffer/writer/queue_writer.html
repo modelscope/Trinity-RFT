@@ -522,6 +522,7 @@ window.addEventListener("load", initFullscreen);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -863,7 +864,7 @@ document.write(`
 <div class="viewcode-block" id="QueueWriter.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.queue_writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">QueueStorage</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
 
 
