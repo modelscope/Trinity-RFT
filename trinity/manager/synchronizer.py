@@ -44,7 +44,10 @@ class Synchronizer:
         self._modules = {module_ref}
         self._modules_lock = asyncio.Lock()
         asyncio.create_task(self._check_modules())
-        if self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+        if (
+            self.config.mode != "bench"
+            and self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
+        ):
             asyncio.create_task(self._find_latest_state_dict())
 
     async def add_module(self, module_ref: ray.actor.ActorHandle) -> None:

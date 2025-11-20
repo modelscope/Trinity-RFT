@@ -93,7 +93,7 @@ ray start --head
 
 **A:** 以下参数可能有所帮助：
 
-- 对于 trainer：当 `actor_rollout_ref.actor.use_dynamic_bsz=false` 时，调整 `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`；当 `actor_rollout_ref.actor.use_dynamic_bsz=true` 时，调整 `actor_rollout_ref.actor.ppo_max_token_len_per_gpu` 和 `actor_rollout_ref.actor.ulysses_sequence_parallel_size`。设置 `actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` 也可能有帮助。
+- 对于 trainer：当 `trainer.use_dynamic_bsz=false` 时，调整 `trainer.max_token_len_per_gpu`；当 `trainer.use_dynamic_bsz=true` 时，调整 `trainer.ppo_max_token_len_per_gpu` 和 `trainer.ulysses_sequence_parallel_size`。设置 `trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` 也可能有帮助。
 - 对于 explorer：调整 `explorer.rollout_model.tensor_parallel_size`。
 
 ## 第三部分：调试方法
@@ -113,7 +113,7 @@ trinity run --config grpo_gsm8k/gsm8k.yaml 2>&1 | tee debug.log
 
 1. 启动推理模型： `trinity debug --config <config_file_path> --module inference_model`
 
-2. 在另一个终端中进行工作流的调试：`trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>`
+2. 在另一个终端中进行工作流的调试：`trinity debug --config <config_file_path> --module workflow --output-file <output_file_path> --plugin-dir <plugin_dir>`
 
 更多详细信息，请参阅{ref}`工作流开发指南 <Workflows>`章节。
 

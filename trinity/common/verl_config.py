@@ -85,6 +85,7 @@ class FSDPConfig:
     wrap_policy: WrapPolicy = field(default_factory=WrapPolicy)
     fsdp_size: int = -1
     forward_prefetch: bool = False
+    model_dtype: Optional[str] = None
 
 
 @dataclass
@@ -163,8 +164,6 @@ class Actor:
     clip_ratio_high: Optional[float] = None
     entropy_coeff: float = 0.001
     use_kl_loss: bool = False
-    kl_loss_coef: float = 0.0
-    kl_loss_type: str = "low_var_kl"
 
 
 @dataclass

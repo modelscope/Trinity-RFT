@@ -168,7 +168,10 @@ class ActorRolloutRefWorker(Worker):
                     self.config.actor.ppo_micro_batch_size
                 )
 
-            if self.config.actor.ppo_micro_batch_size_per_gpu is not None:
+            if (
+                not self.config.actor.use_dynamic_bsz
+                and self.config.actor.ppo_micro_batch_size_per_gpu is not None
+            ):
                 assert (
                     self.config.actor.ppo_mini_batch_size
                     % self.config.actor.ppo_micro_batch_size_per_gpu
@@ -181,7 +184,11 @@ class ActorRolloutRefWorker(Worker):
                 ), f"normalized ppo_mini_batch_size {self.config.actor.ppo_mini_batch_size} should be larger than ppo_micro_batch_size_per_gpu {self.config.actor.ppo_micro_batch_size_per_gpu}"
 
         # normalize ref config
-        if self._is_ref and self.config.ref.log_prob_micro_batch_size is not None:
+        if (
+            self._is_ref
+            and not self.config.ref.log_prob_use_dynamic_bsz
+            and self.config.ref.log_prob_micro_batch_size is not None
+        ):
             self.config.ref.log_prob_micro_batch_size //= (
                 self.device_mesh.size() // self.ulysses_sequence_parallel_size
             )
@@ -246,7 +253,7 @@ class ActorRolloutRefWorker(Worker):
             else:
                 self.tokenizer.chat_template = self.config.model.custom_chat_template
 
-        torch_dtype = fsdp_config.get("model_dtype", None)
+        torch_dtype = fsdp_config.model_dtype
         if torch_dtype is None:
             torch_dtype = torch.float32 if self._is_actor else torch.bfloat16
         else:
@@ -325,9 +332,6 @@ class ActorRolloutRefWorker(Worker):
                 use_fused_kernels=use_fused_kernels,
                 fused_kernels_backend=fused_kernels_backend,
             )
-
-            # some parameters may not in torch_dtype. TODO(zhangchi.usc1992) remove this after we switch to fsdp2
-            actor_module.to(torch_dtype)
 
             if enable_gradient_checkpointing:
                 actor_module.gradient_checkpointing_enable(
@@ -971,7 +975,7 @@ class CriticWorker(Worker):
             self.config.ppo_micro_batch_size_per_gpu = self.config.ppo_micro_batch_size
             self.config.forward_micro_batch_size_per_gpu = self.config.forward_micro_batch_size
 
-        if self.config.ppo_micro_batch_size_per_gpu is not None:
+        if not self.config.use_dynamic_bsz and self.config.ppo_micro_batch_size_per_gpu is not None:
             assert (
                 self.config.ppo_mini_batch_size % self.config.ppo_micro_batch_size_per_gpu == 0
             ), f"normalized ppo_mini_batch_size {self.config.ppo_mini_batch_size} should be divisible by ppo_micro_batch_size_per_gpu {self.config.ppo_micro_batch_size_per_gpu}"
@@ -1020,7 +1024,7 @@ class CriticWorker(Worker):
         if self.rank == 0:
             print(f"Critic overriding config {override_config_kwargs}")
 
-        torch_dtype = self.config.model.fsdp_config.get("model_dtype", "fp32")
+        torch_dtype = self.config.model.fsdp_config.model_dtype or "fp32"
         torch_dtype = PrecisionType.to_dtype(torch_dtype)
 
         from transformers import AutoConfig
@@ -1059,9 +1063,6 @@ class CriticWorker(Worker):
                 use_remove_padding=use_remove_padding,
                 ulysses_sp_size=self.ulysses_sequence_parallel_size,
             )
-
-            # some parameters may not in torch_dtype
-            critic_module.to(torch_dtype)
 
             if config.model.get("enable_gradient_checkpointing", False):
                 critic_module.gradient_checkpointing_enable(

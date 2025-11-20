@@ -382,6 +382,12 @@ explorer:
 - `auxiliary_models`: 用于自定义工作流的额外模型。
 - `eval_interval`: 模型评估的间隔（以步为单位）。
 - `eval_on_startup`: 是否在启动时评估模型。更准确地说，是在第 0 步使用原始模型评估，因此重启时不会触发。
+- `over_rollout`: [实验性] 超量 rollout 机制的配置，允许 explorer 在每个步骤中使用少于完整批次大小的任务继续进行。这在某些任务显著耗时较长的场景中能有效地提高吞吐量。仅当使用动态同步（`synchronizer.sync_style` 不是 `fixed`）时适用。
+  - `ratio`: explorer 在每个步骤中仅等待 `(1 - ratio) * batch_size` 的任务。默认为 `0.0`，表示等待所有任务。
+  - `wait_after_min`: 达到最小任务阈值后，等待此秒数后再继续。
+- `dynamic_timeout`: [实验性] 动态超时机制的配置，根据成功任务的平均耗时调整每个任务的超时时间。
+  - `enable`: 是否启用动态超时。默认为 `false`。
+  - `ratio`: 每个任务的超时时间动态设置为 `average_time_per_success_task * ratio`。默认为 `3.0`。
 
 ---
 
@@ -395,6 +401,7 @@ synchronizer:
   sync_interval: 10
   sync_offset: 0
   sync_timeout: 1200
+  sync_style: 'fixed'
 ```
 
 - `sync_method`: 同步方法。选项：
@@ -403,6 +410,9 @@ synchronizer:
 - `sync_interval`: trainer 和 explorer 之间模型权重同步的间隔（步）。
 - `sync_offset`: trainer 和 explorer 之间模型权重同步的偏移量（步）。explorer 可在 trainer 开始训练前运行 `sync_offset` 步。
 - `sync_timeout`: 同步超时时间。
+- `sync_style`: 同步风格。选项：
+  - `fixed`: explorer 和 trainer 每隔 `sync_interval` 步同步一次权重。
+  - `dynamic_by_explorer`: explorer 在完成 `sync_interval` 步后通知 trainer 同步权重，而不管此时 trainer 已完成多少步。
 
 ---
 

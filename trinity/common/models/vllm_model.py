@@ -402,9 +402,8 @@ class vLLMRolloutModel(InferenceModel):
             tokens=token_ids,
             logprobs=logprobs[prompt_length - 1 :],
             prompt_length=prompt_length,
-            action_mask=action_mask[prompt_length:],  # Exclude the prompt
-            prompt_text=self.tokenizer.decode(token_ids[:prompt_length]),
-            response_text=self.tokenizer.decode(token_ids[prompt_length:]),
+            action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
+            messages=messages,
         )
 
     async def shutdown(self):

@@ -233,44 +233,50 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                     json.dump(transformer_config_dict, f, indent=2)
 
         if self.should_save_hf_model or save_as_hf:
-            # wait for everyone to dump to local
-            state_dict = self.weight_saver(
-                self.model,
-                self.hf_config,
-                dtype=self.param_dtype,
-                is_value_model=self.is_value_model,
-                tie_word_embeddings=self.share_embeddings_and_output_weights,
-            )
+            try:
+                # wait for everyone to dump to local
+                state_dict = self.weight_saver(
+                    self.model,
+                    self.hf_config,
+                    dtype=self.param_dtype,
+                    is_value_model=self.is_value_model,
+                    tie_word_embeddings=self.share_embeddings_and_output_weights,
+                )
 
-            torch.distributed.barrier()
-            if self.rank == 0:
-                # TODO: async save or use mbridge to save hf model
-                hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
-                import warnings
+                torch.distributed.barrier()
+                if self.rank == 0:
+                    # TODO: async save or use mbridge to save hf model
+                    hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
+                    import warnings
 
-                from accelerate import init_empty_weights
+                    from accelerate import init_empty_weights
 
-                with init_empty_weights(), warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    if "mistral7b-rm" in self.config.model.path:
-                        from transformers import MistralForSequenceClassification
+                    with init_empty_weights(), warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        if "mistral7b-rm" in self.config.model.path:
+                            from transformers import MistralForSequenceClassification
 
-                        model = MistralForSequenceClassification.from_pretrained(
-                            self.config.model.path
-                        )  # use score head instead of lm_head
-                        state_dict["score.weight"] = state_dict["score.weight"]
-                    else:
-                        from transformers import AutoModelForCausalLM
+                            model = MistralForSequenceClassification.from_pretrained(
+                                self.config.model.path
+                            )  # use score head instead of lm_head
+                            state_dict["score.weight"] = state_dict["score.weight"]
+                        else:
+                            from transformers import AutoModelForCausalLM
 
-                        model = AutoModelForCausalLM.from_pretrained(
-                            self.config.model.path, torch_dtype="auto"
-                        )
-                model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
-                log_with_rank(
-                    f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
-                    rank=self.rank,
-                    logger=logger,
-                    log_only_rank_0=True,
+                            model = AutoModelForCausalLM.from_pretrained(
+                                self.config.model.path, torch_dtype="auto"
+                            )
+                    model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
+                    log_with_rank(
+                        f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
+                        rank=self.rank,
+                        logger=logger,
+                        log_only_rank_0=True,
+                    )
+            except Exception:
+                logger.error(
+                    f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it.",
+                    exc_info=True,
                 )
 
         ray.get(

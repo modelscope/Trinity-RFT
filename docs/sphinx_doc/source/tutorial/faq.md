@@ -94,7 +94,7 @@ ray start --head
 
 **A:** The following parameters may be helpful:
 
-- For trainer, adjust `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` when `actor_rollout_ref.actor.use_dynamic_bsz=false`; adjust `actor_rollout_ref.actor.ppo_max_token_len_per_gpu` and `actor_rollout_ref.actor.ulysses_sequence_parallel_size` when `actor_rollout_ref.actor.use_dynamic_bsz=true`. Setting `actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` may also help.
+- For trainer, adjust `trainer.max_token_len_per_gpu` when `trainer.use_dynamic_bsz=false`; adjust `trainer.ppo_max_token_len_per_gpu` and `trainer.ulysses_sequence_parallel_size` when `trainer.use_dynamic_bsz=true`. Setting `trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` may also help.
 - For explorer, adjust `explorer.rollout_model.tensor_parallel_size`.
 
 
@@ -113,7 +113,7 @@ To debug a new workflow, use Trinity-RFT's debug mode with the following steps:
 
 1. Launch the inference model via `trinity debug --config <config_file_path> --module inference_model`
 
-2. Debug the workflow in another terminal via `trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>`
+2. Debug the workflow in another terminal via `trinity debug --config <config_file_path> --module workflow --output-file <output_file_path> --plugin-dir <plugin_dir>`
 
 Please refer to {ref}`Workflow Development Guide <Workflows>` section for details.
 
