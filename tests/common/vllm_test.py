@@ -220,12 +220,10 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         "max_model_len",
         "max_prompt_tokens",
         "max_response_tokens",
-        "enable_prompt_truncation",
     ),
     [
-        (20, 19, None, True),
-        (20, None, 1, True),
-        (20, 1, None, False),
+        (20, 19, None),
+        (20, None, 1),
     ],
 )
 class TestModelLen(RayUnittestBaseAysnc):
@@ -236,19 +234,14 @@ class TestModelLen(RayUnittestBaseAysnc):
         self.config.model.max_model_len = self.max_model_len
         self.config.model.max_prompt_tokens = self.max_prompt_tokens
         self.config.model.max_response_tokens = self.max_response_tokens
-        self.config.model.enable_prompt_truncation = self.enable_prompt_truncation
+        self.config.model.enable_prompt_truncation = True
         self.config.explorer.rollout_model.enable_openai_api = True
         self.config.check_and_update()
 
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
-        if self.enable_prompt_truncation:
-            self.test_model_len = self.run_model_len_with_prompt_truncation
-        else:
-            self.test_model_len = self.run_model_len_without_prompt_truncation
-
-    async def run_model_len_with_prompt_truncation(self):
+    async def test_model_len(self):
         await self.model_wrapper.prepare()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -287,7 +280,23 @@ class TestModelLen(RayUnittestBaseAysnc):
             self.config.model.max_response_tokens,
         )
 
-    async def run_model_len_without_prompt_truncation(self):
+
+class TestModelLenWithoutPromptTruncation(RayUnittestBaseAysnc):
+    def setUp(self):
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = 20
+        self.config.model.max_prompt_tokens = 1
+        self.config.model.max_response_tokens = None
+        self.config.model.enable_prompt_truncation = False
+        self.config.explorer.rollout_model.enable_openai_api = True
+        self.config.check_and_update()
+
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+
+    async def test_model_len(self):
         await self.model_wrapper.prepare()
         messages = [
             {"role": "user", "content": "How are you?"},
@@ -296,13 +305,13 @@ class TestModelLen(RayUnittestBaseAysnc):
         # For vllm engine, max_prompt_tokens and max_response_tokens work
         response = self.model_wrapper.chat(messages)
         self.assertEqual(len(response), 1)
-        self.assertEqual(
+        self.assertLessEqual(
             len(response[0].tokens) - response[0].prompt_length,
             self.config.model.max_response_tokens,
         )
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
-        self.assertEqual(
+        self.assertLessEqual(
             len(exps[0].tokens) - exps[0].prompt_length,
             self.config.model.max_response_tokens,
         )
@@ -318,9 +327,6 @@ class TestModelLen(RayUnittestBaseAysnc):
             len(exps[0].tokens) - response.usage.prompt_tokens,
             self.config.model.max_response_tokens,
         )
-
-    async def test_model_len(self):
-        pass
 
 
 class TestAPIServer(RayUnittestBaseAysnc):
