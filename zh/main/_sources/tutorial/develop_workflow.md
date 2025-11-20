@@ -509,7 +509,7 @@ trinity debug --config <config_file_path> --module inference_model
 模型启动后会持续运行并等待调试指令，不会自动退出。此时，你可在另一个终端执行如下命令进行 Workflow 调试：
 
 ```bash
-trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>
+trinity debug --config <config_file_path> --module workflow --output-file <output_file_path> --plugin-dir <plugin_dir>
 ```
 
 - `config_file_path`：YAML 配置文件路径，通常与启动推理模型时使用的配置文件相同。

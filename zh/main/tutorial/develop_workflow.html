@@ -1392,7 +1392,7 @@ document.write(`
 </div>
 <p>其中，<code class="docutils literal notranslate"><span class="pre">config_file_path</span></code> 为 YAML 格式的配置文件路径，格式与 <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span></code> 命令所用配置文件一致。配置文件中的 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model</span></code> 和 <code class="docutils literal notranslate"><span class="pre">explorer.auxiliary_models</span></code> 字段会被加载，用于初始化推理模型。</p>
 <p>模型启动后会持续运行并等待调试指令，不会自动退出。此时，你可在另一个终端执行如下命令进行 Workflow 调试：</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output_file<span class="w"> </span>&lt;output_file_path&gt;<span class="w"> </span>--plugin_dir<span class="w"> </span>&lt;plugin_dir&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output-file<span class="w"> </span>&lt;output_file_path&gt;<span class="w"> </span>--plugin-dir<span class="w"> </span>&lt;plugin_dir&gt;
 </pre></div>
 </div>
 <ul class="simple">

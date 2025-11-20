@@ -513,7 +513,7 @@ Here, `<config_file_path>` is the path to a YAML configuration file, which shoul
 Once started, the model will keep running and wait for debug instructions; it will not exit automatically. You can then run the following command in another terminal to debug your workflow:
 
 ```bash
-trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>
+trinity debug --config <config_file_path> --module workflow --output-file <output_file_path> --plugin-dir <plugin_dir>
 ```
 
 - `<config_file_path>`: Path to the YAML configuration file, usually the same as used for starting the inference model.

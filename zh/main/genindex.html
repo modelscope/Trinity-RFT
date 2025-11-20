@@ -1111,6 +1111,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.DataProcessorConfig.__init__">__init__() （trinity.common.config.DataProcessorConfig 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DynamicTimeoutConfig.__init__">__init__() （trinity.common.config.DynamicTimeoutConfig 方法）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExperienceBufferConfig.__init__">__init__() （trinity.common.config.ExperienceBufferConfig 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExperiencePipelineConfig.__init__">__init__() （trinity.common.config.ExperiencePipelineConfig 方法）</a>
@@ -1138,6 +1140,8 @@ document.write(`
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.OperatorConfig.__init__">__init__() （trinity.common.config.OperatorConfig 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.OptimizerConfig.__init__">__init__() （trinity.common.config.OptimizerConfig 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.OverRolloutConfig.__init__">__init__() （trinity.common.config.OverRolloutConfig 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ReplayBufferConfig.__init__">__init__() （trinity.common.config.ReplayBufferConfig 方法）</a>
 </li>
@@ -1717,6 +1721,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.calculate_reward">calculate_reward() （trinity.common.workflows.EmailSearchWorkflow 方法）</a>
 </li>
+      <li><a href="build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.calculate_run_level_metrics">calculate_run_level_metrics()（在 trinity.explorer.workflow_runner 模块中）</a>
+</li>
+      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.calculate_task_level_metrics">calculate_task_level_metrics()（在 trinity.explorer.scheduler 模块中）</a>
+</li>
       <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.AlgorithmType.can_balance_batch">can_balance_batch（trinity.algorithm.algorithm.AlgorithmType 属性）</a>
 </li>
       <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.AsymREAlgorithm.can_balance_batch">can_balance_batch（trinity.algorithm.algorithm.AsymREAlgorithm 属性）</a>
@@ -1871,10 +1879,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.chosen_key">chosen_key（trinity.common.config.FormatConfig 属性）</a>
 </li>
-      <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.DPODataModel.chosen_message_list">chosen_message_list（trinity.buffer.schema.sql_schema.DPODataModel 属性）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.DPODataModel.chosen_message_list">chosen_message_list（trinity.buffer.schema.sql_schema.DPODataModel 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.chosen_messages">chosen_messages（trinity.common.experience.Experience 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.chosen">chosen（trinity.common.experience.Experience 属性）</a>
@@ -2249,12 +2257,12 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.default_args">default_args()（trinity.algorithm.policy_loss_fn.RECPolicyLossFn 类方法）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn.default_args">default_args()（trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn 类方法）</a>
 </li>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SFTISLossFn.default_args">default_args()（trinity.algorithm.policy_loss_fn.SFTISLossFn 类方法）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SFTLossFn.default_args">default_args()（trinity.algorithm.policy_loss_fn.SFTLossFn 类方法）</a>
 </li>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SFTPhiLossFn.default_args">default_args()（trinity.algorithm.policy_loss_fn.SFTPhiLossFn 类方法）</a>
@@ -2399,6 +2407,12 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SyncStyle.DYNAMIC_BY_TRAINER">DYNAMIC_BY_TRAINER（trinity.common.constants.SyncStyle 属性）</a>
 </li>
+      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.dynamic_timeout">dynamic_timeout() （trinity.explorer.scheduler.Scheduler 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.dynamic_timeout">dynamic_timeout（trinity.common.config.ExplorerConfig 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DynamicTimeoutConfig">DynamicTimeoutConfig（trinity.common.config 中的类）</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -2451,6 +2465,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_thinking">enable_thinking（trinity.common.config.InferenceModelConfig 属性）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DynamicTimeoutConfig.enable">enable（trinity.common.config.DynamicTimeoutConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ReplayBufferConfig.enable">enable（trinity.common.config.ReplayBufferConfig 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.enable">enable（trinity.common.verl_config.RewardModel 属性）</a>
@@ -2497,10 +2513,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerInput.eval_tasksets">eval_tasksets（trinity.common.config.ExplorerInput 属性）</a>
 </li>
-      <li><a href="build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation()（在 trinity.utils.eval_utils 模块中）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation()（在 trinity.utils.eval_utils 模块中）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerInput.experience_buffer">experience_buffer（trinity.common.config.TrainerInput 属性）</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.DPODataModel.experience_bytes">experience_bytes（trinity.buffer.schema.sql_schema.DPODataModel 属性）</a>
@@ -3559,7 +3575,7 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.metrics">metrics（trinity.common.experience.Experience 属性）</a>
 </li>
-      <li><a href="build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.Status.metric">metric（trinity.explorer.workflow_runner.Status 属性）</a>
+      <li><a href="build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.Status.metrics">metrics（trinity.explorer.workflow_runner.Status 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.micro_batch_size_per_gpu">micro_batch_size_per_gpu（trinity.common.verl_config.RewardModel 属性）</a>
 </li>
@@ -4108,10 +4124,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.optimizer_offload">optimizer_offload（trinity.common.verl_config.MegatronConfig 属性）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.OptimizerConfig.optimizer_type">optimizer_type（trinity.common.config.OptimizerConfig 属性）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.OptimizerConfig">OptimizerConfig（trinity.common.config 中的类）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.AlgorithmConfig.optimizer">optimizer（trinity.common.config.AlgorithmConfig 属性）</a>
@@ -4130,6 +4146,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig.output">output（trinity.common.config.TaskPipelineConfig 属性）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.over_rollout">over_rollout（trinity.common.config.ExplorerConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.override_config">override_config（trinity.common.verl_config.ActorModel 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.CriticModel.override_config">override_config（trinity.common.verl_config.CriticModel 属性）</a>
@@ -4139,6 +4157,8 @@ document.write(`
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.override_transformer_config">override_transformer_config（trinity.common.verl_config.MegatronConfig 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig">OverrideTransformerConfig（trinity.common.verl_config 中的类）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.OverRolloutConfig">OverRolloutConfig（trinity.common.config 中的类）</a>
 </li>
   </ul></td>
 </tr></table>
@@ -4402,6 +4422,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector">RandomSelector（trinity.buffer.selector.selector 中的类）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DynamicTimeoutConfig.ratio">ratio（trinity.common.config.DynamicTimeoutConfig 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.OverRolloutConfig.ratio">ratio（trinity.common.config.OverRolloutConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.TaskModel.raw_task">raw_task（trinity.buffer.schema.sql_schema.TaskModel 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.raw_task">raw_task（trinity.common.workflows.Task 属性）</a>
@@ -4548,8 +4572,6 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task.repeat_times">repeat_times（trinity.common.workflows.workflow.Task 属性）</a>
 </li>
-      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.repeat_times">repeat_times（trinity.explorer.scheduler.TaskWrapper 属性）</a>
-</li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow.repeatable">repeatable（trinity.common.workflows.Workflow 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow.repeatable">repeatable（trinity.common.workflows.workflow.Workflow 属性）</a>
@@ -4632,16 +4654,18 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.restart_runner">restart_runner() （trinity.explorer.scheduler.RunnerWrapper 方法）</a>
 </li>
+      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.results">results（trinity.explorer.scheduler.TaskWrapper 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure.result">result（trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Trainer.resume_from_path">resume_from_path（trinity.common.verl_config.Trainer 属性）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Trainer.resume_mode">resume_mode（trinity.common.verl_config.Trainer 属性）</a>
 </li>
       <li><a href="build_api/trinity.buffer.utils.html#trinity.buffer.utils.retry_session">retry_session()（在 trinity.buffer.utils 模块中）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.returns">returns（trinity.common.experience.Experience 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experiences.returns">returns（trinity.common.experience.Experiences 属性）</a>
@@ -4863,8 +4887,6 @@ document.write(`
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow.run_async">run_async() （trinity.common.workflows.workflow.Workflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_manager.html#trinity.manager.config_manager.ConfigManager.run_config">run_config() （trinity.manager.config_manager.ConfigManager 方法）</a>
-</li>
-      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.run_id_base">run_id_base（trinity.explorer.scheduler.TaskWrapper 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.run_server_in_ray">run_server_in_ray()（在 trinity.common.models.vllm_patch.api_patch 模块中）</a>
 </li>
@@ -5633,6 +5655,8 @@ document.write(`
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.strategy">strategy（trinity.common.verl_config.RewardModel 属性）</a>
 </li>
       <li><a href="build_api/trinity.utils.math_eval_utils.html#trinity.utils.math_eval_utils.strip_string">strip_string()（在 trinity.utils.math_eval_utils 模块中）</a>
+</li>
+      <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.sub_task_num">sub_task_num（trinity.explorer.scheduler.TaskWrapper 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExperienceBufferConfig.subset_name">subset_name（trinity.common.config.ExperienceBufferConfig 属性）</a>
 </li>
@@ -7286,6 +7310,8 @@ document.write(`
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.OverRolloutConfig.wait_after_min">wait_after_min（trinity.common.config.OverRolloutConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.wait_all">wait_all() （trinity.explorer.scheduler.Scheduler 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.SynchronizerConfig.wait_for_checkpoint">wait_for_checkpoint（trinity.common.config.SynchronizerConfig 属性）</a>

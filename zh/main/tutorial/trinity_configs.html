@@ -1046,6 +1046,18 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>: 用于自定义工作流的额外模型。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eval_interval</span></code>: 模型评估的间隔（以步为单位）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eval_on_startup</span></code>: 是否在启动时评估模型。更准确地说，是在第 0 步使用原始模型评估，因此重启时不会触发。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">over_rollout</span></code>: [实验性] 超量 rollout 机制的配置，允许 explorer 在每个步骤中使用少于完整批次大小的任务继续进行。这在某些任务显著耗时较长的场景中能有效地提高吞吐量。仅当使用动态同步（<code class="docutils literal notranslate"><span class="pre">synchronizer.sync_style</span></code> 不是 <code class="docutils literal notranslate"><span class="pre">fixed</span></code>）时适用。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ratio</span></code>: explorer 在每个步骤中仅等待 <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">-</span> <span class="pre">ratio)</span> <span class="pre">*</span> <span class="pre">batch_size</span></code> 的任务。默认为 <code class="docutils literal notranslate"><span class="pre">0.0</span></code>，表示等待所有任务。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wait_after_min</span></code>: 达到最小任务阈值后，等待此秒数后再继续。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dynamic_timeout</span></code>: [实验性] 动态超时机制的配置，根据成功任务的平均耗时调整每个任务的超时时间。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable</span></code>: 是否启用动态超时。默认为 <code class="docutils literal notranslate"><span class="pre">false</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ratio</span></code>: 每个任务的超时时间动态设置为 <code class="docutils literal notranslate"><span class="pre">average_time_per_success_task</span> <span class="pre">*</span> <span class="pre">ratio</span></code>。默认为 <code class="docutils literal notranslate"><span class="pre">3.0</span></code>。</p></li>
+</ul>
+</li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -1057,6 +1069,7 @@ document.write(`
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="w">  </span><span class="nt">sync_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">sync_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1200</span>
+<span class="w">  </span><span class="nt">sync_style</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;fixed&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -1069,6 +1082,12 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">sync_interval</span></code>: trainer 和 explorer 之间模型权重同步的间隔（步）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sync_offset</span></code>: trainer 和 explorer 之间模型权重同步的偏移量（步）。explorer 可在 trainer 开始训练前运行 <code class="docutils literal notranslate"><span class="pre">sync_offset</span></code> 步。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sync_timeout</span></code>: 同步超时时间。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sync_style</span></code>: 同步风格。选项：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code>: explorer 和 trainer 每隔 <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> 步同步一次权重。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dynamic_by_explorer</span></code>: explorer 在完成 <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> 步后通知 trainer 同步权重，而不管此时 trainer 已完成多少步。</p></li>
+</ul>
+</li>
 </ul>
 </section>
 <hr class="docutils" />
