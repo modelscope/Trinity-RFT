@@ -6,7 +6,6 @@ Modified from https://github.com/rllm-org/rllm/blob/main/rllm/environments/froze
 from typing import Optional, Tuple
 
 import numpy as np
-from gymnasium.utils import seeding
 
 # Map gym state in integer
 MAP_LOOKUP = {
@@ -117,7 +116,14 @@ def generate_random_map(
     valid = False
     board: list[list[str]] = []  # initialize to make pyright happy
 
-    np_random, _ = seeding.np_random(seed)
+    try:
+        from gymnasium.utils import seeding
+
+        np_random, _ = seeding.np_random(seed)
+    except ImportError:
+        raise ImportError(
+            "Gymnasium is not installed. Please install gymnasium first before running the frozen_lake workflow."
+        )
 
     # generate random start and end points
     while not valid:
