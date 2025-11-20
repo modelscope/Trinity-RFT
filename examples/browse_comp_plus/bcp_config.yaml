@@ -1,0 +1,135 @@
+project: "Trinity_BrowseComp_Plus"
+name: "BrowseComp_Plus_Simple_React_Agent"
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
+
+algorithm:
+  algorithm_type: multi_step_grpo
+  repeat_times: 8  # Number of rollouts per sample for GRPO
+  advantage_fn_args:
+    std_threshold: 0.001
+  optimizer:
+    lr: 1e-6
+
+model:
+  # Main agent model for rollout
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-4B-Instruct-2507}
+  max_response_tokens: 10000
+  max_model_len: 64000
+
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+
+buffer:
+  total_epochs: 128
+  batch_size: 64
+  train_batch_size: 512  # Total batch size: batch_size * gpu_per_node * gradient_accumulation
+
+  explorer_input:
+    # Training dataset
+    taskset:
+      name: browsecomp_train
+      storage_type: file
+      path: ${oc.env:TRINITY_TASKSET_PATH,data/trinity_format}
+      split: train
+      format:
+        prompt_key: 'query'  # Field name for the query
+        response_key: 'answer'  # Field name for ground truth answer
+      workflow_args:
+        # Uses local searcher (no MCP server required)
+        max_iterations: 30  # Maximum conversation rounds
+        max_model_tokens: 64000  # Filter experiences longer than this
+        # Local searcher configuration
+        searcher_type: "bm25"  # Type of searcher: bm25, dense, etc.
+        index_path: ${oc.env:BROWSECOMP_INDEX_PATH,indexes/bm25}  # Path to search index (relative to BROWSECOMP_PATH)
+        browsecomp_path: ${oc.env:BROWSECOMP_PATH,null}  # Path to BrowseComp-Plus directory
+        top_k: 5  # Number of search results per query
+        snippet_max_tokens: 512  # Max tokens per document snippet
+        include_get_document: false  # Whether to include get_document tool
+      rollout_args:
+        temperature: 1.0
+        top_p: 1.0
+        max_tokens: 10000
+      enable_progress_bar: true
+
+    # Evaluation datasets
+    eval_tasksets:
+    - name: browsecomp_eval
+      storage_type: file
+      path: ${oc.env:TRINITY_TASKSET_PATH,data/trinity_format}
+      split: test
+      format:
+        prompt_key: 'query'
+        response_key: 'answer'
+      workflow_args:
+        max_iterations: 30
+        max_model_tokens: 64000
+        searcher_type: "bm25"
+        index_path: ${oc.env:BROWSECOMP_INDEX_PATH,indexes/bm25}
+        browsecomp_path: ${oc.env:BROWSECOMP_PATH,null}
+        top_k: 5
+        snippet_max_tokens: 512
+        include_get_document: false
+      rollout_args:
+        temperature: 1.0
+        max_tokens: 10000
+        top_p: 1.0
+      enable_progress_bar: true
+
+    default_workflow_type: 'bcp_simple_react_workflow'
+
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      max_read_timeout: 7200
+      replay_buffer:
+        enable: true
+
+explorer:
+  eval_interval: 10  # Evaluate every 10 training iterations
+  max_repeat_times_per_runner: 4
+  max_timeout: 3600  # 1 hour timeout per rollout
+  runner_per_model: 16
+
+  # Rollout model configuration (agent model)
+  rollout_model:
+    enable_thinking: true
+    enable_history: true
+    enable_openai_api: true
+    enable_auto_tool_choice: true  # Enable automatic tool calling
+    tool_call_parser: hermes  # Tool call parser format
+    engine_num: 2  # Number of vLLM engines
+    tensor_parallel_size: 1  # Tensor parallelism per engine
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+    gpu_memory_utilization: 0.7
+    enable_chunked_prefill: true
+
+  # Auxiliary models (judge model for evaluation)
+  auxiliary_models:
+    - model_path: ${oc.env:TRINITY_JUDGE_MODEL_PATH,qwen/Qwen3-30B-A3B-Instruct-2507}
+      engine_num: 1
+      tensor_parallel_size: 2  # Use 2 GPUs for the larger judge model
+      enable_thinking: false
+      max_prompt_tokens: 20480
+      max_response_tokens: 8192
+      max_model_len: 32000
+
+synchronizer:
+  sync_style: dynamic_by_explorer
+  sync_method: 'nccl'
+  sync_interval: 4  # Sync every 4 batches
+  sync_timeout: 7200
+
+trainer:
+  save_interval: 20  # Save checkpoint every 20 iterations
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  max_token_len_per_gpu: 16384
+  ulysses_sequence_parallel_size: 4
+
+monitor:
+  monitor_type: wandb
