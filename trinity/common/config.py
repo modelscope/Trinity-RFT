@@ -439,6 +439,8 @@ class ModelConfig:
     max_response_tokens: Optional[int] = None
     # the minimum number of tokens for the response
     min_response_tokens: int = 1
+    # whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens.
+    enable_prompt_truncation: bool = True
 
     # lora config
     lora_configs: Optional[List[LoRAConfig]] = None
@@ -480,6 +482,8 @@ class InferenceModelConfig:
     max_response_tokens: Optional[int] = None
     # if not set, use `model.min_response_tokens`
     min_response_tokens: Optional[int] = None
+    # if not set, use `model.enable_prompt_truncation`
+    enable_prompt_truncation: Optional[bool] = None
     # used for testing very long response generation, do not set it unless you know what you are doing
     ignore_eos: bool = False
 
@@ -1154,6 +1158,19 @@ class Config:
             model.min_response_tokens = max(model.max_response_tokens - 1, 0)  # type: ignore [operator]
             logger.warning(f"`min_response_tokens` is set to {model.min_response_tokens}.")
 
+        if model.enable_prompt_truncation is True:
+            if model.max_prompt_tokens is None:
+                raise ValueError(
+                    "When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly."
+                )
+            logger.warning(
+                f"`enable_prompt_truncation` is set to True; the prompt will be truncated to `max_prompt_tokens`={model.max_prompt_tokens} tokens if it is too long."
+            )
+        else:
+            logger.warning(
+                "`enable_prompt_truncation` is set to False; please make sure the prompt is not too long and `max_model_len` is large enough, otherwise prompt length + response length may exceed `max_model_len`!"
+            )
+
     def __iter__(self):
         """Iterate over configs with each stage applied in order.
 
@@ -1224,6 +1241,7 @@ class Config:
                 "max_prompt_tokens",
                 "max_response_tokens",
                 "min_response_tokens",
+                "enable_prompt_truncation",
             ]
             rope_args = ["rope_scaling", "rope_theta"]
             model_args = rollout_args + length_args + rope_args

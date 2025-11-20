@@ -11,9 +11,7 @@ import re
 from dataclasses import asdict
 from typing import List, Optional, Tuple
 
-import gymnasium as gym
 import numpy as np
-from gymnasium.envs.toy_text.frozen_lake import FrozenLakeEnv as GymFrozenLakeEnv
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -91,6 +89,21 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
             task=task,
             auxiliary_models=auxiliary_models,
         )
+
+        # Import gymnasium here to avoid import error if gymnasium is not installed
+        # and this workflow is not used
+        try:
+            import gymnasium as gym
+            from gymnasium.envs.toy_text.frozen_lake import (
+                FrozenLakeEnv as GymFrozenLakeEnv,
+            )
+        except ImportError as e:
+            error_message = (
+                f"Gymnasium is not installed. Please install gymnasium first before "
+                f"running the frozen_lake workflow. Error: {str(e)}"
+            )
+            self.logger.error(error_message)
+            raise ImportError(error_message)
 
         # Extract workflow-specific arguments
         workflow_args = task.workflow_args if hasattr(task, "workflow_args") else {}

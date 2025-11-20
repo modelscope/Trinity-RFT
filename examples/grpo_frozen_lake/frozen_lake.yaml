@@ -14,6 +14,7 @@ algorithm:
     kl_coef: 0.0
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-3B-Instruct}
+  enable_prompt_truncation: false
   max_response_tokens: 10240
   max_model_len: 14436
   temperature: 0.7

@@ -65,6 +65,9 @@ class vLLMRolloutModel(InferenceModel):
             temperature=config.temperature,
             max_tokens=config.max_response_tokens,
             min_tokens=config.min_response_tokens,
+            truncate_prompt_tokens=(
+                config.max_prompt_tokens if config.enable_prompt_truncation else None
+            ),
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
@@ -188,9 +191,12 @@ class vLLMRolloutModel(InferenceModel):
         """
         if self.tokenizer is None:
             await self._initialize_tokenizer()
-        token_ids = self.tokenizer(prompt, truncation=False, return_tensors="pt")[  # type: ignore
-            "input_ids"
-        ][0].tolist()
+        token_ids = self.tokenizer(  # type: ignore
+            prompt,
+            truncation=self.config.enable_prompt_truncation,
+            max_length=self.config.max_prompt_tokens,
+            return_tensors="pt",
+        )["input_ids"][0].tolist()
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids}, lora_request=lora_request, **kwargs
         )
