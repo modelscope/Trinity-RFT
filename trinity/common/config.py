@@ -182,6 +182,7 @@ class StorageConfig:
 
     # used for StorageType.QUEUE
     capacity: int = 10000
+    staleness_limit: Optional[int] = None
     max_read_timeout: float = 1800
     replay_buffer: Optional[ReplayBufferConfig] = field(default_factory=ReplayBufferConfig)
 
