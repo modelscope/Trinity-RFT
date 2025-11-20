@@ -946,6 +946,7 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for alfworld task.&quot;&quot;&quot;</span>
 
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="AlfworldWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.__init__">[文档]</a>
@@ -979,32 +980,27 @@ document.write(`
 
 <div class="viewcode-block" id="AlfworldWorkflow.generate_env_inference_samples">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-        <span class="c1"># TODO: Make this parallel</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating env inference samples...&quot;</span><span class="p">)</span>
-        <span class="n">experience_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rollout_num</span><span class="p">):</span>
-            <span class="n">observation</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-            <span class="n">final_reward</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
-            <span class="n">memory</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">AlfWORLD_SYSTEM_PROMPT</span><span class="p">})</span>
-            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span><span class="p">):</span>
-                <span class="n">format_obs</span> <span class="o">=</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
-                <span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span> <span class="o">+</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_obs</span><span class="p">}]</span>
-                <span class="n">response_text</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
-                <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">response_text</span><span class="p">})</span>
-                <span class="n">action</span> <span class="o">=</span> <span class="n">parse_action</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span>
-                <span class="n">observation</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
-                    <span class="n">final_reward</span> <span class="o">=</span> <span class="n">reward</span>
-                    <span class="k">break</span>
-            <span class="n">experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_messages_to_experience</span><span class="p">(</span>
-                <span class="n">memory</span><span class="p">,</span> <span class="n">final_reward</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;env_rounds&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s2">&quot;env_done&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mi">0</span><span class="p">}</span>
-            <span class="p">)</span>
-            <span class="n">experience_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="n">observation</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">final_reward</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+        <span class="n">memory</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">AlfWORLD_SYSTEM_PROMPT</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span><span class="p">):</span>
+            <span class="n">format_obs</span> <span class="o">=</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
+            <span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span> <span class="o">+</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_obs</span><span class="p">}]</span>
+            <span class="n">response_text</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
+            <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">response_text</span><span class="p">})</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">parse_action</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span>
+            <span class="n">observation</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+                <span class="n">final_reward</span> <span class="o">=</span> <span class="n">reward</span>
+                <span class="k">break</span>
+        <span class="n">experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_messages_to_experience</span><span class="p">(</span>
+            <span class="n">memory</span><span class="p">,</span> <span class="n">final_reward</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;env_rounds&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s2">&quot;env_done&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="p">)</span>
         <span class="c1"># Close the env to save cpu memory</span>
         <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">experience_list</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">experience</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.run_async">
@@ -1013,8 +1009,6 @@ document.write(`
         <span class="c1"># assume the task_description is the game_file_path generated.</span>
         <span class="c1"># see Trinity-RFT/examples/grpo_alfworld/get_alfworld_data.py</span>
         <span class="n">game_file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span>
-        <span class="n">rollout_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span>
-        <span class="c1"># TODO: Make parallel envs</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">textworld</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">textworld.gym</span>
@@ -1041,7 +1035,7 @@ document.write(`
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error importing AlfworldTWEnv </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">. Please make sure you have installed the alfworld package successfully, following the instructions in https://github.com/alfworld/alfworld&quot;</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">create_environment</span><span class="p">(</span><span class="n">game_file_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="n">env</span><span class="p">)</span></div>
 </div>
 
 
