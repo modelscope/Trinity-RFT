@@ -853,7 +853,7 @@ class Config:
                 )
 
     def _check_explorer_input(self) -> None:
-        if self.mode == "serve":
+        if self.mode in {"train", "serve"}:
             # no need to check explorer_input in serve mode
             return
 
@@ -864,11 +864,11 @@ class Config:
                 raise ValueError("Do not support setting `taskset` and `tasksets` simultaneously!")
             explorer_input.tasksets = [explorer_input.taskset]
             explorer_input.taskset = None
-        elif self.mode not in {"bench", "train"} and len(explorer_input.tasksets) == 0:
+        elif self.mode != "bench" and len(explorer_input.tasksets) == 0:
             raise ValueError("At least one taskset should be provided in explorer_input!")
 
         for i, taskset in enumerate(explorer_input.tasksets):
-            if self.mode != "train" and not taskset.path:
+            if not taskset.path:
                 raise ValueError(
                     "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
                 )
@@ -913,8 +913,8 @@ class Config:
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
     def _check_trainer_input(self) -> None:
-        if self.mode in {"bench", "serve"}:
-            # no need to check trainer_input in bench/serve mode
+        if self.mode == "bench":
+            # no need to check trainer_input in bench mode
             return
 
         trainer_input = self.buffer.trainer_input

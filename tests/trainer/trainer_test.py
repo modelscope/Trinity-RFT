@@ -140,6 +140,9 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.config.mode = "bench"
         self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         self.config.explorer.bench_on_latest_checkpoint = False
+        self.config.buffer.explorer_input.taskset = None
+        self.config.buffer.explorer_input.tasksets = []
+        self.config.buffer.trainer_input.experience_buffer = None
         self.config.check_and_update()
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
