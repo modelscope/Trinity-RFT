@@ -176,7 +176,6 @@ class GRPOGroupedAdvantage(GroupAdvantage):
 
             metrics["reward_mean"] = group_reward_mean.item()
             metrics["reward_std"] = group_reward_std.item()
-            metrics["advantage_std"] = exp.advantages.std().item()
 
         return exps, metrics
 

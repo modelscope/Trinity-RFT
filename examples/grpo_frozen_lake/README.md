@@ -1,6 +1,7 @@
 # Frozen Lake
 
-This example shows the usage of GRPO on the [Frozen Lake](https://gymnasium.farama.org/environments/toy_text/frozen_lake/) task.
+This example shows the usage of GRPO on the [Frozen Lake](https://gymnasium.farama.org/environments/toy_text/frozen_lake/) task. Note that this task is only tested with Qwen2.5 Instruct models.
+
 
 ## Data and Environment Preparation
 
