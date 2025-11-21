@@ -184,7 +184,7 @@ class ServeTest(RayUnittestBaseAysnc):
         self.config.explorer.service_status_check_interval = 30
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="experience_buffer",
-            storage_type=StorageType.SQL,
+            storage_type=StorageType.SQL.value,
         )
         self.config.check_and_update()
         if multiprocessing.get_start_method(allow_none=True) != "spawn":

@@ -132,7 +132,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
@@ -151,7 +151,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
         explorer1_config.buffer.explorer_output = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         explorer1_config.check_and_update()
 
@@ -255,7 +255,7 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         config.synchronizer.sync_method = self.sync_method
         config.synchronizer.sync_style = self.sync_style
@@ -275,7 +275,7 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
         explorer1_config.buffer.explorer_output = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         explorer2_config = deepcopy(explorer1_config)
         explorer2_config.explorer.name = "explorer2"
@@ -356,7 +356,7 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         config.synchronizer.sync_method = SyncMethod.NCCL
         config.synchronizer.sync_style = self.sync_style

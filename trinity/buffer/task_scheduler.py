@@ -13,8 +13,77 @@ from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
 
 
+def get_taskset_scheduler(explorer_state: Dict, config: Config) -> "TasksetSchedulerBase":
+    """Get a taskset scheduler according to the config.
+
+    Args:
+        explorer_state (Dict): Restoration state from checkpoint (may include progress info)
+        config (Config): Full system configuration containing buffer and taskset settings
+
+    Returns:
+        TasksetSchedulerBase: The taskset scheduler instance
+    """
+    taskset_configs = config.buffer.explorer_input.tasksets
+    if len(taskset_configs) == 1 and taskset_configs[0].task_selector.selector_type == "sequential":
+        return SimpleTasksetScheduler(explorer_state, config)
+    else:
+        return TasksetScheduler(explorer_state, config)
+
+
+class TasksetSchedulerBase:
+    def __init__(self, explorer_state: Dict, config: Config):
+        self.config = config
+        self.explorer_state = explorer_state
+
+    async def read_async(self) -> List:
+        """Asynchronously reads a batch of tasks according to the current schedule."""
+        raise NotImplementedError
+
+    def state_dict(self) -> List[Dict]:
+        """return persistent state for checkpointing.
+
+        Returns:
+            List[Dict]: State dicts for all selectors (one per taskset)
+        """
+        raise NotImplementedError
+
+    def update(self, pipeline_metrics: Dict) -> None:
+        """Update selectors using feedback from the training pipeline."""
+        raise NotImplementedError
+
+
+class SimpleTasksetScheduler(TasksetSchedulerBase):
+    """
+    A simple taskset scheduler that only reads from one taskset without task selection strategies.
+    """
+
+    def __init__(self, explorer_state: Dict, config: Config):
+        super().__init__(explorer_state, config)
+        if "latest_task_index" in self.explorer_state:
+            self.explorer_state["taskset_states"] = [
+                {
+                    "current_index": explorer_state["latest_task_index"],
+                }
+            ]
+        index = self.explorer_state.get("taskset_states", [{"current_index": 0}])[0].get(
+            "current_index", 0
+        )
+        self.config.buffer.explorer_input.tasksets[0].index = index
+        self.reader = get_buffer_reader(config.buffer.explorer_input.tasksets[0])
+
+    async def read_async(self) -> List:
+        return await self.reader.read_async()
+
+    def state_dict(self) -> List[Dict]:
+        return [self.reader.state_dict()]
+
+    def update(self, pipeline_metrics: Dict) -> None:
+        # do nothing here
+        return
+
+
 @Experimental
-class TasksetScheduler:
+class TasksetScheduler(TasksetSchedulerBase):
     """
     Coordinates multiple datasets (tasksets) with customizable task selection strategies per taskset.
 
@@ -38,7 +107,7 @@ class TasksetScheduler:
             explorer_state (Dict): Restoration state from checkpoint (may include progress info)
             config (Config): Full system configuration containing buffer and taskset settings
         """
-        self.config = config
+        super().__init__(explorer_state, config)
 
         # Backward compatibility: old format stored 'latest_task_index' directly
         if "latest_task_index" in explorer_state:
@@ -52,7 +121,7 @@ class TasksetScheduler:
         self.read_batch_size = config.buffer.batch_size
         taskset_configs = config.buffer.explorer_input.tasksets
 
-        from trinity.buffer.reader.file_reader import TaskFileReader
+        from trinity.buffer.reader.file_reader import FileReader
 
         taskset_states = explorer_state.get(
             "taskset_states", [{"current_index": 0}] * len(taskset_configs)
@@ -62,15 +131,15 @@ class TasksetScheduler:
         for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config)
-            if not isinstance(taskset, TaskFileReader):
+            if not isinstance(taskset, FileReader):
                 raise TypeError(
                     f"Taskset '{taskset_config.name}' has an unsupported type '{type(taskset).__name__}'."
-                    f"Currently, only 'TaskFileReader' is supported by TasksetScheduler."
+                    f"Currently, only 'FileReader' is supported by TasksetScheduler."
                 )
 
             # Create selector based on type specified in config (e.g., 'sequential', 'shuffle')
             selector = SELECTORS.get(taskset_config.task_selector.selector_type)(
-                taskset.dataset, taskset_config.task_selector
+                taskset.reader.dataset, taskset_config.task_selector
             )
             selector.load_state_dict(taskset_state)  # Restore any prior state
 

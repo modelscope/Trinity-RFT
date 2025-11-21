@@ -12,7 +12,7 @@ class SQLWriter(BufferWriter):
     """Writer of the SQL buffer."""
 
     def __init__(self, config: StorageConfig) -> None:
-        assert config.storage_type == StorageType.SQL
+        assert config.storage_type == StorageType.SQL.value
         # we only support write RFT algorithm buffer for now
         self.wrap_in_ray = config.wrap_in_ray
         self.db_wrapper = SQLStorage.get_wrapper(config)

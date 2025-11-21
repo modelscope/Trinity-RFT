@@ -18,6 +18,7 @@ from trinity.common.constants import (
     CHECKPOINT_ROOT_DIR_ENV_VAR,
     MODEL_PATH_ENV_VAR,
     PromptType,
+    StorageType,
 )
 
 API_MODEL_PATH_ENV_VAR = "TRINITY_API_MODEL_PATH"
@@ -133,6 +134,7 @@ def get_unittest_dataset_config(dataset_name: str = "countdown", split: str = "t
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_for_gsm8k"),
             split="train",
+            storage_type=StorageType.FILE.value,
             schema_type="sft",
             format=FormatConfig(
                 prompt_type=PromptType.PLAINTEXT,
@@ -146,6 +148,7 @@ def get_unittest_dataset_config(dataset_name: str = "countdown", split: str = "t
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_with_tools"),
             split="train",
+            storage_type=StorageType.FILE.value,
             format=FormatConfig(
                 prompt_type=PromptType.MESSAGES,
                 messages_key="messages",
@@ -159,6 +162,8 @@ def get_unittest_dataset_config(dataset_name: str = "countdown", split: str = "t
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "human_like"),
             split="train",
+            storage_type=StorageType.FILE.value,
+            schema_type="dpo",
             format=FormatConfig(
                 prompt_type=PromptType.PLAINTEXT,
                 prompt_key="prompt",

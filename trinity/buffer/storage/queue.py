@@ -309,12 +309,12 @@ class QueueStorage:
             if is_database_url(st_config.path):
                 from trinity.buffer.writer.sql_writer import SQLWriter
 
-                st_config.storage_type = StorageType.SQL
+                st_config.storage_type = StorageType.SQL.value
                 self.writer = SQLWriter(st_config)
             elif is_json_file(st_config.path):
                 from trinity.buffer.writer.file_writer import JSONWriter
 
-                st_config.storage_type = StorageType.FILE
+                st_config.storage_type = StorageType.FILE.value
                 self.writer = JSONWriter(st_config)
             else:
                 self.logger.warning("Unknown supported storage path: %s", st_config.path)
@@ -322,7 +322,7 @@ class QueueStorage:
         else:
             from trinity.buffer.writer.file_writer import JSONWriter
 
-            st_config.storage_type = StorageType.FILE
+            st_config.storage_type = StorageType.FILE.value
             self.writer = JSONWriter(st_config)
         self.logger.warning(f"Save experiences in {st_config.path}.")
         self.ref_count = 0

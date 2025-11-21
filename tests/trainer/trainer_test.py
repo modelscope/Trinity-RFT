@@ -305,7 +305,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
                         experience_buffer=ExperienceBufferConfig(
                             name="test_queue_storage",
                             max_read_timeout=20,
-                            storage_type=StorageType.QUEUE,
+                            storage_type=StorageType.QUEUE.value,
                             max_retry_times=10,
                         )
                     ),
@@ -512,7 +512,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         config.buffer.trainer_input.experience_buffer.replay_buffer.enable = self.use_priority_queue
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
@@ -541,7 +541,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
         explorer1_config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="exp_buffer",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
         )
         explorer2_config = deepcopy(explorer1_config)
         explorer2_config.trainer = deepcopy(trainer_config.trainer)

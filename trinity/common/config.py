@@ -168,7 +168,7 @@ class StorageConfig:
     """
 
     name: str = ""
-    storage_type: StorageType = StorageType.FILE
+    storage_type: str = StorageType.FILE.value
     path: Optional[str] = None
     repeat_times: Optional[int] = None
 
@@ -228,7 +228,7 @@ class StorageConfig:
 @dataclass
 class TasksetConfig:
     name: str = ""
-    storage_type: StorageType = StorageType.FILE
+    storage_type: str = StorageType.FILE.value
     path: Optional[str] = None
 
     default_workflow_type: Optional[str] = None
@@ -294,7 +294,7 @@ class ExperienceBufferConfig:
     """Storage Config for trainer input experience buffer."""
 
     name: str = ""
-    storage_type: StorageType = StorageType.FILE
+    storage_type: str = StorageType.QUEUE.value
     path: Optional[str] = None
 
     # used for StorageType.QUEUE
@@ -948,14 +948,14 @@ class Config:
         if experience_buffer is None:
             experience_buffer = trainer_input.experience_buffer = ExperienceBufferConfig(
                 name="experience_buffer",
-                storage_type=StorageType.QUEUE,
+                storage_type=StorageType.QUEUE.value,
             )
             logger.info(f"Auto set `buffer.trainer_input.experience_buffer` to {experience_buffer}")
-        elif experience_buffer.storage_type is StorageType.FILE and self.mode == "both":
+        elif experience_buffer.storage_type == StorageType.FILE.value and self.mode == "both":
             logger.warning(
                 "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
             )
-            experience_buffer.storage_type = StorageType.QUEUE
+            experience_buffer.storage_type = StorageType.QUEUE.value
 
         if not experience_buffer.name:
             experience_buffer.name = "experience_buffer"
@@ -992,8 +992,8 @@ class Config:
             experience_buffer.total_epochs = self.buffer.total_epochs
             experience_buffer.total_steps = self.buffer.total_steps
 
-    def _default_storage_path(self, storage_type: StorageType, name: str) -> str:
-        if storage_type == StorageType.SQL:
+    def _default_storage_path(self, storage_type: str, name: str) -> str:
+        if storage_type == StorageType.SQL.value:
             return "sqlite:///" + os.path.join(self.buffer.cache_dir, f"{name}.db")  # type: ignore[arg-type]
         else:
             return os.path.join(self.buffer.cache_dir, f"{name}.jsonl")  # type: ignore[arg-type]

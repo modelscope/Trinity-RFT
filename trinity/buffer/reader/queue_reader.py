@@ -1,20 +1,22 @@
 """Reader of the Queue buffer."""
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import ray
 
 from trinity.buffer.buffer_reader import BufferReader
+from trinity.buffer.reader.reader import READER
 from trinity.buffer.storage.queue import QueueStorage
 from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
+@READER.register_module("queue")
 class QueueReader(BufferReader):
     """Reader of the Queue buffer."""
 
     def __init__(self, config: StorageConfig):
-        assert config.storage_type == StorageType.QUEUE
+        assert config.storage_type == StorageType.QUEUE.value
         self.timeout = config.max_read_timeout
         self.read_batch_size = config.batch_size
         self.queue = QueueStorage.get_wrapper(config)
@@ -39,3 +41,11 @@ class QueueReader(BufferReader):
                 f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
             )
         return exps
+
+    def state_dict(self) -> Dict:
+        # SQL Not supporting state dict yet
+        return {"current_index": 0}
+
+    def load_state_dict(self, state_dict):
+        # SQL Not supporting state dict yet
+        return None

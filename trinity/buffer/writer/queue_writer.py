@@ -13,7 +13,7 @@ class QueueWriter(BufferWriter):
     """Writer of the Queue buffer."""
 
     def __init__(self, config: StorageConfig):
-        assert config.storage_type == StorageType.QUEUE
+        assert config.storage_type == StorageType.QUEUE.value
         self.queue = QueueStorage.get_wrapper(config)
 
     def write(self, data: List) -> None:

@@ -6,6 +6,7 @@ import datasets
 from datasets import Dataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
+from trinity.buffer.reader.reader import READER
 from trinity.buffer.schema.formatter import FORMATTER
 from trinity.common.config import StorageConfig
 
@@ -85,14 +86,42 @@ class _HFBatchReader:
 
 
 class BaseFileReader(BufferReader):
-    def __len__(self):
-        return self.dataset.dataset_size
-
     async def read_async(self, batch_size: Optional[int] = None):
         try:
             return self.read(batch_size)
         except StopIteration as e:
             raise StopAsyncIteration from e
+
+
+@READER.register_module("file")
+class FileReader(BaseFileReader):
+    """Provide a unified interface for Experience and Task file readers."""
+
+    def __init__(self, config: StorageConfig):
+        if config.schema_type and config.schema_type != "task":
+            self.reader = ExperienceFileReader(config)
+        else:
+            self.reader = TaskFileReader(config)
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        return self.reader.read(batch_size)
+
+    def read_with_indices(self, indices: List[int]) -> List:
+        """Read tasks with indices."""
+        return self.reader.read_with_indices(indices)
+
+    async def read_with_indices_async(self, indices: List[int]) -> List:
+        """Read tasks with indices asynchronously."""
+        return await self.reader.read_with_indices_async(indices)
+
+    def state_dict(self):
+        return self.reader.state_dict()
+
+    def load_state_dict(self, state_dict):
+        return self.reader.load_state_dict(state_dict)
+
+    def __len__(self):
+        return self.reader.__len__()
 
 
 class ExperienceFileReader(BaseFileReader):
@@ -120,6 +149,15 @@ class ExperienceFileReader(BaseFileReader):
             experience = self.formatter.format(sample)
             exp_list.append(experience)
         return exp_list
+
+    def state_dict(self):
+        return {"current_index": self.dataset.current_offset}
+
+    def load_state_dict(self, state_dict):
+        self.dataset.current_offset = state_dict["current_index"]
+
+    def __len__(self):
+        return self.dataset.dataset_size
 
 
 class TaskFileReader(BaseFileReader):
@@ -164,3 +202,12 @@ class TaskFileReader(BaseFileReader):
     async def read_with_indices_async(self, indices: List[int]) -> List:
         """Read tasks with indices asynchronously."""
         return self.read_with_indices(indices)
+
+    def state_dict(self):
+        return {"current_index": self.dataset.current_offset}
+
+    def load_state_dict(self, state_dict):
+        self.dataset.current_offset = state_dict["current_index"]
+
+    def __len__(self):
+        return self.dataset.dataset_size

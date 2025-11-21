@@ -253,7 +253,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             self.config.buffer.trainer_input.experience_buffer
         ) = ExperienceBufferConfig(
             name="test",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             schema_type="experience",
             path="",
         )

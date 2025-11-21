@@ -106,7 +106,7 @@ class TestFileBuffer(unittest.IsolatedAsyncioTestCase):
         dataset_config = get_unittest_dataset_config("countdown", "train")
         self.config.buffer.explorer_input.taskset = dataset_config
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
-            name="test_buffer", storage_type=StorageType.FILE
+            name="test_buffer", storage_type=StorageType.FILE.value
         )
         self.config.check_and_update()
         ray.init(ignore_reinit_error=True, runtime_env={"env_vars": self.config.get_envs()})

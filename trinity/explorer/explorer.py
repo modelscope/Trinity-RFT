@@ -16,7 +16,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
-from trinity.buffer.task_scheduler import TasksetScheduler
+from trinity.buffer.task_scheduler import get_taskset_scheduler
 from trinity.common.config import Config
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
@@ -54,7 +54,7 @@ class Explorer:
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
         self.taskset = (
-            TasksetScheduler(explorer_state, config)
+            get_taskset_scheduler(explorer_state=explorer_state, config=config)
             if self.config.mode not in {"bench", "serve"}
             else None
         )
@@ -289,8 +289,8 @@ class Explorer:
                 f"Evaluation on {eval_taskset_config.name} at step {self.explore_step_num} started."
             )
             eval_taskset = get_buffer_reader(eval_taskset_config)
-            eval_batch_id = f"{self.explore_step_num}/{eval_taskset.name}"
-            self.pending_eval_tasks.append((self.explore_step_num, eval_taskset.name))
+            eval_batch_id = f"{self.explore_step_num}/{eval_taskset_config.name}"
+            self.pending_eval_tasks.append((self.explore_step_num, eval_taskset_config.name))
             while True:
                 try:
                     data = await eval_taskset.read_async()

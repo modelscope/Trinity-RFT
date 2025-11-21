@@ -5,10 +5,20 @@ from typing import Dict, List
 
 from parameterized import parameterized
 
-from tests.tools import get_template_config
-from trinity.buffer.task_scheduler import TasksetScheduler
+from tests.tools import get_template_config, get_unittest_dataset_config
+from trinity.buffer.reader import READER
+from trinity.buffer.reader.file_reader import TaskFileReader
+from trinity.buffer.task_scheduler import TasksetScheduler, get_taskset_scheduler
 from trinity.common.config import FormatConfig, TaskSelectorConfig, TasksetConfig
 from trinity.common.workflows.workflow import Task
+
+
+@READER.register_module("custom_reader")
+class CustomReader(TaskFileReader):
+    """A custom reader for testing."""
+
+    def __init__(self, config):
+        super().__init__(config)
 
 
 class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
@@ -313,3 +323,36 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
 
         with self.assertRaises(StopAsyncIteration):
             batch_tasks = await task_scheduler.read_async()
+
+    async def test_task_scheduler_simple(self):
+        config = get_template_config()
+        config.mode = "explore"
+        config.buffer.batch_size = 4
+        config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown", "train")
+        config.buffer.explorer_input.taskset.storage_type = "custom_reader"
+        config.check_and_update()
+
+        task_scheduler = get_taskset_scheduler({}, config)
+
+        batch_tasks = await task_scheduler.read_async()
+        self.assertEqual(len(batch_tasks), 4)
+        task_scheduler_state = task_scheduler.state_dict()
+        self.assertEqual(len(task_scheduler_state), 1)
+        self.assertEqual(task_scheduler_state[0]["current_index"], 4)
+        # no effect
+        task_scheduler.update({"metric1": 0.5})
+
+        task_scheduler = get_taskset_scheduler(
+            {
+                "latest_iteration": 1,
+                "taskset_states": [
+                    {"current_index": 8},
+                ],
+            },
+            config,
+        )
+        batch_tasks = await task_scheduler.read_async()
+        self.assertEqual(len(batch_tasks), 4)
+        task_scheduler_state = task_scheduler.state_dict()
+        self.assertEqual(len(task_scheduler_state), 1)
+        self.assertEqual(task_scheduler_state[0]["current_index"], 12)

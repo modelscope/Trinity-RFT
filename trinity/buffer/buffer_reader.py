@@ -19,7 +19,12 @@ class BufferReader(ABC):
         raise NotImplementedError
 
     def state_dict(self) -> Dict:
-        return {}
+        """Return the state of the reader as a dict.
+        Returns:
+            A dict containing the reader state. At minimum, it should contain
+            the `current_index` field.
+        """
+        raise NotImplementedError
 
     def load_state_dict(self, state_dict: Dict) -> None:
-        pass
+        raise NotImplementedError

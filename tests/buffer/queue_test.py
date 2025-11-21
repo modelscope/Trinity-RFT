@@ -34,7 +34,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name=name,
             schema_type="experience",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             max_read_timeout=3,
             path=BUFFER_FILE_PATH,
             batch_size=self.train_batch_size,
@@ -100,7 +100,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_buffer_small",
             schema_type="experience",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             max_read_timeout=1,
             capacity=8,
             path=BUFFER_FILE_PATH,
@@ -160,7 +160,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_buffer_small",
             schema_type="experience",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             max_read_timeout=3,
             capacity=4,
             path=BUFFER_FILE_PATH,
@@ -191,7 +191,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_buffer_small",
             schema_type="experience",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             max_read_timeout=3,
             capacity=4,  # max total number of items; each item is List[Experience]
             path=BUFFER_FILE_PATH,
@@ -320,7 +320,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_buffer_small",
             schema_type="experience",
-            storage_type=StorageType.QUEUE,
+            storage_type=StorageType.QUEUE.value,
             max_read_timeout=3,
             capacity=4,  # max total number of items; each item is List[Experience]
             path=BUFFER_FILE_PATH,

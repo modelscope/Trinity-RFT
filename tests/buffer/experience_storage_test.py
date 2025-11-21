@@ -31,7 +31,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_storage",
             schema_type=schema_type,
-            storage_type=StorageType.SQL,
+            storage_type=StorageType.SQL.value,
             max_read_timeout=3,
             path=f"sqlite:///{DB_PATH}",
             batch_size=self.train_batch_size,
@@ -91,7 +91,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         config = ExperienceBufferConfig(
             name="test_storage",
             schema_type="experience",
-            storage_type=StorageType.SQL,
+            storage_type=StorageType.SQL.value,
             max_read_timeout=3,
             path=f"sqlite:///{DB_PATH}",
             batch_size=self.train_batch_size,

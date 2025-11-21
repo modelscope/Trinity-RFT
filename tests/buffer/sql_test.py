@@ -4,9 +4,10 @@ import ray
 import torch
 
 from tests.tools import RayUnittestBaseAysnc
+from trinity.buffer import get_buffer_reader
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import ExperienceBufferConfig
+from trinity.common.config import ExperienceBufferConfig, TasksetConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 
@@ -14,7 +15,7 @@ db_path = os.path.join(os.path.dirname(__file__), "test.db")
 
 
 class TestSQLBuffer(RayUnittestBaseAysnc):
-    async def test_sql_buffer_read_write(self) -> None:
+    async def test_sql_exp_buffer_read_write(self) -> None:
         total_num = 8
         put_batch_size = 2
         read_batch_size = 4
@@ -22,7 +23,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
             name="test_buffer",
             schema_type="experience",
             path=f"sqlite:///{db_path}",
-            storage_type=StorageType.SQL,
+            storage_type=StorageType.SQL.value,
             batch_size=read_batch_size,
         )
         sql_writer = SQLWriter(config.to_storage_config())
@@ -62,6 +63,41 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
         self.assertEqual(await sql_writer.release(), 0)
         self.assertRaises(StopIteration, sql_reader.read)
 
+    async def test_sql_task_buffer_read_write(self) -> None:
+        total_samples = 8
+        batch_size = 4
+        config = TasksetConfig(
+            name="test_task_buffer",
+            path=f"sqlite:///{db_path}",
+            storage_type=StorageType.SQL.value,
+            batch_size=batch_size,
+            default_workflow_type="math_workflow",
+        )
+        sql_writer = SQLWriter(config.to_storage_config())
+        tasks = [
+            {"question": f"question_{i}", "answer": f"answer_{i}"} for i in range(total_samples)
+        ]
+        self.assertEqual(await sql_writer.acquire(), 1)
+        sql_writer.write(tasks)
+        sql_reader = get_buffer_reader(config.to_storage_config())
+        read_tasks = []
+        try:
+            while True:
+                cur_tasks = sql_reader.read()
+                read_tasks.extend(cur_tasks)
+        except StopIteration:
+            pass
+        self.assertEqual(len(read_tasks), total_samples)
+        self.assertIn("question", read_tasks[0].raw_task)
+        self.assertIn("answer", read_tasks[0].raw_task)
+        db_wrapper = ray.get_actor("sql-test_task_buffer")
+        self.assertIsNotNone(db_wrapper)
+        self.assertEqual(await sql_writer.release(), 0)
+
     def setUp(self) -> None:
+        if os.path.exists(db_path):
+            os.remove(db_path)
+
+    def tearDown(self) -> None:
         if os.path.exists(db_path):
             os.remove(db_path)

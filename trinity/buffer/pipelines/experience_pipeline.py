@@ -58,7 +58,7 @@ class ExperiencePipeline:
             elif is_json_file(pipeline_config.input_save_path):
                 return get_buffer_writer(
                     StorageConfig(
-                        storage_type=StorageType.FILE,
+                        storage_type=StorageType.FILE.value,
                         path=pipeline_config.input_save_path,
                         wrap_in_ray=False,
                     ),
@@ -66,7 +66,7 @@ class ExperiencePipeline:
             elif is_database_url(pipeline_config.input_save_path):
                 return get_buffer_writer(
                     StorageConfig(
-                        storage_type=StorageType.SQL,
+                        storage_type=StorageType.SQL.value,
                         path=pipeline_config.input_save_path,
                         wrap_in_ray=False,
                     ),
