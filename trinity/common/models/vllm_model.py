@@ -394,6 +394,19 @@ class vLLMRolloutModel(InferenceModel):
             chat_template=self.chat_template,
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
+
+        # Truncate tokens if they exceed the length limit
+        assert token_ids is not None
+        is_truncated = False  # TODO: add to experience itself
+        if self.config.max_model_len is not None and self.config.max_model_len > 0:
+            if len(token_ids) > self.config.max_model_len - 1:
+                is_truncated = True
+                self.logger.warning(
+                    f"Warning: {len(token_ids) = } exceeds the length limit {self.config.max_model_len-1 = }"
+                )
+                token_ids = token_ids[: self.config.max_model_len - 1]
+                action_mask = action_mask[: self.config.max_model_len - 1]
+
         temperature = temperature if temperature is not None else self.config.temperature
         logprobs = await self.logprobs(
             token_ids=token_ids.tolist(), temperature=temperature
@@ -404,6 +417,7 @@ class vLLMRolloutModel(InferenceModel):
             prompt_length=prompt_length,
             action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
             messages=messages,
+            info={"is_truncated": is_truncated},
         )
 
     async def shutdown(self):

@@ -107,7 +107,8 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         # Extract workflow-specific arguments
         workflow_args = task.workflow_args if hasattr(task, "workflow_args") else {}
-        self.max_steps = workflow_args.get("max_steps", 10)
+        self.env_max_steps = workflow_args.get("env_max_steps", 8)
+        self.agent_max_steps = workflow_args.get("agent_max_steps", 10)
         self.desc = workflow_args.get("desc", None)
         self.is_slippery = workflow_args.get("is_slippery", False)
         self.max_response_tokens = self.rollout_args.get("max_response_tokens", 10240)
@@ -120,7 +121,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
 
         if self.desc is None:
             random_map, goal_position = generate_random_map(
-                size=self.size, p=self.p, seed=self.seed, max_steps=self.max_steps
+                size=self.size, p=self.p, seed=self.seed, max_steps=self.env_max_steps
             )
         else:
             random_map = np.asarray(copy.deepcopy(self.desc), dtype="c")
@@ -286,7 +287,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         messages.append({"role": "system", "content": system_prompt})
 
         # Run episode until done or max_steps reached
-        for step in range(self.max_steps):
+        for step in range(self.agent_max_steps):
             # Format observation for the model
             user_prompt_content = (
                 f"Current Observation ({self.step_count}): \n"
@@ -299,8 +300,8 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 if self.last_observation == self.current_observation:
                     user_prompt_content += "\nYour last response is invalid. Your position didn't change at all. You may need to recheck your thinking process, action outputted, and the format of response. Remember, you should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```."
 
-            if self.max_steps is not None and self.max_steps - self.step_count > 0:
-                user_prompt_content += f"\nThe maximum number of steps remaining is {self.max_steps - self.step_count}."
+            if self.agent_max_steps is not None and self.agent_max_steps - self.step_count > 0:
+                user_prompt_content += f"\nThe maximum number of steps remaining is {self.agent_max_steps - self.step_count}."
 
             messages.append({"role": "user", "content": user_prompt_content})
 
@@ -313,7 +314,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 max_tokens = self.max_response_tokens - response_token_len
 
             if max_tokens <= 0:
-                messages = messages[:-1]  # TODO: check if this is correct
+                messages = messages[:-1]  # Remove the last user message
                 self.done = False
                 self.step_rewards.append(0)
                 terminate_reason = "max_tokens_reached"

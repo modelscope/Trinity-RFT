@@ -31,7 +31,8 @@ buffer:
       path: ${oc.env:TRINITY_TASKSET_PATH}
       split: train
       workflow_args:
-        max_steps: 10
+        env_max_steps: 8
+        agent_max_steps: 10
         is_slippery: false
     eval_tasksets:
       - name: frozenlake
@@ -39,7 +40,8 @@ buffer:
         path: ${oc.env:TRINITY_TASKSET_PATH}
         split: test
         workflow_args:
-          max_steps: 10
+          env_max_steps: 8
+          agent_max_steps: 10
           is_slippery: false
         rollout_args:
           n: 4

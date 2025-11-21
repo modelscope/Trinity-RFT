@@ -168,6 +168,9 @@ class MultiTurnWorkflow(Workflow):
     def process_messages_to_experience(self, messages, reward, info={}) -> Experience:
         converted_experience = self.model.convert_messages_to_experience(messages)
 
+        if converted_experience.info.get("is_truncated", False):
+            reward = 0.0
+
         tokens = converted_experience.tokens
         log_probs = converted_experience.logprobs
         assert converted_experience.action_mask is not None
