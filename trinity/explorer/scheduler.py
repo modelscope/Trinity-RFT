@@ -61,6 +61,7 @@ class RunnerWrapper:
         self.timeout = config.explorer.max_timeout
         self.namespace = ray.get_runtime_context().namespace
         self.runner = self._create_runner()
+        self.state = {}
 
     def _create_runner(self):
         return (
@@ -78,6 +79,10 @@ class RunnerWrapper:
 
     async def prepare(self):
         await self.runner.prepare.remote()
+
+    async def update_state(self) -> None:
+        """Get the runner state."""
+        self.state = await self.runner.get_runner_state.remote()
 
     async def run_with_retry(
         self, task: TaskWrapper, repeat_times: int, run_id_base: int, timeout: float
@@ -253,6 +258,24 @@ class Scheduler:
                 await asyncio.sleep(0.1)
         self.logger.info("Scheduler loop stopped.")
 
+    async def _monitor_runner_state_loop(self) -> None:
+        interval = self.config.explorer.runner_state_report_interval
+        if interval <= 0:
+            self.logger.info("Runner state monitoring loop disabled.")
+            return
+
+        self.logger.info("Runner state monitoring loop started.")
+        while self.running:
+            try:
+                await asyncio.gather(*[runner.update_state() for runner in self.runners.values()])
+                self.print_all_state()
+            except Exception:
+                self.logger.error(
+                    f"Error in runner state monitoring loop:\n{traceback.format_exc()}"
+                )
+            await asyncio.sleep(interval)
+        self.logger.info("Runner state monitoring loop stopped.")
+
     async def _schedule_pending_tasks(self) -> None:
         if not self.idle_runners:
             return
@@ -333,6 +356,7 @@ class Scheduler:
         self.scheduler_task = asyncio.create_task(self._scheduler_loop())
         ready_refs = [runner.runner.__ray_ready__.remote() for runner in self.runners.values()]
         await asyncio.gather(*ready_refs)
+        self.monitor_task = asyncio.create_task(self._monitor_runner_state_loop())
         self.logger.info(f"Starting Scheduler with {self.runner_num} runners")
 
     async def stop(self) -> None:
@@ -352,6 +376,12 @@ class Scheduler:
             self.scheduler_task.cancel()
             try:
                 await self.scheduler_task
+            except asyncio.CancelledError:
+                pass
+        if self.monitor_task:
+            self.monitor_task.cancel()
+            try:
+                await self.monitor_task
             except asyncio.CancelledError:
                 pass
         self.logger.info("Scheduler stopped")
@@ -525,3 +555,77 @@ class Scheduler:
             )
 
         raise TimeoutError(error_msg)
+
+    def get_key_state(self, key: str) -> Dict:
+        """Get the scheduler state.
+
+        Args:
+            key (`str`): The key of the state to get.
+
+        Returns:
+            `Dict`: A dictionary of runner ids to their state for the given key.
+        """
+        result = {}
+        for runner in self.runners.values():
+            runner_state = runner.state
+            if runner_state and key in runner_state:
+                result[runner.runner_id] = runner_state[key]
+        return result
+
+    def get_runner_state(self, runner_id: int) -> Dict:
+        """Get the scheduler state.
+
+        Args:
+            runner_id (`int`): The id of the runner.
+
+        Returns:
+            `Dict`: The state of the runner.
+        """
+        runner = self.runners.get(runner_id, None)
+        if runner:
+            return runner.state
+        else:
+            return {}
+
+    def get_all_state(self) -> Dict:
+        """Get all runners' state.
+
+        Returns:
+            `Dict`: The state of all runners.
+        """
+        result = {}
+        for runner in self.runners.values():
+            runner_state = runner.state
+            if runner_state:
+                result[runner.runner_id] = runner_state
+        return result
+
+    def print_all_state(self) -> None:
+        """Print all runners' state in a clear, aligned table format."""
+        all_keys = set()
+        for runner in self.runners.values():
+            runner_state = runner.state
+            if runner_state:
+                all_keys.update(runner_state.keys())
+        all_keys = sorted(all_keys)
+        # Prepare header
+        header = ["runner_id"] + all_keys  # type: ignore [operator]
+        # Prepare rows
+        rows = []
+        for runner in self.runners.values():
+            runner_state = runner.state or {}
+            row = [str(runner.runner_id)]
+            for key in all_keys:
+                value = runner_state.get(key, "-")
+                row.append(str(value))
+            rows.append(row)
+        # Calculate column widths
+        col_widths = [max(len(str(x)) for x in col) for col in zip(header, *rows)]
+        # Print header
+        header_line = " | ".join(str(h).ljust(w) for h, w in zip(header, col_widths))
+        self.logger.info(header_line)
+        self.logger.info("-+-".join("-" * w for w in col_widths))
+        # Print each row
+        for row in rows:
+            line = " | ".join(str(cell).ljust(w) for cell, w in zip(row, col_widths))
+            self.logger.info(line)

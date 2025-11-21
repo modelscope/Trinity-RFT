@@ -1,6 +1,7 @@
 import asyncio
 import time
 import unittest
+from collections import defaultdict
 from typing import List, Optional
 
 import ray
@@ -11,7 +12,7 @@ from tests.tools import get_template_config
 from trinity.common.config import ExperienceBufferConfig
 from trinity.common.constants import StorageType, SyncStyle
 from trinity.common.experience import EID, Experience
-from trinity.common.models.model import InferenceModel
+from trinity.common.models.model import InferenceModel, ModelWrapper
 from trinity.common.workflows import Task
 from trinity.common.workflows.workflow import WORKFLOWS, Workflow
 from trinity.explorer.scheduler import Scheduler
@@ -132,6 +133,41 @@ class DummyAsyncWorkflow(Workflow):
 
     def run(self):
         raise RuntimeError("This method should not be called")
+
+
+@WORKFLOWS.register_module("dummy_workflow_with_state")
+class DummyWorkflowWithState(Workflow):
+    can_repeat: bool = True
+    is_async: bool = True
+
+    def __init__(self, *, task, model: ModelWrapper, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.step_num = task.workflow_args.get("step_num", 1)
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
+
+    async def run_async(self) -> List[Experience]:
+        exps = []
+        for i in range(self.repeat_times):
+            run_level_metrics = {"run_metrics": float(i + self.run_id_base)}
+            run_level_exps = []
+            for step in range(self.step_num):
+                run_level_exps.append(
+                    Experience(
+                        eid=EID(run=i + self.run_id_base, step=step),
+                        tokens=torch.zeros(5),
+                        prompt_length=2,
+                        prompt_text="success",
+                    )
+                )
+            run_level_exps[-1].metrics = run_level_metrics
+            self.logger.info(f"Setting workflow state to repeat_cnt={i}")
+            await self.model.set_workflow_state({"repeat_cnt": i})
+            await asyncio.sleep(1)
+            exps.extend(run_level_exps)
+        return exps
 
 
 @ray.remote
@@ -779,3 +815,58 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             ray.shutdown()
         except Exception:
             pass
+
+
+class TestRunnerStateCollection(unittest.IsolatedAsyncioTestCase):
+    async def test_runner_state_collection(self):
+        ray.init(ignore_reinit_error=True)
+        config = get_template_config()
+        config.explorer.runner_per_model = 2
+        config.explorer.runner_state_report_interval = 0.5
+        config.explorer.max_repeat_times_per_runner = 2
+        config.check_and_update()
+        scheduler = Scheduler(config, [DummyModel.remote(), DummyModel.remote()])
+        # 4 runner in side the scheduler
+        await scheduler.start()
+
+        tasks = [
+            Task(
+                workflow=DummyWorkflowWithState,  # type: ignore[type-abstract]
+                workflow_args={"step_num": 2},
+                repeat_times=4,
+                raw_task={},
+            )
+            for _ in range(4)
+        ]
+        scheduler.schedule(tasks, batch_id=0)
+
+        async def monitor_routine():
+            runner_0_state_history = defaultdict(set)
+            await asyncio.sleep(0.5)  # wait for first report
+            for _ in range(16):
+                await asyncio.sleep(0.3)
+                states = scheduler.get_all_state()
+                self.assertEqual(len(states), 4)
+                for state in states.values():
+                    self.assertIn("workflow_id", state)
+                    self.assertIn("model_version", state)
+                    self.assertIn("begin_time", state)
+                    self.assertIn("terminate_time", state)
+                    self.assertIn("repeat_cnt", state)
+                ids = scheduler.get_key_state("workflow_id")
+                self.assertEqual(len(ids), 4)
+                self.assertEqual(len(set(ids.values())), 4)
+                runner_0_state = scheduler.get_runner_state(0)
+                for key, value in runner_0_state.items():
+                    runner_0_state_history[key].add(value)
+            self.assertEqual(len(runner_0_state_history["repeat_cnt"]), 2)  # max_repeat_times is 2
+            self.assertEqual(len(runner_0_state_history["model_version"]), 1)
+            self.assertEqual(
+                len(runner_0_state_history["workflow_id"]), 2
+            )  # split into 2 sub tasks
+            self.assertEqual(len(runner_0_state_history["begin_time"]), 2)
+
+        await asyncio.gather(
+            monitor_routine(),
+            scheduler.get_results(batch_id=0),
+        )

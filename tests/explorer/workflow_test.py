@@ -2,6 +2,7 @@
 """Test for the workflow module"""
 import asyncio
 import unittest
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 from unittest import mock
@@ -508,6 +509,48 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         ray.shutdown(_exiting_interpreter=True)
 
 
+class StateRecordingWorkflow(Workflow):
+    is_async: bool = True
+
+    def __init__(self, *, task, model: ModelWrapper, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.wait_time = task.workflow_args.get("wait_time", 1)
+
+    async def run_async(self):
+        for i in range(self.wait_time):
+            await self.model.set_workflow_state({"step": i})
+            await asyncio.sleep(1)
+        return [Experience(tokens=Tensor([0, 1, 2]), prompt_length=1, reward=1.0)]
+
+
+class TestWorkflowStateRecording(unittest.IsolatedAsyncioTestCase):
+    async def test_workflow_state_recording(self):
+        model = MagicMock()
+        model_wrapper = ModelWrapper(model, engine_type="vllm")
+
+        task = Task(
+            workflow=StateRecordingWorkflow,
+            repeat_times=3,
+            raw_task={},
+            workflow_args={"wait_time": 3},
+        )
+        workflow = task.to_workflow(model_wrapper)
+
+        async def monitor_routine():
+            old_state = {}
+            count = 0
+            for i in range(20):
+                await asyncio.sleep(0.2)
+                new_state = await model_wrapper.get_workflow_state()
+                if new_state.get("step") != old_state.get("step"):
+                    old_state = new_state
+                    count += 1
+            self.assertEqual(count, 3)
+            return count
+
+        await asyncio.gather(*[monitor_routine(), workflow.run_async()])
+
+
 class TestAgentScopeWorkflowAdapter(unittest.IsolatedAsyncioTestCase):
     @unittest.skip("Waiting for agentscope>=0.1.6")
     async def test_adapter(self):
@@ -559,6 +602,9 @@ class DummyModelWrapper:
     def get_openai_async_client(self):
         return openai.AsyncOpenAI(api_key="EMPTY")
 
+    async def clean_workflow_state(self):
+        return
+
     @property
     async def model_version_async(self):
         return 0
@@ -604,3 +650,50 @@ class TestWorkflowRunner(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(status.ok)
             self.assertIsInstance(exps, list)
             self.assertEqual(len(exps), 2)
+
+    async def test_workflow_runner_get_state(self):
+        config = get_template_config()
+
+        async def mock_get_api_server_url_remote():
+            return None
+
+        async def mock_get_model_version_remote():
+            return 1
+
+        model = MagicMock()
+        model.get_api_server_url.remote = MagicMock(side_effect=mock_get_api_server_url_remote)
+        model.get_model_version.remote = MagicMock(side_effect=mock_get_model_version_remote)
+
+        runner = WorkflowRunner(
+            config,
+            model=model,
+            auxiliary_models=[],
+            runner_id=1,
+        )
+        await runner.prepare()
+
+        task = Task(
+            workflow=StateRecordingWorkflow,
+            raw_task={},
+            workflow_args={"wait_time": 2},
+            batch_id=1,
+            task_id=2,
+        )
+
+        async def monitor_routine():
+            state_history = defaultdict(set)
+            count = 0
+            for i in range(20):
+                await asyncio.sleep(0.4)
+                new_state = await runner.get_runner_state()
+                for k, v in new_state.items():
+                    state_history[k].add(v)
+            self.assertEqual(len(state_history["model_version"]), 1)
+            self.assertEqual(len(state_history["workflow_id"]), 3)
+            self.assertEqual(len(state_history["begin_time"]), 3)
+            self.assertEqual(len(state_history["step"]), 2)
+            return count
+
+        await asyncio.gather(
+            *[monitor_routine(), runner.run_task(task, repeat_times=3, run_id_base=0)]
+        )
