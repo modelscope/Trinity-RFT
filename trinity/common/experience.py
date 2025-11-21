@@ -238,7 +238,7 @@ class Experience:
     def to_dict(self) -> dict:
         """Convert the experience to a dictionary."""
         res = {
-            "eid": self.eid,
+            "eid": self.eid.to_dict(),
             "type": self.experience_type,
             "prompt_length": self.prompt_length,
             "response_length": len(self.tokens) - self.prompt_length,  # type: ignore [arg-type]

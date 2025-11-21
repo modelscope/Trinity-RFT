@@ -1,0 +1,67 @@
+project: AgentScope-ReAct
+name: GSM8K-Qwen3-8B
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
+algorithm:
+  algorithm_type: multi_step_grpo
+  repeat_times: 8
+  optimizer:
+    lr: 1e-6
+model:
+  model_path: '/mnt/data/model_cache/modelscope/hub/Qwen/Qwen/Qwen2___5-1___5B-Instruct'
+  max_response_tokens: 16384
+  max_model_len: 24576
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 1
+  batch_size: 32
+  train_batch_size: 256
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: env_service
+      path: 'http://localhost:8080'
+      subset_name: 'appworld'
+      split: 'train'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+      rollout_args:
+        temperature: 1.0
+      default_workflow_type: 'agentopia_workflow'
+    eval_tasksets: []
+  trainer_input:
+    experience_buffer:
+      name: agentscope_gsm8k_buffer
+      storage_type: queue
+explorer:
+  eval_interval: 50
+  runner_per_model: 16
+  max_timeout: 1800
+  rollout_model:
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    enable_openai_api: true
+    enable_history: true
+    enable_auto_tool_choice: true
+    tool_call_parser: hermes
+    # reasoning_parser: deepseek_r1
+    enable_thinking: false
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_style: dynamic_by_explorer
+  sync_method: 'nccl'
+  sync_interval: 2
+  sync_timeout: 1200
+trainer:
+  save_interval: 100
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  max_token_len_per_gpu: 24576
+  ulysses_sequence_parallel_size: 2
+monitor:
+  monitor_type: tensorboard

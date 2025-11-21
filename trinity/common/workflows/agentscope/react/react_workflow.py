@@ -2,17 +2,14 @@
 
 This workflow is a demonstration of how to integrate the AgentScope framework within the Trinity-RFT workflow system with minimal modifications.
 """
-
-from typing import Dict, List, Optional, Union
-
+import uuid
 import openai
-
+from typing import Dict, List, Optional, Union
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-
+from transformers import AutoTokenizer
 from .templates import TEMPLATE_MAP
-
 
 @WORKFLOWS.register_module("as_react_workflow")
 class AgentScopeReActWorkflow(Workflow):
@@ -20,7 +17,7 @@ class AgentScopeReActWorkflow(Workflow):
 
     def __init__(
         self,
-        *,
+        config,
         task: Task,
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
@@ -97,3 +94,4 @@ class AgentScopeReActWorkflow(Workflow):
             if isinstance(reward, dict):
                 exp.metrics.update(reward)
         return exps
+

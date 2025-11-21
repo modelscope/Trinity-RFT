@@ -80,6 +80,7 @@ class _HFBatchReader:
         for i in indices:
             assert 0 <= i < self.dataset_size
             batch.append(self.dataset[int(i)])
+        self.progress_bar.update(len(batch))  # update progress bar
         return batch
 
 
@@ -163,3 +164,61 @@ class TaskFileReader(BaseFileReader):
     async def read_with_indices_async(self, indices: List[int]) -> List:
         """Read tasks with indices asynchronously."""
         return self.read_with_indices(indices)
+
+
+import os
+def read_astune_config(yaml_fp):
+    from hydra import initialize, compose
+    from omegaconf import DictConfig
+
+    def load_hydra_config(config_path: str, config_name: str) -> DictConfig:
+        with initialize(config_path=config_path, version_base=None):
+            cfg = compose(config_name=config_name, overrides=[])
+            return cfg
+
+    dir_path = os.path.dirname(yaml_fp)
+    file_name = os.path.basename(yaml_fp)
+    return load_hydra_config(config_path=dir_path, config_name=file_name)
+
+class AstuneTaskReader(TaskFileReader):
+    def __init__(self, config):
+        self.config = config
+        self.read_batch_size = config.batch_size
+        self.split = config.split
+
+        yaml_path = os.environ.get('ASTUNE_CONFIG_REDIRECT', None)
+        if yaml_path is None:
+            raise ValueError("ASTUNE_CONFIG_REDIRECT is not set in environment variables")
+        astune_config = read_astune_config(os.path.relpath(yaml_path, os.path.dirname(__file__)))
+
+        # from vsdb import bp
+        # bp("XXX")
+
+        from astune.task_reader import TaskReaderRouter, task_to_standard_dataset
+        task_reader = TaskReaderRouter(astune_config)
+        if 'train' in self.split:
+            train_dataset = task_to_standard_dataset(task_reader.get_training_tasks())
+        if 'val' in self.split:
+            train_dataset = task_to_standard_dataset(task_reader.get_validation_tasks())
+
+        self.dataset = _HFBatchReader(
+            datasets.concatenate_datasets([train_dataset]), # type ignore
+            name=self.config.name,
+            default_batch_size=self.read_batch_size,
+            total_epochs=self.config.total_epochs if not self.config.is_eval else 1,
+            offset=self.config.index,
+            drop_last=not self.config.is_eval,
+            total_steps=self.config.total_steps,
+            enable_progress_bar=self.config.enable_progress_bar,
+        )
+        self.formatter = FORMATTER.get("task")(self.config)
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        batch_size = batch_size or self.read_batch_size
+        tasks = []
+        samples = self.dataset.read_batch(batch_size)
+        for sample in samples:
+            task = self.formatter.format(sample)
+            tasks.append(task)
+        return tasks
+

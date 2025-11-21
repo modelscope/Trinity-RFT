@@ -275,7 +275,7 @@ The configuration for each task dataset is defined as follows:
   - `file`: The dataset is stored in `jsonl`/`parquet` files. The data file organization is required to meet the huggingface standard. *We recommand using this storage type for most cases.*
   - `sql`: The dataset is stored in a SQL database. *This type is unstable and will be optimized in the future versions.*
 - `path`: The path to the task dataset.
-  - For `file` storage type, the path points to the directory that contains the task dataset files.
+  - For `file` storage type, the path points to the directory that contains the task dataset files. It supports loading both local and remote data files in a compatible format with [`datasets.load_dataset()`](https://huggingface.co/docs/datasets/main/en/package_reference/loading_methods#datasets.load_dataset) function.
   - For `sql` storage type, the path points to the sqlite database file.
 - `subset_name`: The subset name of the task dataset, corresponding to the `name` parameter in huggingface datasets `load_dataset` function. Default is `None`.
 - `split`: The split of the task dataset, corresponding to the `split` parameter in huggingface datasets `load_dataset` function. Default is `train`.

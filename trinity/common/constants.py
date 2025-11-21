@@ -62,6 +62,7 @@ class StorageType(CaseInsensitiveEnum):
     SQL = "sql"
     QUEUE = "queue"
     FILE = "file"
+    ASTUNE = "astune"
 
 
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):

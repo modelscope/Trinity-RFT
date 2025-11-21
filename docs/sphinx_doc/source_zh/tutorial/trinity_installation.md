@@ -6,7 +6,7 @@
 在安装前，请确保您的系统满足以下要求：
 
 - **Python**：3.10 至 3.12（包含）
-- **CUDA**：12.4 至 12.8（包含）
+- **CUDA**：大于等于 12.6
 - **GPU**：至少 2 块 GPU
 
 ---
@@ -65,14 +65,14 @@ uv sync --extra dev --extra flash_attn
 如果您只需使用 Trinity-RFT 而不打算修改代码：
 
 ```bash
-pip install trinity-rft==0.3.1
+pip install trinity-rft
 pip install flash-attn==2.8.1
 ```
 
 或使用 `uv`：
 
 ```bash
-uv pip install trinity-rft==0.3.1
+uv pip install trinity-rft
 uv pip install flash-attn==2.8.1
 ```
 

@@ -82,6 +82,7 @@ class EmailSearchWorkflow(Workflow):
                 "max_tokens": self.task.rollout_args.max_tokens or 4096,
             },
             response_structure=AnswerModel,
+            max_iters=self.max_turns,
         )
 
     async def run_async(self):
@@ -92,7 +93,7 @@ class EmailSearchWorkflow(Workflow):
             experiences
         )  # NOTE: this metrics works only if the agent calls model once in each turn
 
-        reward_dict = self.calculate_reward(answer_and_sources)
+        reward_dict = await self.calculate_reward(answer_and_sources)
         reward = sum(reward_dict.values())
 
         for i, experience in enumerate(experiences):
@@ -107,7 +108,7 @@ class EmailSearchWorkflow(Workflow):
         )
         return experiences
 
-    def calculate_reward(self, answer_and_sources: Dict) -> Dict[str, float]:
+    async def calculate_reward(self, answer_and_sources: Dict) -> Dict[str, float]:
         """Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
         try:
             answer = answer_and_sources.get("answer", None)
@@ -140,7 +141,7 @@ class EmailSearchWorkflow(Workflow):
 
         try:
             judge_model = self.auxiliary_models[0] if self.auxiliary_models else None
-            judge_response = judge_correctness(answer, self.query, judge_model)
+            judge_response = await judge_correctness(answer, self.query, judge_model)
             rubric.answer_correct = judge_response
 
         except Exception as e:
@@ -179,4 +180,4 @@ class EmailSearchWorkflow(Workflow):
             return result
 
         self.logger.error(f"Rubric {rubric} not handled properly")
-        raise ValueError("Rubric is not handled properly")
+        return {"accuracy": 0.0, "format": 0.0}

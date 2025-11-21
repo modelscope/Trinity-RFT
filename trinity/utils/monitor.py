@@ -16,12 +16,10 @@ try:
     import mlflow
 except ImportError:
     mlflow = None
-
 try:
     import swanlab
 except ImportError:
     swanlab = None
-
 from torch.utils.tensorboard import SummaryWriter
 
 from trinity.common.config import Config
@@ -200,6 +198,7 @@ class MlflowMonitor(Monitor):
             os.environ["MLFLOW_TRACKING_PASSWORD"] = password
         mlflow.set_tracking_uri(config.monitor.monitor_args.get("uri", "http://localhost:5000"))
         mlflow.set_experiment(project)
+        mlflow.enable_system_metrics_logging()
         mlflow.start_run(
             run_name=f"{name}_{role}",
             tags={

@@ -12,6 +12,8 @@ from trinity.common.config import Config
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
 
+from trinity.buffer.reader.file_reader import AstuneTaskReader
+
 
 @Experimental
 class TasksetScheduler:
@@ -62,7 +64,7 @@ class TasksetScheduler:
         for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config)
-            if not isinstance(taskset, TaskFileReader):
+            if not isinstance(taskset, TaskFileReader) and not isinstance(taskset, AstuneTaskReader):
                 raise TypeError(
                     f"Taskset '{taskset_config.name}' has an unsupported type '{type(taskset).__name__}'."
                     f"Currently, only 'TaskFileReader' is supported by TasksetScheduler."
@@ -90,6 +92,13 @@ class TasksetScheduler:
         self.epoch = self.step * self.read_batch_size // len(self.base_taskset_ids)
         self.orders = self.build_orders(self.epoch)
 
+        if self.config.buffer.total_steps:
+            self.max_steps = self.config.buffer.total_steps
+        else:
+            self.max_steps = (
+                self.config.buffer.total_epochs * len(self.base_taskset_ids) // self.read_batch_size
+            )
+
     def build_orders(self, epoch: int):
         """
         Creates a shuffled sequence of taskset IDs to control sampling priority per step.
@@ -108,6 +117,9 @@ class TasksetScheduler:
         rng.shuffle(taskset_ids)
         return taskset_ids
 
+    def _should_stop(self) -> bool:
+        return self.step >= self.max_steps
+
     async def read_async(self) -> List:
         """
         Asynchronously reads a batch of tasks according to the current schedule.
@@ -125,12 +137,8 @@ class TasksetScheduler:
         Returns:
             List[Task]: A batch of tasks from potentially multiple tasksets
         """
-        if self.config.buffer.total_steps:
-            if self.step >= self.config.buffer.total_steps:
-                raise StopAsyncIteration
-        else:
-            if self.epoch >= self.config.buffer.total_epochs:
-                raise StopAsyncIteration
+        if self._should_stop():
+            raise StopAsyncIteration
 
         batch_size = self.read_batch_size
         start = self.step * batch_size % len(self.base_taskset_ids)
@@ -143,8 +151,6 @@ class TasksetScheduler:
         else:
             taskset_ids = self.orders[start:]
             self.epoch += 1
-            if self.epoch >= self.config.buffer.total_epochs:
-                raise StopAsyncIteration
             self.orders = self.build_orders(self.epoch)
             taskset_ids += self.orders[: (end - len(self.base_taskset_ids))]
 
@@ -190,7 +196,7 @@ class TasksetScheduler:
         """
         if SELECTOR_METRIC not in pipeline_metrics:
             return
-        selector_metric = pipeline_metrics[SELECTOR_METRIC]
+        selector_metric = pipeline_metrics.pop(SELECTOR_METRIC, {})
         for taskset_id, taskset_kwargs in selector_metric.items():
             selector = self.selectors[taskset_id]
             selector.update(**taskset_kwargs)

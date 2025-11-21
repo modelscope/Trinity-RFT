@@ -24,6 +24,10 @@ def get_buffer_reader(config: BufferStorageConfig) -> BufferReader:
         from trinity.buffer.reader.queue_reader import QueueReader
 
         return QueueReader(storage_config)
+    elif storage_config.storage_type == StorageType.ASTUNE:
+        from trinity.buffer.reader.file_reader import AstuneTaskReader
+
+        return AstuneTaskReader(storage_config)
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.reader.file_reader import (
             ExperienceFileReader,
