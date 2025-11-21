@@ -41,7 +41,7 @@ def save_dataset_to_local(name: str, data: list[dict], split: str = "default") -
     return dataset_path
 
 
-def prepare_frozenlake_data(train_size=10000, test_size=100):
+def prepare_frozenlake_data(train_size=10000, test_size=100, map_max_size=6):
     """
     Prepare and save FrozenLake datasets for training and testing.
 
@@ -58,8 +58,8 @@ def prepare_frozenlake_data(train_size=10000, test_size=100):
     # Generate random parameters for train and test sets
     train_seeds = np.random.randint(0, 100000, size=train_size)
     test_seeds = np.random.randint(0, 100000, size=test_size)
-    train_sizes = np.random.randint(2, 10, size=train_size)
-    test_sizes = np.random.randint(2, 10, size=test_size)
+    train_sizes = np.random.randint(2, map_max_size, size=train_size)
+    test_sizes = np.random.randint(2, map_max_size, size=test_size)
     train_ps = np.random.uniform(0.6, 0.85, size=train_size)
     test_ps = np.random.uniform(0.6, 0.85, size=test_size)
 
