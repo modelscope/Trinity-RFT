@@ -276,6 +276,9 @@ class ModelWrapper:
         else:
             return None
 
+    async def get_message_token_len(self, messages: List[dict]) -> int:
+        return await self.model.get_message_token_len.remote(messages)
+
     def get_openai_client(self) -> openai.OpenAI:
         """Get the openai client.
 
