@@ -29,13 +29,14 @@ Download the GSM8K dataset to the local directory `$DATASET_PATH/gsm8k`:
 
 ```bash
 # Using Modelscope
-modelscope download --dataset modelscope/gsm8k --local_dir $DATASET_PATH/gsm8k
+modelscope download --dataset AI-ModelScope/gsm8k --local_dir $DATASET_PATH/gsm8k
 
 # Using Huggingface
 huggingface-cli download openai/gsm8k --repo-type dataset --local-dir $DATASET_PATH/gsm8k
 ```
 
 More details on dataset downloading are referred to [ModelScope](https://modelscope.cn/docs/datasets/download) or [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space).
+The dataset downloaded from ModelScope may lack the `dtype` field and cause error when loading the dataset. To solve this issue, please delete the `dataset_infos.json` file and run the experiment again.
 
 ## Step 2: Set up Configuration and Run Experiment
 

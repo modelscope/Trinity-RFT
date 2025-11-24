@@ -828,6 +828,19 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeWorkflowAdapter.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeWorkflowAdapter.run_async()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.can_reset"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.can_reset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.is_async"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.is_async</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.can_repeat"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.can_repeat</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.rollout_args"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.rollout_args</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.finished"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.success"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.success()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.env_step"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.env_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.render"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.render()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.run_async()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2188,6 +2201,141 @@ The prompts are adapted from RAR-IMPLICIT method in <a class="reference external
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">FrozenLakeWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow" title="Link to this definition">#</a></dt>
+<dd><p>基类：<a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.MultiTurnWorkflow" title="trinity.common.workflows.workflow.MultiTurnWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiTurnWorkflow</span></code></a></p>
+<p>FrozenLake environment for multi-step workflows.</p>
+<p>## Description
+The game starts with the player at random location of the frozen lake grid world with the
+goal located at another random location for the 4x4 environment.</p>
+<p>## Action Space
+The action shape is <cite>(1,)</cite> in the range <cite>{0, 3}</cite> indicating
+which direction to move the player.
+NOTE the action space is different from gymnasium.envs.toy_text.frozen_lake.FrozenLakeEnv, start from 1
+use action_map to map from custom action to action defined in FrozenLakeEnv in gymnasium
+- 0: Still
+- 1: Left
+- 2: Down
+- 3: Right
+- 4: Up</p>
+<p>## Starting State
+The episode starts with the player at random location</p>
+<p>## Rewards
+Reward schedule:
+- Reach goal: +1
+- Reach hole: 0
+- Reach frozen: 0</p>
+<p>## Arguments
+<cite>is_slippery</cite>: if action is left and is_slippery is True, then:
+- P(move left)=1/3
+- P(move up)=1/3
+- P(move down)=1/3</p>
+<p>## Example
+P   _   _   _
+_   _   _   O
+O   _   O   _
+O   _   _   G</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.can_reset">
+<span class="sig-name descname"><span class="pre">can_reset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.can_reset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.is_async">
+<span class="sig-name descname"><span class="pre">is_async</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.is_async" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.can_repeat">
+<span class="sig-name descname"><span class="pre">can_repeat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.can_repeat" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.__init__"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialize the FrozenLake workflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> -- The model wrapper to use for generating actions.</p></li>
+<li><p><strong>task</strong> -- The task configuration containing workflow-specific arguments.</p></li>
+<li><p><strong>auxiliary_models</strong> -- Optional list of auxiliary models.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.rollout_args">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rollout_args</span></span><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.rollout_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.finished">
+<span class="sig-name descname"><span class="pre">finished</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.finished"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.finished" title="Link to this definition">#</a></dt>
+<dd><p>Check if the episode is finished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">返回<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the player is on goal (G) or hole (H), False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.success">
+<span class="sig-name descname"><span class="pre">success</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.success"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.success" title="Link to this definition">#</a></dt>
+<dd><p>Check if the agent has reached the goal (G).</p>
+<dl class="field-list simple">
+<dt class="field-odd">返回<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the player is on goal (G), False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.env_step">
+<span class="sig-name descname"><span class="pre">env_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.env_step"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.env_step" title="Link to this definition">#</a></dt>
+<dd><p>Execute a step in the environment.</p>
+<p>Maps custom action to gymnasium FrozenLakeEnv action and takes the step.
+Checks if the action is effective (whether player moves in the env).</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> -- The action to take.</p>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (observation, reward, done, info).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tiny_rgb_array'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.render"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.render" title="Link to this definition">#</a></dt>
+<dd><p>Render the environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> -- Rendering mode. Options: &quot;tiny_rgb_array&quot;, &quot;list&quot;, &quot;state&quot;, &quot;rgb_array&quot;, &quot;ansi&quot;.</p>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rendered observation based on the mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.FrozenLakeWorkflow.run_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/frozen_lake/workflow.html#FrozenLakeWorkflow.run_async"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.FrozenLakeWorkflow.run_async" title="Link to this definition">#</a></dt>
+<dd><p>Run the workflow and return a list of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">返回<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of Experience objects, one for each rollout.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -2470,6 +2618,19 @@ The prompts are adapted from RAR-IMPLICIT method in <a class="reference external
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeWorkflowAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">AgentScopeWorkflowAdapter.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeWorkflowAdapter.construct_experiences"><code class="docutils literal notranslate"><span class="pre">AgentScopeWorkflowAdapter.construct_experiences()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeWorkflowAdapter.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeWorkflowAdapter.run_async()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.can_reset"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.can_reset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.is_async"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.is_async</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.can_repeat"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.can_repeat</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.rollout_args"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.rollout_args</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.finished"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.success"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.success()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.env_step"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.env_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.render"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.render()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.FrozenLakeWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">FrozenLakeWorkflow.run_async()</span></code></a></li>
 </ul>
 </li>
 </ul>

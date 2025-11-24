@@ -45,22 +45,47 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
-const style = document.createElement('style');
-style.textContent = `.mermaid-container {
-    position: relative !important;
-    display: inline-block;
+const defaultStyle = document.createElement('style');
+defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
     width: 100%;
 }
 
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+`;
+document.head.appendChild(defaultStyle);
+
+const fullscreenStyle = document.createElement('style');
+fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
 .mermaid-fullscreen-btn {
-    position: absolute !important;
     width: 28px;
     height: 28px;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.3);
     border-radius: 4px;
     cursor: pointer;
-    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -95,7 +120,7 @@ style.textContent = `.mermaid-container {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw;
+    width: 95vw;
     height: 100vh;
     background: rgba(255, 255, 255, 0.98);
     z-index: 9999;
@@ -113,7 +138,7 @@ style.textContent = `.mermaid-container {
     justify-content: center;
 }
 
-.mermaid-fullscreen-content {
+.mermaid-container-fullscreen {
     position: relative;
     width: 95vw;
     height: 90vh;
@@ -129,12 +154,12 @@ style.textContent = `.mermaid-container {
     justify-content: center;
 }
 
-.mermaid-fullscreen-content.dark-theme {
+.mermaid-container-fullscreen.dark-theme {
     background: #1a1a1a;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
 }
 
-.mermaid-fullscreen-content .mermaid {
+.mermaid-container-fullscreen pre.mermaid {
     width: 100%;
     height: 100%;
     display: flex;
@@ -142,11 +167,9 @@ style.textContent = `.mermaid-container {
     justify-content: center;
 }
 
-.mermaid-fullscreen-content .mermaid svg {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    max-height: 85vh;
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
     cursor: grab;
 }
 
@@ -190,9 +213,8 @@ style.textContent = `.mermaid-container {
 
 .mermaid-fullscreen-modal .mermaid-fullscreen-btn {
     display: none !important;
-}
-`;
-document.head.appendChild(style);
+}`;
+document.head.appendChild(fullscreenStyle);
 
 // Detect if page has dark background
 const isDarkTheme = () => {
@@ -208,19 +230,44 @@ const isDarkTheme = () => {
     return false;
 };
 
-const initFullscreen = async () => {
+const load = async () => {
     await mermaid.run();
 
     const all_mermaids = document.querySelectorAll(".mermaid");
     const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
 
-    if(all_mermaids.length !== mermaids_processed.length) {
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(load, 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(load, 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
         // Wait for mermaid to process all diagrams
-        setTimeout(initFullscreen, 200);
+        setTimeout(load, 200);
         return;
     }
 
     const darkTheme = isDarkTheme();
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
 
     const modal = document.createElement('div');
     modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
@@ -229,17 +276,20 @@ const initFullscreen = async () => {
     modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
     modal.innerHTML = `
         <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
-        <div class="mermaid-fullscreen-content${darkTheme ? ' dark-theme' : ''}"></div>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
     `;
     document.body.appendChild(modal);
 
-    const modalContent = modal.querySelector('.mermaid-fullscreen-content');
+    const modalContent = modal.querySelector('.mermaid-container-fullscreen');
     const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    let previousScrollOffset = [window.scrollX, window.scrollY];
 
     const closeModal = () => {
         modal.classList.remove('active');
         modalContent.innerHTML = '';
-        document.body.style.overflow = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
     };
 
     closeBtn.addEventListener('click', closeModal);
@@ -269,6 +319,7 @@ const initFullscreen = async () => {
         fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
         fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
         fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
 
         // Calculate dynamic position based on diagram's margin and padding
         const diagramStyle = window.getComputedStyle(mermaidDiv);
@@ -280,6 +331,7 @@ const initFullscreen = async () => {
         fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
 
         fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
             const clone = mermaidDiv.cloneNode(true);
             modalContent.innerHTML = '';
             modalContent.appendChild(clone);
@@ -291,7 +343,22 @@ const initFullscreen = async () => {
                 svg.style.width = '100%';
                 svg.style.height = 'auto';
                 svg.style.maxWidth = '100%';
-                svg.style.display = 'block';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
             }
 
             modal.classList.add('active');
@@ -335,7 +402,7 @@ const initFullscreen = async () => {
     });
 };
 
-window.addEventListener("load", initFullscreen);
+window.addEventListener("load", load);
 </script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/trinity/common/config';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -1358,6 +1425,8 @@ document.write(`
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># the minimum number of tokens for the response</span>
     <span class="n">min_response_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1"># whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens.</span>
+    <span class="n">enable_prompt_truncation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># lora config</span>
     <span class="n">lora_configs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">LoRAConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1402,6 +1471,8 @@ document.write(`
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># if not set, use `model.min_response_tokens`</span>
     <span class="n">min_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># if not set, use `model.enable_prompt_truncation`</span>
+    <span class="n">enable_prompt_truncation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># used for testing very long response generation, do not set it unless you know what you are doing</span>
     <span class="n">ignore_eos</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -2070,9 +2141,14 @@ document.write(`
             <span class="n">model</span><span class="o">.</span><span class="n">critic_model_path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_path</span>
 
         <span class="c1"># check template</span>
-        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">chat_template_path</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">chat_template_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">chat_template_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">chat_template_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Failed to read chat template from </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">chat_template_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># check max_model_len, max_prompt_tokens, max_response_tokens</span>
 
@@ -2126,6 +2202,19 @@ document.write(`
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">min_response_tokens</span> <span class="o">&gt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">:</span>  <span class="c1"># type: ignore [operator]</span>
             <span class="n">model</span><span class="o">.</span><span class="n">min_response_tokens</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore [operator]</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`min_response_tokens` is set to </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">min_response_tokens</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">enable_prompt_truncation</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`enable_prompt_truncation` is set to True; the prompt will be truncated to `max_prompt_tokens`=</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="si">}</span><span class="s2"> tokens if it is too long.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;`enable_prompt_truncation` is set to False; please make sure the prompt is not too long and `max_model_len` is large enough, otherwise prompt length + response length may exceed `max_model_len`!&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over configs with each stage applied in order.</span>
@@ -2199,6 +2288,7 @@ document.write(`
                 <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;min_response_tokens&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;enable_prompt_truncation&quot;</span><span class="p">,</span>
             <span class="p">]</span>
             <span class="n">rope_args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rope_scaling&quot;</span><span class="p">,</span> <span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span>
             <span class="n">model_args</span> <span class="o">=</span> <span class="n">rollout_args</span> <span class="o">+</span> <span class="n">length_args</span> <span class="o">+</span> <span class="n">rope_args</span>

@@ -635,13 +635,14 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>Qwen/Qwen
 <p><strong>Data Preparation.</strong></p>
 <p>Download the GSM8K dataset to the local directory <code class="docutils literal notranslate"><span class="pre">$DATASET_PATH/gsm8k</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Modelscope</span>
-modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span class="w"> </span>modelscope/gsm8k<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
+modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span class="w"> </span>AI-ModelScope/gsm8k<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
 
 <span class="c1"># Using Huggingface</span>
 huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gsm8k<span class="w"> </span>--repo-type<span class="w"> </span>dataset<span class="w"> </span>--local-dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
 </pre></div>
 </div>
-<p>More details on dataset downloading are referred to <a class="reference external" href="https://modelscope.cn/docs/datasets/download">ModelScope</a> or <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space">Huggingface</a>.</p>
+<p>More details on dataset downloading are referred to <a class="reference external" href="https://modelscope.cn/docs/datasets/download">ModelScope</a> or <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space">Huggingface</a>.
+The dataset downloaded from ModelScope may lack the <code class="docutils literal notranslate"><span class="pre">dtype</span></code> field and cause error when loading the dataset. To solve this issue, please delete the <code class="docutils literal notranslate"><span class="pre">dataset_infos.json</span></code> file and run the experiment again.</p>
 </section>
 <section id="step-2-set-up-configuration-and-run-experiment">
 <h2>Step 2: Set up Configuration and Run Experiment<a class="headerlink" href="#step-2-set-up-configuration-and-run-experiment" title="Link to this heading">#</a></h2>

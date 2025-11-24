@@ -636,13 +636,14 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>Qwen/Qwen
 <p><strong>数据准备</strong></p>
 <p>将 GSM8K 数据集下载到本地目录 <code class="docutils literal notranslate"><span class="pre">$DATASET_PATH/gsm8k</span></code>：</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 使用 Modelscope</span>
-modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span class="w"> </span>modelscope/gsm8k<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
+modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span class="w"> </span>AI-ModelScope/gsm8k<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
 
 <span class="c1"># 使用 Huggingface</span>
 huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gsm8k<span class="w"> </span>--repo-type<span class="w"> </span>dataset<span class="w"> </span>--local-dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/gsm8k
 </pre></div>
 </div>
-<p>更多关于数据集下载的细节请参考 <a class="reference external" href="https://modelscope.cn/docs/datasets/download">ModelScope</a> 或 <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space">Huggingface</a>。</p>
+<p>更多关于数据集下载的细节请参考 <a class="reference external" href="https://modelscope.cn/docs/datasets/download">ModelScope</a> 或 <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space">Huggingface</a>。
+从 ModelScope 下载的数据集可能缺少 <code class="docutils literal notranslate"><span class="pre">dtype</span></code> 字段，导致加载数据集时出错。要解决这个问题，请删除 <code class="docutils literal notranslate"><span class="pre">dataset_infos.json</span></code> 文件并重新运行实验。</p>
 </section>
 <section id="id4">
 <h2>第 2 步：配置实验并运行<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
