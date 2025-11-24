@@ -103,6 +103,9 @@ class Experience:
     reward: Optional[float] = None
     advantages: Optional[Tensor] = None  # [resp_length]
     returns: Optional[Tensor] = None  # [resp_length]
+    truncate_status: Optional[
+        str
+    ] = None  # The status of truncation, e.g., "prompt_truncated", "response_truncated"; Not working for openai api
     info: dict = field(
         default_factory=dict
     )  # Additional information about the experience, can also be used to store custom fields
@@ -138,6 +141,7 @@ class Experience:
         reward=None,
         advantages=None,
         returns=None,
+        truncate_status=None,
         info=None,
         metrics=None,
         prompt_length=1,
@@ -191,6 +195,7 @@ class Experience:
         self.experience_type = experience_type
         self.info = info or {}
         self.metrics = metrics or {}
+        self.truncate_status = truncate_status
         self.prompt_length = prompt_length
         self.response_text = response_text
         self.prompt_text = prompt_text
@@ -259,6 +264,8 @@ class Experience:
             res["rejected_messages"] = self.rejected_messages
         if self.reward is not None:
             res["reward"] = float(self.reward)
+        if self.truncate_status is not None:
+            res["truncate_status"] = self.truncate_status
         return res
 
     @classmethod

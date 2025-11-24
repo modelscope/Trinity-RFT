@@ -174,7 +174,7 @@ model:
 - `max_prompt_tokens`: 输入 prompt 中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `max_response_tokens`: 模型生成的回复中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `min_response_tokens`: 模型生成的回复中允许的最小 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
-- `enable_prompt_truncation`: 是否截断 prompt。默认为 `true`。若设置为 `true`，则 prompt 将被截断为 `max_prompt_tokens` 个 token；若设置为 `false`，则 prompt 不会被截断，存在 prompt 和 response 长度之和超过 `max_model_len` 的风险。
+- `enable_prompt_truncation`: 是否截断 prompt。默认为 `true`。若设置为 `true`，则 prompt 将被截断为 `max_prompt_tokens` 个 token；若设置为 `false`，则 prompt 不会被截断，存在 prompt 和 response 长度之和超过 `max_model_len` 的风险。在 OpenAI API 模式下不生效。
 
 ```{tip}
 如果使用的是 Explorer 提供的 openai API，则只有 `max_model_len` 会生效，而 `max_response_tokens`、`max_prompt_tokens` 和 `min_response_tokens` 的值将被忽略，在没有独立指定 `max_tokens` 时，每次 API 调用将生成最多 `max_model_len - prompt_length` 个 token，因此在使用时请确保 prompt 长度小于 `max_model_len`。

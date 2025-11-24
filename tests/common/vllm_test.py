@@ -221,10 +221,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         "max_prompt_tokens",
         "max_response_tokens",
     ),
-    [
-        (20, 19, None),
-        (20, None, 1),
-    ],
+    [(20, 19, None), (20, None, 1), (20, 5, 15)],
 )
 class TestModelLen(RayUnittestBaseAysnc):
     def setUp(self):
@@ -240,6 +237,7 @@ class TestModelLen(RayUnittestBaseAysnc):
 
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.config.model.model_path)
 
     async def test_model_len(self):
         await self.model_wrapper.prepare()
@@ -250,16 +248,41 @@ class TestModelLen(RayUnittestBaseAysnc):
 
         # For vllm engine, max_prompt_tokens and max_response_tokens work
         response = self.model_wrapper.chat(messages)
+        print("--------------------------------")
+        print(response[0])
         self.assertEqual(len(response), 1)
-        self.assertEqual(len(response[0].tokens), self.config.model.max_model_len)
+        # check prompt content and length
+        if self.max_prompt_tokens == 5:
+            self.assertEqual(response[0].truncate_status, "prompt_truncated")
+        encoded_prompt = self.tokenizer.encode(response[0].prompt_text, add_special_tokens=False)
+        self.assertEqual(len(encoded_prompt), response[0].prompt_length)
+        self.assertLessEqual(response[0].prompt_length, self.config.model.max_prompt_tokens)
+        # check response content and length
+        encoded_response = self.tokenizer.encode(
+            response[0].response_text, add_special_tokens=False
+        )
+        self.assertEqual(len(encoded_response), len(response[0].tokens) - response[0].prompt_length)
+        self.assertLessEqual(
+            len(response[0].tokens) - response[0].prompt_length,
+            self.config.model.max_response_tokens,
+        )
+        # check full sequene
+        self.assertLessEqual(len(response[0].tokens), self.config.model.max_model_len)
+
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
-        # check prompt length, response length, max_model_len
-        self.assertEqual(exps[0].prompt_length, self.config.model.max_prompt_tokens)
-        self.assertEqual(
+        # check prompt content and length
+        encoded_prompt = self.tokenizer.encode(exps[0].prompt_text, add_special_tokens=False)
+        self.assertEqual(len(encoded_prompt), exps[0].prompt_length)
+        self.assertLessEqual(exps[0].prompt_length, self.config.model.max_prompt_tokens)
+        # check response content and length
+        encoded_response = self.tokenizer.encode(exps[0].response_text, add_special_tokens=False)
+        self.assertEqual(len(encoded_response), len(exps[0].tokens) - exps[0].prompt_length)
+        self.assertLessEqual(
             len(exps[0].tokens) - exps[0].prompt_length, self.config.model.max_response_tokens
         )
-        self.assertLessEqual(len(response[0].tokens), self.config.model.max_model_len)
+        # check full sequence
+        self.assertLessEqual(len(exps[0].tokens), self.config.model.max_model_len)
 
         # For openai api, max_prompt_tokens and max_response_tokens do not work
         openai_client = self.model_wrapper.get_openai_client()

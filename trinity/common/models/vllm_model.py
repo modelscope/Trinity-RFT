@@ -197,6 +197,24 @@ class vLLMRolloutModel(InferenceModel):
             max_length=self.config.max_prompt_tokens,
             return_tensors="pt",
         )["input_ids"][0].tolist()
+        truncated_prompt = self.tokenizer.decode(token_ids)
+
+        # Check if prompt truncation occurred
+        truncate_status = None
+        if self.config.enable_prompt_truncation and len(truncated_prompt) < len(prompt):
+            truncate_status = "prompt_truncated"
+            self.logger.warning(f"Prompt was truncated to {len(token_ids)} tokens")
+            dummy_response_tokens = self.tokenizer.encode("\n", add_special_tokens=False)
+            return [
+                Experience(
+                    tokens=token_ids + dummy_response_tokens,
+                    prompt_length=len(token_ids),
+                    prompt_text=truncated_prompt,
+                    response_text="\n",
+                    truncate_status=truncate_status,
+                )
+            ]
+
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids}, lora_request=lora_request, **kwargs
         )
@@ -397,10 +415,10 @@ class vLLMRolloutModel(InferenceModel):
 
         # Truncate tokens if they exceed the length limit
         assert token_ids is not None
-        is_truncated = False  # TODO: add to experience itself
+        truncate_status = None
         if self.config.max_model_len is not None and self.config.max_model_len > 0:
             if len(token_ids) > self.config.max_model_len - 1:
-                is_truncated = True
+                truncate_status = "response_truncated"
                 self.logger.warning(
                     f"Warning: {len(token_ids) = } exceeds the length limit {self.config.max_model_len-1 = }"
                 )
@@ -417,7 +435,7 @@ class vLLMRolloutModel(InferenceModel):
             prompt_length=prompt_length,
             action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
             messages=messages,
-            info={"is_truncated": is_truncated},
+            truncate_status=truncate_status,
         )
 
     async def shutdown(self):

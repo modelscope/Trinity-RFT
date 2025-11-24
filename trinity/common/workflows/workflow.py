@@ -168,7 +168,7 @@ class MultiTurnWorkflow(Workflow):
     def process_messages_to_experience(self, messages, reward, info={}) -> Experience:
         converted_experience = self.model.convert_messages_to_experience(messages)
 
-        if converted_experience.info.get("is_truncated", False):
+        if converted_experience.truncate_status == "response_truncated":
             reward = 0.0
 
         tokens = converted_experience.tokens
