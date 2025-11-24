@@ -36,6 +36,8 @@ trinity run --config examples/grpo_frozen_lake/frozen_lake.yaml
 ```
 
 ## Results
-We show the result with a Qwen2.5-3B-Instruct model in the following. The figures demonstrate the reward increases over training steps.
+We show the result with a Qwen2.5-3B-Instruct model in the following. The figures demonstrate both the reward and the test score increase over training steps.
 
 ![reward](frozen_lake_reward.png)
+
+![test_score](frozen_lake_test_score.png)
