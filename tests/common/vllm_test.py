@@ -234,6 +234,7 @@ class TestModelLen(RayUnittestBaseAysnc):
         self.config.model.max_model_len = self.max_model_len
         self.config.model.max_prompt_tokens = self.max_prompt_tokens
         self.config.model.max_response_tokens = self.max_response_tokens
+        self.config.model.enable_prompt_truncation = True
         self.config.explorer.rollout_model.enable_openai_api = True
         self.config.check_and_update()
 
@@ -246,14 +247,21 @@ class TestModelLen(RayUnittestBaseAysnc):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What's the weather like today?"},
         ]
+
+        # For vllm engine, max_prompt_tokens and max_response_tokens work
         response = self.model_wrapper.chat(messages)
         self.assertEqual(len(response), 1)
-        self.assertEqual(len(response[0].tokens), self.max_model_len)
+        self.assertEqual(len(response[0].tokens), self.config.model.max_model_len)
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
-        self.assertEqual(len(exps[0].tokens), self.max_model_len)
+        # check prompt length, response length, max_model_len
+        self.assertEqual(exps[0].prompt_length, self.config.model.max_prompt_tokens)
+        self.assertEqual(
+            len(exps[0].tokens) - exps[0].prompt_length, self.config.model.max_response_tokens
+        )
+        self.assertLessEqual(len(response[0].tokens), self.config.model.max_model_len)
 
-        # max_prompt_tokens and max_response_tokens do not work with openai api
+        # For openai api, max_prompt_tokens and max_response_tokens do not work
         openai_client = self.model_wrapper.get_openai_client()
         model_id = openai_client.models.list().data[0].id
         with self.assertRaises(BadRequestError):
@@ -267,9 +275,57 @@ class TestModelLen(RayUnittestBaseAysnc):
         exps = self.model_wrapper.extract_experience_from_history()
         self.assertEqual(len(exps), 1)
         # only generate max_response_tokens tokens
-        self.assertEqual(
-            len(exps[0].tokens),
-            response.usage.prompt_tokens + self.config.model.max_response_tokens,
+        self.assertLessEqual(
+            len(exps[0].tokens) - response.usage.prompt_tokens,
+            self.config.model.max_response_tokens,
+        )
+
+
+class TestModelLenWithoutPromptTruncation(RayUnittestBaseAysnc):
+    def setUp(self):
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = 20
+        self.config.model.max_prompt_tokens = 1
+        self.config.model.max_response_tokens = None
+        self.config.model.enable_prompt_truncation = False
+        self.config.explorer.rollout_model.enable_openai_api = True
+        self.config.check_and_update()
+
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+
+    async def test_model_len(self):
+        await self.model_wrapper.prepare()
+        messages = [
+            {"role": "user", "content": "How are you?"},
+        ]
+
+        # For vllm engine, max_prompt_tokens and max_response_tokens work
+        response = self.model_wrapper.chat(messages)
+        self.assertEqual(len(response), 1)
+        self.assertLessEqual(
+            len(response[0].tokens) - response[0].prompt_length,
+            self.config.model.max_response_tokens,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertLessEqual(
+            len(exps[0].tokens) - exps[0].prompt_length,
+            self.config.model.max_response_tokens,
+        )
+
+        # For openai api
+        openai_client = self.model_wrapper.get_openai_client()
+        model_id = openai_client.models.list().data[0].id
+        response = openai_client.chat.completions.create(model=model_id, messages=messages, n=1)
+        self.assertEqual(len(response.choices), 1)
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        self.assertLessEqual(
+            len(exps[0].tokens) - response.usage.prompt_tokens,
+            self.config.model.max_response_tokens,
         )
 
 

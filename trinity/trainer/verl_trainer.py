@@ -451,8 +451,12 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
                     # compute advantages, executed on the driver process
                     batch, _ = self.advantage_fn(batch)
+            else:
+                # skip token_level_scores for sft/dpo
+                if "token_level_scores" in batch.batch.keys():
+                    batch.batch["token_level_scores"] = batch.batch["token_level_scores"]
 
-                # update critic
+            # update critic
             if self.algorithm.use_critic:
                 with marked_timer("update_critic", timing_raw):
                     critic_output = self.critic_wg.update_critic(batch)
