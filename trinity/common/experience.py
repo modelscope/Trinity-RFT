@@ -416,8 +416,12 @@ class Experiences:
 
     eids: List[EID]  # Experience IDs of each experience in the batch
     tokens: Tensor  # [batch_size, seq_length]
+
+    # At least one of `rewards` or `token_level_rewards` must be provided (not None).
+    # If both are provided, `token_level_rewards` will be used and `rewards` will be ignored.
     rewards: Tensor  # [batch_size]
     token_level_rewards: Tensor  # [batch_size, response_length]
+
     advantages: Optional[Tensor]  # [batch_size, response_length]
     returns: Optional[Tensor]  # [batch_size, response_length]
     attention_masks: Tensor  # [batch_size, sequence_length]

@@ -454,7 +454,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             else:
                 # skip token_level_scores for sft/dpo
                 if "token_level_scores" in batch.batch.keys():
-                    batch.batch["token_level_scores"] = batch.batch["token_level_scores"]
+                    batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
 
             # update critic
             if self.algorithm.use_critic:
