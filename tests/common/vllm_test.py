@@ -221,7 +221,11 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         "max_prompt_tokens",
         "max_response_tokens",
     ),
-    [(20, 19, None), (20, None, 1), (20, 5, 15)],
+    [
+        (20, 19, None),
+        (20, None, 1),
+        (20, 5, 15),
+    ],
 )
 class TestModelLen(RayUnittestBaseAysnc):
     def setUp(self):
@@ -248,8 +252,6 @@ class TestModelLen(RayUnittestBaseAysnc):
 
         # For vllm engine, max_prompt_tokens and max_response_tokens work
         response = self.model_wrapper.chat(messages)
-        print("--------------------------------")
-        print(response[0])
         self.assertEqual(len(response), 1)
         # check prompt content and length
         if self.max_prompt_tokens == 5:
