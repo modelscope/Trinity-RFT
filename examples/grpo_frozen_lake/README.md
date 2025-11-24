@@ -5,7 +5,7 @@ This example shows the usage of GRPO on the [Frozen Lake](https://gymnasium.fara
 
 ## Data and Environment Preparation
 
-After setting up the basic environment following the [installation section of Quickstart](../../docs/sphinx_doc/source/tutorial/example_reasoning_basic.md#step-0-environment-preparation), you need to install the additional dependencies by running the following command:
+After setting up the basic environment following the [installation guidance](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html), you need to install the additional dependencies by running the following command:
 
 ```bash
 pip install gymnasium[toy_text]
@@ -18,9 +18,9 @@ cd examples/grpo_frozen_lake
 python get_frozen_lake_data.py
 ```
 
-This command will save the dataset to the local directory `{DATA_ROOT_DIR}/frozenlake`, and print the path of the dataset. Afterwards, make sure to set the environment variable `TRINITY_TASKSET_PATH` to the path of the dataset.
+This command will save the dataset to the local directory `/path/to/frozenlake`, and print the path of the dataset. Afterwards, make sure to set the environment variable `TRINITY_TASKSET_PATH` to the path of the dataset.
 ```bash
-export TRINITY_TASKSET_PATH={DATA_ROOT_DIR}/frozenlake
+export TRINITY_TASKSET_PATH=/path/to/frozenlake
 ```
 
 
