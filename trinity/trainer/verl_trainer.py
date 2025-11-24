@@ -413,7 +413,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
     def train_step(self, batch: Experiences) -> Dict:  # noqa C901
-        batch = to_data_proto(batch)
+        batch = to_data_proto(batch, self.logger)
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1

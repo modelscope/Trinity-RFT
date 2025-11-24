@@ -123,6 +123,48 @@ class TestExperience(unittest.TestCase):
         self.assertEqual(batch.rewards[0], 0.1)
         self.assertEqual(batch.rewards[1], 0.2)
 
+    def test_gather_with_token_level_reward(self):
+        # test empty gathering
+        batch = Experiences.gather_experiences([])
+        self.assertEqual(batch.tokens.numel(), 0)
+        self.assertEqual(batch.rewards.numel(), 0)
+        self.assertEqual(batch.token_level_rewards.numel(), 0)
+        self.assertEqual(batch.eids, [])
+
+        # test single experience gathering
+        exp = Experience(
+            tokens=torch.tensor([1, 2, 3]),
+            token_level_reward=torch.tensor([0, 1.0]),
+            prompt_length=1,
+        )
+        batch = Experiences.gather_experiences([exp])
+        self.assertEqual(batch.batch_size, 1)
+        self.assertTrue(
+            torch.equal(batch.tokens[0], torch.tensor([0, 1, 2, 3], dtype=torch.int64)[-3:])
+        )
+        self.assertEqual(batch.prompt_length, 1)
+        self.assertIsNone(batch.rewards)
+        self.assertTrue(torch.equal(batch.token_level_rewards[0], torch.tensor([0, 1.0])))
+
+        # test multiple experiences gathering
+        exps = [
+            Experience(
+                tokens=torch.tensor([1, 2]), token_level_reward=torch.tensor([0.1]), prompt_length=1
+            ),
+            Experience(
+                tokens=torch.tensor([3, 4, 5]),
+                token_level_reward=torch.tensor([0.2]),
+                prompt_length=2,
+            ),
+        ]
+        batch = Experiences.gather_experiences(exps)
+        self.assertEqual(batch.batch_size, 2)
+        self.assertEqual(batch.prompt_length, 2)
+        self.assertEqual(batch.tokens.shape[1], 3)
+        self.assertIsNone(batch.rewards)
+        self.assertTrue(torch.equal(batch.token_level_rewards[0], torch.tensor([0.1])))
+        self.assertTrue(torch.equal(batch.token_level_rewards[1], torch.tensor([0.2])))
+
     def test_action_mask_and_logprobs_type(self):
         exp = Experience(tokens=[1, 2, 3], logprobs=[0.1, 0.2, 0.3], prompt_length=1)
         self.assertIsInstance(exp.tokens, torch.Tensor)
