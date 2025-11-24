@@ -1371,7 +1371,7 @@ document.write(`
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.train_step">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>  <span class="c1"># noqa C901</span>
-        <span class="n">batch</span> <span class="o">=</span> <span class="n">to_data_proto</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">to_data_proto</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1412,7 +1412,8 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># skip token_level_scores for sft/dpo</span>
                 <span class="k">if</span> <span class="s2">&quot;token_level_scores&quot;</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_scores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_scores&quot;</span><span class="p">]</span>
+                    <span class="k">assert</span> <span class="s2">&quot;token_level_rewards&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                    <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_rewards&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_scores&quot;</span><span class="p">]</span>
 
             <span class="c1"># update critic</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>

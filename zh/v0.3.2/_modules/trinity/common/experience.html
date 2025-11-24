@@ -1025,6 +1025,7 @@ document.write(`
     <span class="n">prompt_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Length of the prompt in tokens, used for generating attention masks</span>
     <span class="n">logprobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
     <span class="n">reward</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">token_level_reward</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
     <span class="n">advantages</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
     <span class="n">returns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
     <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
@@ -1062,6 +1063,7 @@ document.write(`
         <span class="n">tokens</span><span class="p">,</span>
         <span class="n">logprobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">reward</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">token_level_reward</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">advantages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">returns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1108,6 +1110,9 @@ document.write(`
             <span class="n">logprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span> <span class="o">=</span> <span class="n">logprobs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token_level_reward</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">token_level_reward</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">token_level_reward</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_level_reward</span> <span class="o">=</span> <span class="n">token_level_reward</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">advantages</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">advantages</span>
@@ -1224,6 +1229,14 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">rewards</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># Gather token level rewards</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">token_level_reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
+            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span>
+                <span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;token_level_reward&quot;</span><span class="p">,</span> <span class="n">max_response_length</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="c1"># gather action_masks</span>
         <span class="n">action_masks</span> <span class="o">=</span> <span class="n">gather_action_masks</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
 
@@ -1233,21 +1246,20 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># gather logprobs</span>
-
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
-            <span class="n">logprobs</span> <span class="o">=</span> <span class="n">gather_logprobs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
+            <span class="n">logprobs</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logprobs</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># gather advantages</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">advantages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
-            <span class="n">advantages</span> <span class="o">=</span> <span class="n">gather_advantages</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
+            <span class="n">advantages</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;advantages&quot;</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">advantages</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># gather returns</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
-            <span class="n">returns</span> <span class="o">=</span> <span class="n">gather_returns</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
+            <span class="n">returns</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;returns&quot;</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">returns</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1261,6 +1273,7 @@ document.write(`
             <span class="n">eids</span><span class="o">=</span><span class="n">eids</span><span class="p">,</span>
             <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
             <span class="n">rewards</span><span class="o">=</span><span class="n">rewards</span><span class="p">,</span>
+            <span class="n">token_level_rewards</span><span class="o">=</span><span class="n">token_level_rewards</span><span class="p">,</span>
             <span class="n">advantages</span><span class="o">=</span><span class="n">advantages</span><span class="p">,</span>
             <span class="n">returns</span><span class="o">=</span><span class="n">returns</span><span class="p">,</span>
             <span class="n">attention_masks</span><span class="o">=</span><span class="n">attention_masks</span><span class="p">,</span>
@@ -1348,7 +1361,12 @@ document.write(`
 
     <span class="n">eids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EID</span><span class="p">]</span>  <span class="c1"># Experience IDs of each experience in the batch</span>
     <span class="n">tokens</span><span class="p">:</span> <span class="n">Tensor</span>  <span class="c1"># [batch_size, seq_length]</span>
+
+    <span class="c1"># At least one of `rewards` or `token_level_rewards` must be provided (not None).</span>
+    <span class="c1"># If both are provided, `token_level_rewards` will be used and `rewards` will be ignored.</span>
     <span class="n">rewards</span><span class="p">:</span> <span class="n">Tensor</span>  <span class="c1"># [batch_size]</span>
+    <span class="n">token_level_rewards</span><span class="p">:</span> <span class="n">Tensor</span>  <span class="c1"># [batch_size, response_length]</span>
+
     <span class="n">advantages</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span>  <span class="c1"># [batch_size, response_length]</span>
     <span class="n">returns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span>  <span class="c1"># [batch_size, response_length]</span>
     <span class="n">attention_masks</span><span class="p">:</span> <span class="n">Tensor</span>  <span class="c1"># [batch_size, sequence_length]</span>
@@ -1398,6 +1416,7 @@ document.write(`
     <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="p">(</span>
         <span class="n">tokens</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
         <span class="n">rewards</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+        <span class="n">token_level_rewards</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="n">advantages</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="n">returns</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
         <span class="n">attention_masks</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
@@ -1483,67 +1502,22 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="gather_logprobs">
-<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.gather_logprobs">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">gather_logprobs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-    <span class="n">logprob_dtype</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprobs</span><span class="o">.</span><span class="n">dtype</span>  <span class="c1"># type: ignore [union-attr]</span>
+<div class="viewcode-block" id="gather_response_attrs">
+<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.gather_response_attrs">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gather_response_attrs</span><span class="p">(</span>
+    <span class="n">experiences</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">pad_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attr_name</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">pad_value</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pad_value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">),</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span><span class="p">),),</span>
-                        <span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="n">logprob_dtype</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span>
-        <span class="p">]</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="gather_advantages">
-<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.gather_advantages">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">gather_advantages</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">advantages</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">advantages_dtype</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">advantages</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span><span class="p">,</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">advantages</span><span class="p">),),</span>
-                        <span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="n">advantages_dtype</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span>
-        <span class="p">]</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="gather_returns">
-<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.gather_returns">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">gather_returns</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]]]:</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">returns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">returns_dtype</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">returns</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">exp</span><span class="o">.</span><span class="n">returns</span><span class="p">,</span>
-                    <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">returns</span><span class="p">),),</span>
-                        <span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="n">returns_dtype</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)),),</span>
+                        <span class="n">pad_value</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">]</span>
             <span class="p">)</span>

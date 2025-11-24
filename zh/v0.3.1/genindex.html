@@ -2786,19 +2786,15 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_action_masks">gather_action_masks()（在 trinity.common.experience 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_advantages">gather_advantages()（在 trinity.common.experience 模块中）</a>
-</li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_attention_masks">gather_attention_masks()（在 trinity.common.experience 模块中）</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experiences.gather_experiences">gather_experiences()（trinity.common.experience.Experiences 类方法）</a>
-</li>
-      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_logprobs">gather_logprobs()（在 trinity.common.experience 模块中）</a>
 </li>
       <li><a href="build_api/trinity.utils.monitor.html#trinity.utils.monitor.gather_metrics">gather_metrics()（在 trinity.utils.monitor 模块中）</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_multi_modal_inputs">gather_multi_modal_inputs()（在 trinity.common.experience 模块中）</a>
 </li>
-      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_returns">gather_returns()（在 trinity.common.experience 模块中）</a>
+      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_response_attrs">gather_response_attrs()（在 trinity.common.experience 模块中）</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.gather_token_ids">gather_token_ids()（在 trinity.common.experience 模块中）</a>
 </li>
@@ -2914,10 +2910,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_path">get_model_path() （trinity.common.models.model.InferenceModel 方法）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path">get_model_path() （trinity.common.models.vllm_model.vLLMRolloutModel 方法）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">get_model_response() （trinity.common.workflows.AlfworldWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response">get_model_response() （trinity.common.workflows.SciWorldWorkflow 方法）</a>
@@ -5853,6 +5849,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task.to_workflow">to_workflow() （trinity.common.workflows.workflow.Task 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experiences.token_level_rewards">token_level_rewards（trinity.common.experience.Experiences 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.token_level_reward">token_level_reward（trinity.common.experience.Experience 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.models.utils.html#trinity.common.models.utils.tokenize_and_mask_messages_default">tokenize_and_mask_messages_default()（在 trinity.common.models.utils 模块中）</a>
 </li>
       <li><a href="build_api/trinity.common.models.utils.html#trinity.common.models.utils.tokenize_and_mask_messages_hf">tokenize_and_mask_messages_hf()（在 trinity.common.models.utils 模块中）</a>
@@ -6307,6 +6307,8 @@ document.write(`
         <li><a href="build_api/trinity.buffer.operators.filters.html#module-trinity.buffer.operators.filters">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.operators.filters.reward_filter
 
@@ -6314,8 +6316,6 @@ document.write(`
         <li><a href="build_api/trinity.buffer.operators.filters.reward_filter.html#module-trinity.buffer.operators.filters.reward_filter">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.operators.mappers
 
