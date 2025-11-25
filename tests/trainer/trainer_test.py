@@ -878,8 +878,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
 
     def tearDown(self):
-        # shutil.rmtree(self.config.checkpoint_job_dir)
-        pass
+        shutil.rmtree(self.config.checkpoint_job_dir)
 
 
 class TestMultiModalGRPO(BaseTrainerCase):
