@@ -133,9 +133,9 @@ class TestExperience(unittest.TestCase):
         # prompt_length must be > 0
         with self.assertRaises(AssertionError):
             Experience(tokens=[1, 2, 3], prompt_length=0)
-        # tokens must be longer than prompt_length for single-turn
+        # tokens must be no less than prompt_length for single-turn
         with self.assertRaises(AssertionError):
-            Experience(tokens=[1, 2], prompt_length=2)
+            Experience(tokens=[1, 2], prompt_length=3)
         # DPO: tokens must match prompt_length
         exp = Experience(tokens=[1, 2], chosen=[3], rejected=[4], prompt_length=1)
         exp.prompt_length = 2  # should automatically adjust

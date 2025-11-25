@@ -215,6 +215,7 @@ class vLLMRolloutModel(InferenceModel):
                         prompt_text=self.tokenizer.decode(token_ids),
                         response_text="",
                         truncate_status="prompt_truncated",
+                        reward=0.0,
                     )
                 ]
 
