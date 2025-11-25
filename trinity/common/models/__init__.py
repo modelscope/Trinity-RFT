@@ -84,6 +84,9 @@ def create_inference_models(
     allocator = _BundleAllocator(node_bundle_map)
     namespace = ray.get_runtime_context().namespace
     # create rollout models
+    # in 'serve' mode, we always enable openai api for rollout model
+    if config.mode == "serve":
+        config.explorer.rollout_model.enable_openai_api = True
     for i in range(config.explorer.rollout_model.engine_num):
         bundles_for_engine = allocator.allocate(config.explorer.rollout_model.tensor_parallel_size)
         config.explorer.rollout_model.bundle_indices = ",".join(
