@@ -464,7 +464,7 @@ class ActorRolloutRefWorker(Worker):
                 num_warmup_steps = int(num_warmup_steps_ratio * total_steps)
 
             if self.rank == 0:
-                print(f"Total steps: {total_steps}, num_warmup_steps: {num_warmup_steps}")
+                print(f"num_warmup_steps: {num_warmup_steps}")
 
             if warmup_style == "constant":
                 actor_lr_scheduler = get_constant_schedule_with_warmup(
@@ -1180,7 +1180,7 @@ class CriticWorker(Worker):
             num_warmup_steps = int(num_warmup_steps_ratio * total_steps)
 
         if self.rank == 0:
-            print(f"Total steps: {total_steps}, num_warmup_steps: {num_warmup_steps}")
+            print(f"num_warmup_steps: {num_warmup_steps}")
 
         from verl.utils.torch_functional import (
             get_constant_schedule_with_warmup,

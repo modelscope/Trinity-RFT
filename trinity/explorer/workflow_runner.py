@@ -74,6 +74,12 @@ class WorkflowRunner:
         self.auxiliary_model_async_clients = []
         self.workflow_instance: Workflow = None
         self.runner_id = runner_id
+        self.runner_state = {
+            "workflow_id": None,
+            "model_version": None,
+            "begin_time": 0,
+            "terminate_time": 0,
+        }
 
     async def prepare(self) -> None:
         """Prepare the runner."""
@@ -121,23 +127,35 @@ class WorkflowRunner:
     ) -> Tuple[List[Experience], List[Dict]]:
         """Init workflow from the task and run it."""
         self._create_workflow_instance(task)
+
         if self.workflow_instance.repeatable:
             self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
             st = time.time()
+            await self.model_wrapper.clean_workflow_state()
+            self.runner_state["workflow_id"] = f"{task.batch_id}/{task.task_id}/{run_id_base}"
+            self.runner_state["terminate_time"] = None
+            self.runner_state["begin_time"] = st
             exps = await self._run_workflow(self.workflow_instance)
-            task_execution_time = time.time() - st
+            et = time.time()
+            self.runner_state["terminate_time"] = et
             # repeatable workflow cannot calculate run level metrics, we use experience level metrics directly
             run_metrics = [exp.metrics for exp in exps if exp.metrics]
             for metric in run_metrics:
-                metric["time/task_execution"] = task_execution_time
+                metric["time/task_execution"] = et - st
         else:
             exps = []
             run_metrics = []
             for i in range(repeat_times):
                 st = time.time()
+                await self.model_wrapper.clean_workflow_state()
+                self.runner_state["workflow_id"] = f"{task.batch_id}/{task.task_id}/{i}"
+                self.runner_state["terminate_time"] = None
+                self.runner_state["begin_time"] = st
                 new_exps = await self._run_workflow(self.workflow_instance)
+                et = time.time()
+                self.runner_state["terminate_time"] = et
                 run_metric = calculate_run_level_metrics(new_exps)
-                run_metric["time/task_execution"] = time.time() - st
+                run_metric["time/task_execution"] = et - st
                 run_metrics.append(run_metric)
                 for exp in new_exps:
                     exp.eid.run = run_id_base + i
@@ -145,6 +163,12 @@ class WorkflowRunner:
                 if i < repeat_times - 1:
                     self._create_workflow_instance(task)
         return exps, run_metrics
+
+    async def get_runner_state(self) -> Dict:
+        """Get the runner state."""
+        runner_state = self.runner_state.copy()
+        runner_state.update(await self.model_wrapper.get_workflow_state())
+        return runner_state
 
     async def run_task(
         self,
@@ -156,9 +180,10 @@ class WorkflowRunner:
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
             st = time.time()
+            model_version = await self.model_wrapper.model_version_async
+            self.runner_state["model_version"] = model_version
             exps, metrics = await self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
-            model_version = await self.model_wrapper.model_version_async
             # set eid for each experience
             for exp in exps:
                 exp.eid.batch = task.batch_id

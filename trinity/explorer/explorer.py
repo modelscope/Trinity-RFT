@@ -380,6 +380,7 @@ class Explorer:
         metric.update(pipeline_metrics)
         if statuses:
             metric.update(gather_metrics([status.metrics[0] for status in statuses], "rollout"))
+            metric["rollout/finished_task_count"] = len(statuses)
             self.monitor.log(metric, step=step)
 
     async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
@@ -392,10 +393,11 @@ class Explorer:
             if eval_step != step:
                 return
             self.pending_eval_tasks.popleft()
-            eval_results, _ = await self.scheduler.get_results(batch_id=f"{step}/{eval_task_name}")
+            statuses, _ = await self.scheduler.get_results(batch_id=f"{step}/{eval_task_name}")
+            metric[f"{prefix}/{eval_task_name}/finished_task_count"] = len(statuses)
             metric.update(
                 gather_metrics(
-                    [status.metrics[0] for status in eval_results], f"{prefix}/{eval_task_name}"
+                    [status.metrics[0] for status in statuses], f"{prefix}/{eval_task_name}"
                 )
             )
         if self.eval_start_time is not None:

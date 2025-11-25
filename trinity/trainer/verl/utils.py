@@ -1,6 +1,7 @@
 """Utils for ccompatibility issues with verl."""
 
 import os
+from logging import Logger
 
 import numpy as np
 import torch
@@ -12,7 +13,7 @@ from trinity.common.config import Config
 from trinity.common.experience import Experiences
 
 
-def to_data_proto(experiences: Experiences) -> DataProto:  # noqa: C901
+def to_data_proto(experiences: Experiences, logger: Logger) -> DataProto:  # noqa: C901
     """Convert Experiences to verl DataProto."""
     attention_mask = experiences.attention_masks
     cumsum = torch.cumsum(attention_mask, dim=-1)
@@ -31,13 +32,22 @@ def to_data_proto(experiences: Experiences) -> DataProto:  # noqa: C901
         ),
     }
 
-    if experiences.rewards is not None:
-        token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
-        eos_mask_idx = cumsum.argmax(dim=-1)
-        token_level_rewards[
-            torch.arange(experiences.batch_size), eos_mask_idx
-        ] = experiences.rewards
-        token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
+    if experiences.rewards is not None or experiences.token_level_rewards is not None:
+        assert experiences.logprobs is not None
+        if experiences.token_level_rewards is not None:
+            if experiences.rewards is not None:
+                logger.warning(
+                    "Both experiences.rewards and experiences.token_level_rewards are provided. "
+                    "Using experiences.token_level_rewards."
+                )
+            token_level_rewards = experiences.token_level_rewards
+        else:
+            token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
+            eos_mask_idx = cumsum.argmax(dim=-1)
+            token_level_rewards[
+                torch.arange(experiences.batch_size), eos_mask_idx
+            ] = experiences.rewards
+            token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
         batch_dict.update(
             {
                 "token_level_scores": token_level_rewards,

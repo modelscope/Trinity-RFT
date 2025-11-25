@@ -4,7 +4,7 @@ import asyncio
 import socket
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import httpx
 import numpy as np
@@ -103,7 +103,9 @@ class ModelWrapper:
         self.enable_history = enable_history
         self.history = []
         self.status = RunningStatus.RUNNING
+        self.workflow_state: Dict = {}
         self.request_count = 0
+        self.state_lock = asyncio.Lock()
 
     async def prepare(self) -> None:
         """Prepare the model wrapper."""
@@ -363,6 +365,22 @@ class ModelWrapper:
         if clear_history:
             self.history.clear()
         return exps
+
+    # Workflow state management methods
+    async def set_workflow_state(self, state: Dict) -> None:
+        """Set the state of workflow using the model."""
+        async with self.state_lock:
+            self.workflow_state.update(state)
+
+    async def clean_workflow_state(self) -> None:
+        """Clean the state of workflow using the model."""
+        async with self.state_lock:
+            self.workflow_state = {}
+
+    async def get_workflow_state(self) -> Dict:
+        """Get the state of workflow using the model."""
+        async with self.state_lock:
+            return self.workflow_state.copy()
 
 
 def convert_api_output_to_experience(

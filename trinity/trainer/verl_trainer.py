@@ -413,7 +413,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
     def train_step(self, batch: Experiences) -> Dict:  # noqa C901
-        batch = to_data_proto(batch)
+        batch = to_data_proto(batch, self.logger)
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1
@@ -454,7 +454,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             else:
                 # skip token_level_scores for sft/dpo
                 if "token_level_scores" in batch.batch.keys():
-                    batch.batch["token_level_scores"] = batch.batch["token_level_scores"]
+                    assert "token_level_rewards" not in batch.batch.keys()
+                    batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
 
             # update critic
             if self.algorithm.use_critic:

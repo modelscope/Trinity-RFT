@@ -101,6 +101,7 @@ class Experience:
     prompt_length: int = 1  # Length of the prompt in tokens, used for generating attention masks
     logprobs: Optional[Tensor] = None  # [resp_length]
     reward: Optional[float] = None
+    token_level_reward: Optional[Tensor] = None  # [resp_length]
     advantages: Optional[Tensor] = None  # [resp_length]
     returns: Optional[Tensor] = None  # [resp_length]
     truncate_status: Optional[
@@ -139,6 +140,7 @@ class Experience:
         tokens,
         logprobs=None,
         reward=None,
+        token_level_reward=None,
         advantages=None,
         returns=None,
         truncate_status=None,
@@ -186,6 +188,9 @@ class Experience:
             logprobs = torch.tensor(logprobs, dtype=torch.float32)
         self.logprobs = logprobs
         self.reward = reward
+        if isinstance(token_level_reward, list):
+            token_level_reward = torch.tensor(token_level_reward, dtype=torch.float32)
+        self.token_level_reward = token_level_reward
         if isinstance(advantages, list):
             advantages = torch.tensor(advantages, dtype=torch.float32)
         self.advantages = advantages
@@ -293,6 +298,14 @@ class Experience:
         else:
             rewards = None
 
+        # Gather token level rewards
+        if all(exp.token_level_reward is not None for exp in experiences):
+            token_level_rewards = gather_response_attrs(
+                experiences, "token_level_reward", max_response_length
+            )
+        else:
+            token_level_rewards = None
+
         # gather action_masks
         action_masks = gather_action_masks(experiences, max_response_length)
 
@@ -302,21 +315,20 @@ class Experience:
         )
 
         # gather logprobs
-
         if all(exp.logprobs is not None for exp in experiences):
-            logprobs = gather_logprobs(experiences, max_response_length)
+            logprobs = gather_response_attrs(experiences, "logprobs", max_response_length)
         else:
             logprobs = None
 
         # gather advantages
         if all(exp.advantages is not None for exp in experiences):
-            advantages = gather_advantages(experiences, max_response_length)
+            advantages = gather_response_attrs(experiences, "advantages", max_response_length)
         else:
             advantages = None
 
         # gather returns
         if all(exp.returns is not None for exp in experiences):
-            returns = gather_returns(experiences, max_response_length)
+            returns = gather_response_attrs(experiences, "returns", max_response_length)
         else:
             returns = None
 
@@ -330,6 +342,7 @@ class Experience:
             eids=eids,
             tokens=tokens,
             rewards=rewards,
+            token_level_rewards=token_level_rewards,
             advantages=advantages,
             returns=returns,
             attention_masks=attention_masks,
@@ -410,7 +423,12 @@ class Experiences:
 
     eids: List[EID]  # Experience IDs of each experience in the batch
     tokens: Tensor  # [batch_size, seq_length]
+
+    # At least one of `rewards` or `token_level_rewards` must be provided (not None).
+    # If both are provided, `token_level_rewards` will be used and `rewards` will be ignored.
     rewards: Tensor  # [batch_size]
+    token_level_rewards: Tensor  # [batch_size, response_length]
+
     advantages: Optional[Tensor]  # [batch_size, response_length]
     returns: Optional[Tensor]  # [batch_size, response_length]
     attention_masks: Tensor  # [batch_size, sequence_length]
@@ -454,6 +472,7 @@ def empty_experiences(custom_fields: Optional[List[CustomField]]) -> Experiences
     exps = Experiences(
         tokens=torch.empty(0, dtype=torch.int32),
         rewards=torch.empty(0, dtype=torch.float32),
+        token_level_rewards=torch.empty(0, dtype=torch.float32),
         advantages=torch.empty(0, dtype=torch.float32),
         returns=torch.empty(0, dtype=torch.float32),
         attention_masks=torch.empty(0, dtype=torch.bool),
@@ -529,59 +548,20 @@ def gather_attention_masks(experiences, max_prompt_length: int, max_response_len
     return attention_masks
 
 
-def gather_logprobs(experiences, max_response_length: int) -> Tensor:
-    logprob_dtype = experiences[0].logprobs.dtype  # type: ignore [union-attr]
+def gather_response_attrs(
+    experiences, attr_name: str, max_response_length: int, pad_value: int = 0
+) -> Tensor:
+    dtype = getattr(experiences[0], attr_name).dtype
+    pad_value = torch.tensor(pad_value, dtype=dtype)
     return torch.stack(
         [
             torch.cat(
                 [
-                    exp.logprobs,
+                    getattr(exp, attr_name),
                     torch.full(
-                        (max_response_length - len(exp.logprobs),),
-                        0.0,
-                        dtype=logprob_dtype,
-                    ),
-                ]
-            )
-            for exp in experiences
-        ]
-    )
-
-
-def gather_advantages(experiences, max_response_length: int) -> Optional[Tensor]:
-    if experiences[0].advantages is None:
-        return None
-    advantages_dtype = experiences[0].advantages.dtype
-    return torch.stack(
-        [
-            torch.cat(
-                [
-                    exp.advantages,
-                    torch.full(
-                        (max_response_length - len(exp.advantages),),
-                        0.0,
-                        dtype=advantages_dtype,
-                    ),
-                ]
-            )
-            for exp in experiences
-        ]
-    )
-
-
-def gather_returns(experiences, max_response_length: int) -> Optional[dict[str, List[Tensor]]]:
-    if experiences[0].returns is None:
-        return None
-    returns_dtype = experiences[0].returns.dtype
-    return torch.stack(
-        [
-            torch.cat(
-                [
-                    exp.returns,
-                    torch.full(
-                        (max_response_length - len(exp.returns),),
-                        0.0,
-                        dtype=returns_dtype,
+                        (max_response_length - len(getattr(exp, attr_name)),),
+                        pad_value,
+                        dtype=dtype,
                     ),
                 ]
             )
