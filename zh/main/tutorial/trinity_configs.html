@@ -711,7 +711,7 @@ document.write(`
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_root_dir</span></code>: 所有检查点和日志的根目录。该实验的检查点将存储在 <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/</span></code> 路径下。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">continue_from_checkpoint</span></code>: 若设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code>，实验将从检查点路径中的最新检查点继续；否则，会将当前实验重命名为 <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_&lt;timestamp&gt;</span></code> 并启动新实验。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">continue_from_checkpoint</span></code>: 若设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code>，实验将从检查点路径中的最新检查点继续；否则，会将当前实验重命名为 <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_&lt;timestamp&gt;</span></code> 并启动新实验。由于我们的分离式设计，从检查点恢复的时候，我们只能保证Trainer的模型参数以及其使用的可选缓冲区（<code class="docutils literal notranslate"><span class="pre">auxiliary_buffers</span></code>）可以恢复到最新检查点的状态，而Explorer和Experience Buffer不能保证恢复到同一时点。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ray_namespace</span></code>: 当前实验中启动模块的命名空间。若未指定，则默认为 <code class="docutils literal notranslate"><span class="pre">&lt;project&gt;/&lt;name&gt;</span></code>。</p></li>
 </ul>
 </section>

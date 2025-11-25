@@ -596,12 +596,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.load_state_dict()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.default_args()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.load_state_dict()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.WarmupSampleStrategy"><code class="docutils literal notranslate"><span class="pre">WarmupSampleStrategy</span></code></a><ul class="nav section-nav flex-column">
@@ -660,6 +664,18 @@ document.write(`
 <dd><p>Get the default arguments of the sample strategy.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.state_dict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Get the state dict of the sample strategy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.load_state_dict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.load_state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Load the state dict of the sample strategy.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -694,6 +710,18 @@ document.write(`
 <dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.default_args">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#DefaultSampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.default_args" title="Link to this definition">#</a></dt>
 <dd><p>Get the default arguments of the sample strategy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.state_dict">
+<span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#DefaultSampleStrategy.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Get the state dict of the sample strategy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.load_state_dict">
+<span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#DefaultSampleStrategy.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.load_state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Load the state dict of the sample strategy.</p>
 </dd></dl>
 
 </dd></dl>
@@ -764,12 +792,16 @@ Please use DefaultSampleStrategy instead.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.load_state_dict()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.default_args()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.load_state_dict()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.sample_strategy.sample_strategy.WarmupSampleStrategy"><code class="docutils literal notranslate"><span class="pre">WarmupSampleStrategy</span></code></a><ul class="nav section-nav flex-column">

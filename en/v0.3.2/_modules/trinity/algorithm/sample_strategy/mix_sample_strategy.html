@@ -1033,6 +1033,24 @@ document.write(`
             <span class="s2">&quot;expert_data_ratio&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
             <span class="s2">&quot;sft_dataset_name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_dataset&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="MixSampleStrategy.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.state_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;usal_buffer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+            <span class="s2">&quot;expert_buffer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="MixSampleStrategy.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.load_state_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;usal_buffer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;usal_buffer&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expert_buffer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;expert_buffer&quot;</span><span class="p">])</span></div>
 </div>
 
 </pre></div>

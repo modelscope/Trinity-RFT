@@ -968,6 +968,20 @@ document.write(`
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the default arguments of the sample strategy.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="SampleStrategy.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.SampleStrategy.state_dict">[文档]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the state dict of the sample strategy.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="SampleStrategy.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.SampleStrategy.load_state_dict">[文档]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the state dict of the sample strategy.&quot;&quot;&quot;</span></div>
 </div>
 
 
@@ -1001,6 +1015,19 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="DefaultSampleStrategy.state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.DefaultSampleStrategy.state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DefaultSampleStrategy.load_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.DefaultSampleStrategy.load_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span></div>
 </div>
 
 
