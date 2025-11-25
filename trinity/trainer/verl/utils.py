@@ -154,7 +154,10 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
     if "advantages" in batch.batch:
         # adv
         advantages = batch.batch["advantages"]
-        valid_adv = torch.masked_select(advantages, response_mask)
+        if response_mask.numel() > 0:
+            valid_adv = torch.masked_select(advantages, response_mask)
+        else:
+            valid_adv = torch.zeros(1)
         metrics.update(
             {
                 # adv
@@ -166,7 +169,10 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
     if "returns" in batch.batch:
         # returns
         returns = batch.batch["returns"]
-        valid_returns = torch.masked_select(returns, response_mask)
+        if response_mask.numel() > 0:
+            valid_returns = torch.masked_select(returns, response_mask)
+        else:
+            valid_returns = torch.zeros(1)
         metrics.update(
             {
                 "critic/returns/mean": torch.mean(valid_returns).detach().item(),

@@ -207,16 +207,18 @@ class vLLMRolloutModel(InferenceModel):
                 self.logger.warning(
                     f"Prompt was truncated to {self.config.max_prompt_tokens} tokens"
                 )
-                token_ids = token_ids[: self.config.max_prompt_tokens]
+                token_ids = token_ids[: self.config.max_prompt_tokens + 1]  # leave one for response
                 return [
                     Experience(
                         tokens=token_ids,
-                        prompt_length=len(token_ids),
-                        prompt_text=self.tokenizer.decode(token_ids),
-                        response_text="",
+                        logprobs=torch.zeros(1, dtype=torch.float32),
+                        prompt_length=len(token_ids) - 1,
+                        prompt_text=self.tokenizer.decode(token_ids[:-1]),
+                        response_text=self.tokenizer.decode(token_ids[-1]),
                         truncate_status="prompt_truncated",
                         reward=0.0,
                     )
+                    for i in range(kwargs.get("n", 1))
                 ]
 
         output = await self._generate_internal(

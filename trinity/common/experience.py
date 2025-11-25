@@ -169,10 +169,13 @@ class Experience:
             assert (
                 prompt_length > 0
             ), "Prompt length must be greater than 0 for single-turn experiences."
-            assert (
-                len(tokens) >= prompt_length
-            ), f"Token ids must be not less than the prompt length. Got len(tokens)={len(tokens)}, prompt_length={prompt_length}."
-            action_mask = torch.ones(len(tokens) - prompt_length, dtype=torch.bool)
+            if truncate_status != "prompt_truncated":
+                assert (
+                    len(tokens) > prompt_length
+                ), f"Token ids must be larger than the prompt length. Got len(tokens)={len(tokens)}, prompt_length={prompt_length}."
+                action_mask = torch.ones(len(tokens) - prompt_length, dtype=torch.bool)
+            else:
+                action_mask = torch.zeros(len(logprobs), dtype=torch.bool)
         elif experience_type == "dpo":
             prompt_length = len(tokens)
         if eid is None:
