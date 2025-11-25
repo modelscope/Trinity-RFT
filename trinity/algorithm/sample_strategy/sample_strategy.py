@@ -43,6 +43,14 @@ class SampleStrategy(ABC):
     def default_args(cls) -> dict:
         """Get the default arguments of the sample strategy."""
 
+    @abstractmethod
+    def state_dict(self) -> dict:
+        """Get the state dict of the sample strategy."""
+
+    @abstractmethod
+    def load_state_dict(self, state_dict: dict) -> None:
+        """Load the state dict of the sample strategy."""
+
 
 @SAMPLE_STRATEGY.register_module("default")
 class DefaultSampleStrategy(SampleStrategy):
@@ -63,6 +71,13 @@ class DefaultSampleStrategy(SampleStrategy):
     @classmethod
     def default_args(cls) -> dict:
         return {}
+
+    def state_dict(self) -> dict:
+        return self.exp_buffer.state_dict()
+
+    def load_state_dict(self, state_dict: dict) -> None:
+        if state_dict:
+            self.exp_buffer.load_state_dict(state_dict)
 
 
 @Deprecated

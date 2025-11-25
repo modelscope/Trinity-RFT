@@ -1,5 +1,6 @@
 """Tests for trainer."""
 
+import json
 import multiprocessing
 import os
 import shutil
@@ -809,7 +810,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.config.algorithm.policy_loss_fn = "mix"
         self.config.buffer.batch_size = 4
         self.config.buffer.train_batch_size = 32
-        self.config.buffer.total_epochs = 1
+        self.config.buffer.total_steps = 2
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.synchronizer.sync_interval = 1
         self.config.trainer.save_interval = 1
@@ -823,6 +824,31 @@ class TestTrainerMIX(BaseTrainerCase):
         self.config.buffer.trainer_input.experience_buffer.max_read_timeout = 20
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         both(self.config)
+        ray.shutdown(_exiting_interpreter=True)
+
+        # check trainer resume metadata
+        trainer_meta_file = os.path.join(self.config.checkpoint_job_dir, "trainer_meta.json")
+        with open(trainer_meta_file) as f:
+            trainer_meta = json.load(f)
+        self.assertEqual(trainer_meta["latest_iteration"], 2)
+        self.assertEqual(
+            trainer_meta["sample_strategy_state"]["expert_buffer"]["current_index"], 32
+        )
+
+        self.config.buffer.total_steps = None
+        self.config.buffer.total_epochs = 1
+        self.config.check_and_update()
+        ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
+        both(self.config)
+
+        # check trainer resume metadata
+        with open(trainer_meta_file) as f:
+            trainer_meta = json.load(f)
+        self.assertEqual(trainer_meta["latest_iteration"], 4)
+        self.assertEqual(
+            trainer_meta["sample_strategy_state"]["expert_buffer"]["current_index"], 64
+        )
+
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
 
         # test rollout metrics
@@ -852,7 +878,8 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
 
     def tearDown(self):
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        # shutil.rmtree(self.config.checkpoint_job_dir)
+        pass
 
 
 class TestMultiModalGRPO(BaseTrainerCase):

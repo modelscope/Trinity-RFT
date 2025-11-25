@@ -14,6 +14,7 @@ import pandas as pd
 import ray
 
 from trinity.algorithm import SAMPLE_STRATEGY
+from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod, SyncStyle
 from trinity.common.experience import Experiences
@@ -38,9 +39,6 @@ class Trainer:
             path=config.checkpoint_job_dir, trainer_name=config.trainer.name, config=config
         )
         trainer_state = self.state.load_trainer()
-        config.buffer.trainer_input.experience_buffer.index = trainer_state.get(
-            "latest_exp_index", 0
-        )
         self.last_trainer_sync_step = 0
         self.monitor = MONITOR.get(config.monitor.monitor_type)(
             project=config.project,
@@ -50,10 +48,17 @@ class Trainer:
             config=config,
         )
         self._sample_exps_to_log = []
-        self.sample_strategy = SAMPLE_STRATEGY.get(config.algorithm.sample_strategy)(
+        self.sample_strategy: SampleStrategy = SAMPLE_STRATEGY.get(
+            config.algorithm.sample_strategy
+        )(
             buffer_config=config.buffer,
             **config.algorithm.sample_strategy_args,
         )
+        if "latest_exp_index" in trainer_state:
+            sample_strategy_state = {"current_index": trainer_state["latest_exp_index"]}
+        else:
+            sample_strategy_state = trainer_state.get("sample_strategy_state", {})
+        self.sample_strategy.load_state_dict(sample_strategy_state)
         self.save_interval = config.trainer.save_interval
         self.last_sync_step = None
         self.last_sync_time = None
@@ -190,8 +195,8 @@ class Trainer:
             self.logger.info(f"Saving checkpoint at step {self.train_step_num}...")
             self.engine.save_checkpoint(block_until_saved=block_until_saved, save_as_hf=save_as_hf)
             self.state.save_trainer(
-                current_exp_index=self.engine.train_step_num * self.config.buffer.train_batch_size,
                 current_step=self.train_step_num,
+                sample_strategy_state=self.sample_strategy.state_dict(),
             )
         return metrics
 

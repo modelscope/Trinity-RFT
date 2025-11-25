@@ -111,3 +111,15 @@ class MixSampleStrategy(SampleStrategy):
             "expert_data_ratio": 0.5,
             "sft_dataset_name": "sft_dataset",
         }
+
+    def state_dict(self) -> dict:
+        return {
+            "usal_buffer": self.usual_exp_buffer.state_dict(),
+            "expert_buffer": self.expert_exp_buffer.state_dict(),
+        }
+
+    def load_state_dict(self, state_dict: dict) -> None:
+        if state_dict.get("usal_buffer", None):
+            self.usual_exp_buffer.load_state_dict(state_dict["usal_buffer"])
+        if state_dict.get("expert_buffer", None):
+            self.expert_exp_buffer.load_state_dict(state_dict["expert_buffer"])

@@ -101,14 +101,14 @@ class StateManager:
 
     def save_trainer(
         self,
-        current_exp_index: int,
         current_step: int,
+        sample_strategy_state: dict,
     ) -> None:
         with open(self.trainer_state_path, "w", encoding="utf-8") as f:
             json.dump(
                 {
-                    "latest_exp_index": current_exp_index,
                     "latest_iteration": current_step,
+                    "sample_strategy_state": sample_strategy_state,
                 },
                 f,
                 indent=2,

@@ -43,9 +43,9 @@ class QueueReader(BufferReader):
         return exps
 
     def state_dict(self) -> Dict:
-        # SQL Not supporting state dict yet
+        # Queue Not supporting state dict yet
         return {"current_index": 0}
 
     def load_state_dict(self, state_dict):
-        # SQL Not supporting state dict yet
+        # Queue Not supporting state dict yet
         return None
