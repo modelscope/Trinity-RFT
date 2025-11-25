@@ -630,6 +630,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_current_load"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_current_load()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.sync_model_weights"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.sync_model_weights()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.extract_experience_from_history"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.extract_experience_from_history()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.set_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.set_workflow_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.clean_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.clean_workflow_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_workflow_state()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.convert_api_output_to_experience"><code class="docutils literal notranslate"><span class="pre">convert_api_output_to_experience()</span></code></a></li>
@@ -868,6 +871,24 @@ document.write(`
 <dd><p>Extract experiences from the history.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.set_workflow_state">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_workflow_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#ModelWrapper.set_workflow_state"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.set_workflow_state" title="Link to this definition">#</a></dt>
+<dd><p>Set the state of workflow using the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.clean_workflow_state">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clean_workflow_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#ModelWrapper.clean_workflow_state"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.clean_workflow_state" title="Link to this definition">#</a></dt>
+<dd><p>Clean the state of workflow using the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.get_workflow_state">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_workflow_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#ModelWrapper.get_workflow_state"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.get_workflow_state" title="Link to this definition">#</a></dt>
+<dd><p>Get the state of workflow using the model.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -967,6 +988,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_current_load"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_current_load()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.sync_model_weights"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.sync_model_weights()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.extract_experience_from_history"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.extract_experience_from_history()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.set_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.set_workflow_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.clean_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.clean_workflow_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_workflow_state"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_workflow_state()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.convert_api_output_to_experience"><code class="docutils literal notranslate"><span class="pre">convert_api_output_to_experience()</span></code></a></li>

@@ -996,7 +996,13 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_async_clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="p">:</span> <span class="n">Workflow</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span> <span class="o">=</span> <span class="n">runner_id</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span> <span class="o">=</span> <span class="n">runner_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;workflow_id&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;model_version&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;begin_time&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;terminate_time&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="WorkflowRunner.prepare">
@@ -1051,23 +1057,35 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Init workflow from the task and run it.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_workflow_instance</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">repeatable</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">set_repeat_times</span><span class="p">(</span><span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">)</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">clean_workflow_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;workflow_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">task_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">run_id_base</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;terminate_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;begin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span>
             <span class="n">exps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_workflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="p">)</span>
-            <span class="n">task_execution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
+            <span class="n">et</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;terminate_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">et</span>
             <span class="c1"># repeatable workflow cannot calculate run level metrics, we use experience level metrics directly</span>
             <span class="n">run_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">metrics</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span> <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">metrics</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">run_metrics</span><span class="p">:</span>
-                <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;time/task_execution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_execution_time</span>
+                <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;time/task_execution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">et</span> <span class="o">-</span> <span class="n">st</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">exps</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">run_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat_times</span><span class="p">):</span>
                 <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">clean_workflow_state</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;workflow_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">task_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;terminate_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;begin_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span>
                 <span class="n">new_exps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_workflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="p">)</span>
+                <span class="n">et</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;terminate_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">et</span>
                 <span class="n">run_metric</span> <span class="o">=</span> <span class="n">calculate_run_level_metrics</span><span class="p">(</span><span class="n">new_exps</span><span class="p">)</span>
-                <span class="n">run_metric</span><span class="p">[</span><span class="s2">&quot;time/task_execution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
+                <span class="n">run_metric</span><span class="p">[</span><span class="s2">&quot;time/task_execution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">et</span> <span class="o">-</span> <span class="n">st</span>
                 <span class="n">run_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">run_metric</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">new_exps</span><span class="p">:</span>
                     <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">run_id_base</span> <span class="o">+</span> <span class="n">i</span>
@@ -1075,6 +1093,15 @@ document.write(`
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">repeat_times</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_create_workflow_instance</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">run_metrics</span>
+
+<div class="viewcode-block" id="WorkflowRunner.get_runner_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.WorkflowRunner.get_runner_state">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_runner_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the runner state.&quot;&quot;&quot;</span>
+        <span class="n">runner_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">runner_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">get_workflow_state</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">runner_state</span></div>
+
 
 <div class="viewcode-block" id="WorkflowRunner.run_task">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.WorkflowRunner.run_task">[文档]</a>
@@ -1088,9 +1115,10 @@ document.write(`
         <span class="c1"># TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">model_version</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">model_version_async</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runner_state</span><span class="p">[</span><span class="s2">&quot;model_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_version</span>
             <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">exps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;An empty experience is generated&quot;</span>
-            <span class="n">model_version</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">model_version_async</span>
             <span class="c1"># set eid for each experience</span>
             <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">batch_id</span>

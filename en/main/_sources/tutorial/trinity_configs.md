@@ -379,6 +379,7 @@ explorer:
   dynamic_timeout:
     enable: false
     ratio: 3.0
+  runner_state_report_interval: 0
 ```
 
 - `name`: Name of the explorer. This name will be used as the Ray actor's name, so it must be unique.
@@ -399,6 +400,7 @@ explorer:
 - `dynamic_timeout`: [Experimental] Configurations for dynamic timeout mechanism, which adjusts the timeout for each task based on the average time taken for successful tasks.
   - `enable`: Whether to enable dynamic timeout. Default is `false`.
   - `ratio`: The timeout for each task is dynamically set to `average_time_per_success_task * ratio`. Default is `3.0`.
+- `runner_state_report_interval`: Workflow runner report interval (in seconds). If set to a value greater than `0`, the workflow runner will periodically report its status to the main explorer process and print it in the command line for monitoring. Default is `0`, meaning this feature is disabled. If you want to use this feature, it is recommended to set it to `10` seconds or longer to minimize performance impact.
 
 ---
 

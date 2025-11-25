@@ -1382,7 +1382,7 @@ document.write(`
                 <span class="n">num_warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_warmup_steps_ratio</span> <span class="o">*</span> <span class="n">total_steps</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total steps: </span><span class="si">{</span><span class="n">total_steps</span><span class="si">}</span><span class="s2">, num_warmup_steps: </span><span class="si">{</span><span class="n">num_warmup_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;num_warmup_steps: </span><span class="si">{</span><span class="n">num_warmup_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">warmup_style</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
                 <span class="n">actor_lr_scheduler</span> <span class="o">=</span> <span class="n">get_constant_schedule_with_warmup</span><span class="p">(</span>
@@ -2143,7 +2143,7 @@ document.write(`
             <span class="n">num_warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_warmup_steps_ratio</span> <span class="o">*</span> <span class="n">total_steps</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total steps: </span><span class="si">{</span><span class="n">total_steps</span><span class="si">}</span><span class="s2">, num_warmup_steps: </span><span class="si">{</span><span class="n">num_warmup_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;num_warmup_steps: </span><span class="si">{</span><span class="n">num_warmup_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.torch_functional</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
             <span class="n">get_constant_schedule_with_warmup</span><span class="p">,</span>

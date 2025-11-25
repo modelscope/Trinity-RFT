@@ -1042,6 +1042,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">dynamic_timeout</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.0</span>
+<span class="w">  </span><span class="nt">runner_state_report_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -1069,6 +1070,7 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">ratio</span></code>: The timeout for each task is dynamically set to <code class="docutils literal notranslate"><span class="pre">average_time_per_success_task</span> <span class="pre">*</span> <span class="pre">ratio</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">3.0</span></code>.</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">runner_state_report_interval</span></code>: Workflow runner report interval (in seconds). If set to a value greater than <code class="docutils literal notranslate"><span class="pre">0</span></code>, the workflow runner will periodically report its status to the main explorer process and print it in the command line for monitoring. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>, meaning this feature is disabled. If you want to use this feature, it is recommended to set it to <code class="docutils literal notranslate"><span class="pre">10</span></code> seconds or longer to minimize performance impact.</p></li>
 </ul>
 </section>
 <hr class="docutils" />

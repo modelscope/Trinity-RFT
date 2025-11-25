@@ -982,7 +982,8 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">retry_times</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">max_retry_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">max_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">namespace</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span><span class="o">.</span><span class="n">namespace</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1003,6 +1004,13 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.prepare">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RunnerWrapper.update_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.update_state">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the runner state.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">get_runner_state</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="RunnerWrapper.run_with_retry">
@@ -1194,6 +1202,24 @@ document.write(`
                 <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduler loop stopped.&quot;</span><span class="p">)</span>
 
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_monitor_runner_state_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">runner_state_report_interval</span>
+        <span class="k">if</span> <span class="n">interval</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Runner state monitoring loop disabled.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Runner state monitoring loop started.&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">update_state</span><span class="p">()</span> <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_all_state</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error in runner state monitoring loop:</span><span class="se">\n</span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Runner state monitoring loop stopped.&quot;</span><span class="p">)</span>
+
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_schedule_pending_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">idle_runners</span><span class="p">:</span>
             <span class="k">return</span>
@@ -1279,6 +1305,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_loop</span><span class="p">())</span>
         <span class="n">ready_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">__ray_ready__</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">ready_refs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_monitor_runner_state_loop</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting Scheduler with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runner_num</span><span class="si">}</span><span class="s2"> runners&quot;</span><span class="p">)</span></div>
 
 
@@ -1301,6 +1328,12 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_task</span>
+            <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_task</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitor_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_task</span>
             <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
                 <span class="k">pass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduler stopped&quot;</span><span class="p">)</span></div>
@@ -1489,6 +1522,92 @@ document.write(`
             <span class="p">)</span>
 
         <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Scheduler.get_key_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.get_key_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_key_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the scheduler state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (`str`): The key of the state to get.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `Dict`: A dictionary of runner ids to their state for the given key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">runner_state</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">state</span>
+            <span class="k">if</span> <span class="n">runner_state</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">runner_state</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">runner_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">runner_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Scheduler.get_runner_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.get_runner_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_runner_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the scheduler state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            runner_id (`int`): The id of the runner.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `Dict`: The state of the runner.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">runner_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">runner</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="Scheduler.get_all_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.get_all_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all runners&#39; state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `Dict`: The state of all runners.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">runner_state</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">state</span>
+            <span class="k">if</span> <span class="n">runner_state</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">runner_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">runner_state</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="Scheduler.print_all_state">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.print_all_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_all_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print all runners&#39; state in a clear, aligned table format.&quot;&quot;&quot;</span>
+        <span class="n">all_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">runner_state</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">state</span>
+            <span class="k">if</span> <span class="n">runner_state</span><span class="p">:</span>
+                <span class="n">all_keys</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">runner_state</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">all_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_keys</span><span class="p">)</span>
+        <span class="c1"># Prepare header</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;runner_id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_keys</span>  <span class="c1"># type: ignore [operator]</span>
+        <span class="c1"># Prepare rows</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">runner_state</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">state</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">runner_id</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_keys</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">runner_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="c1"># Calculate column widths</span>
+        <span class="n">col_widths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="o">*</span><span class="n">rows</span><span class="p">)]</span>
+        <span class="c1"># Print header</span>
+        <span class="n">header_line</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">col_widths</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">header_line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-+-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">col_widths</span><span class="p">))</span>
+        <span class="c1"># Print each row</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">cell</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col_widths</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

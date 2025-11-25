@@ -370,26 +370,34 @@ explorer:
     tensor_parallel_size: 1
   eval_interval: 100
   eval_on_startup: True
+  over_rollout:
+    ratio: 0.0
+    wait_after_min: 30.0
+  dynamic_timeout:
+    enable: false
+    ratio: 3.0
+  runner_state_report_interval: 0
 ```
 
 - `name`: explorer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。
-- `runner_per_model`: 每个 rollout 模型的并行工作流执行器数量。
-- `max_timeout`: 工作流完成的最大时间（秒）。
-- `max_retry_times`: 工作流的最大重试次数。
-- `env_vars`: 为每个工作流执行器设置的环境变量。
+- `runner_per_model`: 每个推理引擎实例所服务的 WorkflowRunner 数量。
+- `max_timeout`: 等待 Workflow 完成的最大时间（秒）。
+- `max_retry_times`: Workflow 失败或超时情况下的最大重试次数。
+- `env_vars`: 为每个 WorkflowRunner 设置的环境变量。
 - `rollout_model.engine_type`: 推理引擎类型。支持 `vllm_async` 和 `vllm`，二者的含义相同，都使用了异步引擎。后续版本会只保留 `vllm`。
-- `rollout_model.engine_num`: 推理引擎数量。
-- `rollout_model.tensor_parallel_size`: 张量并行度。
-- `rollout_model.enable_history`: 是否启用模型调用历史记录。若设为 `True`，模型包装器会自动记录模型调用返回的 experience。请定期通过 `extract_experience_from_history` 提取历史，以避免内存溢出。默认为 `False`。
-- `auxiliary_models`: 用于自定义工作流的额外模型。
-- `eval_interval`: 模型评估的间隔（以步为单位）。
-- `eval_on_startup`: 是否在启动时评估模型。更准确地说，是在第 0 步使用原始模型评估，因此重启时不会触发。
+- `rollout_model.engine_num`: 推理引擎实例的数量。
+- `rollout_model.tensor_parallel_size`: 每个实例的张量并行度。
+- `rollout_model.enable_history`: 是否启用模型调用历史记录功能。若设为 `True`，模型会自动记录调用返回的 experience。请定期通过 `extract_experience_from_history` 提取历史，以避免内存溢出。默认为 `False`。
+- `auxiliary_models`: 用于自定义工作流的辅助模型。
+- `eval_interval`: 模型评估的间隔（以 step 为单位）。
+- `eval_on_startup`: 是否在启动时评估模型。更准确地说，是在第 0 步使用原始模型评估，因此中断训练后重启时不会触发该行为。
 - `over_rollout`: [实验性] 超量 rollout 机制的配置，允许 explorer 在每个步骤中使用少于完整批次大小的任务继续进行。这在某些任务显著耗时较长的场景中能有效地提高吞吐量。仅当使用动态同步（`synchronizer.sync_style` 不是 `fixed`）时适用。
   - `ratio`: explorer 在每个步骤中仅等待 `(1 - ratio) * batch_size` 的任务。默认为 `0.0`，表示等待所有任务。
   - `wait_after_min`: 达到最小任务阈值后，等待此秒数后再继续。
 - `dynamic_timeout`: [实验性] 动态超时机制的配置，根据成功任务的平均耗时调整每个任务的超时时间。
   - `enable`: 是否启用动态超时。默认为 `false`。
   - `ratio`: 每个任务的超时时间动态设置为 `average_time_per_success_task * ratio`。默认为 `3.0`。
+- `runner_state_report_interval`: WorkflowRunner 报告自身状态的时间间隔（秒）。若设为大于 0 的值，工作流执行器会定期将其状态报告给 explorer 主进程并打印在命令行中，以便监控其运行状态。默认为 `0`，表示不启用此功能。推荐如需使用此功能，将其设置为 `10` 秒或更长时间以减少对性能的影响。
 
 ---
 

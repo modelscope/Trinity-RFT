@@ -603,6 +603,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.prepare"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.prepare()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.update_state"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.update_state()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.run_with_retry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.restart_runner()</span></code></a></li>
 </ul>
@@ -618,6 +619,10 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_results"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_results()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.has_step"><code class="docutils literal notranslate"><span class="pre">Scheduler.has_step()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.wait_all"><code class="docutils literal notranslate"><span class="pre">Scheduler.wait_all()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_key_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_key_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_runner_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_runner_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_all_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_all_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.print_all_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.print_all_state()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -687,6 +692,12 @@ Each task can run multiple times (repeat_times) on same or different runners.</p
 <dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.prepare">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.prepare" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.update_state">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.update_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.update_state" title="Link to this definition">#</a></dt>
+<dd><p>Get the runner state.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.run_with_retry">
@@ -808,6 +819,60 @@ starting with an integer (e.g., 123, “123/my_task”)</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.get_key_state">
+<span class="sig-name descname"><span class="pre">get_key_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.get_key_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.get_key_state" title="Link to this definition">#</a></dt>
+<dd><p>Get the scheduler state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<cite>str</cite>) – The key of the state to get.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of runner ids to their state for the given key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.get_runner_state">
+<span class="sig-name descname"><span class="pre">get_runner_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.get_runner_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.get_runner_state" title="Link to this definition">#</a></dt>
+<dd><p>Get the scheduler state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>runner_id</strong> (<cite>int</cite>) – The id of the runner.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The state of the runner.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.get_all_state">
+<span class="sig-name descname"><span class="pre">get_all_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.get_all_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.get_all_state" title="Link to this definition">#</a></dt>
+<dd><p>Get all runners’ state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The state of all runners.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.print_all_state">
+<span class="sig-name descname"><span class="pre">print_all_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.print_all_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.print_all_state" title="Link to this definition">#</a></dt>
+<dd><p>Print all runners’ state in a clear, aligned table format.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -869,6 +934,7 @@ starting with an integer (e.g., 123, “123/my_task”)</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.prepare"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.prepare()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.update_state"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.update_state()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.run_with_retry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.restart_runner()</span></code></a></li>
 </ul>
@@ -884,6 +950,10 @@ starting with an integer (e.g., 123, “123/my_task”)</p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_results"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_results()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.has_step"><code class="docutils literal notranslate"><span class="pre">Scheduler.has_step()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.wait_all"><code class="docutils literal notranslate"><span class="pre">Scheduler.wait_all()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_key_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_key_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_runner_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_runner_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.get_all_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.get_all_state()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.Scheduler.print_all_state"><code class="docutils literal notranslate"><span class="pre">Scheduler.print_all_state()</span></code></a></li>
 </ul>
 </li>
 </ul>
