@@ -280,6 +280,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         self.step_count = 0
         self.action = None
         terminate_reason = None
+        truncate_status = None
 
         # Initialize messages
         messages = []
@@ -318,6 +319,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 self.done = False
                 self.step_rewards.append(0)
                 terminate_reason = "max_tokens_reached"
+                truncate_status = "response_truncated"
                 break
 
             # Get action from the model
@@ -360,6 +362,7 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
                 "env_done": 1 if self.done else 0,
                 "test_score": final_reward,
             },
+            truncate_status=truncate_status,
         )
         return [experience]
 

@@ -165,10 +165,12 @@ class MultiTurnWorkflow(Workflow):
         self.repeat_times = repeat_times
         self.run_id_base = run_id_base
 
-    def process_messages_to_experience(self, messages, reward, info={}) -> Experience:
+    def process_messages_to_experience(
+        self, messages, reward, info={}, truncate_status=None
+    ) -> Experience:
         converted_experience = self.model.convert_messages_to_experience(messages)
 
-        if converted_experience.truncate_status == "response_truncated":
+        if converted_experience.truncate_status == "prompt_truncated":
             reward = 0.0
 
         tokens = converted_experience.tokens
@@ -188,6 +190,7 @@ class MultiTurnWorkflow(Workflow):
             prompt_length=converted_experience.prompt_length,
             prompt_text=converted_experience.prompt_text,
             response_text=converted_experience.response_text,
+            truncate_status=converted_experience.truncate_status or truncate_status,
             reward=reward,
             logprobs=log_probs,
             info=info,

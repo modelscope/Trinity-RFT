@@ -191,29 +191,32 @@ class vLLMRolloutModel(InferenceModel):
         """
         if self.tokenizer is None:
             await self._initialize_tokenizer()
+
+        # Tokenize once without truncation to check if truncation is needed
         token_ids = self.tokenizer(  # type: ignore
             prompt,
-            truncation=self.config.enable_prompt_truncation,
-            max_length=self.config.max_prompt_tokens,
+            truncation=False,
             return_tensors="pt",
-        )["input_ids"][0].tolist()
-        truncated_prompt = self.tokenizer.decode(token_ids)
+        )[
+            "input_ids"
+        ][0].tolist()
 
-        # Check if prompt truncation occurred
-        truncate_status = None
-        if self.config.enable_prompt_truncation and len(truncated_prompt) < len(prompt):
-            truncate_status = "prompt_truncated"
-            self.logger.warning(f"Prompt was truncated to {len(token_ids)} tokens")
-            dummy_response_tokens = self.tokenizer.encode("\n", add_special_tokens=False)
-            return [
-                Experience(
-                    tokens=token_ids + dummy_response_tokens,
-                    prompt_length=len(token_ids),
-                    prompt_text=truncated_prompt,
-                    response_text="\n",
-                    truncate_status=truncate_status,
+        # Check if truncation is needed and apply it
+        if self.config.enable_prompt_truncation and self.config.max_prompt_tokens is not None:
+            if len(token_ids) > self.config.max_prompt_tokens:
+                self.logger.warning(
+                    f"Prompt was truncated to {self.config.max_prompt_tokens} tokens"
                 )
-            ]
+                token_ids = token_ids[: self.config.max_prompt_tokens]
+                return [
+                    Experience(
+                        tokens=token_ids,
+                        prompt_length=len(token_ids),
+                        prompt_text=self.tokenizer.decode(token_ids),
+                        response_text="",
+                        truncate_status="prompt_truncated",
+                    )
+                ]
 
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids}, lora_request=lora_request, **kwargs
