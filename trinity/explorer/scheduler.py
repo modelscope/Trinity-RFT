@@ -30,7 +30,9 @@ class TaskWrapper:
     results: List[Tuple[Status, List[Experience]]] = field(default_factory=list)
 
 
-def calculate_task_level_metrics(metrics: List[Dict]) -> Dict[str, float]:
+def calculate_task_level_metrics(
+    metrics: List[Dict], is_eval: bool, eval_at_k: List[int]
+) -> Dict[str, float]:
     """Calculate task level metrics from experiences."""
     if not metrics:
         return {}
@@ -39,7 +41,20 @@ def calculate_task_level_metrics(metrics: List[Dict]) -> Dict[str, float]:
         for key, value in m.items():
             if isinstance(value, (int, float)):
                 aggregated_metrics[key].append(value)
-    return {key: sum(values) / len(values) for key, values in aggregated_metrics.items() if values}
+    if is_eval:
+        result = {}
+        for key, values in aggregated_metrics.items():
+            for k in eval_at_k:
+                if k > len(values):
+                    continue
+                result[f"{key}/mean@{k}"] = sum(values[:k]) / k
+                result[f"{key}/best@{k}"] = max(values[:k]) / k
+                result[f"{key}/worst@{k}"] = min(values[:k]) / k
+        return result
+    else:
+        return {
+            key: sum(values) / len(values) for key, values in aggregated_metrics.items() if values
+        }
 
 
 class RunnerWrapper:
@@ -327,7 +342,12 @@ class Scheduler:
                     if not s.ok:
                         all_success = False
                 task_status = Status(
-                    ok=all_success, metrics=[calculate_task_level_metrics(task_metrics)]
+                    ok=all_success,
+                    metrics=[
+                        calculate_task_level_metrics(
+                            task_metrics, task.task.is_eval, task.task.eval_at_k
+                        )
+                    ],
                 )
                 self.completed_tasks[task.batch_id].appendleft((task_status, task_experiences))
                 self.logger.debug(f"Task completed (batch_id {task.batch_id}).")

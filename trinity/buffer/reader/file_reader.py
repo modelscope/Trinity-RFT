@@ -176,7 +176,7 @@ class TaskFileReader(BaseFileReader):
             total_epochs=self.config.total_epochs if not self.config.is_eval else 1,
             offset=self.config.index,
             drop_last=not self.config.is_eval,
-            total_steps=self.config.total_steps,
+            total_steps=self.config.total_steps if not self.config.is_eval else None,
             enable_progress_bar=self.config.enable_progress_bar,
         )
         self.formatter = FORMATTER.get("task")(config)

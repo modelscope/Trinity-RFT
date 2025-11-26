@@ -397,7 +397,9 @@ class Explorer:
             metric[f"{prefix}/{eval_task_name}/finished_task_count"] = len(statuses)
             metric.update(
                 gather_metrics(
-                    [status.metrics[0] for status in statuses], f"{prefix}/{eval_task_name}"
+                    [status.metrics[0] for status in statuses],
+                    f"{prefix}/{eval_task_name}",
+                    output_stats=["mean", "std"],
                 )
             )
         if self.eval_start_time is not None:
