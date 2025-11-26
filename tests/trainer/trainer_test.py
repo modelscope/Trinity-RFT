@@ -1050,7 +1050,7 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
         self.config.model.max_model_len = 20
         self.config.model.max_prompt_tokens = 5
         self.config.model.max_response_tokens = 15
-        # self.config.model.enable_prompt_truncation = True
+        self.config.model.enable_prompt_truncation = True
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.kl_loss_fn = "none"
@@ -1068,10 +1068,18 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)
-        max_prompt = parser.metric_values("prompt_length/max")
-        self.assertEqual(max(max_prompt), 5)
-        min_prompt = parser.metric_values("prompt_length/min")
-        self.assertEqual(min(min_prompt), 5)
+        max_prompt_length = parser.metric_values("prompt_length/max")
+        self.assertEqual(max(max_prompt_length), 5)
+        min_prompt_length = parser.metric_values("prompt_length/min")
+        self.assertEqual(min(min_prompt_length), 5)
+        max_response_length = parser.metric_values("response_length/max")
+        self.assertEqual(max(max_response_length), 1)
+        min_response_length = parser.metric_values("response_length/min")
+        self.assertEqual(min(min_response_length), 1)
+        final_loss = parser.metric_values("actor/final_loss")
+        self.assertEqual(final_loss[0], 0.0)
+        grad_norm = parser.metric_values("actor/grad_norm")
+        self.assertEqual(grad_norm[0], 0.0)
 
     def tearDown(self):
         # remove dir only when the test passed
