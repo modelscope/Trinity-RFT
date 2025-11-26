@@ -65,7 +65,6 @@ class TaskFormatter:
             workflow_args=self.config.workflow_args,
             reward_fn_args=self.config.reward_fn_args,
             is_eval=self.config.is_eval,
-            eval_at_k=self.config.eval_at_k,
             raw_task=sample,
         )
 

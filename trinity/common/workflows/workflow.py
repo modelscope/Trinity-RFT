@@ -30,7 +30,6 @@ class Task(dict):
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
     is_eval: bool = False
-    eval_at_k: List[int] = field(default_factory=lambda: [1])
     reward_fn: Optional[Type[RewardFn]] = None
     raw_task: Optional[dict] = None  # The raw data sample
 

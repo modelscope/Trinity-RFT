@@ -84,7 +84,7 @@ class GenerationConfig:
     logprobs: Optional[int] = None  # 0  # vLLM return `logprobs + 1` elements
     max_tokens: Optional[int] = None  # if None, use model.max_response_tokens
     # repeat each task for `n` times
-    # ! DO NOT SET, it will be set by `algorithm.repeat_times` or `max(buffer.explorer_input.eval_tasksets[i].eval_at_k)`
+    # ! DO NOT SET, it will be set by `algorithm.repeat_times` or `max(buffer.explorer_input.eval_tasksets[i].repeat_times)`
     n: int = 1
 
 
@@ -196,7 +196,6 @@ class StorageConfig:
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
     task_selector: TaskSelectorConfig = field(default_factory=TaskSelectorConfig)
-    eval_at_k: List[int] = field(default_factory=lambda: [1])
 
     # enable progress bar (tqdm) for _HFBatchReader
     enable_progress_bar: Optional[bool] = False
@@ -238,7 +237,6 @@ class TasksetConfig:
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
     task_selector: TaskSelectorConfig = field(default_factory=TaskSelectorConfig)
-    eval_at_k: List[int] = field(default_factory=lambda: [1])
 
     # used for StorageType.FILE
     split: str = "train"
@@ -253,8 +251,8 @@ class TasksetConfig:
 
     # ! DO NOT SET, automatically load from checkpoint
     index: int = 0
-    # ! DO NOT SET, automatically set from `algorithm.repeat_times` or `max(buffer.explorer_input.eval_tasksets[i].eval_at_k)`
-    repeat_times: Optional[int] = None
+    # ! DO NOT SET in trainer_input, automatically set from `algorithm.repeat_times`
+    repeat_times: int = 1
     # ! DO NOT SET, automatically set based on train/eval
     is_eval: bool = False
     # ! DO NOT SET, automatically set from buffer.batch_size
@@ -270,7 +268,6 @@ class TasksetConfig:
             storage_type=self.storage_type,
             path=self.path,
             task_selector=self.task_selector,
-            eval_at_k=self.eval_at_k,
             repeat_times=self.repeat_times,
             split=self.split,
             subset_name=self.subset_name,
@@ -910,7 +907,6 @@ class Config:
                     "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
                     f" (={self.algorithm.repeat_times})."
                 )
-            taskset.eval_at_k = []
             taskset.total_epochs = self.buffer.total_epochs
             taskset.total_steps = self.buffer.total_steps
             taskset.batch_size = self.buffer.batch_size
@@ -931,9 +927,6 @@ class Config:
             dataset.batch_size = self.buffer.batch_size
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
-            if len(dataset.eval_at_k) == 0:
-                dataset.eval_at_k = [1]
-            dataset.repeat_times = max(dataset.eval_at_k)
 
             # eval_workflow has higher priority than workflow in eval tasksets, so we set it first
             set_if_none(dataset, "default_workflow_type", explorer_input.default_eval_workflow_type)

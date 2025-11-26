@@ -31,15 +31,12 @@ class TaskWrapper:
     results: List[Tuple[Status, List[Experience]]] = field(default_factory=list)
 
 
-def calculate_task_level_metrics(
-    metrics: List[Dict], is_eval: bool, eval_at_k: List[int]
-) -> Dict[str, float]:
+def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str, float]:
     """Calculate task level metrics (mean) from multiple runs of the same task.
 
     Args:
         metrics (`List[Dict]`): A list of metric dictionaries from multiple runs of the same task.
         is_eval (`bool`): Whether this is an evaluation task.
-        eval_at_k (`List[int]`): A list of k values to evaluate at.
 
     Returns:
         `Dict[str, float]`: A dictionary of aggregated metrics, where each metric is averaged over all runs.
@@ -54,9 +51,13 @@ def calculate_task_level_metrics(
     if is_eval:
         result = {}
         for key, values in aggregated_metrics.items():
-            for k in eval_at_k:
-                if k > len(values):
-                    continue
+            k_list = []
+            k = 2
+            while k < len(values):
+                k_list.append(k)
+                k *= 2
+            k_list.append(len(values))
+            for k in k_list:
                 result[f"{key}/mean@{k}"] = sum(values[:k]) / k
                 result[f"{key}/best@{k}"] = max(values[:k])
                 result[f"{key}/worst@{k}"] = min(values[:k])
@@ -356,11 +357,7 @@ class Scheduler:
                 # calculate task level metrics
                 task_status = Status(
                     ok=all_success,
-                    metrics=[
-                        calculate_task_level_metrics(
-                            task_metrics, task.task.is_eval, task.task.eval_at_k
-                        )
-                    ],
+                    metrics=[calculate_task_level_metrics(task_metrics, task.task.is_eval)],
                 )
                 self.completed_tasks[task.batch_id].appendleft((task_status, task_experiences))
                 self.logger.debug(f"Task completed (batch_id {task.batch_id}).")

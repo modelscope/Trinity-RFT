@@ -84,14 +84,11 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.config.buffer.explorer_input.taskset.task_selector = TaskSelectorConfig(
             selector_type="shuffle", seed=42
         )
-        self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("countdown", "test")
-        )
-        self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("copy_countdown", "test")
-        )
-        self.config.buffer.explorer_input.eval_tasksets[0].eval_at_k = [1, 2]
-        self.config.buffer.explorer_input.eval_tasksets[1].eval_at_k = [3, 4]
+        eval_tasksets = self.config.buffer.explorer_input.eval_tasksets
+        eval_tasksets.append(get_unittest_dataset_config("countdown", "test"))
+        eval_tasksets.append(get_unittest_dataset_config("copy_countdown", "test"))
+        eval_tasksets[0].repeat_times = 4
+        eval_tasksets[1].repeat_times = 4
         self.config.trainer.save_interval = 4
         self.config.check_and_update()
         _trainer_config = self.config.trainer.trainer_config
@@ -149,13 +146,12 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.config.check_and_update()
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
-        eval_tasksets = self.config.buffer.explorer_input.eval_tasksets
         for prefix in ["eval", "bench"]:
-            for eval_taskset, taskset_name in zip(eval_tasksets, ["countdown", "copy_countdown"]):
+            for taskset_name in ["countdown", "copy_countdown"]:
                 metrics = parser.metric_list(f"{prefix}/{taskset_name}")
                 self.assertTrue(len(metrics) > 0)
                 for eval_stats in ["mean", "best", "worst"]:
-                    for k in eval_taskset.eval_at_k:
+                    for k in [2, 4]:
                         for stats in ["mean", "std"]:
                             metric_name = f"{prefix}/{taskset_name}/score/{eval_stats}@{k}/{stats}"
                             metric_steps = parser.metric_steps(metric_name)
@@ -973,7 +969,7 @@ class TestTrainerLoRA(BaseTrainerCase):
         self.config.buffer.explorer_input.eval_tasksets.append(
             get_unittest_dataset_config("gsm8k", "test")
         )
-        self.config.buffer.explorer_input.eval_tasksets[0].eval_at_k = [1, 2, 4]
+        self.config.buffer.explorer_input.eval_tasksets[0].repeat_times = 8
         self.config.model.model_path = get_model_path()
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.advantage_fn = "grpo"
@@ -1021,12 +1017,11 @@ class TestTrainerLoRA(BaseTrainerCase):
         self.config.check_and_update()
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
-        eval_taskset = self.config.buffer.explorer_input.eval_tasksets[0]
         for prefix in ["eval", "bench"]:
             gsm8k_metrics = parser.metric_list(f"{prefix}/gsm8k")
             self.assertTrue(len(gsm8k_metrics) > 0)
             for eval_stats in ["mean", "best", "worst"]:
-                for k in eval_taskset.eval_at_k:
+                for k in [2, 4, 8]:
                     for stats in ["mean", "std"]:
                         metric_name = f"{prefix}/gsm8k/accuracy/{eval_stats}@{k}/{stats}"
                         metric_steps = parser.metric_steps(metric_name)
