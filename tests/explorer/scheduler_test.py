@@ -785,6 +785,18 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
         await scheduler.start()
         tasks = []
+        tasks.extend(generate_tasks(0, timeout_num=4, repeat_times=1, timeout_seconds=1))
+        for task in tasks:
+            task.is_eval = True
+        scheduler.schedule(
+            tasks, batch_id="0/eval"
+        )  # eval tasks will not count into dynamic timeout
+        statuses, exps = await scheduler.get_results(batch_id="0/eval")
+        self.assertEqual(len(statuses), 4)
+        self.assertEqual(len(exps), 0)
+        self.assertEqual(scheduler.total_running_time, 0)
+        self.assertEqual(scheduler.total_completed_tasks, 0)
+        tasks = []
         # generate 4 tasks that will run 1 second
         tasks.extend(generate_tasks(0, timeout_num=4, repeat_times=1, timeout_seconds=1))
         scheduler.schedule(tasks, batch_id=0)  # first step will not use dynamic timeout

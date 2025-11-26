@@ -26,14 +26,24 @@ class TaskWrapper:
 
     task: Task
     batch_id: Union[int, str]
-    sub_task_num: int = 1
+    sub_task_num: int = 1  # number of sub tasks splitted from this task
+    # if max_repeat_times_per_runner is set, one task may be splitted into multiple sub tasks
     results: List[Tuple[Status, List[Experience]]] = field(default_factory=list)
 
 
 def calculate_task_level_metrics(
     metrics: List[Dict], is_eval: bool, eval_at_k: List[int]
 ) -> Dict[str, float]:
-    """Calculate task level metrics from experiences."""
+    """Calculate task level metrics (mean) from multiple runs of the same task.
+
+    Args:
+        metrics (`List[Dict]`): A list of metric dictionaries from multiple runs of the same task.
+        is_eval (`bool`): Whether this is an evaluation task.
+        eval_at_k (`List[int]`): A list of k values to evaluate at.
+
+    Returns:
+        `Dict[str, float]`: A dictionary of aggregated metrics, where each metric is averaged over all runs.
+    """
     if not metrics:
         return {}
     aggregated_metrics: Dict[str, List[float]] = defaultdict(list)
@@ -327,11 +337,13 @@ class Scheduler:
             return
         else:
             status, exps, runner_id, run_time = async_task.result()
-            self.total_running_time += run_time
-            self.total_completed_tasks += 1
+            if not task.task.is_eval:  # only count running time for non-eval tasks
+                self.total_running_time += run_time
+                self.total_completed_tasks += 1
             task.results.append((status, exps))
             self.busy_runners.pop(runner_id)
             self.idle_runners.add(runner_id)
+            # If all sub runs in a task are completed
             if len(task.results) == task.sub_task_num:
                 task_experiences = []
                 task_metrics = []
@@ -341,6 +353,7 @@ class Scheduler:
                     task_experiences.extend(exp)
                     if not s.ok:
                         all_success = False
+                # calculate task level metrics
                 task_status = Status(
                     ok=all_success,
                     metrics=[

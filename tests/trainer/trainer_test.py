@@ -1041,10 +1041,18 @@ class TestOverRollout(BaseTrainerCase):
         self.config.algorithm.repeat_times = 4
         self.config.buffer.batch_size = 4
         self.config.buffer.total_steps = 2
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config(
+            "countdown", "train"
+        )
+        self.config.buffer.explorer_input.eval_tasksets = [
+            get_unittest_dataset_config("countdown", "test")
+        ]
+        self.config.buffer.eval_interval = 4  # only eval on start
         self.config.name = f"explore-over-rollout-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.explorer.over_rollout.ratio = 0.5  # set over rollout rate to 50%, which means only wait for 2 (4 * 50%) tasks in each steps
         self.config.explorer.over_rollout.wait_after_min = 0
+        self.config.explorer.dynamic_timeout.enable = True
+        self.config.explorer.dynamic_timeout.ratio = 2
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.advantage_fn_args = {
@@ -1058,7 +1066,7 @@ class TestOverRollout(BaseTrainerCase):
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
         eval_metrics = parser.metric_list("eval")
-        self.assertTrue(len(eval_metrics) == 0)
+        self.assertTrue(len(eval_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
         self.assertTrue(parser.metric_exist("experience_pipeline/experience_count"))
         experience_counts = parser.metric_values("experience_pipeline/experience_count")
