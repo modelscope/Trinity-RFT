@@ -43,8 +43,8 @@ buffer:
           env_max_steps: 8
           agent_max_steps: 10
           is_slippery: false
+        repeat_times: 4
         rollout_args:
-          n: 4
           top_p: 0.8
           top_k: 20
     default_workflow_type: 'frozen_lake_workflow'
