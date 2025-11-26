@@ -1004,7 +1004,7 @@ document.write(`
     <span class="n">logprobs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># 0  # vLLM return `logprobs + 1` elements</span>
     <span class="n">max_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># if None, use model.max_response_tokens</span>
     <span class="c1"># repeat each task for `n` times</span>
-    <span class="c1"># ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`</span>
+    <span class="c1"># ! DO NOT SET, it will be set by `algorithm.repeat_times` or `buffer.explorer_input.eval_tasksets[i].repeat_times`</span>
     <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span></div>
 
 
@@ -1193,10 +1193,10 @@ document.write(`
 
     <span class="n">enable_progress_bar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># ! This setting is only valid for `eval_taskset`; for other taskset, it will be overridden by `algorithm.repeat_times`.</span>
+    <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="c1"># ! DO NOT SET, automatically load from checkpoint</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="c1"># ! DO NOT SET, automatically set from algorithm.repeat_times</span>
-    <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="c1"># ! DO NOT SET, automatically set based on train/eval</span>
     <span class="n">is_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># ! DO NOT SET, automatically set from buffer.batch_size</span>
@@ -1425,7 +1425,8 @@ document.write(`
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># the minimum number of tokens for the response</span>
     <span class="n">min_response_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="c1"># whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens.</span>
+    <span class="c1"># whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens;</span>
+    <span class="c1"># not applicable for OpenAI API</span>
     <span class="n">enable_prompt_truncation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># lora config</span>
@@ -1943,7 +1944,7 @@ document.write(`
             <span class="n">dataset</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">batch_size</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
             <span class="c1"># eval_workflow has higher priority than workflow in eval tasksets, so we set it first</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>
@@ -2208,7 +2209,7 @@ document.write(`
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">enable_prompt_truncation</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly.&quot;</span>
+                    <span class="s2">&quot;When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly. This function does not work with OpenAI API mode.&quot;</span>
                 <span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;`enable_prompt_truncation` is set to True; the prompt will be truncated to `max_prompt_tokens`=</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="si">}</span><span class="s2"> tokens if it is too long.&quot;</span>

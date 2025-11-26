@@ -948,16 +948,15 @@ document.write(`
 
 <div class="viewcode-block" id="calculate_task_level_metrics">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.calculate_task_level_metrics">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">calculate_task_level_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_task_level_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">is_eval</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate task level metrics (mean) from multiple runs of the same task.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        metrics (`List[Dict]`): A list of metric dictionaries from multiple runs of the same task.</span>
+<span class="sd">        is_eval (`bool`): Whether this is an evaluation task.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        `Dict[str, float]`: A dictionary of aggregated metrics, where each metric is averaged over all runs.</span>
-
-<span class="sd">    TODO: support more aggregation methods like max, min.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span>
@@ -966,7 +965,27 @@ document.write(`
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
                 <span class="n">aggregated_metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">aggregated_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">values</span><span class="p">}</span></div>
+    <span class="k">if</span> <span class="n">is_eval</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">aggregated_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;time/task_execution&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">or</span> <span class="s2">&quot;time/run_execution&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">k_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">while</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+                <span class="n">k_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">*=</span> <span class="mi">2</span>
+            <span class="n">k_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_list</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">/mean@</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">[:</span><span class="n">k</span><span class="p">])</span> <span class="o">/</span> <span class="n">k</span>
+                <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">/best@</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">[:</span><span class="n">k</span><span class="p">])</span>
+                <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">/worst@</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">[:</span><span class="n">k</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">aggregated_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">values</span>
+        <span class="p">}</span></div>
 
 
 
@@ -1286,7 +1305,8 @@ document.write(`
                         <span class="n">all_success</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="c1"># calculate task level metrics</span>
                 <span class="n">task_status</span> <span class="o">=</span> <span class="n">Status</span><span class="p">(</span>
-                    <span class="n">ok</span><span class="o">=</span><span class="n">all_success</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">calculate_task_level_metrics</span><span class="p">(</span><span class="n">task_metrics</span><span class="p">)]</span>
+                    <span class="n">ok</span><span class="o">=</span><span class="n">all_success</span><span class="p">,</span>
+                    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">calculate_task_level_metrics</span><span class="p">(</span><span class="n">task_metrics</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">is_eval</span><span class="p">)],</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">completed_tasks</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">batch_id</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">((</span><span class="n">task_status</span><span class="p">,</span> <span class="n">task_experiences</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task completed (batch_id </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>

@@ -1211,6 +1211,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">step_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">terminate_reason</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">truncate_status</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Initialize messages</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1249,6 +1250,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">step_rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">terminate_reason</span> <span class="o">=</span> <span class="s2">&quot;max_tokens_reached&quot;</span>
+                <span class="n">truncate_status</span> <span class="o">=</span> <span class="s2">&quot;response_truncated&quot;</span>
                 <span class="k">break</span>
 
             <span class="c1"># Get action from the model</span>
@@ -1291,6 +1293,7 @@ document.write(`
                 <span class="s2">&quot;env_done&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="s2">&quot;test_score&quot;</span><span class="p">:</span> <span class="n">final_reward</span><span class="p">,</span>
             <span class="p">},</span>
+            <span class="n">truncate_status</span><span class="o">=</span><span class="n">truncate_status</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">experience</span><span class="p">]</span></div>
 

@@ -1072,7 +1072,10 @@ document.write(`
     <span class="k">if</span> <span class="s2">&quot;advantages&quot;</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">:</span>
         <span class="c1"># adv</span>
         <span class="n">advantages</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;advantages&quot;</span><span class="p">]</span>
-        <span class="n">valid_adv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="n">response_mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response_mask</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">valid_adv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="n">response_mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">valid_adv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="c1"># adv</span>
@@ -1084,7 +1087,10 @@ document.write(`
     <span class="k">if</span> <span class="s2">&quot;returns&quot;</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">:</span>
         <span class="c1"># returns</span>
         <span class="n">returns</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span>
-        <span class="n">valid_returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="n">response_mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response_mask</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">valid_returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">masked_select</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="n">response_mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">valid_returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;critic/returns/mean&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">valid_returns</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
