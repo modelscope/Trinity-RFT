@@ -51,6 +51,9 @@ def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str
     if is_eval:
         result = {}
         for key, values in aggregated_metrics.items():
+            if "time/task_execution" in key or "time/run_execution" in key:
+                result[key] = sum(values) / len(values)
+                continue
             k_list = []
             k = 2
             while k < len(values):

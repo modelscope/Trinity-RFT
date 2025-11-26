@@ -48,13 +48,16 @@ class BaseExplorerCase(RayUnittestBase):
 class TestExplorerCountdownEval(BaseExplorerCase):
     def test_explorer(self):
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        self.config.buffer.explorer_input.eval_tasksets.extend(
+        eval_tasksets = self.config.buffer.explorer_input.eval_tasksets
+        eval_tasksets.extend(
             [
                 get_unittest_dataset_config("countdown", "test"),
                 get_unittest_dataset_config("eval_short"),
                 get_unittest_dataset_config("eval_long"),
             ]
         )
+        eval_tasksets[1].repeat_times = 6
+        eval_tasksets[2].repeat_times = 10
         self.config.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.check_and_update()
         explore(self.config)
@@ -65,8 +68,15 @@ class TestExplorerCountdownEval(BaseExplorerCase):
         self.assertTrue(len(eval_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
         self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
-        self.assertTrue("eval/eval_short/accuracy/max" in eval_metrics)
-        self.assertTrue("eval/eval_long/accuracy/max" in eval_metrics)
+        for eval_taskset, k_list in zip(eval_tasksets, [[1], [2, 4, 6], [2, 4, 8, 10]]):
+            for eval_stats in ["mean", "best", "worst"]:
+                for k in k_list:
+                    for stats in ["mean", "std"]:
+                        metric_name = "score" if eval_taskset.name == "countdown" else "accuracy"
+                        self.assertIn(
+                            f"eval/{eval_taskset.name}/{metric_name}/{eval_stats}@{k}/{stats}",
+                            eval_metrics,
+                        )
 
 
 class TestExplorerGSM8KRULERNoEval(BaseExplorerCase):

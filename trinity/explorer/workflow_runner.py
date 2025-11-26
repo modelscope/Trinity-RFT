@@ -141,7 +141,7 @@ class WorkflowRunner:
             # repeatable workflow cannot calculate run level metrics, we use experience level metrics directly
             run_metrics = [exp.metrics for exp in exps if exp.metrics]
             for metric in run_metrics:
-                metric["time/task_execution"] = et - st
+                metric["time/run_execution"] = et - st
         else:
             exps = []
             run_metrics = []
@@ -155,7 +155,7 @@ class WorkflowRunner:
                 et = time.time()
                 self.runner_state["terminate_time"] = et
                 run_metric = calculate_run_level_metrics(new_exps)
-                run_metric["time/task_execution"] = et - st
+                run_metric["time/run_execution"] = et - st
                 run_metrics.append(run_metric)
                 for exp in new_exps:
                     exp.eid.run = run_id_base + i
@@ -209,7 +209,7 @@ class WorkflowRunner:
             error_trace_back = traceback.format_exc()
             self.logger.error(f"WorkflowRunner run task error: {e}\nTraceback:\n{error_trace_back}")
             return (
-                Status(False, metrics=[{"time/task_execution": time.time() - st}], message=str(e)),
+                Status(False, metrics=[{"time/run_execution": time.time() - st}], message=str(e)),
                 [],
             )
 
