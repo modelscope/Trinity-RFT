@@ -58,8 +58,8 @@ def calculate_task_level_metrics(
                 if k > len(values):
                     continue
                 result[f"{key}/mean@{k}"] = sum(values[:k]) / k
-                result[f"{key}/best@{k}"] = max(values[:k]) / k
-                result[f"{key}/worst@{k}"] = min(values[:k]) / k
+                result[f"{key}/best@{k}"] = max(values[:k])
+                result[f"{key}/worst@{k}"] = min(values[:k])
         return result
     else:
         return {

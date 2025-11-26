@@ -931,6 +931,8 @@ class Config:
             dataset.batch_size = self.buffer.batch_size
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
+            if len(dataset.eval_at_k) == 0:
+                dataset.eval_at_k = [1]
             dataset.repeat_times = max(dataset.eval_at_k)
 
             # eval_workflow has higher priority than workflow in eval tasksets, so we set it first
