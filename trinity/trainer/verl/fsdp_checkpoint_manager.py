@@ -360,6 +360,8 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 if self._save_model_thread is not None:
                     self._save_model_thread.join()
 
+                state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
+
                 def _save_model():
                     runtime_context = ray.get_runtime_context()
                     node_id = runtime_context.get_node_id()

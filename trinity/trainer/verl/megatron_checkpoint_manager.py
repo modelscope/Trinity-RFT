@@ -257,15 +257,16 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                             from transformers import MistralForSequenceClassification
 
                             model = MistralForSequenceClassification.from_pretrained(
-                                self.config.model.path
+                                self.config.model.path, torch_dtype=torch.bfloat16
                             )  # use score head instead of lm_head
                             state_dict["score.weight"] = state_dict["score.weight"]
                         else:
                             from transformers import AutoModelForCausalLM
 
                             model = AutoModelForCausalLM.from_pretrained(
-                                self.config.model.path, torch_dtype="auto"
+                                self.config.model.path, torch_dtype=torch.bfloat16
                             )
+                    state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
                     model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
                     log_with_rank(
                         f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
