@@ -38,10 +38,10 @@ We provide a Docker setup to simplify environment management.
 #### Build the Docker Image
 
 
-Trinity-RFT provides a dedicated Dockerfile for Megatron-LM located at `scripts/docker_for_megatron/Dockerfile`. You can build the image using the following command:
+Trinity-RFT provides a dedicated Dockerfile for Megatron-LM located at `scripts/docker/Dockerfile.megatron`. You can build the image using the following command:
 
 ```bash
-docker build -f scripts/docker_for_megatron/Dockerfile -t trinity-rft-megatron:latest .
+docker build -f scripts/docker/Dockerfile.megatron -t trinity-rft-megatron:latest .
 ```
 
 > 💡 You can customize the Dockerfile before building — for example, to add pip mirrors or set API keys.

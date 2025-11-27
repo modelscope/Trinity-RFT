@@ -43,11 +43,11 @@ pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
 
 #### 构建 Docker 镜像
 
-Trinity-RFT 提供了专门用于 Megatron-LM 的 Dockerfile，位于 `scripts/docker_for_megatron/Dockerfile`。
+Trinity-RFT 提供了专门用于 Megatron-LM 的 Dockerfile，位于 `scripts/docker/Dockerfile.megatron`。
 可以使用以下命令构建镜像：
 
 ```bash
-docker build -f scripts/docker_for_megatron/Dockerfile -t trinity-rft-megatron:latest .
+docker build -f scripts/docker/Dockerfile.megatron -t trinity-rft-megatron:latest .
 ```
 
 > 💡 你可以在构建前自定义 Dockerfile —— 例如添加 pip 镜像源或设置 API 密钥。

@@ -6,7 +6,7 @@ For installing Trinity-RFT, you have three options: from source (recommended), v
 Before installing, ensure your system meets the following requirements:
 
 - **Python**: Version 3.10 to 3.12 (inclusive)
-- **CUDA**: Version >= 12.6
+- **CUDA**: Version >= 12.8
 - **GPUs**: At least 2 GPUs
 
 ---
