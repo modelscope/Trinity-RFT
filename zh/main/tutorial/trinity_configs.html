@@ -601,8 +601,8 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model">Model 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster">Cluster 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#buffer">Buffer 配置</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入配置</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入配置</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>
@@ -867,7 +867,7 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">total_steps</span></code>: 总训练步数（可选）。若指定，则 <code class="docutils literal notranslate"><span class="pre">total_epochs</span></code> 不生效。</p></li>
 </ul>
 <section id="explorer">
-<h3>Explorer 输入<a class="headerlink" href="#explorer" title="Link to this heading">#</a></h3>
+<h3>Explorer 输入配置<a class="headerlink" href="#explorer" title="Link to this heading">#</a></h3>
 <p>定义 explorer 用于训练和评估的数据集。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
@@ -938,7 +938,7 @@ document.write(`
 </ul>
 </section>
 <section id="trainer">
-<h3>Trainer 输入<a class="headerlink" href="#trainer" title="Link to this heading">#</a></h3>
+<h3>Trainer 输入配置<a class="headerlink" href="#trainer" title="Link to this heading">#</a></h3>
 <p>定义 trainer 使用的 experience buffer 和可选的辅助数据集。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -1107,10 +1107,12 @@ document.write(`
 <p>指定 trainer 的后端和行为。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trainer</span>
-<span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
-<span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;verl&quot;</span>
+<span class="w">  </span><span class="nt">trainer_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fsdp&quot;</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">save_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unrestricted&quot;</span>
+<span class="w">  </span><span class="nt">save_hf_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;last&quot;</span>
 <span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
@@ -1121,6 +1123,13 @@ document.write(`
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: trainer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_type</span></code>: trainer 后端实现。目前仅支持 <code class="docutils literal notranslate"><span class="pre">verl</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer_strategy</span></code>: VeRL 的训练策略。默认值为 <code class="docutils literal notranslate"><span class="pre">fsdp</span></code>。可选值如下：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fsdp</span></code>: 使用 PyTorch FSDP。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fsdp2</span></code>: 使用 PyTorch FSDP2。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">megatron</span></code>: 使用 Megatron-LM。</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save_interval</span></code>: 保存模型检查点的频率（步）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">total_steps</span></code>: 总训练步数。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save_strategy</span></code>: 模型保存时的并行策略。默认值为<code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>。可选值如下：</p>
@@ -1129,6 +1138,13 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">single_process</span></code>：整个系统中，仅允许一个进程执行保存，该进程内的多个线程可以并行处理保存任务，不同进程之间串行执行。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">single_node</span></code>：整个系统中，仅允许一个计算节点执行保存，该节点内的进程和线程可并行工作，不同节点的保存串行执行。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>：不限制保存操作，允许多个节点、进程或线程同时保存模型。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_hf_checkpoint</span></code>: 指定保存 HuggingFace 格式检查点的时机，默认为 &quot;last&quot;。注意在保存为 HuggingFace 格式会消耗额外的时间、存储空间和显存，可能影响训练性能或导致显存不足错误。可选值：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">last</span></code>: 仅训练产生的最后一个检查点保存为 HuggingFace 格式。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">always</span></code>: 所有检查点均保存为 HuggingFace 格式。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">never</span></code>: 不保存 HuggingFace 格式检查点。</p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">grad_clip</span></code>: 梯度裁剪阈值。</p></li>
@@ -1545,8 +1561,8 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model">Model 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster">Cluster 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#buffer">Buffer 配置</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入配置</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入配置</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>

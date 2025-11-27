@@ -227,7 +227,7 @@ buffer:
 - `total_epochs`: 总训练轮数。
 - `total_steps`: 总训练步数（可选）。若指定，则 `total_epochs` 不生效。
 
-### Explorer 输入
+### Explorer 输入配置
 
 定义 explorer 用于训练和评估的数据集。
 
@@ -289,7 +289,7 @@ buffer:
 - `default_reward_fn_type`: 探索过程中使用的奖励函数。若未指定，则使用 `buffer.default_reward_fn_type`。
 - `workflow_args`: 用于补充数据集级别参数的字典。
 
-### Trainer 输入
+### Trainer 输入配置
 
 定义 trainer 使用的 experience buffer 和可选的辅助数据集。
 
@@ -433,10 +433,12 @@ synchronizer:
 ```yaml
 trainer:
   name: trainer
-  trainer_type: 'verl'
-  save_interval: 100
+  trainer_type: "verl"
+  trainer_strategy: "fsdp"
   total_steps: 1000
+  save_interval: 100
   save_strategy: "unrestricted"
+  save_hf_checkpoint: "last"
   grad_clip: 1.0
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
@@ -446,6 +448,10 @@ trainer:
 
 - `name`: trainer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。
 - `trainer_type`: trainer 后端实现。目前仅支持 `verl`。
+- `trainer_strategy`: VeRL 的训练策略。默认值为 `fsdp`。可选值如下：
+  - `fsdp`: 使用 PyTorch FSDP。
+  - `fsdp2`: 使用 PyTorch FSDP2。
+  - `megatron`: 使用 Megatron-LM。
 - `save_interval`: 保存模型检查点的频率（步）。
 - `total_steps`: 总训练步数。
 - `save_strategy`: 模型保存时的并行策略。默认值为`unrestricted`。可选值如下：
@@ -453,6 +459,10 @@ trainer:
   - `single_process`：整个系统中，仅允许一个进程执行保存，该进程内的多个线程可以并行处理保存任务，不同进程之间串行执行。
   - `single_node`：整个系统中，仅允许一个计算节点执行保存，该节点内的进程和线程可并行工作，不同节点的保存串行执行。
   - `unrestricted`：不限制保存操作，允许多个节点、进程或线程同时保存模型。
+- `save_hf_checkpoint`: 指定保存 HuggingFace 格式检查点的时机，默认为 "last"。注意在保存为 HuggingFace 格式会消耗额外的时间、存储空间和显存，可能影响训练性能或导致显存不足错误。可选值：
+  - `last`: 仅训练产生的最后一个检查点保存为 HuggingFace 格式。
+  - `always`: 所有检查点均保存为 HuggingFace 格式。
+  - `never`: 不保存 HuggingFace 格式检查点。
 - `grad_clip`: 梯度裁剪阈值。
 - `use_dynamic_bsz`: 是否使用动态批量大小。
 - `max_token_len_per_gpu`: 训练过程中，每个 GPU 最大 token 长度; 当 `use_dynamic_bsz=true` 时生效。
