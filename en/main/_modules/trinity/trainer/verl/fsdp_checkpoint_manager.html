@@ -1287,6 +1287,8 @@ document.write(`
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
+                <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
                 <span class="k">def</span><span class="w"> </span><span class="nf">_save_model</span><span class="p">():</span>
                     <span class="n">runtime_context</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span>
                     <span class="n">node_id</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="o">.</span><span class="n">get_node_id</span><span class="p">()</span>
