@@ -1,7 +1,7 @@
 mode: both
 project: Trinity-RFT
-group: gsm8k-bench
-name: gsm8k-qwen2.5-1.5B
+group: ${oc.env:TRINITY_GROUP,gsm8k-bench}
+name: ${oc.env:TRINITY_NAME,gsm8k}
 checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo

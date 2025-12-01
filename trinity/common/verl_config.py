@@ -244,7 +244,7 @@ class Critic:
     ppo_max_token_len_per_gpu: Optional[int] = None
     forward_max_token_len_per_gpu: Optional[int] = None
     ulysses_sequence_parallel_size: Optional[int] = None
-    ppo_epochs: int = 0
+    ppo_epochs: int = 1
     shuffle: bool = False
     grad_clip: Optional[float] = None
     cliprange_value: float = 0.0

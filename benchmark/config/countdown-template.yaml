@@ -1,7 +1,7 @@
 mode: both
 project: Trinity-RFT
-group: countdown-bench
-name: countdown-qwen2.5-1.5B
+group: ${oc.env:TRINITY_GROUP,countdown-bench}
+name: ${oc.env:TRINITY_NAME,countdown}
 checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: ppo
@@ -72,102 +72,16 @@ trainer:
   total_steps: 1000
   enable_preview: true
   grad_clip: 1.0
+  max_token_len_per_gpu: 6400
   trainer_config:
-    actor_rollout_ref:
-      hybrid_engine: true
-      model:
-        external_lib: null
-        override_config: {}
-        enable_gradient_checkpointing: true
-        use_remove_padding: true
-      actor:
-        strategy: fsdp
-        ppo_micro_batch_size_per_gpu: 4
-        use_dynamic_bsz: true
-        ppo_max_token_len_per_gpu: 6400
-        ppo_epochs: 1
-        shuffle: false
-        ulysses_sequence_parallel_size: 1
-        checkpoint:
-          load_contents:
-          - model
-          - optimizer
-          - extra
-          save_contents:
-          - model
-          - optimizer
-          - extra
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-      ref:
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-        log_prob_micro_batch_size_per_gpu: 8
-        log_prob_use_dynamic_bsz: true
-        log_prob_max_token_len_per_gpu: 6400
-        ulysses_sequence_parallel_size: 1
-    custom_reward_function:
-      path: null
-      name: compute_score
-    algorithm:
-      kl_penalty: low_var_kl
-      kl_ctrl:
-        type: fixed
-        kl_coef: 0.001
-    trainer:
-      balance_batch: true
-      resume_mode: auto
-      resume_from_path: ''
-      critic_warmup: 0
-      default_hdfs_dir: null
-      remove_previous_ckpt_in_save: false
-      del_local_ckpt_after_load: false
-      max_actor_ckpt_to_keep: null
-      max_critic_ckpt_to_keep: null
     critic:
-      strategy: fsdp
       optim:
         lr: 1e-5
         lr_warmup_steps_ratio: 0.0
         warmup_style: constant
-      model:
-        override_config: {}
-        external_lib: null
-        enable_gradient_checkpointing: true
-        use_remove_padding: true
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-      ppo_micro_batch_size_per_gpu: 8
-      forward_micro_batch_size_per_gpu: 8
-      use_dynamic_bsz: true
       ppo_max_token_len_per_gpu: 12800
       forward_max_token_len_per_gpu: 12800
-      ulysses_sequence_parallel_size: 1
-      ppo_epochs: 1
-      shuffle: false
-      grad_clip: 1.0
       cliprange_value: 0.5
-      checkpoint:
-        load_contents:
-        - model
-        - optimizer
-        - extra
-        save_contents:
-        - model
-        - optimizer
-        - extra
 monitor:
   monitor_type: wandb
 synchronizer:
