@@ -4,7 +4,9 @@ import os
 from datasets import load_dataset
 from huggingface_hub import hf_hub_download
 
-DEFAULT_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "guru")
+DEFAULT_DATA_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "data", "guru_math"
+)
 
 
 def process_fn(example, idx):

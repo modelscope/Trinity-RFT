@@ -77,10 +77,10 @@ python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/countdown-bench.png)
 
-### 3. Guru
+### 3. Guru-Math
 To reproduce this experiment:
 ```bash
-python bench.py guru --model_path /path/to/Qwen/Qwen2.5-7B
+python bench.py guru_math --model_path /path/to/Qwen/Qwen2.5-7B
 ```
 
 #### Guru Results

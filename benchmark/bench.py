@@ -87,17 +87,16 @@ def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
         subprocess.CalledProcessError: If the generation script fails (due to check=True).
 
     Side Effects:
-        - Modifies `taskset_config` by setting the "path" key to the resolved path.
         - May create directories and files on disk via the external generation script.
         - Executes a subprocess to run the dataset generation script.
 
     Examples:
-        For dataset_name='guru' and taskset_config={"path": None},
+        For dataset_name='guru_math' and taskset_config={"path": None},
         this function will runs the following command and
-        generate the guru dataset to default location (DEFAULT_DATA_PATH in scripts/gen_guru_data.py):
+        generate the guru_math dataset to default location (DEFAULT_DATA_PATH in scripts/gen_guru_math_data.py):
 
         ```bash
-        python scripts/gen_guru_data.py --local_dir DEFAULT_DATA_PATH
+        python scripts/gen_guru_math_data.py --local_dir DEFAULT_DATA_PATH
         ```
     """
     if taskset_path:
@@ -108,7 +107,7 @@ def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
 
     dataset_script_map = {
         "countdown": "gen_countdown_data.py",
-        "guru": "gen_guru_data.py",
+        "guru_math": "gen_guru_math_data.py",
     }
     if dataset_name not in dataset_script_map:
         raise ValueError(
@@ -223,16 +222,21 @@ def main(args):
         dist.barrier()
         dist.destroy_process_group()
         cmd_list.append("--dlc")
-    if args.dataset == "guru":
-        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    # load plugins
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    plugin_dir = os.path.join(base_path, "plugins", args.dataset)
+    if os.path.exists(plugin_dir):
         cmd_list.append("--plugin-dir")
-        cmd_list.append(os.path.join(base_path, "plugins"))
+        cmd_list.append(plugin_dir)
+
+    # run command
     subprocess.run(cmd_list, check=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str.lower, choices=["gsm8k", "countdown", "guru"])
+    parser.add_argument("dataset", type=str.lower, choices=["gsm8k", "countdown", "guru_math"])
     parser.add_argument(
         "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
     )

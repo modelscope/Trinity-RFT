@@ -485,7 +485,7 @@ def compute_score(solution_str: str, ground_truth: str, extra_info: dict) -> dic
         extra_info: dict with additional info for the score computation
 
     Returns:
-        Reward score (1.0 for correct, -1.0 for incorrect)
+        Reward score (1.0 for correct, 0.0 for incorrect)
     """
     # First assert intended generation and gt type
     model_output = str(solution_str)
@@ -513,7 +513,6 @@ def compute_score(solution_str: str, ground_truth: str, extra_info: dict) -> dic
         except Exception:
             correct = False
 
-    # reward = 1.0 if correct else -1.0
     reward = 1.0 if correct else 0.0
     acc = correct
 
