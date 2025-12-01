@@ -1,7 +1,7 @@
 mode: both
 project: Trinity-RFT
-group: alfworld-bench
-name: alfworld-qwen2.5-3B
+group: ${oc.env:TRINITY_GROUP,os-bench}
+name: ${oc.env:TRINITY_NAME,alfworld}
 checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo
@@ -17,6 +17,7 @@ algorithm:
   entropy_loss_fn: default
   kl_loss_fn_args:
     kl_coef: 0.001
+data_processor: {}
 model:
   model_path: placeholder
   max_prompt_tokens: 10240
@@ -32,7 +33,7 @@ buffer:
       name: alfworld
       split: train
       storage_type: file
-      path: placeholder
+      path: null
       format:
         prompt_key: 'game_file'
       rollout_args:
@@ -42,7 +43,7 @@ buffer:
       - name: alfworld
         split: test
         storage_type: file
-        path: placeholder
+        path: null
         format:
           prompt_key: 'game_file'
         rollout_args:

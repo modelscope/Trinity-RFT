@@ -108,6 +108,8 @@ def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
     dataset_script_map = {
         "countdown": "gen_countdown_data.py",
         "guru_math": "gen_guru_math_data.py",
+        "alfworld": "get_alfworld_full_data.py",
+        "frozenlake": "../../examples/grpo_frozen_lake/get_frozen_lake_data.py",
     }
     if dataset_name not in dataset_script_map:
         raise ValueError(
@@ -133,6 +135,13 @@ def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
             raise AttributeError(f"{script_filename} is missing 'DEFAULT_DATA_PATH'")
         taskset_path = module.DEFAULT_DATA_PATH
     taskset_path = os.path.realpath(taskset_path)
+
+    # For frozenlake, check if train.parquet and test.parquet already exist
+    if dataset_name == "frozenlake":
+        train_path = os.path.join(taskset_path, "train.parquet")
+        test_path = os.path.join(taskset_path, "test.parquet")
+        if os.path.exists(train_path) and os.path.exists(test_path):
+            return taskset_path
 
     gen_script_path = os.path.join(base_dir, "scripts", script_filename)
     subprocess.run([sys.executable, gen_script_path, "--local_dir", taskset_path], check=True)
@@ -173,6 +182,11 @@ def prepare_configs(args, rank, current_time):
             args.dataset,
             args.taskset_path or os.environ.get("TASKSET_PATH") or taskset_config["path"],
         )
+        eval_taskset_config = config["buffer"]["explorer_input"]["eval_tasksets"]
+        if len(eval_taskset_config) > 0:
+            # TODO: support seperately set path for eval taskset
+            for eval_taskset_config in eval_taskset_config:
+                eval_taskset_config["path"] = taskset_config["path"]
         if args.lr:
             config["algorithm"]["optimizer"]["lr"] = args.lr
         if args.sync_interval:
@@ -236,7 +250,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str.lower, choices=["gsm8k", "countdown", "guru_math"])
+    parser.add_argument(
+        "dataset", type=str.lower, choices=["gsm8k", "countdown", "guru_math", "frozenlake"]
+    )
     parser.add_argument(
         "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
     )

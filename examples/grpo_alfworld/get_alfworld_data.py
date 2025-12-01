@@ -2,6 +2,7 @@
 We use this script to create the huggingface format dataset files for the alfworld dataset.
 NOTE: You need to install the alfworld dataset in first: https://github.com/alfworld/alfworld
 """
+import argparse
 import glob
 import json
 import os
@@ -10,16 +11,13 @@ import random
 random.seed(42)
 
 
-def create_dataset_files(output_dir, train_size=None, test_size=None):
-    # The ALFWORLD_DATA is the dataset path in the environment variable ALFWORLD_DATA, you need to set it when install alfworld dataset
-    from alfworld.info import ALFWORLD_DATA
-
+def create_dataset_files(game_data_path, output_dir, train_size=None, test_size=None):
     # get all matched game files from train and valid_seen directories
     train_game_files = glob.glob(
-        os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/train/*/*/game.tw-pddl")
+        os.path.expanduser(f"{game_data_path}/json_2.1.1/train/*/*/game.tw-pddl")
     )
     test_game_files = glob.glob(
-        os.path.expanduser(f"{ALFWORLD_DATA}/json_2.1.1/valid_seen/*/*/game.tw-pddl")
+        os.path.expanduser(f"{game_data_path}/json_2.1.1/valid_seen/*/*/game.tw-pddl")
     )
 
     # get absolute path
@@ -86,8 +84,28 @@ def create_dataset_files(output_dir, train_size=None, test_size=None):
 
 
 if __name__ == "__main__":
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = f"{current_file_dir}/alfworld_data"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--game_data_path", type=str, default=None, required=False)
+    parser.add_argument("--local_dir", type=str, default=None, required=False)
+    parser.add_argument("--train_size", type=int, default=None, required=False)
+    parser.add_argument("--test_size", type=int, default=None, required=False)
+    args = parser.parse_args()
+
+    if args.game_data_path is None:
+        # ALFWORLD_DATA is the dataset path in the environment variable
+        # you need to set it when install alfworld dataset
+        from alfworld.info import ALFWORLD_DATA
+
+        args.game_data_path = ALFWORLD_DATA
+
+    if args.local_dir is None:
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        args.local_dir = f"{current_file_dir}/alfworld_data"
+
     # use all data by default, or specify train_size and test_size if needed
-    create_dataset_files(output_dir)
-    # create_dataset_files(output_dir, train_size=1024, test_size=100) # use subset of data for testing
+    create_dataset_files(
+        game_data_path=args.game_data_path,
+        output_dir=args.local_dir,
+        train_size=args.train_size,
+        test_size=args.test_size,
+    )

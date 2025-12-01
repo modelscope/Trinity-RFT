@@ -1,7 +1,7 @@
 mode: both
 project: Trinity-RFT
-group: frozenlake-bench
-name: frozenlake-qwen2.5-3B
+group: ${oc.env:TRINITY_GROUP,frozenlake-bench}
+name: ${oc.env:TRINITY_NAME,frozenlake}
 checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo
@@ -34,7 +34,7 @@ buffer:
     taskset:
       name: frozenlake
       storage_type: file
-      path: placeholder
+      path: null
       split: train
       workflow_args:
         env_max_steps: 8
@@ -43,7 +43,7 @@ buffer:
     eval_tasksets:
       - name: frozenlake
         storage_type: file
-        path: placeholder
+        path: null
         split: test
         workflow_args:
           env_max_steps: 8
@@ -82,8 +82,8 @@ trainer:
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
-monitor:
-  monitor_type: wandb
+# monitor:
+#   monitor_type: wandb
 synchronizer:
   sync_method: nccl
   sync_style: fixed

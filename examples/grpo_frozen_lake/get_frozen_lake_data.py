@@ -1,6 +1,7 @@
 """
 Modified from https://github.com/rllm-org/rllm/blob/main/examples/frozenlake/prepare_frozenlake_data.py
 """
+import argparse
 import os
 
 import numpy as np
@@ -8,46 +9,45 @@ import pandas as pd
 
 from trinity.common.constants import TASKSET_PATH_ENV_VAR
 
-path_from_env = os.environ.get(TASKSET_PATH_ENV_VAR)
-if path_from_env is not None:
-    DATA_ROOT_DIR = os.path.dirname(path_from_env)
-else:
-    DATA_ROOT_DIR = os.path.join(os.path.dirname(__file__), "data")
+DEFAULT_DATA_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "data", "frozenlake"
+)
 
 
-def save_dataset_to_local(name: str, data: list[dict], split: str = "default") -> str:
-    """Save dataset directly to local DATA_PATH.
+def save_dataset_to_local(data_path: str, data: list[dict], split: str = "default") -> str:
+    """Save dataset directly to local data_path.
 
     Args:
-        name: Name of the dataset
+        data_path: Path to save the dataset
         data: List of dictionaries containing the dataset examples
         split: Split name (e.g., 'train', 'test', 'default')
 
     Returns:
         str: Path to the saved parquet file
     """
-    dataset_dir = os.path.join(DATA_ROOT_DIR, name)
-    os.makedirs(dataset_dir, exist_ok=True)
+    os.makedirs(data_path, exist_ok=True)
 
     # Convert to DataFrame and save
     data_df = pd.DataFrame(data)
-    dataset_path = os.path.join(dataset_dir, f"{split}.parquet")
+    dataset_path = os.path.join(data_path, f"{split}.parquet")
     data_df.to_parquet(dataset_path)
 
     print(
-        f"Saved dataset '{name}' split '{split}' with {len(data)} examples at {dataset_path}. Make sure to set the environment variable {TASKSET_PATH_ENV_VAR} to {DATA_ROOT_DIR}/{name}."
+        f"Saved dataset frozenlake split '{split}' with {len(data)} examples at {dataset_path}. Make sure to set the environment variable {TASKSET_PATH_ENV_VAR} to {data_path}."
     )
 
     return dataset_path
 
 
-def prepare_frozenlake_data(train_size=10000, test_size=100, map_max_size=6):
+def prepare_frozenlake_data(data_path, train_size=10000, test_size=100, map_max_size=6):
     """
     Prepare and save FrozenLake datasets for training and testing.
 
     Args:
+        data_path (str): Path to save the dataset
         train_size (int): Number of training examples to generate
         test_size (int): Number of test examples to generate
+        map_max_size (int): Maximum size of the map
 
     Returns:
         tuple: (train_data, test_data) - Lists of data dictionaries
@@ -78,14 +78,27 @@ def prepare_frozenlake_data(train_size=10000, test_size=100, map_max_size=6):
     ]
 
     # Save datasets directly to local DATA_PATH
-    save_dataset_to_local("frozenlake", train_data, "train")
-    save_dataset_to_local("frozenlake", test_data, "test")
+    save_dataset_to_local(data_path, train_data, "train")
+    save_dataset_to_local(data_path, test_data, "test")
 
     return train_data, test_data
 
 
 if __name__ == "__main__":
-    train_data, test_data = prepare_frozenlake_data()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--local_dir", default=DEFAULT_DATA_PATH)
+    parser.add_argument("--train_size", type=int, default=10000)
+    parser.add_argument("--test_size", type=int, default=100)
+    parser.add_argument("--map_max_size", type=int, default=6)
+    args = parser.parse_args()
+
+    train_data, test_data = prepare_frozenlake_data(
+        data_path=args.local_dir,
+        train_size=args.train_size,
+        test_size=args.test_size,
+        map_max_size=args.map_max_size,
+    )
+
     print(f"Train dataset: {len(train_data)} examples")
     print(f"Test dataset: {len(test_data)} examples")
     print("Sample train example:", train_data[0])
