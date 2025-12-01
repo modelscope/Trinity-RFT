@@ -5,7 +5,7 @@ from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 
 
 @REWARD_FUNCTIONS.register_module("math_boxed_reward_naive_dapo")
-class NaiveDpoRewardFn(MathBoxedRewardFn):
+class NaiveDapoRewardFn(MathBoxedRewardFn):
     def __call__(  # type: ignore
         self,
         response: str,

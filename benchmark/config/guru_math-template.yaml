@@ -1,7 +1,7 @@
 mode: both
 project: Trinity-RFT
-group: ${oc.env:TRINITY_GROUP,guru-bench}
-name: ${oc.env:TRINITY_NAME,guru}
+group: ${oc.env:TRINITY_GROUP,guru_math-bench}
+name: ${oc.env:TRINITY_NAME,guru_math}
 checkpoint_root_dir: placeholder
 model:
   model_path: Qwen/Qwen2.5-7B
@@ -48,10 +48,6 @@ buffer:
       storage_type: queue
       replay_buffer:
         enable: false
-        priority_fn: linear_decay
-        reuse_cooldown_time: null
-        priority_fn_args:
-          decay: 2.0
 explorer:
   eval_interval: 10
   runner_per_model: 8

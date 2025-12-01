@@ -66,7 +66,7 @@ def set_engine_num(config, args):
 def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
     """Ensures the taskset path exists for the given dataset; generates it if necessary.
 
-    This function checks whether the 'path' specified in taskset_config exists. If not,
+    This function checks whether `taskset_path` exists. If not,
     it uses a corresponding data generation script (e.g., gen_countdown_data.py) to create
     the dataset at the default or provided location. The generator scripts are expected
     to be located in the 'scripts/' subdirectory relative to this file.
@@ -91,9 +91,9 @@ def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
         - Executes a subprocess to run the dataset generation script.
 
     Examples:
-        For dataset_name='guru_math' and taskset_config={"path": None},
-        this function will runs the following command and
-        generate the guru_math dataset to default location (DEFAULT_DATA_PATH in scripts/gen_guru_math_data.py):
+        For dataset_name='guru_math' and taskset_path=None, this function will runs the
+        following command and generate the guru_math dataset to default location
+        (DEFAULT_DATA_PATH in scripts/gen_guru_math_data.py):
 
         ```bash
         python scripts/gen_guru_math_data.py --local_dir DEFAULT_DATA_PATH
