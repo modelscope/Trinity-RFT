@@ -23,27 +23,17 @@ To filter the unsolvable tasks, we restrict the game map to have a valid path wi
 
 We evaluate the performance of the following methods in Trinity-RFT framework with version [0.3.3](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3) and compare against the latest release of rLLM with commit ID [ef6451f](https://github.com/rllm-org/rllm/commit/ef6451fbd7eba224c4a87e3fd944d7c0e2bcc0ea) as of Nov. 6, 2025.
 
-
 We fine-tune a Qwen2.5-3B-Instruct model using the training tasks with GRPO. For all experiments, we fix key parameters to `batch_size=64`, `repeat_times=8`, and `lr=1e-6`. We run each experiment for three times and report the average results.
-
 
 For fair comparison, we optimize the configurations related to the training efficiency to achieve better performance. For rLLM, we adopt the default configurations in ` examples/frozenlake/train_frozenlake_agent.sh` except that we increase the batch size to 64 for stability and set the number of rollout workers to 64 for efficiency. For Trinity-RFT, we set the `explorer.engine_num` to 4 for efficiency.
 
-
----
-
 ## 3. Results and Analysis
-
-
 
 We compare the sample efficiency of different methods by plotting the reward and test score in the following figures. At the same step, Trinity-RFT and rLLM achieve similar rewards and test scores, verifying the training correctness.
 
-
 ![](../../docs/sphinx_doc/assets/bench_frozenlake_step.png)
 
-
-The following table details the wall-clock time required for each method to reach a specific performance threshold. From the results, Trinity-RFT requires less time to reach the 
-
+The following table details the wall-clock time required for each method to reach a specific performance threshold. From the results, Trinity-RFT requires less time to reach the target performance.
 
 | Method | Training Reward | Time to Reach Target (Hours) | Speedup |
 |----------|------------------|-------------------------------|---------|
@@ -51,7 +41,6 @@ The following table details the wall-clock time required for each method to reac
 | Trinity-RFT | 0.6188 | 2.87 | 1.38× |
 | rLLM | 0.8007 | 5.91 | - |
 | Trinity-RFT | 0.8033 | 5.44 | 1.09× |
-
 
 | Method | Test Score | Time to Reach Target (Hours) | Speedup |
 |----------|------------------|-------------------------------|---------|
