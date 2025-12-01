@@ -1,0 +1,91 @@
+mode: both
+project: Trinity-RFT
+group: frozenlake-bench
+name: frozenlake-qwen2.5-3B
+checkpoint_root_dir: placeholder
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 8
+  loss_agg_mode: "seq-mean-token-sum"
+  optimizer:
+    lr: 1e-6
+  policy_loss_fn: ppo
+  advantage_fn: grpo
+  kl_penalty_fn: none
+  kl_loss_fn: k2
+  entropy_loss_fn: default
+  policy_loss_fn_args:
+    clip_range_low: 0.2
+    clip_range_high: 0.28
+  kl_loss_fn_args:
+    kl_coef: 0.0
+data_processor: {}
+model:
+  model_path: Qwen/Qwen2.5-3B-Instruct
+  max_prompt_tokens: 4096
+  max_response_tokens: 10240
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  batch_size: 64
+  total_epochs: 3
+  explorer_input:
+    taskset:
+      name: frozenlake
+      storage_type: file
+      path: placeholder
+      split: train
+      workflow_args:
+        env_max_steps: 8
+        agent_max_steps: 10
+        is_slippery: false
+    eval_tasksets:
+      - name: frozenlake
+        storage_type: file
+        path: placeholder
+        split: test
+        workflow_args:
+          env_max_steps: 8
+          agent_max_steps: 10
+          is_slippery: false
+        repeat_times: 4
+        rollout_args:
+          temperature: 0.7
+          top_p: 0.8
+          top_k: 20
+    default_workflow_type: 'frozen_lake_workflow'
+explorer:
+  eval_on_startup: true
+  eval_interval: 10
+  runner_per_model: 8
+  max_timeout: 900
+  max_retry_times: 2
+  rollout_model:
+    engine_num: 4
+    tensor_parallel_size: 1
+    enforce_eager: false
+    enable_prefix_caching: false
+    enable_chunked_prefill: true
+    gpu_memory_utilization: 0.85
+    dtype: bfloat16
+    seed: 42
+    enable_thinking: false
+    enable_openai_api: false
+  auxiliary_models: []
+  bench_on_latest_checkpoint: true
+trainer:
+  trainer_type: verl
+  save_interval: 1000
+  enable_preview: true
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  max_token_len_per_gpu: 16384
+  ulysses_sequence_parallel_size: 1
+monitor:
+  monitor_type: wandb
+synchronizer:
+  sync_method: nccl
+  sync_style: fixed
+  sync_interval: 1
+  sync_timeout: 1200
