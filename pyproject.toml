@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]

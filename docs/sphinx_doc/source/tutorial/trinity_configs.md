@@ -436,10 +436,12 @@ Specifies the backend and behavior of the trainer.
 ```yaml
 trainer:
   name: trainer
-  trainer_type: 'verl'
-  save_interval: 100
+  trainer_type: "verl"
+  trainer_strategy: "fsdp"
   total_steps: 1000
+  save_interval: 100
   save_strategy: "unrestricted"
+  save_hf_checkpoint: "last"
   grad_clip: 1.0
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
@@ -449,13 +451,21 @@ trainer:
 
 - `name`: Name of the trainer. This name will be used as the Ray actor's name, so it must be unique.
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
-- `save_interval`: Frequency (in steps) at which to save model checkpoints.
+- `trainer_strategy`: Strategy for VeRL trainer. Default is `fsdp`. Options include:
+  - `fsdp`: Use PyTorch FSDP.
+  - `fsdp2`: Use PyTorch FSDP2.
+  - `megatron`: Use Megatron-LM.
 - `total_steps`: Total number of training steps.
+- `save_interval`: Frequency (in steps) at which to save model checkpoints.
 - `save_strategy`: The parallel strategy used when saving the model. Defaults to `unrestricted`. The available options are as follows:
   - `single_thread`: Only one thread across the entire system is allowed to save the model; saving tasks from different threads are executed sequentially.
   - `single_process`: Only one process across the entire system is allowed to perform saving; multiple threads within that process can handle saving tasks in parallel, while saving operations across different processes are executed sequentially.
   - `single_node`: Only one compute node across the entire system is allowed to perform saving; processes and threads within that node can work in parallel, while saving operations across different nodes are executed sequentially.
   - `unrestricted`: No restrictions on saving operations; multiple nodes, processes, or threads are allowed to save the model simultaneously.
+- `save_hf_checkpoint`: Whether to save the model in HuggingFace format. Default is `last`. Note that saving in HuggingFace format consumes additional time, storage space, and GPU memory, which may impact training performance or lead to out-of-memory errors. Options include:
+  - `last`: Save only the last checkpoint in HuggingFace format.
+  - `always`: Save all checkpoints in HuggingFace format.
+  - `never`: Do not save in HuggingFace format.
 - `grad_clip`: Gradient clipping for updates.
 - `use_dynamic_bsz`: Whether to use dynamic batch size.
 - `max_token_len_per_gpu`:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when `use_dynamic_bsz=true`.

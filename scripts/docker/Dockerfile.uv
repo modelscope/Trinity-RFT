@@ -1,0 +1,62 @@
+# This Dockerfile sets up a Trinity-RFT environment with Megatron support using uv.
+# Build and run the docker image with the following command:
+#
+# cd <Trinity-RFT root dir>
+# docker build -f scripts/docker/Dockerfile.uv -t trinity-rft:latest .
+# docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
+#
+# Note:
+# 1. This Dockerfile uses 'uv' to create a virtual environment for better package management. If you want a simpler setup without 'uv', please refer to `scripts/docker/Dockerfile`.
+# 2. Make sure to use `uv pip` to install packages within the virtual environment.
+
+FROM nvcr.io/nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
+
+WORKDIR /workspace
+
+RUN chmod 1777 /tmp && apt update && apt install -y \
+    build-essential \
+    curl git wget vim tmux net-tools \
+    python3 python3-pip python3-dev python3-packaging python3-venv \
+    libomp-dev infiniband-diags libibverbs-dev librdmacm-dev rdma-core perftest \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    && ln -sf /usr/bin/pip3 /usr/bin/pip
+
+# For Aliyun users: update pip mirror to aliyun to speed up pip install
+# ENV PIP_INDEX_URL=http://mirrors.cloud.aliyuncs.com/pypi/simple/
+# ENV PIP_TRUSTED_HOST=mirrors.cloud.aliyuncs.com
+
+ENV VIRTUAL_ENV=/opt/venv
+
+# copy the Trinity-RFT dir into the workspace
+COPY . .
+
+# Install uv
+RUN pip install uv && uv venv /opt/venv --python=python3.12
+
+# Install minimal Trinity-RFT
+RUN . /opt/venv/bin/activate && \
+    uv pip install -e.[mm,dev]
+
+# Install flash_attn and Megatron
+RUN . /opt/venv/bin/activate && \
+    uv pip install flash_attn==2.8.1 --no-deps --no-cache-dir && \
+    uv pip install -e .[megatron] && \
+    NVCC_APPEND_FLAGS="--threads 4" APEX_PARALLEL_BUILD=8 \
+    uv pip install -v --no-build-isolation \
+    --config-settings="--build-option=--cpp_ext" \
+    --config-settings="--build-option=--cuda_ext" \
+    git+https://github.com/NVIDIA/apex.git
+
+# Set Env variables
+
+# WANDB
+# ENV WANDB_API_KEY=
+# ENV WANDB_BASE_URL=
+
+# LLM API
+# ENV OPENAI_API_KEY=
+# ENV DASH_API_KEY=
+
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/venv/bin/activate && exec \"$@\"", "--"]
+CMD ["bash"]

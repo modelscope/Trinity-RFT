@@ -45,6 +45,7 @@ explorer:
 trainer:
   trainer_type: verl
   save_interval: 100
+  save_hf_checkpoint: never
   grad_clip: 1.0
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384

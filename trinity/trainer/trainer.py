@@ -63,6 +63,7 @@ class Trainer:
         self.last_sync_step = None
         self.last_sync_time = None
         self.total_steps = config.trainer.total_steps or float("inf")
+        self.save_hf_checkpoint = config.trainer.save_hf_checkpoint
 
     async def prepare(self) -> None:
         """Prepare the trainer."""
@@ -90,7 +91,9 @@ class Trainer:
                 if await self.need_sync():
                     metrics.update(await self.sync_weight())
                 if self.need_save():
-                    metrics.update(self.save_checkpoint())
+                    metrics.update(
+                        self.save_checkpoint(save_as_hf=self.save_hf_checkpoint == "always")
+                    )
                 if self.config.trainer.enable_preview:
                     self._log_experiences(repr_samples)
                 self.monitor.log(metrics, self.train_step_num)
@@ -101,7 +104,7 @@ class Trainer:
                 self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
                 break
 
-        self.save_checkpoint(block_until_saved=True, save_as_hf=True)
+        self.save_checkpoint(block_until_saved=True, save_as_hf=self.save_hf_checkpoint != "never")
         await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name

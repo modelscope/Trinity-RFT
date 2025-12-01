@@ -1,3 +1,4 @@
+# This Dockerfile sets up a Trinity-RFT environment with minimal support.
 # Build and run the docker image with the following command:
 #
 # cd <Trinity-RFT root dir>
@@ -9,7 +10,7 @@ FROM nvcr.io/nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 
 WORKDIR /workspace
 
-RUN apt update && apt install -y \
+RUN chmod 1777 /tmp && apt update && apt install -y \
     build-essential \
     curl git wget vim tmux net-tools \
     python3 python3-pip python3-dev python3-packaging \

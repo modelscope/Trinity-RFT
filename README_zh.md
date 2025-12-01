@@ -88,6 +88,7 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 ## 🚀 新闻
 
+* [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 发布：修复若干 Bug。
 * [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
 * [2025-11] 推出 [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)：在线 RL 任务选择，实现高效 LLM 微调（[论文](https://arxiv.org/pdf/2510.26374)）。
 * [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.2)] Trinity-RFT v0.3.2 发布：修复若干 Bug 并支持进阶的任务选择和调度。
@@ -129,7 +130,7 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 在安装之前，请确保您的系统满足以下要求：
 
 - **Python**：版本 3.10 至 3.12（含）
-- **CUDA**：版本 >= 12.6
+- **CUDA**：版本 >= 12.8
 - **GPU**：至少 2 块 GPU
 
 ## 源码安装（推荐）

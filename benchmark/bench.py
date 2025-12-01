@@ -1,6 +1,8 @@
 import argparse
+import importlib
 import os
 import subprocess
+import sys
 import time
 
 import torch
@@ -8,14 +10,14 @@ import torch.distributed as dist
 import yaml
 
 from trinity.algorithm.algorithm import ALGORITHM_TYPE
-from trinity.common.constants import MODEL_PATH_ENV_VAR
+from trinity.common.constants import MODEL_PATH_ENV_VAR, SyncStyle
 from trinity.utils.dlc_utils import get_dlc_env_vars
 
 
 def set_engine_num(config, args):
     config["cluster"]["node_num"] = args.node_num
     config["cluster"]["gpu_per_node"] = args.gpu_per_node
-    batch_size = config["buffer"]["batch_size"]
+    batch_size = config["buffer"]["batch_size"] * config["algorithm"]["repeat_times"]
     if config["mode"] == "train":
         return
 
@@ -61,6 +63,83 @@ def set_engine_num(config, args):
         config["explorer"]["rollout_model"]["engine_num"] = opt_explorer_num
 
 
+def check_taskset_path(dataset_name: str, taskset_path: str) -> str:
+    """Ensures the taskset path exists for the given dataset; generates it if necessary.
+
+    This function checks whether `taskset_path` exists. If not,
+    it uses a corresponding data generation script (e.g., gen_countdown_data.py) to create
+    the dataset at the default or provided location. The generator scripts are expected
+    to be located in the 'scripts/' subdirectory relative to this file.
+
+    Args:
+        dataset_name: Name of the dataset (e.g., "countdown", "guru").
+            Must be one of the supported datasets defined in `dataset_script_map`.
+        taskset_path: Path to the dataset.
+
+    Returns:
+        str: The resolved path to the dataset.
+
+    Raises:
+        ValueError: If the `dataset_name` is not supported.
+        FileNotFoundError: If the corresponding generator script does not exist.
+        ImportError: If the generator module fails to load.
+        AttributeError: If the loaded module does not define 'DEFAULT_DATA_PATH'.
+        subprocess.CalledProcessError: If the generation script fails (due to check=True).
+
+    Side Effects:
+        - May create directories and files on disk via the external generation script.
+        - Executes a subprocess to run the dataset generation script.
+
+    Examples:
+        For dataset_name='guru_math' and taskset_path=None, this function will runs the
+        following command and generate the guru_math dataset to default location
+        (DEFAULT_DATA_PATH in scripts/gen_guru_math_data.py):
+
+        ```bash
+        python scripts/gen_guru_math_data.py --local_dir DEFAULT_DATA_PATH
+        ```
+    """
+    if taskset_path:
+        if os.path.exists(taskset_path):
+            return taskset_path
+        if dataset_name == "gsm8k" and taskset_path == "openai/gsm8k":
+            return taskset_path
+
+    dataset_script_map = {
+        "countdown": "gen_countdown_data.py",
+        "guru_math": "gen_guru_math_data.py",
+    }
+    if dataset_name not in dataset_script_map:
+        raise ValueError(
+            f"Unsupported dataset: {dataset_name}. Please specify a valid taskset path."
+        )
+
+    base_dir = os.path.dirname(__file__)
+    script_filename = dataset_script_map[dataset_name]
+    script_module_name = script_filename[:-3]  # remove .py
+
+    script_file_path = os.path.join(base_dir, "scripts", script_filename)
+    if not os.path.exists(script_file_path):
+        raise FileNotFoundError(f"Generator script not found: {script_file_path}")
+
+    spec = importlib.util.spec_from_file_location(script_module_name, script_file_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load spec for module: {script_module_name}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if taskset_path is None:
+        if not hasattr(module, "DEFAULT_DATA_PATH"):
+            raise AttributeError(f"{script_filename} is missing 'DEFAULT_DATA_PATH'")
+        taskset_path = module.DEFAULT_DATA_PATH
+    taskset_path = os.path.realpath(taskset_path)
+
+    gen_script_path = os.path.join(base_dir, "scripts", script_filename)
+    subprocess.run([sys.executable, gen_script_path, "--local_dir", taskset_path], check=True)
+
+    return taskset_path
+
+
 def prepare_configs(args, rank, current_time):
     base_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -89,18 +168,19 @@ def prepare_configs(args, rank, current_time):
             )
             if args.critic_lr:
                 config["trainer"]["trainer_config"]["critic"]["optim"]["lr"] = args.critic_lr
-        config["buffer"]["explorer_input"]["taskset"]["path"] = (
-            args.taskset_path
-            or os.environ.get("TASKSET_PATH")
-            or config["buffer"]["explorer_input"]["taskset"]["path"]
+        taskset_config = config["buffer"]["explorer_input"]["taskset"]
+        taskset_config["path"] = check_taskset_path(
+            args.dataset,
+            args.taskset_path or os.environ.get("TASKSET_PATH") or taskset_config["path"],
         )
-        assert (
-            config["buffer"]["explorer_input"]["taskset"]["path"] is not None
-        ), "Please specify taskset path."
         if args.lr:
             config["algorithm"]["optimizer"]["lr"] = args.lr
         if args.sync_interval:
             config["synchronizer"]["sync_interval"] = args.sync_interval
+        if args.sync_offset:
+            config["synchronizer"]["sync_offset"] = args.sync_offset
+        if args.sync_style:
+            config["synchronizer"]["sync_style"] = args.sync_style
 
         with open(config_path, "w") as f:
             yaml.dump(config, f, allow_unicode=True, sort_keys=False)
@@ -131,7 +211,7 @@ def main(args):
         rank, current_time = 0, time.time()
     config_path = prepare_configs(args, rank, current_time)
     cmd_list = [
-        "python",
+        sys.executable,
         "-m",
         "trinity.cli.launcher",
         "run",
@@ -142,12 +222,21 @@ def main(args):
         dist.barrier()
         dist.destroy_process_group()
         cmd_list.append("--dlc")
+
+    # load plugins
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    plugin_dir = os.path.join(base_path, "plugins", args.dataset)
+    if os.path.exists(plugin_dir):
+        cmd_list.append("--plugin-dir")
+        cmd_list.append(plugin_dir)
+
+    # run command
     subprocess.run(cmd_list, check=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str, choices=["gsm8k", "countdown", "openr1"])
+    parser.add_argument("dataset", type=str.lower, choices=["gsm8k", "countdown", "guru_math"])
     parser.add_argument(
         "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
     )
@@ -190,6 +279,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--sync_interval", type=int, default=None, help="Specify the sync interval."
+    )
+    parser.add_argument("--sync_offset", type=int, default=None, help="Specify the sync offset.")
+    parser.add_argument(
+        "--sync_style",
+        type=str,
+        default=None,
+        choices=[sync_style.value for sync_style in SyncStyle],
     )
     args = parser.parse_args()
     main(args)

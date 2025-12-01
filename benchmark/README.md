@@ -69,16 +69,23 @@ The chart below shows performance based on this [commit](https://github.com/mode
 ![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
 
 ### 2. Countdown
-First generate data, then run the benchmark:
+To reproduce this experiment:
 ```bash
-# Step 1: Generate data
-python benchmark/scripts/gen-countdown-data.py --local_dir /your/data/path
-# Step 2: Run benchmark
-python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct --taskset_path /your/data/path
+python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
 ```
 #### Countdown Results
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/countdown-bench.png)
+
+### 3. Guru-Math
+To reproduce this experiment:
+```bash
+python bench.py guru_math --model_path /path/to/Qwen/Qwen2.5-7B
+```
+
+#### Guru Results
+The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/fbf6c967bcd637bfd9f81fb4d7dd4961d7d5a407).
+![View Results](../docs/sphinx_doc/assets/guru-bench.png)
 
 *More benchmarks will be added soon!*
 

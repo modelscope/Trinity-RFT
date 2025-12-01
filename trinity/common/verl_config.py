@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.common.config import Config, SynchronizerConfig
+from trinity.common.config import Config, SynchronizerConfig, set_if_none
 from trinity.common.constants import EXPLORER_NAME
 from trinity.utils.log import get_logger
 
@@ -137,7 +137,7 @@ class ProfileConfig:
 
 @dataclass
 class Actor:
-    strategy: str = "fsdp"
+    strategy: Optional[str] = None
     ppo_mini_batch_size: int = 256
     ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
@@ -232,7 +232,7 @@ class CriticModel:
 
 @dataclass
 class Critic:
-    strategy: str = "fsdp"
+    strategy: Optional[str] = None
     optim: Optim = field(default_factory=Optim)
     model: CriticModel = field(default_factory=CriticModel)
     ppo_mini_batch_size: int = 0
@@ -244,7 +244,7 @@ class Critic:
     ppo_max_token_len_per_gpu: Optional[int] = None
     forward_max_token_len_per_gpu: Optional[int] = None
     ulysses_sequence_parallel_size: Optional[int] = None
-    ppo_epochs: int = 0
+    ppo_epochs: int = 1
     shuffle: bool = False
     grad_clip: Optional[float] = None
     cliprange_value: float = 0.0
@@ -270,7 +270,7 @@ class _RewardModel:
 @dataclass
 class RewardModel:
     enable: bool = False
-    strategy: str = "fsdp"
+    strategy: Optional[str] = None
     model: _RewardModel = field(default_factory=_RewardModel)
     micro_batch_size_per_gpu: int = 1
     max_length: Optional[int] = None
@@ -416,6 +416,7 @@ class veRLConfig:
         self.critic.ray_namespace = config.synchronizer.ray_namespace
 
         # Actor / Rollout Config
+        set_if_none(self.actor_rollout_ref.actor, "strategy", config.trainer.trainer_strategy)
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.actor_rollout_ref.model.rope_scaling = config.model.rope_scaling
@@ -488,7 +489,7 @@ class veRLConfig:
             )
 
         # Critic config
-        self.critic.strategy = self.actor_rollout_ref.actor.strategy
+        set_if_none(self.critic, "strategy", config.trainer.trainer_strategy)
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
         self.critic.ppo_mini_batch_size = config.buffer.train_batch_size

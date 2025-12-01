@@ -683,11 +683,17 @@ class ExplorerConfig:
 class TrainerConfig:
     name: str = TRAINER_NAME
     trainer_type: str = "verl"
+    trainer_strategy: str = "fsdp"
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
     total_steps: Optional[
         int
     ] = None  # total training steps, training stops when reaching this step, None means no limit
+
+    save_hf_checkpoint: str = "last"  # whether to save checkpoint in HuggingFace format
+    # "always": save all checkpoints in HF format
+    # "never": never save checkpoint in HF format
+    # "last": only save the last checkpoint in HF format
 
     # trainer configs
     grad_clip: float = 1.0
@@ -1217,6 +1223,8 @@ class Config:
                     setattr(new_config, field_name, stage_value)
             if stage.stage_name:
                 new_config.name = f"{self.name}/{stage.stage_name}"
+            # set trainer.save_hf_checkpoint to "last" to make sure next stage can load from HF checkpoint
+            new_config.trainer.save_hf_checkpoint = "last"
             new_config.stages = []
             yield new_config
 
@@ -1397,6 +1405,11 @@ class Config:
                 if self.trainer.max_token_len_per_gpu is None:
                     self.trainer.max_token_len_per_gpu = math.ceil(
                         2 * self.model.max_model_len / self.trainer.ulysses_sequence_parallel_size  # type: ignore [operator]
+                    )
+                if self.trainer.save_hf_checkpoint not in {"last", "always", "never"}:
+                    raise ValueError(
+                        f"Invalid trainer.save_hf_checkpoint: {self.trainer.save_hf_checkpoint}, "
+                        "must be one of 'last', 'always', or 'never'."
                     )
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")

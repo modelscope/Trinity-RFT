@@ -90,6 +90,7 @@ class TestTrainerCountdown(BaseTrainerCase):
         eval_tasksets[0].repeat_times = 4
         eval_tasksets[1].repeat_times = 4
         self.config.trainer.save_interval = 4
+        self.config.trainer.save_hf_checkpoint = "always"
         self.config.check_and_update()
         _trainer_config = self.config.trainer.trainer_config
         if self.strategy == "megatron":
@@ -134,6 +135,12 @@ class TestTrainerCountdown(BaseTrainerCase):
         )
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_4, "actor"))) > 0)
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))) > 0)
+        self.assertTrue(
+            len(os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))) > 0
+        )
+        self.assertTrue(
+            len(os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))) > 0
+        )
         self.assertEqual(step_num, 8)
         ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
         # test bench mode
@@ -234,10 +241,10 @@ class TestTrainerGSM8K(BaseTrainerCase):
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.trainer.trainer_strategy = self.fsdp_strategy
         self.config.check_and_update()
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         actor_rollout_ref = self.config.trainer.trainer_config.actor_rollout_ref
-        actor_rollout_ref.actor.strategy = self.fsdp_strategy
         actor_rollout_ref.actor.optim.lr = 1e-5
         if self.fsdp_strategy == "fsdp":
             actor_rollout_ref.actor.fsdp_config.param_offload = self.offloading
@@ -679,16 +686,16 @@ class TestTrainerCheckpointSave(unittest.TestCase):
         self.config.explorer.eval_interval = 4
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         self.config.trainer.save_interval = 4
+        self.config.trainer.save_hf_checkpoint = "last"
+        self.config.trainer.trainer_strategy = self.strategy
         self.config.check_and_update()
 
     def test_trainer(self):
         """Test the checkpoint saving."""
         _trainer_config = self.config.trainer.trainer_config
         if self.strategy == "megatron":
-            _trainer_config.actor_rollout_ref.actor.strategy = "megatron"
             _trainer_config.actor_rollout_ref.actor.megatron.tensor_model_parallel_size = 2
             _trainer_config.actor_rollout_ref.ref.megatron.tensor_model_parallel_size = 2
-            _trainer_config.critic.strategy = "megatron"
             _trainer_config.critic.megatron.tensor_model_parallel_size = 2
         _trainer_config.trainer.max_actor_ckpt_to_keep = 2
         _trainer_config.trainer.max_critic_ckpt_to_keep = 2
