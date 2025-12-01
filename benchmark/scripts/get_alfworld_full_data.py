@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+import sys
 
 DEFAULT_DATA_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "data", "alfworld"
@@ -26,10 +27,21 @@ if __name__ == "__main__":
         subprocess.run(["alfworld-download"], check=True, env=env)
 
     # Step 2: Run the script to get the mapping file
-    subprocess.run(
+    base_dir = os.path.dirname(__file__)
+    data_prepare_path = os.path.abspath(
+        os.path.join(
+            base_dir,
+            "..",
+            "..",
+            "examples",
+            "grpo_alfworld",
+            "get_alfworld_data.py",
+        )
+    )
+    subprocess.executable(
         [
-            "python",
-            "../../examples/grpo_alfworld/get_alfworld_data.py",
+            sys.executable,
+            data_prepare_path,
             "--game_data_path",
             game_data_dir,
             "--local_dir",
