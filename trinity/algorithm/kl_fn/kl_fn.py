@@ -85,7 +85,7 @@ class KLFn(ABC):
         old_logprob: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Dict]:
         """Compute KL loss.
-        
+
         Args:
             logprob: Log probabilities from current policy
             ref_logprob: Log probabilities from reference policy
@@ -109,7 +109,7 @@ class KLFn(ABC):
         old_logprob: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """Compute KL divergence between logprob and ref_logprob.
-        
+
         Args:
             logprob: Log probabilities from current policy
             ref_logprob: Log probabilities from reference policy
@@ -236,18 +236,18 @@ class AbsFn(KLFn):
 class CorrectedK3Fn(KLFn):
     """
     Corrected K3 function with importance sampling.
-    
+
     This method applies importance sampling correction to the standard K3 KL divergence.
     The corrected KL is computed as:
-    
+
         KL_corrected = (π_θ / π_old) * KL_standard(π_ref || π_θ)
-    
+
     where:
         - π_θ: current policy
         - π_old: old policy (from rollout)
         - π_ref: reference policy
         - KL_standard: exp(log(π_ref/π_θ)) - log(π_ref/π_θ) - 1
-    
+
     If old_logprob is not provided, it falls back to standard K3.
     """
 
@@ -258,12 +258,12 @@ class CorrectedK3Fn(KLFn):
         old_logprob: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """Compute corrected K3 KL divergence with importance sampling.
-        
+
         Args:
             logprob: Log probabilities from current policy (log π_θ)
             ref_logprob: Log probabilities from reference policy (log π_ref)
             old_logprob: Log probabilities from old policy (log π_old), optional
-            
+
         Returns:
             KL divergence tensor with same shape as input
         """
@@ -271,17 +271,17 @@ class CorrectedK3Fn(KLFn):
         # where log_ratio = log(π_ref / π_θ) = ref_logprob - logprob
         logr = ref_logprob - logprob
         kl_term = torch.exp(logr) - logr - 1
-        
+
         if old_logprob is None:
             # Fall back to standard K3 if old_logprob is not provided
             return kl_term
-        
+
         # Compute importance sampling ratio: π_θ / π_old
         # Clamp for numerical stability
         log_ratio_is = torch.clamp(logprob - old_logprob, min=-20.0, max=20.0)
         ratio_is = torch.exp(log_ratio_is)
-        
+
         # Corrected KL with importance sampling
         corrected_kl = ratio_is * kl_term
-        
+
         return corrected_kl

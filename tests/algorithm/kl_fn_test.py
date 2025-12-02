@@ -128,4 +128,3 @@ class KLFnTest(unittest.TestCase):
             old_logprob=self.old_logprob,
         )
         self.assertGreater(kl_loss_sum.item(), kl_loss_mean.item())
-
