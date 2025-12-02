@@ -1007,9 +1007,18 @@ document.write(`
         <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">response_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute KL loss.&quot;&quot;&quot;</span>
-        <span class="n">kl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kl</span><span class="p">(</span><span class="n">logprob</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute KL loss.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logprob: Log probabilities from current policy</span>
+<span class="sd">            ref_logprob: Log probabilities from reference policy</span>
+<span class="sd">            response_mask: Mask for valid response tokens</span>
+<span class="sd">            loss_agg_mode: Loss aggregation mode</span>
+<span class="sd">            old_logprob: Log probabilities from old policy (for importance sampling)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kl</span><span class="p">(</span><span class="n">logprob</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">,</span> <span class="n">old_logprob</span><span class="p">)</span>
         <span class="n">kl_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span><span class="n">kl</span><span class="p">,</span> <span class="n">response_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">loss_agg_mode</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;kl_loss&quot;</span><span class="p">:</span> <span class="n">kl_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
@@ -1021,8 +1030,19 @@ document.write(`
 <div class="viewcode-block" id="KLFn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.KLFn.calculate_kl">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute KL divergence between logprob and ref_logprob.&quot;&quot;&quot;</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute KL divergence between logprob and ref_logprob.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logprob: Log probabilities from current policy</span>
+<span class="sd">            ref_logprob: Log probabilities from reference policy</span>
+<span class="sd">            old_logprob: Log probabilities from old policy (for importance sampling)</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="KLFn.default_args">
@@ -1045,7 +1065,12 @@ document.write(`
 
 <div class="viewcode-block" id="DummyKLFn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.DummyKLFn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">logprob</span><span class="p">)</span></div>
 
 
@@ -1064,6 +1089,7 @@ document.write(`
         <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">response_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="c1"># return a zero tensor</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="p">{}</span></div>
@@ -1081,7 +1107,12 @@ document.write(`
 
 <div class="viewcode-block" id="K1Fn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K1Fn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">logprob</span> <span class="o">-</span> <span class="n">ref_logprob</span></div>
 </div>
 
@@ -1097,7 +1128,12 @@ document.write(`
 
 <div class="viewcode-block" id="K2Fn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K2Fn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">logprob</span> <span class="o">-</span> <span class="n">ref_logprob</span><span class="p">)</span><span class="o">.</span><span class="n">square</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.5</span></div>
 </div>
 
@@ -1113,7 +1149,12 @@ document.write(`
 
 <div class="viewcode-block" id="K3Fn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K3Fn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="n">logr</span> <span class="o">=</span> <span class="n">ref_logprob</span> <span class="o">-</span> <span class="n">logprob</span>
         <span class="k">return</span> <span class="n">logr</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">logr</span></div>
 </div>
@@ -1130,7 +1171,12 @@ document.write(`
 
 <div class="viewcode-block" id="LowVarKLFn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.LowVarKLFn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="n">kl</span> <span class="o">=</span> <span class="n">ref_logprob</span> <span class="o">-</span> <span class="n">logprob</span>
         <span class="n">kl</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">kl</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
         <span class="n">ratio</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">kl</span><span class="p">)</span>
@@ -1150,8 +1196,75 @@ document.write(`
 
 <div class="viewcode-block" id="AbsFn.calculate_kl">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.AbsFn.calculate_kl">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">logprob</span> <span class="o">-</span> <span class="n">ref_logprob</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CorrectedK3Fn">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.CorrectedK3Fn">[docs]</a>
+<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;corrected_k3&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CorrectedK3Fn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Corrected K3 function with importance sampling.</span>
+
+<span class="sd">    This method applies importance sampling correction to the standard K3 KL divergence.</span>
+<span class="sd">    The corrected KL is computed as:</span>
+
+<span class="sd">        KL_corrected = (π_θ / π_old) * KL_standard(π_ref || π_θ)</span>
+
+<span class="sd">    where:</span>
+<span class="sd">        - π_θ: current policy</span>
+<span class="sd">        - π_old: old policy (from rollout)</span>
+<span class="sd">        - π_ref: reference policy</span>
+<span class="sd">        - KL_standard: exp(log(π_ref/π_θ)) - log(π_ref/π_θ) - 1</span>
+
+<span class="sd">    If old_logprob is not provided, it falls back to standard K3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CorrectedK3Fn.calculate_kl">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.CorrectedK3Fn.calculate_kl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_kl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">ref_logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">old_logprob</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute corrected K3 KL divergence with importance sampling.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logprob: Log probabilities from current policy (log π_θ)</span>
+<span class="sd">            ref_logprob: Log probabilities from reference policy (log π_ref)</span>
+<span class="sd">            old_logprob: Log probabilities from old policy (log π_old), optional</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            KL divergence tensor with same shape as input</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Standard K3 KL term: exp(log_ratio) - log_ratio - 1</span>
+        <span class="c1"># where log_ratio = log(π_ref / π_θ) = ref_logprob - logprob</span>
+        <span class="n">logr</span> <span class="o">=</span> <span class="n">ref_logprob</span> <span class="o">-</span> <span class="n">logprob</span>
+        <span class="n">kl_term</span> <span class="o">=</span> <span class="n">logr</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">logr</span>
+
+        <span class="k">if</span> <span class="n">old_logprob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Fall back to standard K3 if old_logprob is not provided</span>
+            <span class="k">return</span> <span class="n">kl_term</span>
+
+        <span class="c1"># Compute importance sampling ratio: π_θ / π_old</span>
+        <span class="n">log_ratio_is</span> <span class="o">=</span> <span class="n">logprob</span> <span class="o">-</span> <span class="n">old_logprob</span>
+        <span class="n">ratio_is</span> <span class="o">=</span> <span class="n">log_ratio_is</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+        <span class="c1"># Clamp ratio for numerical stability, range [0, 2]</span>
+        <span class="n">ratio_is</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">ratio_is</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="c1"># Corrected KL with importance sampling</span>
+        <span class="n">corrected_kl</span> <span class="o">=</span> <span class="n">ratio_is</span> <span class="o">*</span> <span class="n">kl_term</span>
+
+        <span class="k">return</span> <span class="n">corrected_kl</span></div>
 </div>
 
 </pre></div>

@@ -657,6 +657,10 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.kl_fn.kl_fn.AbsFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">AbsFn.calculate_kl()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.kl_fn.kl_fn.CorrectedK3Fn"><code class="docutils literal notranslate"><span class="pre">CorrectedK3Fn</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.kl_fn.kl_fn.CorrectedK3Fn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">CorrectedK3Fn.calculate_kl()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -688,14 +692,34 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.calculate_kl_loss">
-<span class="sig-name descname"><span class="pre">calculate_kl_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">calculate_kl_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss" title="Link to this definition">#</a></dt>
 <dd><p>Compute KL loss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
+<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
+<li><p><strong>response_mask</strong> – Mask for valid response tokens</p></li>
+<li><p><strong>loss_agg_mode</strong> – Loss aggregation mode</p></li>
+<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.calculate_kl">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
 <dd><p>Compute KL divergence between logprob and ref_logprob.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
+<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
+<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

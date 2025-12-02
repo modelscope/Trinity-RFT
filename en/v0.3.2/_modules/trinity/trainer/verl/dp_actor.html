@@ -1082,6 +1082,7 @@ document.write(`
                         <span class="n">ref_logprob</span><span class="o">=</span><span class="n">model_inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ref_log_prob&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                         <span class="n">response_mask</span><span class="o">=</span><span class="n">response_mask</span><span class="p">,</span>
                         <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">,</span>
+                        <span class="n">old_logprob</span><span class="o">=</span><span class="n">model_inputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;old_log_probs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="n">prefix_metrics</span><span class="p">(</span>
                         <span class="n">src_metrics</span><span class="o">=</span><span class="n">kl_loss_metrics</span><span class="p">,</span>
