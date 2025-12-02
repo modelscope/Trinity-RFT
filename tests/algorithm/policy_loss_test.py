@@ -117,26 +117,28 @@ class VerlPolicyLossTest(unittest.TestCase):
         self.assertTrue(torch.allclose(torch.tensor(metrics["loss"]), mix_loss))
 
     def test_ppo_policy_loss_with_sequence_masking(self):
-        """Test PPO policy loss with sequence masking enabled"""
         policy_loss_fn_cls = POLICY_LOSS_FN.get("ppo")
         policy_loss_fn_args = policy_loss_fn_cls.default_args()
         policy_loss_fn_args["enable_sequence_masking"] = True
         policy_loss_fn_args["delta"] = 0.1
         policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
         loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
-
-        # Test that sequence masking metrics are present
-        self.assertIn("seq_mask/masked_tokens", metrics)
-        self.assertIn("seq_mask/mean_sequence_kl", metrics)
-
-        # Test that masked_tokens is between 0 and 1
-        self.assertGreaterEqual(metrics["seq_mask/masked_tokens"], 0.0)
-        self.assertLessEqual(metrics["seq_mask/masked_tokens"], 1.0)
-
-        # Test that loss is different from non-masked version (if masking occurred)
-        policy_loss_fn_no_mask = policy_loss_fn_cls(**policy_loss_fn_cls.default_args())
-        loss_no_mask, _ = policy_loss_fn_no_mask(log_prob=self.logprob, **self.input_data.batch)
-
-        # Loss should be different if tokens were masked
-        if metrics["seq_mask/masked_tokens"] > 0:
-            self.assertFalse(torch.allclose(loss, loss_no_mask))
+        ppo_loss_masked = torch.tensor(0.22175675630569458)
+        pg_clipfrac = torch.tensor(0.3541666567325592)
+        ppo_kl = torch.tensor(-0.21663446724414825)
+        pg_clipfrac_lower = torch.tensor(0.0625)
+        masked_tokens = torch.tensor(0.16666666666631944)
+        mean_sequence_kl = torch.tensor(-0.21027061343193054)
+        self.assertTrue(torch.allclose(loss, ppo_loss_masked))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), ppo_loss_masked))
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["pg_clipfrac_lower"]), pg_clipfrac_lower)
+        )
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["seq_mask/masked_tokens"]), masked_tokens)
+        )
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["seq_mask/mean_sequence_kl"]), mean_sequence_kl)
+        )
