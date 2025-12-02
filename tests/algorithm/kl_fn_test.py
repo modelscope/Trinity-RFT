@@ -85,8 +85,9 @@ class KLFnTest(unittest.TestCase):
         )
         logr = self.ref_logprob - self.logprob
         kl_standard = torch.exp(logr) - logr - 1
-        log_ratio_is = torch.clamp(self.logprob - self.old_logprob, min=-20.0, max=20.0)
+        log_ratio_is = self.logprob - self.old_logprob
         ratio_is = torch.exp(log_ratio_is)
+        ratio_is = torch.clamp(ratio_is, min=0.0, max=2.0)
         expected_kl = ratio_is * kl_standard
         self.assertTrue(torch.allclose(kl_corrected, expected_kl))
 

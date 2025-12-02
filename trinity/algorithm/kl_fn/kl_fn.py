@@ -277,9 +277,10 @@ class CorrectedK3Fn(KLFn):
             return kl_term
 
         # Compute importance sampling ratio: π_θ / π_old
-        # Clamp for numerical stability
-        log_ratio_is = torch.clamp(logprob - old_logprob, min=-20.0, max=20.0)
+        log_ratio_is = logprob - old_logprob
         ratio_is = torch.exp(log_ratio_is)
+        # Clamp ratio for numerical stability, range [0, 2]
+        ratio_is = torch.clamp(ratio_is, min=0.0, max=2.0)
 
         # Corrected KL with importance sampling
         corrected_kl = ratio_is * kl_term
