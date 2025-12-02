@@ -270,7 +270,7 @@ class CorrectedK3Fn(KLFn):
         # Standard K3 KL term: exp(log_ratio) - log_ratio - 1
         # where log_ratio = log(π_ref / π_θ) = ref_logprob - logprob
         logr = ref_logprob - logprob
-        kl_term = torch.exp(logr) - logr - 1
+        kl_term = logr.exp() - 1 - logr
 
         if old_logprob is None:
             # Fall back to standard K3 if old_logprob is not provided
@@ -278,7 +278,7 @@ class CorrectedK3Fn(KLFn):
 
         # Compute importance sampling ratio: π_θ / π_old
         log_ratio_is = logprob - old_logprob
-        ratio_is = torch.exp(log_ratio_is)
+        ratio_is = log_ratio_is.exp()
         # Clamp ratio for numerical stability, range [0, 2]
         ratio_is = torch.clamp(ratio_is, min=0.0, max=2.0)
 

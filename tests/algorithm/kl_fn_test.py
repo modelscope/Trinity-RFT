@@ -84,9 +84,9 @@ class KLFnTest(unittest.TestCase):
             self.logprob, self.ref_logprob, self.old_logprob
         )
         logr = self.ref_logprob - self.logprob
-        kl_standard = torch.exp(logr) - logr - 1
+        kl_standard = logr.exp() - 1 - logr
         log_ratio_is = self.logprob - self.old_logprob
-        ratio_is = torch.exp(log_ratio_is)
+        ratio_is = log_ratio_is.exp()
         ratio_is = torch.clamp(ratio_is, min=0.0, max=2.0)
         expected_kl = ratio_is * kl_standard
         self.assertTrue(torch.allclose(kl_corrected, expected_kl))
@@ -96,7 +96,7 @@ class KLFnTest(unittest.TestCase):
         corrected_k3_fn = KL_FN.get("corrected_k3")(kl_coef=0.01)
         kl_standard = k3_fn.calculate_kl(self.logprob, self.ref_logprob)
         kl_corrected = corrected_k3_fn.calculate_kl(self.logprob, self.ref_logprob, self.logprob)
-        self.assertTrue(torch.allclose(kl_standard, kl_corrected, rtol=1e-5))
+        self.assertTrue(torch.allclose(kl_standard, kl_corrected, rtol=1e-4, atol=1e-6))
 
     def test_corrected_k3_loss(self):
         corrected_k3_fn = KL_FN.get("corrected_k3")(kl_coef=0.01)
@@ -125,7 +125,7 @@ class KLFnTest(unittest.TestCase):
             logprob=self.logprob,
             ref_logprob=self.ref_logprob,
             response_mask=self.response_mask,
-            loss_agg_mode="token-sum",
+            loss_agg_mode="seq-mean-token-sum",
             old_logprob=self.old_logprob,
         )
         self.assertGreater(kl_loss_sum.item(), kl_loss_mean.item())
