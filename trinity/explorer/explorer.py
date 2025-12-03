@@ -359,7 +359,7 @@ class Explorer:
 
     async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
-            self.logger.info(f"Log metrics of step {step}")
+            self.logger.info(f"Waiting for step {step}")
             await self._finish_explore_step(step=step, model_version=model_version)
             await self._finish_eval_step(step=step)
 

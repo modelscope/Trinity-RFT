@@ -9,7 +9,7 @@ from trinity.common.constants import PromptType
 from trinity.common.experience import Experience
 from trinity.common.models.utils import get_action_mask_method
 from trinity.common.rewards import REWARD_FUNCTIONS
-from trinity.common.workflows import WORKFLOWS, Task
+from trinity.common.workflows.workflow import WORKFLOWS, Task
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 

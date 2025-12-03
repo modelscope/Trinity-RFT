@@ -238,7 +238,8 @@ def studio(port: int = 8501):
 def debug(
     config_path: str,
     module: str,
-    output_file: str = "debug_workflow_runner.html",
+    output_dir: str = "debug_output",
+    enable_viztracer: bool = False,
     plugin_dir: str = None,
 ):
     """Debug a module."""
@@ -247,6 +248,7 @@ def debug(
     load_plugins()
     config = load_config(config_path)
     config.check_and_update()
+    sys.path.insert(0, os.getcwd())
     config.ray_namespace = DEBUG_NAMESPACE
     ray.init(
         namespace=config.ray_namespace,
@@ -261,7 +263,7 @@ def debug(
     elif module == "workflow":
         from trinity.explorer.workflow_runner import DebugWorkflowRunner
 
-        runner = DebugWorkflowRunner(config, output_file)
+        runner = DebugWorkflowRunner(config, output_dir, enable_viztracer)
         asyncio.run(runner.debug())
     else:
         raise ValueError(
@@ -309,10 +311,21 @@ def main() -> None:
         help="Path to the directory containing plugin modules.",
     )
     debug_parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="debug_output",
+        help="The output directory for debug files.",
+    )
+    debug_parser.add_argument(
+        "--enable-profiling",
+        action="store_true",
+        help="Whether to use viztracer for workflow profiling.",
+    )
+    debug_parser.add_argument(
         "--output-file",
         type=str,
-        default="debug_workflow_runner.html",
-        help="The output file for viztracer.",
+        default=None,
+        help="[DEPRECATED] Please use --output-dir instead.",
     )
 
     args = parser.parse_args()
@@ -322,7 +335,7 @@ def main() -> None:
     elif args.command == "studio":
         studio(args.port)
     elif args.command == "debug":
-        debug(args.config, args.module, args.output_file, args.plugin_dir)
+        debug(args.config, args.module, args.output_dir, args.enable_profiling, args.plugin_dir)
 
 
 if __name__ == "__main__":

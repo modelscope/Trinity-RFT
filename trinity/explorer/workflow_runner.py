@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """The Workflow Runner Module."""
 import asyncio
+import os
 import time
 import traceback
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from trinity.buffer import get_buffer_reader
-from trinity.common.config import Config
+from trinity.buffer import get_buffer_reader, get_buffer_writer
+from trinity.common.config import Config, ExperienceBufferConfig
 from trinity.common.experience import Experience
 from trinity.common.models import get_debug_inference_model
 from trinity.common.models.model import InferenceModel, ModelWrapper
@@ -220,23 +221,53 @@ class DebugWorkflowRunner(WorkflowRunner):
     def __init__(
         self,
         config: Config,
-        output_file: str,
+        output_dir: str = "debug_output",
+        enable_profiling: bool = False,
     ) -> None:
         model, auxiliary_models = get_debug_inference_model(config)
         super().__init__(config, model, auxiliary_models, 0)
         self.taskset = get_buffer_reader(config.buffer.explorer_input.tasksets[0])
-        self.output_file = output_file
+        self.output_dir = output_dir
+        self.enable_profiling = enable_profiling
+        # if output dir is not empty, change to a new dir with datetime suffix
+        if os.path.isdir(self.output_dir) and os.listdir(self.output_dir):
+            suffix = time.strftime("%Y%m%d%H%M%S", time.localtime())
+            new_output_dir = f"{self.output_dir}_{suffix}"
+            self.output_dir = new_output_dir
+        self.logger.info(f"Debug output directory: {self.output_dir}")
+        os.makedirs(self.output_dir, exist_ok=True)
+        self.output_profiling_file = os.path.join(
+            self.output_dir,
+            "profiling.html",
+        )
+        self.output_sqlite_file = "sqlite:///" + os.path.join(
+            self.output_dir,
+            "experiences.db",
+        )
+        self.sqlite_writer = get_buffer_writer(
+            ExperienceBufferConfig(
+                name="debug_buffer",
+                schema_type="experience",
+                path=self.output_sqlite_file,
+                storage_type="sql",
+                batch_size=1,
+            )
+        )
 
     async def debug(self) -> None:
         """Run the debug workflow."""
-        from viztracer import VizTracer
-
         await self.prepare()
         tasks = await self.taskset.read_async(batch_size=1)
         task = tasks[0]
-        self.logger.info(f"Read task: {task.task_id}, repeat_times: {task.repeat_times}")
-        with VizTracer(output_file=self.output_file):
-            status, exps = await self.run_task(task, task.repeat_times, 0)
+        self.logger.info(f"Start debugging task:\n{task.raw_task}")
+        if not self.enable_profiling:
+            status, exps = await self.run_task(task, 1, 0)
+        else:
+            from viztracer import VizTracer
+
+            with VizTracer(output_file=self.output_profiling_file):
+                status, exps = await self.run_task(task, 1, 0)
+        await self.sqlite_writer.write_async(exps)
         if status.ok:
             print(f"Task {task.task_id} completed successfully with metrics:\n{status.metrics}")
             for exp in exps:
