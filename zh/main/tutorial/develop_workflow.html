@@ -1462,15 +1462,16 @@ document.write(`
 </div>
 <p>其中，<code class="docutils literal notranslate"><span class="pre">config_file_path</span></code> 为 YAML 格式的配置文件路径，格式与 <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span></code> 命令所用配置文件一致。配置文件中的 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model</span></code> 和 <code class="docutils literal notranslate"><span class="pre">explorer.auxiliary_models</span></code> 字段会被加载，用于初始化推理模型。</p>
 <p>模型启动后会持续运行并等待调试指令，不会自动退出。此时，你可在另一个终端执行如下命令进行 Workflow 调试：</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output-file<span class="w"> </span>&lt;output_file_path&gt;<span class="w"> </span>--plugin-dir<span class="w"> </span>&lt;plugin_dir&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output-dir<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span>--plugin-dir<span class="w"> </span>&lt;plugin_dir&gt;<span class="w"> </span>--enable-profiling
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">config_file_path</span></code>：YAML 配置文件路径，通常与启动推理模型时使用的配置文件相同。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">output_file_path</span></code>：性能分析结果输出路径。调试模式会使用 <a class="reference external" href="https://github.com/gaogaotiantian/viztracer">viztracer</a> 对 Workflow 运行过程进行性能分析，并将结果保存为 HTML 文件，便于在浏览器中查看。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">plugin_dir</span></code>（可选）：插件目录路径。如果你的 Workflow 或奖励函数等模块未内置于 Trinity-RFT，可通过该参数加载自定义模块。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;config_file_path&gt;</span></code>：YAML 配置文件路径，通常与启动推理模型时使用的配置文件相同。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;</span></code>：调试输出保存目录。如果未指定，调试输出将保存在当前工作目录下的 <code class="docutils literal notranslate"><span class="pre">debug_output</span></code> 目录中。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;plugin_dir&gt;</span></code>（可选）：插件目录路径。如果你的 Workflow 或奖励函数等模块未内置于 Trinity-RFT，可通过该参数加载自定义模块。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--enable-profiling</span></code>（可选）：启用性能分析，使用 <a class="reference external" href="https://github.com/gaogaotiantian/viztracer">viztracer</a> 对 Workflow 运行过程进行性能分析。</p></li>
 </ul>
-<p>调试过程中，配置文件中的 <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> 字段会被加载，用于初始化 Workflow 所需的任务数据集和实例。需注意，调试模式仅会读取数据集中的第一条数据进行测试。运行上述命令后，Workflow 的返回值会自动格式化并打印在终端，方便查看运行结果。</p>
+<p>调试过程中，配置文件中的 <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> 字段会被加载，用于初始化 Workflow 所需的任务数据集和实例。需注意，调试模式仅会读取数据集中的第一条数据进行测试。运行上述命令后，Workflow 的返回值会自动格式化并打印在终端以供观察和查看，同时产出的 Experience 会保存到 <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/experiences.db</span></code> 数据库中。</p>
 <p>调试完成后，可在推理模型终端输入 <code class="docutils literal notranslate"><span class="pre">Ctrl+C</span></code> 以终止模型运行。</p>
 </section>
 </section>
