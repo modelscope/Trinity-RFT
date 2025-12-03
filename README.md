@@ -50,7 +50,7 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 <details><summary> more... </summary>
 <ul>
   <li> [2025-11] Trinity-RFT v0.3.2 released: bug fixes and advanced task selection & scheduling.</li>
-  <li> [2025-10] Trinity-RFT v0.3.1 released: multi-stage training support, improved agentic RL examples, LoRA support, debug mode and new RL algorithms.</li> 
+  <li> [2025-10] Trinity-RFT v0.3.1 released: multi-stage training support, improved agentic RL examples, LoRA support, debug mode and new RL algorithms.</li>
   <li> [2025-09] Trinity-RFT v0.3.0 released: enhanced Buffer, FSDP2 & Megatron support, multi-modal models, and new RL algorithms/examples.</li>
   <li> [2025-08] Introducing [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord): dynamic SFT + RL integration for advanced LLM fine-tuning ([paper](https://arxiv.org/pdf/2508.11408)).</li>
   <li> [2025-08] Trinity-RFT v0.2.1 released.</li>
@@ -112,7 +112,7 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
 ## 🔧 Supported Algorithms
 
-We list most algorithms supported by Trinity-RFT in the following table. For more details, the concrete configurations are shown in the [Algorithm module](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py). You can also set up new algorithms by customizing different components.
+We list some algorithms supported by Trinity-RFT in the following table. For more details, the concrete configurations are shown in the [Algorithm module](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py). You can also set up new algorithms by customizing different components, see [tutorial](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_algorithm.html).
 
 | Algorithm [Paper] | Doc/Example | Source Code | Key Configurations |
 |-----------|-----------|---------------|-----------|
@@ -121,7 +121,7 @@ We list most algorithms supported by Trinity-RFT in the following table. For mor
 | CHORD 💡 [[Paper](https://arxiv.org/pdf/2508.11408)] | [[Docs](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)] [[ToolACE Example](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
 | REC Series 💡 [[Paper](https://arxiv.org/pdf/2509.24203)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec` |
 | RLOO [[Paper](https://arxiv.org/pdf/2402.14740)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: rloo` |
-| REINFORCE++ [[Paper](https://arxiv.org/pdf/2501.03262)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: reinforce` |
+| REINFORCE++ [[Paper](https://arxiv.org/pdf/2501.03262)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: reinforceplusplus` |
 | GSPO [[Paper](https://arxiv.org/pdf/2507.18071)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/gspo_policy_loss.py)] | `policy_loss_fn: gspo, advantage_fn: grpo` |
 | TOPR [[Paper](https://arxiv.org/pdf/2503.14286)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/topr_policy_loss.py)] | `algorithm_type: topr` |
 | sPPO [[Paper](https://arxiv.org/pdf/2108.05828)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sppo_loss_fn.py)] | `algorithm_type: sppo` |

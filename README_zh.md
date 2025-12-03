@@ -39,6 +39,30 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 
 
+## 🚀 新闻
+
+* [2025-12] Trinity-RFT 助力淘宝闪购医药健康业务，让 AI 智能体能够理解模糊症状、主动询问后续问题，并提供精准推荐（[新闻](https://tech.china.com.cn/sx/20251201/411376.shtml)）。
+* [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 发布：修复若干 Bug。
+* [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
+* [2025-11] 推出 [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)：在线 RL 任务选择，实现高效 LLM 微调（[论文](https://arxiv.org/pdf/2510.26374)）。
+
+<details><summary> more... </summary>
+<ul>
+  <li> [2025-11] Trinity-RFT v0.3.2 发布：修复若干 Bug 并支持进阶的任务选择和调度。</li>
+  <li> [2025-10] Trinity-RFT v0.3.1 发布：多阶段训练支持、改进的智能体 RL 示例、LoRA 支持、调试模式和全新 RL 算法。</li>
+  <li> [2025-09] Trinity-RFT v0.3.0 发布：增强的 Buffer、FSDP2 & Megatron 支持，多模态模型，以及全新 RL 算法/示例。</li>
+  <li> [2025-08] 推出 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)：动态 SFT + RL 集成，实现进阶 LLM 微调（[论文](https://arxiv.org/pdf/2508.11408)）。</li>
+  <li> [2025-08] Trinity-RFT v0.2.1 发布。</li>
+  <li> [2025-07] Trinity-RFT v0.2.0 发布。</li>
+  <li> [2025-07] 技术报告（arXiv v2）更新，包含新功能、示例和实验：[链接](https://arxiv.org/abs/2505.17826)。</li>
+  <li> [2025-06] Trinity-RFT v0.1.1 发布。</li>
+  <li> [2025-05] Trinity-RFT v0.1.0 发布，同时发布 [技术报告](https://arxiv.org/abs/2505.17826)。</li>
+  <li> [2025-04] Trinity-RFT 开源。</li>
+</ul>
+</details>
+
+
+
 ## 🔨 教程与指南
 
 
@@ -84,28 +108,27 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="系统架构" width="600" />
 
-* **全面的强化学习算法支持：**
-  - 支持流行的强化学习算法，包括 [PPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown), [GRPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [GSPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/gspo_gsm8k), [TOPR](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k), [REC](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k), [sPPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)。
-  - 支持灵活组合模块来构建新算法，如策略损失函数 (e.g., [CISPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py), [SAPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)), 优势估计 (e.g., [RLOO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py), [REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py))。
-  - 进阶的算法设计，如 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord) (SFT+RL 集成) 和 [LLM-as-a-judge](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) 奖励建模。
+
+## 🔨 算法支持
+
+下表列出了 Trinity-RFT 支持的算法，更多算法请参考 [算法模块](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py)。您也可以通过自定义不同的模块来构建新算法，参见 [教程](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html))。
+
+| 算法 [论文] | 文档/示例 | 核心代码 | 关键配置 |
+|-----------|-----------|---------------|-----------|
+| PPO [[论文](https://arxiv.org/pdf/1707.06347)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[Countdown 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo` |
+| GRPO [[论文](https://arxiv.org/pdf/2402.03300)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k) [文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)]| [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo` |
+| CHORD 💡 [[论文](https://arxiv.org/pdf/2508.11408)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)] [[ToolACE 例子](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
+| REC Series 💡 [[论文](https://arxiv.org/pdf/2509.24203)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec` |
+| RLOO [[论文](https://arxiv.org/pdf/2402.14740)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: rloo` |
+| REINFORCE++ [[论文](https://arxiv.org/pdf/2501.03262)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: reinforceplusplus` |
+| GSPO [[论文](https://arxiv.org/pdf/2507.18071)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/gspo_policy_loss.py)] | `policy_loss_fn: gspo, advantage_fn: grpo` |
+| TOPR [[论文](https://arxiv.org/pdf/2503.14286)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/topr_policy_loss.py)] | `algorithm_type: topr` |
+| sPPO [[论文](https://arxiv.org/pdf/2108.05828)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sppo_loss_fn.py)] | `algorithm_type: sppo` |
+| ASYMRE [[论文](https://arxiv.org/pdf/2506.20520)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/asymre_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/asymre_advantage.py)] | `algorithm_type: asymre` |
+| CISPO [[论文](https://arxiv.org/pdf/2506.13585)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py)] | `algorithm_type: cispo` |
+| SAPO [[论文](https://arxiv.org/pdf/2511.20347)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)] | `algorithm_type: sapo` |
 
 
-## 🚀 新闻
-
-* [2025-12] Trinity-RFT 助力淘宝闪购医药健康业务，让 AI 智能体能够理解模糊症状、主动询问后续问题，并提供精准推荐（[新闻](https://tech.china.com.cn/sx/20251201/411376.shtml)）。
-* [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 发布：修复若干 Bug。
-* [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
-* [2025-11] 推出 [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)：在线 RL 任务选择，实现高效 LLM 微调（[论文](https://arxiv.org/pdf/2510.26374)）。
-* [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.2)] Trinity-RFT v0.3.2 发布：修复若干 Bug 并支持进阶的任务选择和调度。
-* [2025-10] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.1)] Trinity-RFT v0.3.1 发布：多阶段训练支持、改进的智能体 RL 示例、LoRA 支持、调试模式和全新 RL 算法。
-* [2025-09] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.0)] Trinity-RFT v0.3.0 发布：增强的 Buffer、FSDP2 & Megatron 支持，多模态模型，以及全新 RL 算法/示例。
-* [2025-08] 推出 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)：动态 SFT + RL 集成，实现进阶 LLM 微调（[论文](https://arxiv.org/pdf/2508.11408)）。
-* [2025-08] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.1)] Trinity-RFT v0.2.1 发布。
-* [2025-07] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.0)] Trinity-RFT v0.2.0 发布。
-* [2025-07] 技术报告（arXiv v2）更新，包含新功能、示例和实验：[链接](https://arxiv.org/abs/2505.17826)。
-* [2025-06] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.1)] Trinity-RFT v0.1.1 发布。
-* [2025-05] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.0)] Trinity-RFT v0.1.0 发布，同时发布 [技术报告](https://arxiv.org/abs/2505.17826)。
-* [2025-04] Trinity-RFT 开源。
 
 ---
 

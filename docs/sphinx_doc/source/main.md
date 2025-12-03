@@ -64,10 +64,27 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="System architecture" width="600" />
 
-* **Comprehensive Algorithm Support:**
-  - Out-of-the-box implementations of popular RL algorithms, including [PPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown), [GRPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [GSPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/gspo_gsm8k), [TOPR](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k), [REC](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k), [sPPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k), and more.
-  - Easily extendable to new algorithms by flexibly composing modular components such as policy loss (e.g., [CISPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py), [SAPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)), advantage estimation (e.g., [RLOO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py), [REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)), and more.
-  - Hybrid approaches like [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord) (SFT+RL integration) and [LLM-as-a-judge](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) reward modeling.
+
+
+## 🔧 Supported Algorithms
+
+We list some algorithms supported by Trinity-RFT in the following table. For more details, the concrete configurations are shown in the [Algorithm module](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py). You can also set up new algorithms by customizing different components, see [tutorial](/tutorial/develop_algorithm.md).
+
+| Algorithm [Paper] | Doc/Example | Source Code | Key Configurations |
+|-----------|-----------|---------------|-----------|
+| PPO [[Paper](https://arxiv.org/pdf/1707.06347)] | [[Docs](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)] [[Countdown Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo` |
+| GRPO [[Paper](https://arxiv.org/pdf/2402.03300)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k) [Docs](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)]| [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo` |
+| CHORD 💡 [[Paper](https://arxiv.org/pdf/2508.11408)] | [[Docs](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)] [[ToolACE Example](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
+| REC Series 💡 [[Paper](https://arxiv.org/pdf/2509.24203)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec` |
+| RLOO [[Paper](https://arxiv.org/pdf/2402.14740)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: rloo` |
+| REINFORCE++ [[Paper](https://arxiv.org/pdf/2501.03262)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `policy_loss_fn: ppo, advantage_fn: reinforceplusplus` |
+| GSPO [[Paper](https://arxiv.org/pdf/2507.18071)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/gspo_policy_loss.py)] | `policy_loss_fn: gspo, advantage_fn: grpo` |
+| TOPR [[Paper](https://arxiv.org/pdf/2503.14286)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/topr_policy_loss.py)] | `algorithm_type: topr` |
+| sPPO [[Paper](https://arxiv.org/pdf/2108.05828)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sppo_loss_fn.py)] | `algorithm_type: sppo` |
+| ASYMRE [[Paper](https://arxiv.org/pdf/2506.20520)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/asymre_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/asymre_advantage.py)] | `algorithm_type: asymre` |
+| CISPO [[Paper](https://arxiv.org/pdf/2506.13585)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py)] | `algorithm_type: cispo` |
+| SAPO [[Paper](https://arxiv.org/pdf/2511.20347)] | - | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)] | `algorithm_type: sapo` |
+
 
 
 ## Acknowledgements
