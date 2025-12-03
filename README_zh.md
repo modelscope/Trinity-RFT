@@ -84,10 +84,15 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="系统架构" width="600" />
 
+* **全面的强化学习算法支持：**
+  - 支持流行的强化学习算法，包括 [PPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown), [GRPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [GSPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/gspo_gsm8k), [TOPR](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k), [REC](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k), [sPPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)。
+  - 支持灵活组合模块来构建新算法，如策略损失函数 (e.g., [CISPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py), [SAPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)), 优势估计 (e.g., [RLOO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py), [REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py))。
+  - 进阶的算法设计，如 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord) (SFT+RL 集成) 和 [LLM-as-a-judge](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) 奖励建模。
 
 
 ## 🚀 新闻
 
+* [2025-12] Trinity-RFT 助力 AI 找药，让 AI 智能体能够理解模糊症状、主动询问后续问题，并提供精准推荐（[新闻](https://tech.china.com.cn/sx/20251201/411376.shtml)）。
 * [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 发布：修复若干 Bug。
 * [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
 * [2025-11] 推出 [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots)：在线 RL 任务选择，实现高效 LLM 微调（[论文](https://arxiv.org/pdf/2510.26374)）。

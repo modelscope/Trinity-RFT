@@ -84,10 +84,15 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="System architecture" width="600" />
 
+* **Comprehensive Algorithm Support:**
+  - Out-of-the-box implementations of popular RL algorithms, including [PPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown), [GRPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [GSPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/gspo_gsm8k), [TOPR](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k), [REC](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k), [sPPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k), and more.
+  - Easily extendable to new algorithms by flexibly composing modular components such as policy loss (e.g., [CISPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py), [SAPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)), advantage estimation (e.g., [RLOO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py), [REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)), and more.
+  - Hybrid approaches like [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord) (SFT+RL integration) and [LLM-as-a-judge](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) reward modeling.
 
 
 ## 🚀 News
 
+* [2025-12] Trinity-RFT powers "AI Medicine Finder", which enables the AI agent to understand vague symptoms, actively ask follow-up questions, and provide precise recommendations ([News](https://tech.china.com.cn/sx/20251201/411376.shtml)).
 * [2025-11] [[Release Notes](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 released: bug fixes.
 * [2025-11] Introducing [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask): a framework for training proactive dialogue agents from offline expert data  ([paper](https://arxiv.org/pdf/2510.25441)).
 * [2025-11] Introducing [BOTS](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots): online RL task selection for efficient LLM fine-tuning ([paper](https://arxiv.org/pdf/2510.26374)).

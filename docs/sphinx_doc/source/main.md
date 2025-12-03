@@ -64,6 +64,10 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="System architecture" width="600" />
 
+* **Comprehensive Algorithm Support:**
+  - Out-of-the-box implementations of popular RL algorithms, including [PPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown), [GRPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [GSPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/gspo_gsm8k), [TOPR](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k), [REC](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k), [sPPO](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k), and more.
+  - Easily extendable to new algorithms by flexibly composing modular components such as policy loss (e.g., [CISPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py), [SAPO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py)), advantage estimation (e.g., [RLOO](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py), [REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)), and more.
+  - Hybrid approaches like [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord) (SFT+RL integration) and [LLM-as-a-judge](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) reward modeling.
 
 
 ## Acknowledgements
