@@ -682,6 +682,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.policy_loss_fn.html">trinity.algorithm.policy_loss_fn.policy_loss_fn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.ppo_policy_loss.html">trinity.algorithm.policy_loss_fn.ppo_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.rec_policy_loss.html">trinity.algorithm.policy_loss_fn.rec_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html">trinity.algorithm.policy_loss_fn.sapo_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html">trinity.algorithm.policy_loss_fn.sft_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.sppo_loss_fn.html">trinity.algorithm.policy_loss_fn.sppo_loss_fn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.algorithm.policy_loss_fn.topr_policy_loss.html">trinity.algorithm.policy_loss_fn.topr_policy_loss module</a></li>
@@ -1044,6 +1045,10 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.rec_policy_loss.html#trinity.algorithm.policy_loss_fn.rec_policy_loss.RECPolicyLossFn.__init__">(trinity.algorithm.policy_loss_fn.rec_policy_loss.RECPolicyLossFn method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.__init__">(trinity.algorithm.policy_loss_fn.RECPolicyLossFn method)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn.__init__">(trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn method)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.__init__">(trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn.__init__">(trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn method)</a>
 </li>
@@ -1903,6 +1908,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.RECAlgorithm attribute)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.SAPOAlgorithm attribute)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.SFTAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.sPPOAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.sPPOAlgorithm attribute)</a>
@@ -2168,6 +2175,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RAFTAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.RAFTAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.RECAlgorithm attribute)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.SAPOAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.SFTAlgorithm attribute)</a>
 </li>
@@ -2479,6 +2488,10 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.default_args">(trinity.algorithm.policy_loss_fn.RECPolicyLossFn class method)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn.default_args">(trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn class method)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.default_args">(trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn class method)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn.default_args">(trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn class method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SFTISLossFn.default_args">(trinity.algorithm.policy_loss_fn.SFTISLossFn class method)</a>
@@ -2546,6 +2559,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RAFTAlgorithm.default_config">(trinity.algorithm.algorithm.RAFTAlgorithm class method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.default_config">(trinity.algorithm.algorithm.RECAlgorithm class method)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.default_config">(trinity.algorithm.algorithm.SAPOAlgorithm class method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.default_config">(trinity.algorithm.algorithm.SFTAlgorithm class method)</a>
 </li>
@@ -4284,6 +4299,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.rec_policy_loss.html#module-trinity.algorithm.policy_loss_fn.rec_policy_loss">trinity.algorithm.policy_loss_fn.rec_policy_loss</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#module-trinity.algorithm.policy_loss_fn.sapo_policy_loss">trinity.algorithm.policy_loss_fn.sapo_policy_loss</a>
+</li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#module-trinity.algorithm.policy_loss_fn.sft_loss">trinity.algorithm.policy_loss_fn.sft_loss</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sppo_loss_fn.html#module-trinity.algorithm.policy_loss_fn.sppo_loss_fn">trinity.algorithm.policy_loss_fn.sppo_loss_fn</a>
@@ -5689,6 +5706,14 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy">(class in trinity.algorithm.sample_strategy.sample_strategy)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm">SAPOAlgorithm (class in trinity.algorithm.algorithm)</a>
+</li>
+      <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn">SAPOPolicyLossFn (class in trinity.algorithm.policy_loss_fn)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn">(class in trinity.algorithm.policy_loss_fn.sapo_policy_loss)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.Config.save">save() (trinity.common.config.Config method)</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.save_checkpoint">save_checkpoint() (trinity.explorer.Explorer method)</a>
@@ -5796,6 +5821,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.schema">(trinity.algorithm.algorithm.RECAlgorithm attribute)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.schema">(trinity.algorithm.algorithm.SAPOAlgorithm attribute)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.schema">(trinity.algorithm.algorithm.SFTAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.sPPOAlgorithm.schema">(trinity.algorithm.algorithm.sPPOAlgorithm attribute)</a>
@@ -5861,6 +5888,10 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.rec_policy_loss.html#trinity.algorithm.policy_loss_fn.rec_policy_loss.RECPolicyLossFn.select_keys">(trinity.algorithm.policy_loss_fn.rec_policy_loss.RECPolicyLossFn property)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.select_keys">(trinity.algorithm.policy_loss_fn.RECPolicyLossFn property)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn.select_keys">(trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn property)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.select_keys">(trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn property)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn.select_keys">(trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn property)</a>
 </li>
@@ -6119,12 +6150,12 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.algorithm_config_manager.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_node_num">set_node_num() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_norm_adv_by_std_in_grpo">set_norm_adv_by_std_in_grpo() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_offload_policy">set_offload_policy() (in module trinity.manager.config_registry.trainer_config_manager)</a>
@@ -6347,6 +6378,12 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
+      <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn.soft_gate_function">soft_gate_function() (trinity.algorithm.policy_loss_fn.sapo_policy_loss.SAPOPolicyLossFn method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.soft_gate_function">(trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.sort_batch_id">sort_batch_id() (in module trinity.explorer.scheduler)</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.CustomField.source_field">source_field (trinity.common.experience.CustomField attribute)</a>
@@ -7127,6 +7164,13 @@ document.write(`
 
       <ul>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.rec_policy_loss.html#module-trinity.algorithm.policy_loss_fn.rec_policy_loss">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.algorithm.policy_loss_fn.sapo_policy_loss
+
+      <ul>
+        <li><a href="build_api/trinity.algorithm.policy_loss_fn.sapo_policy_loss.html#module-trinity.algorithm.policy_loss_fn.sapo_policy_loss">module</a>
 </li>
       </ul></li>
       <li>
@@ -8161,6 +8205,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.use_critic">(trinity.algorithm.algorithm.RECAlgorithm attribute)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.use_critic">(trinity.algorithm.algorithm.SAPOAlgorithm attribute)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.use_critic">(trinity.algorithm.algorithm.SFTAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.sPPOAlgorithm.use_critic">(trinity.algorithm.algorithm.sPPOAlgorithm attribute)</a>
@@ -8222,6 +8268,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RAFTAlgorithm.use_reference">(trinity.algorithm.algorithm.RAFTAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.RECAlgorithm.use_reference">(trinity.algorithm.algorithm.RECAlgorithm attribute)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SAPOAlgorithm.use_reference">(trinity.algorithm.algorithm.SAPOAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.SFTAlgorithm.use_reference">(trinity.algorithm.algorithm.SFTAlgorithm attribute)</a>
 </li>

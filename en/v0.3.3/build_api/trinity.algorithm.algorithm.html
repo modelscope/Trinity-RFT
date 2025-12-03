@@ -678,6 +678,15 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.CISPOAlgorithm.default_config"><code class="docutils literal notranslate"><span class="pre">CISPOAlgorithm.default_config()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_critic"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.use_critic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_reference"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.use_reference</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.compute_advantage_in_trainer"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.compute_advantage_in_trainer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.can_balance_batch"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.can_balance_batch</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.schema"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.schema</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.default_config"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.default_config()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.MIXAlgorithm"><code class="docutils literal notranslate"><span class="pre">MIXAlgorithm</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.MIXAlgorithm.use_critic"><code class="docutils literal notranslate"><span class="pre">MIXAlgorithm.use_critic</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.MIXAlgorithm.use_reference"><code class="docutils literal notranslate"><span class="pre">MIXAlgorithm.use_reference</span></code></a></li>
@@ -1102,6 +1111,45 @@ document.write(`
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">SAPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
+<p>SAPO (Soft Adaptive Policy Optimization) algorithm.</p>
+<p>SAPO uses a smooth, temperature-controlled soft gate instead of hard clipping
+to stabilize training while maintaining effective learning.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.use_critic">
+<span class="sig-name descname"><span class="pre">use_critic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_critic" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.use_reference">
+<span class="sig-name descname"><span class="pre">use_reference</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_reference" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.compute_advantage_in_trainer">
+<span class="sig-name descname"><span class="pre">compute_advantage_in_trainer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.compute_advantage_in_trainer" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.can_balance_batch">
+<span class="sig-name descname"><span class="pre">can_balance_batch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.can_balance_batch" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'experience'</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.schema" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.default_config">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MIXAlgorithm">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MIXAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
@@ -1465,6 +1513,15 @@ but is designed to work with <cite>experience</cite> schema from rollouts.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.CISPOAlgorithm.can_balance_batch"><code class="docutils literal notranslate"><span class="pre">CISPOAlgorithm.can_balance_batch</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.CISPOAlgorithm.schema"><code class="docutils literal notranslate"><span class="pre">CISPOAlgorithm.schema</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.CISPOAlgorithm.default_config"><code class="docutils literal notranslate"><span class="pre">CISPOAlgorithm.default_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_critic"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.use_critic</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.use_reference"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.use_reference</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.compute_advantage_in_trainer"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.compute_advantage_in_trainer</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.can_balance_batch"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.can_balance_batch</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.schema"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.schema</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.SAPOAlgorithm.default_config"><code class="docutils literal notranslate"><span class="pre">SAPOAlgorithm.default_config()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.algorithm.MIXAlgorithm"><code class="docutils literal notranslate"><span class="pre">MIXAlgorithm</span></code></a><ul class="nav section-nav flex-column">

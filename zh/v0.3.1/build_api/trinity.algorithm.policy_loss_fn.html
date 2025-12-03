@@ -672,6 +672,13 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.select_keys"><code class="docutils literal notranslate"><span class="pre">RECPolicyLossFn.select_keys</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.__init__"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.soft_gate_function"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.soft_gate_function()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.default_args"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.select_keys"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.select_keys</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1356,6 +1363,82 @@ to ensure consistent weighting across different batches of the same type experie
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.policy_loss_fn.</span></span><span class="sig-name descname"><span class="pre">SAPOPolicyLossFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_neg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'token-mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/sapo_policy_loss.html#SAPOPolicyLossFn"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn" title="Link to this definition">#</a></dt>
+<dd><p>基类：<a class="reference internal" href="trinity.algorithm.policy_loss_fn.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_neg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'token-mean'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/sapo_policy_loss.html#SAPOPolicyLossFn.__init__"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.__init__" title="Link to this definition">#</a></dt>
+<dd><p>Initialize SAPO policy loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>backend</strong> -- The training framework/backend to use (e.g., &quot;verl&quot;)</p></li>
+<li><p><strong>tau_pos</strong> -- Temperature for positive advantages (τ_pos), default 1.0</p></li>
+<li><p><strong>tau_neg</strong> -- Temperature for negative advantages (τ_neg), default 1.05, should be &gt;= tau_pos</p></li>
+<li><p><strong>loss_agg_mode</strong> -- Mode for aggregating loss across tokens</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.soft_gate_function">
+<span class="sig-name descname"><span class="pre">soft_gate_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advantages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/sapo_policy_loss.html#SAPOPolicyLossFn.soft_gate_function"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.soft_gate_function" title="Link to this definition">#</a></dt>
+<dd><p>Compute the soft gate function f_{i,t}(x).</p>
+<dl class="simple">
+<dt>The soft gate function is defined as:</dt><dd><p>f_{i,t}(x) = σ(τ_{i,t} * (x - 1)) * 4 / τ_{i,t}</p>
+</dd>
+<dt>where:</dt><dd><ul class="simple">
+<li><p>σ is the sigmoid function</p></li>
+<li><p>τ_{i,t} is the asymmetric temperature (tau_pos or tau_neg)</p></li>
+<li><p>x is the importance sampling ratio r_{i,t}(θ)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ratio</strong> -- Token-level importance sampling ratio r_{i,t}(θ)</p></li>
+<li><p><strong>advantages</strong> -- Normalized advantage function Â_i (same for all tokens in a sequence)</p></li>
+</ul>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>The soft gate values for each token</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/sapo_policy_loss.html#SAPOPolicyLossFn.default_args"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.default_args" title="Link to this definition">#</a></dt>
+<dd><p>Get default initialization arguments for SAPO.</p>
+<dl class="simple">
+<dt>Default configuration (from the SAPO paper):</dt><dd><ul class="simple">
+<li><p>tau_pos: 1.0 (temperature for positive advantages)</p></li>
+<li><p>tau_neg: 1.05 (temperature for negative advantages)</p></li>
+<li><p>loss_agg_mode: &quot;token-mean&quot; (average over tokens)</p></li>
+</ul>
+</dd>
+</dl>
+<p>The asymmetric temperatures (tau_neg &gt; tau_pos) help stabilize training
+by more aggressively suppressing updates from tokens with negative advantages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">返回<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of default arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.select_keys">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.select_keys" title="Link to this definition">#</a></dt>
+<dd><p>Returns parameter keys mapped to the specific training framework's naming convention.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -1488,6 +1571,13 @@ to ensure consistent weighting across different batches of the same type experie
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.__init__"><code class="docutils literal notranslate"><span class="pre">RECPolicyLossFn.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.default_args"><code class="docutils literal notranslate"><span class="pre">RECPolicyLossFn.default_args()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.RECPolicyLossFn.select_keys"><code class="docutils literal notranslate"><span class="pre">RECPolicyLossFn.select_keys</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.__init__"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.soft_gate_function"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.soft_gate_function()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.default_args"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.policy_loss_fn.SAPOPolicyLossFn.select_keys"><code class="docutils literal notranslate"><span class="pre">SAPOPolicyLossFn.select_keys</span></code></a></li>
 </ul>
 </li>
 </ul>
