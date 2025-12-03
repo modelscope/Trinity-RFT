@@ -250,6 +250,29 @@ class CISPOAlgorithm(AlgorithmType):
         }
 
 
+@ALGORITHM_TYPE.register_module("gspo")
+class GSPOAlgorithm(AlgorithmType):
+    """GSPO algorithm. See https://arxiv.org/pdf/2507.18071"""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "grpo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "gspo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
 @ALGORITHM_TYPE.register_module("sapo")
 class SAPOAlgorithm(AlgorithmType):
     """SAPO (Soft Adaptive Policy Optimization) algorithm.
