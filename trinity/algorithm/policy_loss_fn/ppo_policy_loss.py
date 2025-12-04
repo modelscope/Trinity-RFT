@@ -99,7 +99,8 @@ class PPOPolicyLossFn(PolicyLossFn):
         pg_losses = torch.where(advantages < 0, clip_pg_losses2, clip_pg_losses1)
 
         # Apply sequence mask to the losses
-        pg_losses = pg_losses * sequence_mask
+        if self.enable_sequence_masking:
+            pg_losses = pg_losses * sequence_mask
 
         pg_loss = aggregate_loss(pg_losses, action_mask, loss_agg_mode=self.loss_agg_mode)
         metrics = {
