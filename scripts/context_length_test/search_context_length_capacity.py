@@ -7,14 +7,18 @@ GPU configurations.
 
 import argparse
 import os
+import shutil
 import subprocess
 import threading
 from typing import List, Optional
 
 import transformers
+import yaml
 
 # Default list of GPU counts to test
 DEFAULT_GPU_NUMS: List[int] = [1, 2, 4, 6]
+EXCEPTION_STRING = "Traceback (most recent call last)"
+OOM_STRING = "torch.OutOfMemoryError: CUDA out of memory"
 
 
 def monitor_output(
@@ -35,8 +39,6 @@ def monitor_output(
         oom_event: Threading event set when 'torch.OutOfMemoryError: CUDA out of memory' is detected.
         log_file: Open file handle where output is logged.
     """
-    exception_string = "Traceback (most recent call last)"
-    oom_string = "torch.OutOfMemoryError: CUDA out of memory"
     try:
         for line in iter(pipe.readline, ""):
             if not line:
@@ -46,11 +48,12 @@ def monitor_output(
             log_file.flush()
 
             # Check for exception
-            if exception_string in line:
+            if EXCEPTION_STRING in line:
                 exception_event.set()
 
             # Check for oom
-            if oom_string in line:
+            if OOM_STRING in line:
+                exception_event.set()
                 oom_event.set()
                 break
     except Exception as e:
@@ -59,6 +62,7 @@ def monitor_output(
 
 def run_command_with_monitor(
     command: List[str],
+    envs: dict[str, str],
     log_path: str,
     timeout: Optional[int] = None,
 ) -> bool:
@@ -71,6 +75,7 @@ def run_command_with_monitor(
 
     Args:
         command: Command to execute, as a list of strings.
+        envs: Environment variables to set for the command.
         log_path: Path to the log file where output will be saved.
         timeout: Optional timeout in seconds before forcing termination.
 
@@ -83,20 +88,22 @@ def run_command_with_monitor(
 
     while retry_flag:
         # Clean up checkpoint directory before each run
-        subprocess.run(["rm", "-rf", checkpoint_root], check=False)
+        shutil.rmtree(checkpoint_root, ignore_errors=True)
 
         exception_event = threading.Event()
         oom_event = threading.Event()
 
         with open(log_path, "w", encoding="utf-8") as log_file:
             # Start subprocess with merged stdout/stderr
+            process_env = os.environ.copy()
+            process_env.update(envs)
             process = subprocess.Popen(
-                " ".join(command),
+                command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                shell=True,
+                env=process_env,
             )
 
             # Start monitoring thread
@@ -132,7 +139,7 @@ def run_command_with_monitor(
                     if oom_event.is_set():  # CUDA OOM
                         retry_flag = False
                     else:
-                        print(f"Exception detected, retrying")
+                        print("Exception detected, retrying...")
 
                     success_flag = False
                 else:  # no exception, runs successfully
@@ -151,7 +158,6 @@ def run_command_with_monitor(
 
 
 def find_max_model_len(
-    model_name: str,
     model_path: str,
     model_config,
     trainer_gpu_num: int,
@@ -170,13 +176,17 @@ def find_max_model_len(
     Uses different YAML config files depending on whether the length exceeds the original max.
 
     Args:
-        model_name: Name of the model (for logging).
         model_path: Path to the pretrained model.
         model_config: Loaded Hugging Face model configuration.
         trainer_gpu_num: Number of GPUs allocated.
         sp_num: Number of sequence parallel groups.
         base_log_dir: Base directory for saving logs.
         start_length: Initial context length to test.
+        save_hf_checkpoint: Checkpoint saving strategy.
+        entropy_saving: Whether to enable entropy-saving options.
+        offload: Whether to offload parameters to CPU.
+        trainer_strategy: Trainer strategy. Only support "fsdp" and "fsdp2" for now.
+        timeout: Timeout in seconds for each training job.
 
     Returns:
         Maximum supported context length before OOM; 0 if search failed.
@@ -190,6 +200,7 @@ def find_max_model_len(
     origin_max_len = model_config.max_position_embeddings
     small_step = 4096
     big_step = origin_max_len // 4
+    model_name = os.path.basename(model_path)
 
     while True:
         log_dir = os.path.join(base_log_dir, model_name, f"gpu-{trainer_gpu_num}", f"sp-{sp_num}")
@@ -202,29 +213,29 @@ def find_max_model_len(
         total_gpu_num = trainer_gpu_num + explorer_gpu_num
 
         # Build command
-        cmd_env = [
-            f"GPU_NUM={total_gpu_num}",
-            f"ENGINE_NUM={explorer_gpu_num}",
-            f"SP_NUM={sp_num}",
-            f"REPEAT_TIMES={trainer_gpu_num // sp_num * 8}",
-            f"MODEL_PATH={model_path}",
-            f"MAX_MODEL_LEN={length}",
-        ]
+        cmd_env = {
+            "GPU_NUM": f"{total_gpu_num}",
+            "ENGINE_NUM": f"{explorer_gpu_num}",
+            "SP_NUM": f"{sp_num}",
+            "REPEAT_TIMES": f"{trainer_gpu_num // sp_num * 8}",
+            "MODEL_PATH": f"{model_path}",
+            "MAX_MODEL_LEN": f"{length}",
+        }
         if length > origin_max_len:
             rope_config = {
                 "rope_type": "yarn",
                 "factor": length / origin_max_len,
                 "original_max_position_embeddings": origin_max_len,
             }
-            cmd_env.append(f"ROPE_SCALING={repr(rope_config).replace(' ', '')}")
+            cmd_env["ROPE_SCALING"] = yaml.dump(rope_config, default_flow_style=True).strip()
         if save_hf_checkpoint != "last":
-            cmd_env.append(f"SAVE_HF_CHECKPOINT={save_hf_checkpoint}")
+            cmd_env["SAVE_HF_CHECKPOINT"] = f"{save_hf_checkpoint}"
         if entropy_saving:
-            cmd_env.append("ENTROPY_SAVING=true")
+            cmd_env["ENTROPY_SAVING"] = "true"
         if offload:
-            cmd_env.append("OFFLOAD=true")
+            cmd_env["OFFLOAD"] = "true"
         if trainer_strategy != "fsdp":
-            cmd_env.append(f"TRAINER_STRATEGY={trainer_strategy}")
+            cmd_env["TRAINER_STRATEGY"] = f"{trainer_strategy}"
 
         cmd_base = [
             "trinity",
@@ -234,15 +245,14 @@ def find_max_model_len(
             "--plugin-dir",
             plugin_dir,
         ]
-        full_cmd = cmd_env + cmd_base
 
-        print(f"Running: {' '.join(full_cmd)}")
+        print(f"Running: {' '.join(f'{k}={v}' for k, v in cmd_env.items())} {' '.join(cmd_base)}")
 
         # Run with monitoring
         success = run_command_with_monitor(
-            full_cmd,
+            cmd_base,
+            cmd_env,
             logfile,
-            # stop_string="ray.exceptions.",
             timeout=timeout,
         )
 
@@ -270,8 +280,8 @@ def main(args):
     """Main entry point: orchestrates multi-GPU, multi-SP context length testing."""
     os.makedirs(args.log_dir, exist_ok=True)
 
-    model_path = os.path.join(args.models_dir, args.model_name)
-    model_config = transformers.AutoConfig.from_pretrained(model_path)
+    model_name = os.path.basename(args.model_path)
+    model_config = transformers.AutoConfig.from_pretrained(args.model_path)
 
     # Map SP group count to starting context length
     sp_num_to_start_length = {sp_num: args.start_length for sp_num in args.test_sp_num}
@@ -288,8 +298,7 @@ def main(args):
         for sp_num in sp_list:
             start_length = max(last_length, sp_num_to_start_length[sp_num])
             max_length = find_max_model_len(
-                model_name=args.model_name,
-                model_path=model_path,
+                model_path=args.model_path,
                 model_config=model_config,
                 trainer_gpu_num=trainer_gpu_num,
                 sp_num=sp_num,
@@ -304,7 +313,7 @@ def main(args):
             last_length = max(max_length, args.start_length)
             sp_num_to_start_length[sp_num] = last_length
             print(
-                f"model_name = {args.model_name}, "
+                f"model_name = {model_name}, "
                 f"trainer_gpu_num = {trainer_gpu_num}, "
                 f"sp_num = {sp_num}, "
                 f"max_model_len = {max_length}"
@@ -323,16 +332,10 @@ if __name__ == "__main__":
         help="Starting context length for testing.",
     )
     parser.add_argument(
-        "--models_dir",
+        "--model_path",
         type=str,
         required=True,
         help="Directory containing the pretrained models.",
-    )
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        required=True,
-        help="Name of the model to test (subdirectory under models_dir).",
     )
     parser.add_argument(
         "--log_dir",
