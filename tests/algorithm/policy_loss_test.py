@@ -142,7 +142,7 @@ class VerlPolicyLossTest(unittest.TestCase):
         self.assertTrue(
             torch.allclose(torch.tensor(metrics["seq_mask/mean_sequence_kl"]), mean_sequence_kl)
         )
-        
+
     def test_sapo_policy_loss(self):
         policy_loss_fn_cls = POLICY_LOSS_FN.get("sapo")
         policy_loss_fn_args = policy_loss_fn_cls.default_args()
