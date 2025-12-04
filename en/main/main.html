@@ -597,6 +597,7 @@ document.write(`
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">💡 What is Trinity-RFT?</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorials-and-guidelines">🔨 Tutorials and Guidelines</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">🌟 Key Features</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-algorithms">🔧 Supported Algorithms</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#citation">Citation</a></li>
 </ul>
@@ -690,6 +691,82 @@ It decouples RFT into three components that work in coordination:</p>
 </li>
 </ul>
 </section>
+<section id="supported-algorithms">
+<h1>🔧 Supported Algorithms<a class="headerlink" href="#supported-algorithms" title="Link to this heading">#</a></h1>
+<p>We list some algorithms supported by Trinity-RFT in the following table. For more details, the concrete configurations are shown in the <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py">Algorithm module</a>. You can also set up new algorithms by customizing different components, see <a class="reference internal" href="tutorial/develop_algorithm.html"><span class="std std-doc">tutorial</span></a>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Algorithm</p></th>
+<th class="head text-left"><p>Doc / Example</p></th>
+<th class="head text-left"><p>Source Code</p></th>
+<th class="head text-left"><p>Key Configurations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p>PPO [<a class="reference external" href="https://arxiv.org/pdf/1707.06347">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html">Doc</a>] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown">Countdown Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">ppo</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>GRPO [<a class="reference external" href="https://arxiv.org/pdf/2402.03300">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html">Doc</a>] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k">GSM8K Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">grpo</span></code></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>CHORD 💡 [<a class="reference external" href="https://arxiv.org/pdf/2508.11408">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html">Doc</a>] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml">ToolACE Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">mix_chord</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>REC Series 💡 [<a class="reference external" href="https://arxiv.org/pdf/2509.24203">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k">GSM8K Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">rec</span></code></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>RLOO [<a class="reference external" href="https://arxiv.org/pdf/2402.14740">Paper</a>]</p></td>
+<td class="text-left"><p>-</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">rloo</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>REINFORCE++ [<a class="reference external" href="https://arxiv.org/pdf/2501.03262">Paper</a>]</p></td>
+<td class="text-left"><p>-</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">reinforceplusplus</span></code></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>GSPO [<a class="reference external" href="https://arxiv.org/pdf/2507.18071">Paper</a>]</p></td>
+<td class="text-left"><p>-</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/gspo_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">gspo</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>TOPR [<a class="reference external" href="https://arxiv.org/pdf/2503.14286">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k">GSM8K Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/topr_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">topr</span></code></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>sPPO [<a class="reference external" href="https://arxiv.org/pdf/2108.05828">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k">GSM8K Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sppo_loss_fn.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">sppo</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>AsymRE [<a class="reference external" href="https://arxiv.org/pdf/2506.20520">Paper</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/asymre_gsm8k">GSM8K Example</a>]</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/asymre_advantage.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">asymre</span></code></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>CISPO [<a class="reference external" href="https://arxiv.org/pdf/2506.13585">Paper</a>]</p></td>
+<td class="text-left"><p>-</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/cispo_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">cispo</span></code></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>SAPO [<a class="reference external" href="https://arxiv.org/pdf/2511.20347">Paper</a>]</p></td>
+<td class="text-left"><p>-</p></td>
+<td class="text-left"><p>[<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sapo_policy_loss.py">Code</a>]</p></td>
+<td class="text-left"><p><code class="docutils literal notranslate"><span class="pre">algorithm_type:</span> <span class="pre">sapo</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="acknowledgements">
 <h1>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">#</a></h1>
 <p>This project is built upon many excellent open-source projects, including:</p>
@@ -748,6 +825,7 @@ It decouples RFT into three components that work in coordination:</p>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">💡 What is Trinity-RFT?</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorials-and-guidelines">🔨 Tutorials and Guidelines</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">🌟 Key Features</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-algorithms">🔧 Supported Algorithms</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#citation">Citation</a></li>
 </ul>

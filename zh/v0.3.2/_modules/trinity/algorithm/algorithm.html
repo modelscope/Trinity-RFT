@@ -1061,6 +1061,64 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="ReinforcePlusPlusAlgorithm">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.ReinforcePlusPlusAlgorithm">[文档]</a>
+<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reinforceplusplus&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReinforcePlusPlusAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reinforce++ algorithm.&quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
+
+<div class="viewcode-block" id="ReinforcePlusPlusAlgorithm.default_config">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.ReinforcePlusPlusAlgorithm.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;reinforceplusplus&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RLOOAlgorithm">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RLOOAlgorithm">[文档]</a>
+<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rloo&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RLOOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RLOO algorithm.&quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
+
+<div class="viewcode-block" id="RLOOAlgorithm.default_config">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RLOOAlgorithm.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;rloo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="OPMDAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.OPMDAlgorithm">[文档]</a>
 <span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
@@ -1222,6 +1280,35 @@ document.write(`
             <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;cispo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GSPOAlgorithm">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.GSPOAlgorithm">[文档]</a>
+<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;gspo&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GSPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;GSPO algorithm. See https://arxiv.org/pdf/2507.18071&quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
+
+<div class="viewcode-block" id="GSPOAlgorithm.default_config">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.GSPOAlgorithm.default_config">[文档]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;gspo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
             <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
