@@ -111,7 +111,7 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 ## 🔨 算法支持
 
-下表列出了 Trinity-RFT 支持的算法，更多算法请参考 [算法模块](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py)。您也可以通过自定义不同的模块来构建新算法，参见 [教程](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html))。
+下表列出了 Trinity-RFT 支持的算法，更多算法请参考 [算法模块](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py)。您也可以通过自定义不同的模块来构建新算法，参见 [教程](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)。
 
 | 算法 [论文] | 文档/示例 | 核心代码 | 关键配置 |
 |-----------|-----------|---------------|-----------|
@@ -119,8 +119,8 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 | GRPO [[论文](https://arxiv.org/pdf/2402.03300)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k)]| [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo` |
 | CHORD 💡 [[论文](https://arxiv.org/pdf/2508.11408)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)] [[ToolACE 例子](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
 | REC Series 💡 [[论文](https://arxiv.org/pdf/2509.24203)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec` |
-| RLOO [[论文](https://arxiv.org/pdf/2402.14740)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `advantage_fn: rloo` |
-| REINFORCE++ [[论文](https://arxiv.org/pdf/2501.03262)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `advantage_fn: reinforceplusplus` |
+| RLOO [[论文](https://arxiv.org/pdf/2402.14740)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `algorithm_type: rloo` |
+| REINFORCE++ [[论文](https://arxiv.org/pdf/2501.03262)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `algorithm_type: reinforceplusplus` |
 | GSPO [[论文](https://arxiv.org/pdf/2507.18071)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/gspo_policy_loss.py)] | `algorithm_type: gspo` |
 | TOPR [[论文](https://arxiv.org/pdf/2503.14286)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/topr_policy_loss.py)] | `algorithm_type: topr` |
 | sPPO [[论文](https://arxiv.org/pdf/2108.05828)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/sppo_loss_fn.py)] | `algorithm_type: sppo` |

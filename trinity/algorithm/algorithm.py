@@ -114,6 +114,52 @@ class GRPOAlgorithm(AlgorithmType):
         }
 
 
+@ALGORITHM_TYPE.register_module("reinforceplusplus")
+class ReinforcePlusPlusAlgorithm(AlgorithmType):
+    """Reinforce++ algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "reinforceplusplus",
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
+@ALGORITHM_TYPE.register_module("rloo")
+class RLOOAlgorithm(AlgorithmType):
+    """RLOO algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "rloo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
 @ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
