@@ -28,7 +28,7 @@ class MathDAPORewardFn(RewardFn):
         self,
         response: str,
         response_token: torch.Tensor,
-        truth: Optional[str] = None,
+        truth: str,
         **kwargs,
     ) -> dict[str, float]:
         accuracy_score = compute_score(response, truth)
