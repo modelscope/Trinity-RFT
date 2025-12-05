@@ -239,7 +239,9 @@ def debug(
     config_path: str,
     module: str,
     output_dir: str = "debug_output",
-    enable_viztracer: bool = False,
+    disable_overwrite: bool = False,
+    enable_profiling: bool = False,
+    port: int = 8502,
     plugin_dir: str = None,
 ):
     """Debug a module."""
@@ -263,8 +265,34 @@ def debug(
     elif module == "workflow":
         from trinity.explorer.workflow_runner import DebugWorkflowRunner
 
-        runner = DebugWorkflowRunner(config, output_dir, enable_viztracer)
+        runner = DebugWorkflowRunner(config, output_dir, enable_profiling, disable_overwrite)
         asyncio.run(runner.debug())
+    elif module == "viewer":
+        from streamlit.web import cli as stcli
+
+        current_dir = Path(__file__).resolve().parent.parent
+        viewer_path = os.path.join(current_dir, "buffer", "viewer.py")
+        output_dir_abs = os.path.abspath(output_dir)
+        if output_dir_abs.endswith("/"):
+            output_dir_abs = output_dir_abs[:-1]
+        print(f"sqlite:///{output_dir_abs}/experiences.db")
+        sys.argv = [
+            "streamlit",
+            "run",
+            viewer_path,
+            "--server.port",
+            str(port),
+            "--server.fileWatcherType",
+            "none",
+            "--",
+            "--db-url",
+            f"sqlite:///{output_dir_abs}/experiences.db",
+            "--table",
+            "debug_buffer",
+            "--tokenizer",
+            config.model.model_path,
+        ]
+        sys.exit(stcli.main())
     else:
         raise ValueError(
             f"Only support 'inference_model' and 'workflow' for debugging, got {module}"
@@ -301,8 +329,8 @@ def main() -> None:
     debug_parser.add_argument(
         "--module",
         type=str,
-        choices=["inference_model", "workflow"],
-        help="The module to start debugging, only support 'inference_model' and 'workflow' for now.",
+        choices=["inference_model", "workflow", "viewer"],
+        help="The module to start debugging, only support 'inference_model', 'workflow' and 'viewer' for now.",
     )
     debug_parser.add_argument(
         "--plugin-dir",
@@ -317,6 +345,9 @@ def main() -> None:
         help="The output directory for debug files.",
     )
     debug_parser.add_argument(
+        "--disable-overwrite", action="store_true", help="Disable overwriting the output directory."
+    )
+    debug_parser.add_argument(
         "--enable-profiling",
         action="store_true",
         help="Whether to use viztracer for workflow profiling.",
@@ -327,6 +358,12 @@ def main() -> None:
         default=None,
         help="[DEPRECATED] Please use --output-dir instead.",
     )
+    debug_parser.add_argument(
+        "--port",
+        type=int,
+        default=8502,
+        help="The port for Experience Viewer.",
+    )
 
     args = parser.parse_args()
     if args.command == "run":
@@ -335,7 +372,15 @@ def main() -> None:
     elif args.command == "studio":
         studio(args.port)
     elif args.command == "debug":
-        debug(args.config, args.module, args.output_dir, args.enable_profiling, args.plugin_dir)
+        debug(
+            args.config,
+            args.module,
+            args.output_dir,
+            args.disable_overwrite,
+            args.enable_profiling,
+            args.port,
+            args.plugin_dir,
+        )
 
 
 if __name__ == "__main__":

@@ -495,7 +495,8 @@ class MyWorkflow(Workflow):
 ```{mermaid}
 flowchart LR
     A[启动推理模型] --> B[调试 Workflow]
-    B --> B
+    B --> C[检查 Experience]
+    C --> B
 ```
 
 启动推理模型的命令如下：
@@ -509,14 +510,21 @@ trinity debug --config <config_file_path> --module inference_model
 模型启动后会持续运行并等待调试指令，不会自动退出。此时，你可在另一个终端执行如下命令进行 Workflow 调试：
 
 ```bash
-trinity debug --config <config_file_path> --module workflow --output-dir <output_dir> --plugin-dir <plugin_dir> --enable-profiling
+trinity debug --config <config_file_path> --module workflow --output-dir <output_dir> [--plugin-dir <plugin_dir>] [--enable-profiling] [--disable-overwrite]
 ```
 
 - `<config_file_path>`：YAML 配置文件路径，通常与启动推理模型时使用的配置文件相同。
 - `<output_dir>`：调试输出保存目录。如果未指定，调试输出将保存在当前工作目录下的 `debug_output` 目录中。
 - `<plugin_dir>`（可选）：插件目录路径。如果你的 Workflow 或奖励函数等模块未内置于 Trinity-RFT，可通过该参数加载自定义模块。
 - `--enable-profiling`（可选）：启用性能分析，使用 [viztracer](https://github.com/gaogaotiantian/viztracer) 对 Workflow 运行过程进行性能分析。
+- `--disable-overwrite`（可选）：禁用输出目录覆盖功能。如果指定的文件夹非空，程序将自动创建一个带有时间戳后缀的新目录（例如 `debug_output_20251203211200`）以避免覆盖现有数据。
 
-调试过程中，配置文件中的 `buffer.explorer_input.taskset` 字段会被加载，用于初始化 Workflow 所需的任务数据集和实例。需注意，调试模式仅会读取数据集中的第一条数据进行测试。运行上述命令后，Workflow 的返回值会自动格式化并打印在终端以供观察和查看，同时产出的 Experience 会保存到 `<output_dir>/experiences.db` 数据库中。
+调试过程中，配置文件中的 `buffer.explorer_input.taskset` 字段会被加载，用于初始化 Workflow 所需的任务数据集和实例。需注意，调试模式仅会读取数据集中的第一条数据进行测试。运行上述命令后，工作流的返回 Experience 会被写入指定输出目录下的 `experiences.db` 文件中，而运行过程中记录的指标会打印在终端以便检查。
+
+```bash
+trinity debug --config <config_file_path> --module viewer --output-dir <output_dir> --port 8502
+```
+
+该命令会在 `http://localhost:8502` 启动 Experience Viewer，用于可视化调试过程中生成的 Experience。你可以在用户友好的界面中检查生成的 Experience。需注意，Viewer 会从指定输出目录下的 `experiences.db` 文件中读取 Experience，因此请确保你已成功运行过 Workflow 调试命令，且替换 `<output_dir>` 为实际的输出目录。
 
 调试完成后，可在推理模型终端输入 `Ctrl+C` 以终止模型运行。

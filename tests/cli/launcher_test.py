@@ -275,6 +275,7 @@ class TestLauncherMain(unittest.TestCase):
                     config="dummy.yaml",
                     module="workflow",
                     enable_profiling=True,
+                    disable_overwrite=False,
                     output_dir=output_dir,
                     output_file=output_file,
                     plugin_dir="",
@@ -297,6 +298,26 @@ class TestLauncherMain(unittest.TestCase):
                     config="dummy.yaml",
                     module="workflow",
                     enable_profiling=False,
+                    disable_overwrite=False,
+                    output_dir=output_dir,
+                    output_file=output_file,
+                    plugin_dir="",
+                ),
+            ):
+                launcher.main()
+
+            dirs = os.listdir(self.config.checkpoint_job_dir)
+            target_output_dir = [d for d in dirs if d.startswith("debug_output_")]
+            self.assertEqual(len(target_output_dir), 0)
+
+            with mock.patch(
+                "argparse.ArgumentParser.parse_args",
+                return_value=mock.Mock(
+                    command="debug",
+                    config="dummy.yaml",
+                    module="workflow",
+                    enable_profiling=False,
+                    disable_overwrite=True,
                     output_dir=output_dir,
                     output_file=output_file,
                     plugin_dir="",
