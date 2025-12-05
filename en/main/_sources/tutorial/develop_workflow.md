@@ -499,7 +499,8 @@ During Workflow development, repeatedly launching the full training process for 
 ```{mermaid}
 flowchart LR
     A[Start Inference Model] --> B[Debug Workflow]
-    B --> B
+    B --> C[Check Experiences]
+    C --> B
 ```
 
 To start the inference model, use the following command:
@@ -513,14 +514,22 @@ Here, `<config_file_path>` is the path to a YAML configuration file, which shoul
 Once started, the model will keep running and wait for debug instructions; it will not exit automatically. You can then run the following command in another terminal to debug your workflow:
 
 ```bash
-trinity debug --config <config_file_path> --module workflow --output-dir <output_dir> --plugin-dir <plugin_dir> --enable-profiling
+trinity debug --config <config_file_path> --module workflow --output-dir <output_dir> [--plugin-dir <plugin_dir>] [--enable-profiling] [--disable-overwrite]
 ```
 
 - `<config_file_path>`: Path to the YAML configuration file, usually the same as used for starting the inference model.
 - `<output_dir>`: Directory to save the debug output. If not specified, the output will be saved to the `debug_output` in the current working directory.
 - `<plugin_dir>` (optional): Path to the plugin directory. If your workflow or reward function modules are not built into Trinity-RFT, you can specify this parameter to load custom modules.
 - `--enable-profiling` (optional): Enable performance profiling using [viztracer](https://github.com/gaogaotiantian/viztracer).
+- `--disable-overwrite` (optional): Disable overwriting the output directory. If the directory is not empty, it will automatically change to a new directory with a timestamp suffix (e.g., `debug_output_20251203211200`) to avoid overwriting existing data.
 
-During debugging, the `buffer.explorer_input.taskset` field in the config will be loaded to initialize the workflow's required task dataset and instance. Note that Debug Mode only reads the first sample in the dataset for testing. After running the above command, the workflow's return value will be automatically formatted and printed in the terminal for easy inspection and the output experiences will be saved to the `<output_dir>/experiences.db` file.
+During debugging, the `buffer.explorer_input.taskset` field in the config will be loaded to initialize the workflow's required task dataset and instance. Note that Debug Mode only reads the first sample in the dataset for testing. After running the above command, the workflow's return experiences will be written to the `experiences.db` file in the specified output directory. Additionally, the metrics will be printed in the terminal for easy inspection.
+
+```bash
+trinity debug --config <config_file_path> --module viewer --output-dir <output_dir> --port 8502
+```
+
+This command launches the Experience Viewer at `http://localhost:8502` to visualize the experiences generated during debugging. You can inspect the generated experiences in a user-friendly interface.
+Note that the viewer reads experiences from the `experiences.db` file in the specified output directory, so ensure that you have successfully run the workflow debug command beforehand and use the same output directory.
 
 When debugging is complete, you can terminate the inference model by pressing `Ctrl+C` in its terminal.

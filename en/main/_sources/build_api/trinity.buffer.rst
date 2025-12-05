@@ -26,6 +26,7 @@ Submodules
    trinity.buffer.buffer_writer
    trinity.buffer.task_scheduler
    trinity.buffer.utils
+   trinity.buffer.viewer
 
 Module contents
 ---------------

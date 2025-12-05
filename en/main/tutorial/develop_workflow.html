@@ -621,6 +621,7 @@ window.addEventListener("load", load);
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer_writer.html">trinity.buffer.buffer_writer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.task_scheduler.html">trinity.buffer.task_scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.utils.html">trinity.buffer.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.viewer.html">trinity.buffer.viewer module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -1457,14 +1458,15 @@ For this case, you can implement the <code class="docutils literal notranslate">
 <pre  class="mermaid">
         flowchart LR
     A[Start Inference Model] --&gt; B[Debug Workflow]
-    B --&gt; B
+    B --&gt; C[Check Experiences]
+    C --&gt; B
     </pre><p>To start the inference model, use the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>inference_model
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">&lt;config_file_path&gt;</span></code> is the path to a YAML configuration file, which should follow the same format as the one used by the <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span></code> command. The <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model</span></code> and <code class="docutils literal notranslate"><span class="pre">explorer.auxiliary_models</span></code> fields in the config will be loaded to initialize the inference model.</p>
 <p>Once started, the model will keep running and wait for debug instructions; it will not exit automatically. You can then run the following command in another terminal to debug your workflow:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output-dir<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span>--plugin-dir<span class="w"> </span>&lt;plugin_dir&gt;<span class="w"> </span>--enable-profiling
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>workflow<span class="w"> </span>--output-dir<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span><span class="o">[</span>--plugin-dir<span class="w"> </span>&lt;plugin_dir&gt;<span class="o">]</span><span class="w"> </span><span class="o">[</span>--enable-profiling<span class="o">]</span><span class="w"> </span><span class="o">[</span>--disable-overwrite<span class="o">]</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -1472,8 +1474,14 @@ For this case, you can implement the <code class="docutils literal notranslate">
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;</span></code>: Directory to save the debug output. If not specified, the output will be saved to the <code class="docutils literal notranslate"><span class="pre">debug_output</span></code> in the current working directory.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;plugin_dir&gt;</span></code> (optional): Path to the plugin directory. If your workflow or reward function modules are not built into Trinity-RFT, you can specify this parameter to load custom modules.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--enable-profiling</span></code> (optional): Enable performance profiling using <a class="reference external" href="https://github.com/gaogaotiantian/viztracer">viztracer</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--disable-overwrite</span></code> (optional): Disable overwriting the output directory. If the directory is not empty, it will automatically change to a new directory with a timestamp suffix (e.g., <code class="docutils literal notranslate"><span class="pre">debug_output_20251203211200</span></code>) to avoid overwriting existing data.</p></li>
 </ul>
-<p>During debugging, the <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> field in the config will be loaded to initialize the workflow’s required task dataset and instance. Note that Debug Mode only reads the first sample in the dataset for testing. After running the above command, the workflow’s return value will be automatically formatted and printed in the terminal for easy inspection and the output experiences will be saved to the <code class="docutils literal notranslate"><span class="pre">&lt;output_dir&gt;/experiences.db</span></code> file.</p>
+<p>During debugging, the <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> field in the config will be loaded to initialize the workflow’s required task dataset and instance. Note that Debug Mode only reads the first sample in the dataset for testing. After running the above command, the workflow’s return experiences will be written to the <code class="docutils literal notranslate"><span class="pre">experiences.db</span></code> file in the specified output directory. Additionally, the metrics will be printed in the terminal for easy inspection.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>debug<span class="w"> </span>--config<span class="w"> </span>&lt;config_file_path&gt;<span class="w"> </span>--module<span class="w"> </span>viewer<span class="w"> </span>--output-dir<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">8502</span>
+</pre></div>
+</div>
+<p>This command launches the Experience Viewer at <code class="docutils literal notranslate"><span class="pre">http://localhost:8502</span></code> to visualize the experiences generated during debugging. You can inspect the generated experiences in a user-friendly interface.
+Note that the viewer reads experiences from the <code class="docutils literal notranslate"><span class="pre">experiences.db</span></code> file in the specified output directory, so ensure that you have successfully run the workflow debug command beforehand and use the same output directory.</p>
 <p>When debugging is complete, you can terminate the inference model by pressing <code class="docutils literal notranslate"><span class="pre">Ctrl+C</span></code> in its terminal.</p>
 </section>
 </section>
