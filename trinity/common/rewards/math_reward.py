@@ -6,7 +6,7 @@ from trinity.common.rewards.accuracy_reward import AccuracyReward
 from trinity.common.rewards.format_reward import FormatReward
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
 from trinity.utils.eval_utils import (
-    compute_score,
+    compute_score_v0,
     simple_answer_parser,
     validate_think_pattern,
 )
@@ -58,7 +58,7 @@ class MathBoxedRewardFn(RewardFn):
         format_score_coef: Optional[float] = 0.1,
         **kwargs,
     ) -> dict[str, float]:
-        accuracy_score = compute_score(response, truth)
+        accuracy_score = compute_score_v0(response, truth)
 
         format_score = 0.0
         if with_think and not validate_think_pattern(response):
