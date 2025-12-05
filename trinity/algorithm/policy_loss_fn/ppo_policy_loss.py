@@ -21,8 +21,8 @@ class PPOPolicyLossFn(PolicyLossFn):
         clip_range_high: Optional[float] = None,
         clip_ratio_c: float = 3.0,
         loss_agg_mode: Optional[str] = "token-mean",
-        enable_sequence_masking: bool = False,
-        delta: float = 0.1,
+        enable_sequence_masking: bool = False,  # introduced in DeepseekV3.2
+        delta_sequence_masking: float = 0.1,
     ) -> None:
         super().__init__(backend=backend)
         if clip_range_low is None:
@@ -39,7 +39,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         assert self.clip_range_high is not None, "clip_range_high must be specified."
         self.loss_agg_mode = loss_agg_mode
         self.enable_sequence_masking = enable_sequence_masking
-        self.delta = delta
+        self.delta_sequence_masking = delta_sequence_masking
 
     def __call__(  # type: ignore
         self,
@@ -54,33 +54,6 @@ class PPOPolicyLossFn(PolicyLossFn):
         negative_approx_kl = torch.clamp(negative_approx_kl, min=-20.0, max=20.0)
         ratio = torch.exp(negative_approx_kl)
         ppo_kl = masked_mean(-negative_approx_kl, action_mask)
-
-        # Compute sequence masking if enabled
-        sequence_mask = torch.ones_like(advantages)
-        if self.enable_sequence_masking:
-            # Compute sequence-level KL divergence: mean KL per sequence
-            # Shape: (batch_size, seq_len) -> (batch_size,)
-            kl_per_token = -negative_approx_kl  # KL divergence per token
-            sequence_kl = (kl_per_token * action_mask).sum(dim=-1) / (
-                action_mask.sum(dim=-1) + 1e-10
-            )
-
-            # Create mask: mask out tokens with negative advantages when sequence KL is high
-            # Token-level advantage check: (batch_size, seq_len)
-            has_negative_advantage = advantages < 0
-            # Sequence-level KL check: (batch_size,) -> (batch_size, 1) -> (batch_size, seq_len)
-            exceeds_kl_threshold = (sequence_kl > self.delta).unsqueeze(-1).expand_as(advantages)
-            # Mask tokens that are both negative advantage AND in high-KL sequences
-            should_mask = has_negative_advantage & exceeds_kl_threshold
-            sequence_mask = (~should_mask).float()
-
-            metrics_seq_mask = {
-                "seq_mask/masked_tokens": should_mask.float().sum().item()
-                / (action_mask.sum().item() + 1e-10),
-                "seq_mask/mean_sequence_kl": sequence_kl.mean().detach().item(),
-            }
-        else:
-            metrics_seq_mask = {}
 
         pg_losses1 = -advantages * ratio
         pg_losses2 = -advantages * torch.clamp(
@@ -98,9 +71,34 @@ class PPOPolicyLossFn(PolicyLossFn):
         )
         pg_losses = torch.where(advantages < 0, clip_pg_losses2, clip_pg_losses1)
 
-        # Apply sequence mask to the losses
+        # Apply sequence masking if enabled
         if self.enable_sequence_masking:
+            # Compute sequence-level KL divergence: mean KL per sequence
+            # Shape: (batch_size, seq_len) -> (batch_size,)
+            kl_per_token = -negative_approx_kl  # KL divergence per token
+            sequence_kl = (kl_per_token * action_mask).sum(dim=-1) / (
+                action_mask.sum(dim=-1) + 1e-10
+            )
+
+            # Create mask: mask out tokens with negative advantages when sequence KL is high
+            # Token-level advantage check: (batch_size, seq_len)
+            has_negative_advantage = advantages < 0
+            # Sequence-level KL check: (batch_size,) -> (batch_size, 1) -> (batch_size, seq_len)
+            exceeds_kl_threshold = (
+                (sequence_kl > self.delta_sequence_masking).unsqueeze(-1).expand_as(advantages)
+            )
+            # Mask tokens that are both negative advantage AND in high-KL sequences
+            should_mask = has_negative_advantage & exceeds_kl_threshold
+            sequence_mask = (~should_mask).float()
+
+            # Apply sequence mask to the losses
             pg_losses = pg_losses * sequence_mask
+
+            metrics_seq_mask = {
+                "seq_mask/masked_tokens": should_mask.float().sum().item()
+                / (action_mask.sum().item() + 1e-10),
+                "seq_mask/mean_sequence_kl": sequence_kl.mean().detach().item(),
+            }
 
         pg_loss = aggregate_loss(pg_losses, action_mask, loss_agg_mode=self.loss_agg_mode)
         metrics = {
@@ -109,7 +107,8 @@ class PPOPolicyLossFn(PolicyLossFn):
             "ppo_kl": ppo_kl.detach().item(),
             "pg_loss": pg_loss.detach().item(),
         }
-        metrics.update(metrics_seq_mask)
+        if self.enable_sequence_masking:
+            metrics.update(metrics_seq_mask)
         return pg_loss, metrics
 
     @classmethod
@@ -119,5 +118,5 @@ class PPOPolicyLossFn(PolicyLossFn):
             "clip_ratio_c": 3.0,
             "loss_agg_mode": "token-mean",
             "enable_sequence_masking": False,
-            "delta": 0.1,
+            "delta_sequence_masking": 0.1,
         }

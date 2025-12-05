@@ -120,7 +120,7 @@ class VerlPolicyLossTest(unittest.TestCase):
         policy_loss_fn_cls = POLICY_LOSS_FN.get("ppo")
         policy_loss_fn_args = policy_loss_fn_cls.default_args()
         policy_loss_fn_args["enable_sequence_masking"] = True
-        policy_loss_fn_args["delta"] = 0.1
+        policy_loss_fn_args["delta_sequence_masking"] = 0.1
         policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
         loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
         ppo_loss_masked = torch.tensor(0.22175675630569458)
