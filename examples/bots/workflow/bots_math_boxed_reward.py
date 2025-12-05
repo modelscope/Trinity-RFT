@@ -22,9 +22,9 @@ class BOTSMathBoxedRewardFn(RewardFn):
         format_score_coef: Optional[float] = 0.1,
         **kwargs,
     ) -> dict[str, float]:
-        from trinity.plugins.bots_reward import compute_score
+        from trinity.plugins.bots_reward import compute_score_bots
 
-        accuracy_score = compute_score(response, truth)
+        accuracy_score = compute_score_bots(response, truth)
 
         format_score = 0.0
         if with_think and not validate_think_pattern(response):

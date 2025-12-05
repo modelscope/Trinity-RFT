@@ -434,6 +434,7 @@ def grade_answer(given_answer: str, ground_truth: str) -> tuple[bool, str]:
 
 
 def _last_boxed_only_string(string):
+    """Strictly extract content from \boxed{}."""
     idx = string.rfind("\\boxed")
     if idx < 0:
         idx = string.rfind("\\fbox")
@@ -476,7 +477,7 @@ def match_answer(response):
     return is_matched, response
 
 
-def compute_score(solution_str: str, ground_truth: str, extra_info: dict) -> dict:
+def compute_score(solution_str: str, ground_truth: str) -> float:
     """Compute the reward score for a solution. This draws heavily from the LLM-as-judge and PRIME reward functions
 
     Args:
@@ -513,10 +514,4 @@ def compute_score(solution_str: str, ground_truth: str, extra_info: dict) -> dic
         except Exception:
             correct = False
 
-    reward = 1.0 if correct else 0.0
-    acc = correct
-
-    return {
-        "score": reward,
-        "acc": acc,
-    }
+    return 1.0 if correct else 0.0

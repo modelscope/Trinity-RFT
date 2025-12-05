@@ -98,7 +98,7 @@ def validate_format(tool_call_list):
 
 
 # Adapted from https://github.com/NVlabs/Tool-N1
-def extract_solution_v0(tool_call_str):
+def extract_solution_v0_toolN1(tool_call_str):
     output_string = tool_call_str
 
     pattern = r"<tool_call>(.*?)</tool_call>"
@@ -112,14 +112,15 @@ def extract_solution_v0(tool_call_str):
         return None, output_string
 
 
-def compute_score_v0(  # noqa: C901
+# Adapted from https://github.com/NVlabs/Tool-N1
+def compute_score_v0_toolN1(  # noqa: C901
     solution_str,
     ground_truth,
     do_print=False,
 ):
     answer = json.loads(ground_truth)
 
-    result, output_string = extract_solution_v0(solution_str)
+    result, output_string = extract_solution_v0_toolN1(solution_str)
 
     if isinstance(result, str):
         try:
@@ -199,7 +200,7 @@ def compute_toolcall_reward(
     solution_str: str,
     ground_truth: str,
 ) -> float:
-    res = compute_score_v0(solution_str, ground_truth)
+    res = compute_score_v0_toolN1(solution_str, ground_truth)
     if isinstance(res, (int, float, bool)):
         return float(res)
     else:
