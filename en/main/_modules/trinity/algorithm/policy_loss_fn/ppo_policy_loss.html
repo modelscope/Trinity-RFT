@@ -941,6 +941,8 @@ document.write(`
         <span class="n">clip_range_high</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">clip_ratio_c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span>
         <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+        <span class="n">enable_sequence_masking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># introduced in DeepseekV3.2</span>
+        <span class="n">delta_sequence_masking</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">clip_range_low</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -955,7 +957,9 @@ document.write(`
         <span class="k">assert</span> <span class="n">clip_ratio_c</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;clip_ratio_c must be greater than 1.0.&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;clip_range_low must be specified.&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;clip_range_high must be specified.&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_sequence_masking</span> <span class="o">=</span> <span class="n">enable_sequence_masking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_sequence_masking</span> <span class="o">=</span> <span class="n">delta_sequence_masking</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -987,6 +991,36 @@ document.write(`
             <span class="n">torch</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="n">clip_pg_losses1</span><span class="p">,</span> <span class="n">pg_losses3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">advantages</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">action_mask</span>
         <span class="p">)</span>
         <span class="n">pg_losses</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">advantages</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">clip_pg_losses2</span><span class="p">,</span> <span class="n">clip_pg_losses1</span><span class="p">)</span>
+
+        <span class="c1"># Apply sequence masking if enabled</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_sequence_masking</span><span class="p">:</span>
+            <span class="c1"># Compute sequence-level KL divergence: mean KL per sequence</span>
+            <span class="c1"># Shape: (batch_size, seq_len) -&gt; (batch_size,)</span>
+            <span class="n">kl_per_token</span> <span class="o">=</span> <span class="o">-</span><span class="n">negative_approx_kl</span>  <span class="c1"># KL divergence per token</span>
+            <span class="n">sequence_kl</span> <span class="o">=</span> <span class="p">(</span><span class="n">kl_per_token</span> <span class="o">*</span> <span class="n">action_mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="n">action_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-10</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Create mask: mask out tokens with negative advantages when sequence KL is high</span>
+            <span class="c1"># Token-level advantage check: (batch_size, seq_len)</span>
+            <span class="n">has_negative_advantage</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="c1"># Sequence-level KL check: (batch_size,) -&gt; (batch_size, 1) -&gt; (batch_size, seq_len)</span>
+            <span class="n">exceeds_kl_threshold</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">sequence_kl</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_sequence_masking</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">advantages</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># Mask tokens that are both negative advantage AND in high-KL sequences</span>
+            <span class="n">should_mask</span> <span class="o">=</span> <span class="n">has_negative_advantage</span> <span class="o">&amp;</span> <span class="n">exceeds_kl_threshold</span>
+            <span class="n">sequence_mask</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">should_mask</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+            <span class="c1"># Apply sequence mask to the losses</span>
+            <span class="n">pg_losses</span> <span class="o">=</span> <span class="n">pg_losses</span> <span class="o">*</span> <span class="n">sequence_mask</span>
+
+            <span class="n">metrics_seq_mask</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;seq_mask/masked_tokens&quot;</span><span class="p">:</span> <span class="n">should_mask</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">action_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">),</span>
+                <span class="s2">&quot;seq_mask/mean_sequence_kl&quot;</span><span class="p">:</span> <span class="n">sequence_kl</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="p">}</span>
+
         <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;pg_clipfrac&quot;</span><span class="p">:</span> <span class="n">pg_clip_frac</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
@@ -994,6 +1028,8 @@ document.write(`
             <span class="s2">&quot;ppo_kl&quot;</span><span class="p">:</span> <span class="n">ppo_kl</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
             <span class="s2">&quot;pg_loss&quot;</span><span class="p">:</span> <span class="n">pg_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_sequence_masking</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metrics_seq_mask</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pg_loss</span><span class="p">,</span> <span class="n">metrics</span>
 
 <div class="viewcode-block" id="PPOPolicyLossFn.default_args">
@@ -1004,6 +1040,8 @@ document.write(`
             <span class="s2">&quot;clip_range&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
             <span class="s2">&quot;clip_ratio_c&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
             <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;enable_sequence_masking&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;delta_sequence_masking&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 
