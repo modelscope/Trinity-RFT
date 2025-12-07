@@ -1,26 +1,26 @@
-# Trainer 参数配置指南
+# Trainer Parameter Configuration Guide
 
-本文档为在 **NVIDIA A100 80GB** 和 **H20 96GB** 显卡上训练 Qwen3 系列模型提供推荐的训练配置建议。
-根据模型大小（0.6B ~ 14B）与上下文长度（`max_model_len`），我们给出了Trainer模块在不同 GPU 数量下的可行方案。
+This document provides recommended training configurations for Qwen3 series models on **NVIDIA A100 80GB** and **H20 96GB** GPUs.
+Based on model size (0.6B ~ 14B) and context length (`max_model_len`), we present feasible Trainer module setups across varying numbers of GPUs.
 
-> 💡 **术语说明**
+> 💡 **Terminology**
 >
-> - **vanilla**：无需特殊配置，使用默认设置即可。
-> - **Env**：需在启动训练前（启动ray之前）设置环境变量：
+> - **vanilla**: No special configuration required; default settings suffice.
+> - **Env**: Set the following environment variable **before launching training (before starting Ray)**:
 >   ```bash
 >   export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 >   ```
-> - **Offload**：需启用 **FSDP v2 + CPU Offload** 技术以节省显存。
-> - **SP=N**：表示使用 **Sequence Parallelism（序列并行）**，并行度为 N（通常 N ≤ GPU 数量）。
-> - **组合项（如 `Env SP=2`）**：需同时满足所有列出的条件。
-> - **“-”**：当前硬件与配置组合下，**无法支持该模型+序列长度的训练**。
+> - **Offload**: Enable **FSDP v2 + CPU Offload** to reduce GPU memory usage.
+> - **SP=N**: Use **Sequence Parallelism** with parallelism degree N (typically N ≤ number of GPUs).
+> - **Combined entries (e.g., `Env SP=2`)**: All listed conditions must be satisfied simultaneously.
+> - **“-”**: The combination of current hardware and configuration **cannot support training** for this model + sequence length.
 
 ---
 
-## 关于长上下文支持
+## Long Context Support
 
-Qwen3 系列模型原生支持的最大上下文长度为 **40,960 tokens**。
-对于超过此长度的训练（如 51,200、81,920 等），我们通过 **YaRN RoPE 扩展** 实现。相关配置如下：
+Qwen3 series models natively support a maximum context length of **40,960 tokens**.
+For training beyond this length (e.g., 51,200, 81,920 tokens), we use **YaRN RoPE extension**. The relevant configuration is as follows:
 
 ```yaml
 model:
@@ -29,21 +29,21 @@ model:
   max_model_len: ${oc.env:MAX_MODEL_LEN,4096}
   rope_scaling:
     rope_type: yarn
-    factor: ${oc.decode:${oc.env:FACTOR}}  # 推荐值 = MAX_MODEL_LEN / 40960
+    factor: ${oc.decode:${oc.env:FACTOR}}  # Recommended value = MAX_MODEL_LEN / 40960
     original_max_position_embeddings: 40960
 ```
 
-> ✅ 使用 YaRN 时，请确保 `factor` 设置合理，避免数值不稳定。
+> ✅ When using YaRN, ensure `factor` is set reasonably to avoid numerical instability.
 
 ---
 
-## 🖥️ A100 80GB 显卡配置建议
+## 🖥️ A100 80GB GPU Configuration Recommendations
 
-> ⚠️ **单卡限制**：在 1 张 A100 上训练 ≥4B 模型或 >20K 上下文时，显存压力极大，**强烈建议使用多卡方案**。
+> ⚠️ **Single-GPU Limitation**: Training models ≥4B or with context lengths >20K on a single A100 GPU places extreme pressure on VRAM. **Multi-GPU setups are strongly recommended**.
 
-### 1 张 GPU
+### 1 GPU
 
-<details><summary>点击查看详细配置</summary>
+<details><summary>Click to view detailed configurations</summary>
 
 |   `max_model_len` | Qwen3-0.6B    | Qwen3-1.7B    | Qwen3-4B      | Qwen3-8B      | Qwen3-14B     |
 |------------------:|:--------------|:--------------|:--------------|:--------------|:--------------|
@@ -60,9 +60,9 @@ model:
 
 ---
 
-### 2 张 GPU
+### 2 GPUs
 
-<details><summary>✅ 推荐：2 卡显著提升 4B~14B 模型的长上下文训练能力，上下文较长时建议启用 SP=2</summary>
+<details><summary>✅ Recommended: 2 GPUs significantly improve long-context training capability for 4B~14B models. Enable SP=2 when using longer contexts.</summary>
 
 |   `max_model_len` | Qwen3-0.6B           | Qwen3-1.7B           | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:---------------------|:---------------------|:---------------------|:---------------------|:---------------------|
@@ -84,9 +84,9 @@ model:
 
 ---
 
-### 4 张 GPU
+### 4 GPUs
 
-<details><summary>✅ 推荐：训练 8B/14B 模型 + 超长上下文（>60K）的理想配置</summary>
+<details><summary>✅ Recommended: Ideal setup for training 8B/14B models with ultra-long contexts (>60K)</summary>
 
 |   `max_model_len` | Qwen3-0.6B           | Qwen3-1.7B           | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:---------------------|:---------------------|:---------------------|:---------------------|:---------------------|
@@ -114,9 +114,9 @@ model:
 
 ---
 
-### 6 张 GPU
+### 6 GPUs
 
-<details><summary>✅ 对中小模型（≤4B）支持较好，但对 14B 模型在超长上下文下仍存在限制</summary>
+<details><summary>✅ Good support for small-to-medium models (≤4B), but still limited for 14B models with ultra-long contexts</summary>
 
 |   `max_model_len` | Qwen3-0.6B   | Qwen3-1.7B   | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:-------------|:-------------|:---------------------|:---------------------|:---------------------|
@@ -138,13 +138,13 @@ model:
 
 ---
 
-## 🧊 H20 96GB 显卡配置建议
+## 🧊 H20 96GB GPU Configuration Recommendations
 
-H20 显存更大（96GB），但计算能力弱于 A100。
+The H20 has larger VRAM (96GB) but lower compute performance compared to the A100.
 
-### 1 张 GPU
+### 1 GPU
 
-<details><summary>单卡可支持 4B 模型至 ~32K 上下文</summary>
+<details><summary>Single GPU supports 4B models up to ~32K context length</summary>
 
 |   `max_model_len` | Qwen3-0.6B    | Qwen3-1.7B    | Qwen3-4B      | Qwen3-8B      | Qwen3-14B     |
 |------------------:|:--------------|:--------------|:--------------|:--------------|:--------------|
@@ -163,9 +163,9 @@ H20 显存更大（96GB），但计算能力弱于 A100。
 
 ---
 
-### 2 张 GPU
+### 2 GPUs
 
-<details><summary>支持 14B 模型至 50K 上下文</summary>
+<details><summary>Supports 14B models up to 50K context length</summary>
 
 |   `max_model_len` | Qwen3-0.6B   | Qwen3-1.7B   | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:-------------|:-------------|:---------------------|:---------------------|:---------------------|
@@ -188,9 +188,9 @@ H20 显存更大（96GB），但计算能力弱于 A100。
 
 ---
 
-### 4 张 GPU
+### 4 GPUs
 
-<details><summary>✅ 可支持 14B 模型训练至 100K 上下文</summary>
+<details><summary>✅ Supports training 14B models up to 100K context length</summary>
 
 |   `max_model_len` | Qwen3-0.6B   | Qwen3-1.7B           | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:-------------|:---------------------|:---------------------|:---------------------|:---------------------|
@@ -220,9 +220,9 @@ H20 显存更大（96GB），但计算能力弱于 A100。
 
 ---
 
-### 6 张 GPU
+### 6 GPUs
 
-<details><summary>对中小模型（≤4B）支持较好，但对 14B 模型在超长上下文下仍存在限制</summary>
+<details><summary>Good support for small-to-medium models (≤4B), but still limited for 14B models with ultra-long contexts</summary>
 
 |   `max_model_len` | Qwen3-0.6B   | Qwen3-1.7B           | Qwen3-4B             | Qwen3-8B             | Qwen3-14B            |
 |------------------:|:-------------|:---------------------|:---------------------|:---------------------|:---------------------|
@@ -245,13 +245,13 @@ H20 显存更大（96GB），但计算能力弱于 A100。
 
 ---
 
-## ✅ 最佳实践建议
+## ✅ Best Practices
 
-1. **从最简配置开始**：优先尝试 `vanilla`，仅在遇到 OOM 时逐步启用高级功能。
-2. **长上下文必用 YaRN**：超过 40,960 tokens 时，务必配置 `rope_scaling` 并合理设置 `factor`。
-3. **OOM 处理顺序**：
-   - 第一步：设置 `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
-   - 第二步：增加 **Sequence Parallelism（SP）**
-   - 第三步：启用 **FSDP v2 + CPU Offload**
-4. **SP 并行度选择**：建议设为 **GPU 数量与注意力头数的公因数**（如 2、4），避免通信瓶颈。
-5. **多卡优于单卡**：即使显存足够，多卡也能通过并行提升训练效率与稳定性。
+1. **Start with the simplest configuration**: Try `vanilla` first, and incrementally enable advanced features only when encountering OOM errors.
+2. **Always use YaRN for long contexts**: For contexts exceeding 40,960 tokens, configure `rope_scaling` and set `factor` appropriately.
+3. **OOM troubleshooting sequence**:
+   - Step 1: Set `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+   - Step 2: Increase **Sequence Parallelism (SP)**
+   - Step 3: Enable **FSDP v2 + CPU Offload**
+4. **Choosing SP parallelism degree**: Prefer values that are **common divisors of both GPU count and attention head count** (e.g., 2, 4) to avoid communication bottlenecks.
+5. **Prefer multi-GPU over single-GPU**: Even when VRAM appears sufficient, multi-GPU setups improve training efficiency and stability through parallelization.
