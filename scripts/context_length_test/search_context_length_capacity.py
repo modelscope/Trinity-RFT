@@ -15,6 +15,8 @@ from typing import List, Optional
 import transformers
 import yaml
 
+from trinity.utils.dlc_utils import is_running, setup_ray_cluster, stop_ray_cluster
+
 # Default list of GPU counts to test
 DEFAULT_GPU_NUMS: List[int] = [1, 2, 4, 6]
 EXCEPTION_STRING = "Traceback (most recent call last)"
@@ -51,6 +53,9 @@ def monitor_output(
             if EXCEPTION_STRING in line:
                 exception_event.set()
 
+            if exception_event.is_set():
+                print(line, end="", flush=True)
+
             # Check for oom
             if OOM_STRING in line:
                 exception_event.set()
@@ -64,6 +69,7 @@ def run_command_with_monitor(
     command: List[str],
     envs: dict[str, str],
     log_path: str,
+    checkpoint_path: str,
     timeout: Optional[int] = None,
 ) -> bool:
     """Runs a shell command with real-time output monitoring and early termination support.
@@ -77,6 +83,7 @@ def run_command_with_monitor(
         command: Command to execute, as a list of strings.
         envs: Environment variables to set for the command.
         log_path: Path to the log file where output will be saved.
+        checkpoint_path: Path to the checkpoint directory.
         timeout: Optional timeout in seconds before forcing termination.
 
     Returns:
@@ -84,19 +91,19 @@ def run_command_with_monitor(
     """
     retry_flag = True
     success_flag = False
-    checkpoint_root = os.environ.get("TRINITY_CHECKPOINT_ROOT_DIR", "./checkpoints/length-test")
+    envs["TRINITY_CHECKPOINT_ROOT_DIR"] = checkpoint_path
+    process_env = os.environ.copy()
+    process_env.update(envs)
 
     while retry_flag:
         # Clean up checkpoint directory before each run
-        shutil.rmtree(checkpoint_root, ignore_errors=True)
+        shutil.rmtree(checkpoint_path, ignore_errors=True)
 
         exception_event = threading.Event()
         oom_event = threading.Event()
 
         with open(log_path, "w", encoding="utf-8") as log_file:
             # Start subprocess with merged stdout/stderr
-            process_env = os.environ.copy()
-            process_env.update(envs)
             process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,
@@ -160,6 +167,7 @@ def run_command_with_monitor(
 def find_max_model_len(
     model_path: str,
     model_config,
+    checkpoint_path: str,
     trainer_gpu_num: int,
     sp_num: int,
     base_log_dir: str,
@@ -178,6 +186,7 @@ def find_max_model_len(
     Args:
         model_path: Path to the pretrained model.
         model_config: Loaded Hugging Face model configuration.
+        checkpoint_path: Path to the checkpoint directory.
         trainer_gpu_num: Number of GPUs allocated.
         sp_num: Number of sequence parallel groups.
         base_log_dir: Base directory for saving logs.
@@ -253,6 +262,7 @@ def find_max_model_len(
             cmd_base,
             cmd_env,
             logfile,
+            checkpoint_path,
             timeout=timeout,
         )
 
@@ -278,6 +288,13 @@ def find_max_model_len(
 
 def main(args):
     """Main entry point: orchestrates multi-GPU, multi-SP context length testing."""
+    if args.dlc:
+        cluster_namespace = "search_context_length_capacity"
+        setup_ray_cluster(namespace=cluster_namespace)
+
+    if not is_running():
+        raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
+
     os.makedirs(args.log_dir, exist_ok=True)
 
     model_name = os.path.basename(args.model_path)
@@ -300,6 +317,7 @@ def main(args):
             max_length = find_max_model_len(
                 model_path=args.model_path,
                 model_config=model_config,
+                checkpoint_path=args.checkpoint_path,
                 trainer_gpu_num=trainer_gpu_num,
                 sp_num=sp_num,
                 base_log_dir=args.log_dir,
@@ -318,6 +336,9 @@ def main(args):
                 f"sp_num = {sp_num}, "
                 f"max_model_len = {max_length}"
             )
+
+    if args.dlc:
+        stop_ray_cluster(namespace=cluster_namespace)
 
 
 if __name__ == "__main__":
@@ -342,6 +363,14 @@ if __name__ == "__main__":
         type=str,
         default=default_log_dir,
         help="Directory to store experiment logs.",
+    )
+    parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        default=os.environ.get("TRINITY_CHECKPOINT_ROOT_DIR", "./checkpoints/length-test"),
+        help="Checkpoint path for testing. "
+        "Note that this directory will be deleted during the test, "
+        "please specify a path that is not used by other processes.",
     )
     parser.add_argument(
         "--test_gpu_num",
@@ -386,6 +415,9 @@ if __name__ == "__main__":
         type=int,
         default=2400,
         help="Timeout for each experiment in seconds.",
+    )
+    parser.add_argument(
+        "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
     )
 
     args = parser.parse_args()

@@ -53,6 +53,7 @@ python search_context_length_capacity.py \
 |--------|--------|-----------|
 | `--start_length` | `4096` | Initial context length to begin testing. |
 | `--log_dir` | `./logs` | Directory to save logs and results. |
+| `--checkpoint_path` | `os.environ.get("TRINITY_CHECKPOINT_ROOT_DIR", "./checkpoints/length-test")` | Checkpoint path for testing. Note that this directory will be deleted during the test, please specify a path that is not used by other processes. |
 | `--test_gpu_num` | `1 2 4 6` | List of GPU counts to test scalability. |
 | `--test_sp_num` | `1` | Sequence parallel group sizes to evaluate. Must divide `test_gpu_num` and number of attention heads. |
 | `--save_hf_checkpoint` | `last` | When to save HF format checkpoints (`always`, `never`, `last`). |
@@ -60,6 +61,7 @@ python search_context_length_capacity.py \
 | `--offload` | `False` | Offload parameters to CPU to reduce GPU memory usage. |
 | `--trainer_strategy` | `fsdp` | Distributed training strategy (`fsdp` or `fsdp2`). |
 | `--timeout` | `2400` (40 min) | Maximum time per job before forced termination. |
+| `--dlc` | `False` | Specify when running in Aliyun PAI DLC. |
 
 ---
 
