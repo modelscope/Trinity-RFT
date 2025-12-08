@@ -1,7 +1,7 @@
 # Trainer Parameter Configuration Guide
 
 This document provides recommended training configurations for Qwen3 series models on **NVIDIA A100 80GB** and **H20 96GB** GPUs.
-Based on model size (0.6B ~ 14B) and context length (`max_model_len`), we present feasible Trainer module setups across varying numbers of GPUs.
+Based on model size (0.6B ~ 14B) and context length (`model.max_model_len`), we present feasible Trainer module setups across varying numbers of GPUs.
 
 > 💡 **Terminology**
 >
@@ -12,8 +12,8 @@ Based on model size (0.6B ~ 14B) and context length (`max_model_len`), we presen
 >   ```
 > - **Offload**: Enable **FSDP v2 + CPU Offload** to reduce GPU memory usage.
 > - **SP=N**: Use **Sequence Parallelism** with parallelism degree N (typically N ≤ number of GPUs).
-> - **Combined entries (e.g., `Env SP=2`)**: All listed conditions must be satisfied simultaneously.
-> - **“-”**: The combination of current hardware and configuration **cannot support training** for this model + sequence length.
+> - **Combined entries (e.g., `Env + SP=2`)**: All listed conditions must be satisfied simultaneously.
+> - **“-”**: The combination of current hardware and configuration **cannot support training** for this model under the given sequence length.
 
 ---
 
@@ -37,7 +37,7 @@ model:
 
 ---
 
-## 🖥️ A100 80GB GPU Configuration Recommendations
+## A100 80GB GPU Configuration Recommendations
 
 > ⚠️ **Single-GPU Limitation**: Training models ≥4B or with context lengths >20K on a single A100 GPU places extreme pressure on VRAM. **Multi-GPU setups are strongly recommended**.
 
@@ -138,7 +138,7 @@ model:
 
 ---
 
-## 🧊 H20 96GB GPU Configuration Recommendations
+## H20 96GB GPU Configuration Recommendations
 
 The H20 has larger VRAM (96GB) but lower compute performance compared to the A100.
 
@@ -253,5 +253,5 @@ The H20 has larger VRAM (96GB) but lower compute performance compared to the A10
    - Step 1: Set `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
    - Step 2: Increase **Sequence Parallelism (SP)**
    - Step 3: Enable **FSDP v2 + CPU Offload**
-4. **Choosing SP parallelism degree**: Prefer values that are **common divisors of both GPU count and attention head count** (e.g., 2, 4) to avoid communication bottlenecks.
+4. **Choosing SP parallelism degree**: Prefer values that are **common divisors of both GPU count and attention head count** (e.g., 2, 4).
 5. **Prefer multi-GPU over single-GPU**: Even when VRAM appears sufficient, multi-GPU setups improve training efficiency and stability through parallelization.
