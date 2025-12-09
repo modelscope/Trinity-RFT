@@ -189,7 +189,7 @@ def remove_boxed(s):
 
 # Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
 def last_boxed_only_string(string):
-    """Find content from \boxed{}, return \boxed{number} if found, otherwise None"""
+    """Extracts the last `\boxed{...}` or `\fbox{...}` substring from the input string."""
     idx = string.rfind("\\boxed")
     if "\\boxed " in string:
         return "\\boxed " + string.split("\\boxed ")[-1].split("$")[0]
