@@ -21,6 +21,7 @@ from trinity.utils.dlc_utils import is_running, setup_ray_cluster, stop_ray_clus
 DEFAULT_GPU_NUMS: List[int] = [1, 2, 4, 6]
 EXCEPTION_STRING = "Traceback (most recent call last)"
 OOM_STRING = "torch.OutOfMemoryError: CUDA out of memory"
+CUDA_ERROR_STRING = "RuntimeError: CUDA error:"
 
 
 def monitor_output(
@@ -57,7 +58,7 @@ def monitor_output(
                 print(line, end="", flush=True)
 
             # Check for oom
-            if OOM_STRING in line:
+            if OOM_STRING in line or CUDA_ERROR_STRING in line:
                 exception_event.set()
                 oom_event.set()
                 break
@@ -71,6 +72,7 @@ def run_command_with_monitor(
     log_path: str,
     checkpoint_path: str,
     timeout: Optional[int] = None,
+    max_retry: int = 10,
 ) -> bool:
     """Runs a shell command with real-time output monitoring and early termination support.
 
@@ -85,6 +87,7 @@ def run_command_with_monitor(
         log_path: Path to the log file where output will be saved.
         checkpoint_path: Path to the checkpoint directory.
         timeout: Optional timeout in seconds before forcing termination.
+        max_retry: Maximum number of retries in case of OOM.
 
     Returns:
         True if the command completed successfully without OOM error; False otherwise.
@@ -95,7 +98,7 @@ def run_command_with_monitor(
     process_env = os.environ.copy()
     process_env.update(envs)
 
-    while retry_flag:
+    for _ in range(max_retry):
         # Clean up checkpoint directory before each run
         shutil.rmtree(checkpoint_path, ignore_errors=True)
 
@@ -160,6 +163,9 @@ def run_command_with_monitor(
             except KeyboardInterrupt:
                 process.terminate()
                 process.wait()
+
+        if not retry_flag:
+            break
 
     return success_flag
 

@@ -4,8 +4,8 @@ from trinity.common.experience import Experience
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 
 
-@WORKFLOWS.register_module("dummy_exp_workflow")
-class CustomWorkflow(SimpleWorkflow):
+@WORKFLOWS.register_module("synthetic_exp_workflow")
+class SyntheticExpWorkflow(SimpleWorkflow):
     def reset(self, task: Task):
         self.workflow_args = task.workflow_args
         self.task = task
