@@ -15,7 +15,6 @@ from sympy.parsing import sympy_parser
 from verl.utils.reward_score.prime_math import math_normalize
 from verl.utils.reward_score.prime_math.grader import math_equal
 
-
 # Constants for normalization
 SUBSTITUTIONS = [
     ("an ", ""),
