@@ -26,14 +26,15 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 | `algorithm.kl_ctrl.kl_coef` | `algorithm.kl_penalty_fn_args.kl_coef` | - |
 
 💡 Detailed explanation:
-* Before using args of advantage function or policy loss function, a good practice is to check the source code to ensure these parameters can be processed by the corresponding function properly.
+
+* Before using args of advantage function or policy loss function (e.g., `algorithm.kl_penalty_fn_args`), a good practice is to check the source code to ensure these parameters can be processed by the corresponding function properly.
 
 
 ### Data
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
-| `data.train_files` | `buffer.explorer_input.taskset.path` | - |
+| `data.train_files` | `buffer.explorer_input.taskset.path` or `buffer.explorer_input.tasksets[i].path` | - |
 | `data.val_files` | `buffer.explorer_input.eval_tasksets[i].path` | - |
 | `data.prompt_key` | `buffer.explorer_input.taskset.format.prompt_key`| Task-specific |
 | `data.response_key` | `buffer.explorer_input.taskset.format.response_key`| Task-specific |
@@ -46,7 +47,8 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 | `data.shuffle` | `buffer.explorer_input.taskset.task_selector.selector_type:random` | Task-specific |
 
 💡 Detailed explanation:
-* The note `task-specific` means you can set different parameters for each training or evaluation task in `buffer.explorer_input.tasksets[i]` or `buffer.explorer_input.eval_tasksets[i]`.
+
+* The note `taskset-specific` means you can set different parameters for each training or evaluation task in `buffer.explorer_input.tasksets[i]` or `buffer.explorer_input.eval_tasksets[i]`.
 
 * For the parameters related to `batch size`, Trinity-RFT uses `buffer.batch_size` to control the number of tasks to be explored in each exploration step, and `buffer.train_batch_size` to control the number of tasks used in each gradient descent step. In most cases, controlling the following parameters can ensure the same effect as veRL:
     - `buffer.batch_size` in Trinity-RFT = `actor_rollout_ref.actor.ppo_mini_batch_size` in veRL
@@ -72,7 +74,7 @@ For advanced training configuration of veRL you can set these up in the field of
 |:-----|:-----|:-----|
 | `actor_rollout_ref.model.path` | `model.model_path` | - |
 | `actor_rollout_ref.actor.optim` | `algorithm.optimizer` | Such as `lr` and `weight_decay` |
-| `actor_rollout_ref.rollout.n` | `algorithm.repeat_times` | Task-specific: `taskset.repeat_times` |
+| `actor_rollout_ref.rollout.n` | `algorithm.repeat_times` | Eval taskset-specific: `eval_tasksets[i].repeat_times` |
 | `actor_rollout_ref.actor.ppo_mini_batch_size` | `buffer.batch_size` | The number of tasks to be explored in each exploration step |
 | `actor_rollout_ref.actor.use_dynamic_bsz` | `trainer.use_dynamic_bsz` | - |
 | `actor_rollout_ref.actor.ppo_max_token_len_per_gpu` | `trainer.max_token_len_per_gpu` | - |
@@ -80,15 +82,16 @@ For advanced training configuration of veRL you can set these up in the field of
 | `actor_rollout_ref.actor.grad_clip` | `trainer.grad_clip` | The gradient clip value for the actor |
 | `actor_rollout_ref.actor.use_kl_loss` | `algorithm.kl_loss_fn` | If set to `none`, the KL divergence loss will not be computed |
 | `actor_rollout_ref.rollout.gpu_memory_utilization` | `explorer.rollout_model.gpu_memory_utilization` | - |
-| `actor_rollout_ref.rollout.temperature` | `model.temperature` | Can be task-specific |
-| `actor_rollout_ref.rollout.top_p` | `model.top_p` | Can be task-specific |
-| `actor_rollout_ref.rollout.top_k` | `model.top_k` | Can be task-specific |
+| `actor_rollout_ref.rollout.temperature` | `model.temperature` | Can be taskset-specific, like `buffer.explorer_input.taskset.rollout_args.temperature` |
+| `actor_rollout_ref.rollout.top_p` | `model.top_p` | Can be taskset-specific |
+| `actor_rollout_ref.rollout.top_k` | `model.top_k` | Can be taskset-specific |
 | `actor_rollout_ref.rollout.tensor_model_parallel_size` | `explorer.rollout_model.tensor_parallel_size` | - |
-| `actor_rollout_ref.rollout.val_kwargs` | `buffer.explorer_input.eval_tasksets[i]` | Task-specific |
+| `actor_rollout_ref.rollout.val_kwargs` | `buffer.explorer_input.eval_tasksets[i]` | Taskset-specific |
 | `critic.model.path` | `model.critic_model_path` | Defaults to `model.model_path` |
 
 💡 Detailed explanation:
-* The note `can be task-specific` (take `temperature` as an example) means you can set `model.temperature` for all the tasks, or set different values for each task in `buffer.explorer_input.taskset.rollout_args.temperature` or `buffer.explorer_input.eval_tasksets[i].rollout_args.temperature`. A concrete example is as follows:
+
+* The note `can be taskset-specific` (take `temperature` as an example) means you can set `model.temperature` for all the tasksets, or set different values for each task in `buffer.explorer_input.taskset.rollout_args.temperature` or `buffer.explorer_input.eval_tasksets[i].rollout_args.temperature`. A concrete example is as follows:
 ```yaml
 buffer:
   explorer_input:
@@ -108,8 +111,11 @@ buffer:
 
 ### Reward Model
 
-Trinity-RFT supports the task-specific reward functions as well as the reward models. For custom reward functions, you can set `explorer.auxiliary_models` and use them within your workflow. For example,
+Trinity-RFT supports the taskset-specific reward functions as well as the reward models. For custom reward functions, you can set `buffer.explorer_input.default_reward_fn_type` to select the corresponding reward function; you can also set `explorer.auxiliary_models` as reward model and use them within your workflow. For example,
 ```yaml
+buffer:
+  explorer_input:
+    default_reward_fn_type: 'custom_reward'
 explorer:
   auxiliary_models:
     - model_path: Qwen/Qwen3-30B-A3B-Instruct-2507
@@ -136,11 +142,13 @@ Please refer to the [configuration](https://github.com/modelscope/Trinity-RFT/bl
 | `trainer.save_freq` | `trainer.save_interval` | - |
 | `trainer.test_freq` | `explorer.eval_interval` | - |
 | `trainer.total_epochs` | `buffer.total_epochs` | - |
-| `trainer.total_training_steps` | `buffer.total_steps` | If not None, `buffer.total_epochs` will be ignored |
+| `trainer.total_training_steps` | `buffer.total_steps` and `trainer.total_steps` | If not None, `buffer.total_epochs` will be ignored |
 | `trainer.critic_warmup` | `trainer.trainer_config.trainer.critic_warmup` | - |
 | `trainer.val_before_train` | `explorer.eval_on_startup` | - |
 | `trainer.resume_mode` | `continue_from_checkpoint` | Explained later |
 | `trainer.resume_from_path` | - | Explained later |
+
+💡 Detailed explanation:
 
 * If you want to resume training from a checkpoint, you can set `continue_from_checkpoint` to `True` and the training will start from the latest checkpoint in the checkpoint path `<checkpoint_root_dir>/<project>/<name>/` (if any).
 
@@ -226,7 +234,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.total_epochs=15 $@
 ```
 
-The corresponding configuration of Trinity-RFT is as follows:
+The corresponding configuration of Trinity-RFT (ppo_example.yaml) is as follows:
 ```yaml
 project: verl_example
 name: Qwen2-7B-Instruct_hybrid_rm
@@ -340,6 +348,11 @@ monitor:
   monitor_type: wandb  # trainer.logger='["console","wandb"]' - wandb is extracted, console is default
 ```
 
+The command to run this example is:
+```bash
+trinity run --config ppo_example.yaml
+```
+
 
 ## Example: GRPO Training
 
@@ -388,7 +401,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.total_epochs=15 $@
 ```
 
-The corresponding configuration of Trinity-RFT is as follows:
+The corresponding configuration of Trinity-RFT (grpo_example.yaml) is as follows:
 ```yaml
 project: verl_grpo_example_gsm8k
 name: deepseek_llm_7b_function_rm_seq_packing
@@ -472,4 +485,9 @@ trainer:
 
 monitor:
   monitor_type: wandb  # trainer.logger='["console","wandb"]' - wandb is extracted, console is default
+```
+
+The command to run this example is:
+```bash
+trinity run --config grpo_example.yaml
 ```
