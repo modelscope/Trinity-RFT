@@ -1596,6 +1596,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.KLFn.apply_kl_penalty_to_reward">apply_kl_penalty_to_reward() （trinity.algorithm.KLFn 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.apply_patches">apply_patches() （trinity.common.models.vllm_worker.WorkerExtension 方法）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.OperatorConfig.args">args（trinity.common.config.OperatorConfig 属性）</a>
 </li>
       <li><a href="build_api/trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.ASYMREAdvantageFn">ASYMREAdvantageFn（trinity.algorithm.advantage_fn 中的类）</a>
@@ -2560,6 +2562,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_history">enable_history（trinity.common.config.InferenceModelConfig 属性）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_log_requests">enable_log_requests（trinity.common.config.InferenceModelConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_lora">enable_lora（trinity.common.config.InferenceModelConfig 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_openai_api">enable_openai_api（trinity.common.config.InferenceModelConfig 属性）</a>
@@ -2630,10 +2634,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.eval_interval">eval_interval（trinity.common.config.ExplorerConfig 属性）</a>
 </li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.eval_on_startup">eval_on_startup（trinity.common.config.ExplorerConfig 属性）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.eval_on_startup">eval_on_startup（trinity.common.config.ExplorerConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerInput.eval_tasksets">eval_tasksets（trinity.common.config.ExplorerInput 属性）</a>
 </li>
       <li><a href="build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation()（在 trinity.utils.eval_utils 模块中）</a>
@@ -4417,7 +4421,11 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.buffer.pipelines.html#trinity.buffer.pipelines.ExperiencePipeline.prepare">prepare() （trinity.buffer.pipelines.ExperiencePipeline 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.prepare">prepare() （trinity.common.models.model.InferenceModel 方法）</a>
+</li>
       <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.prepare">prepare() （trinity.common.models.model.ModelWrapper 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.prepare">prepare() （trinity.common.models.vllm_model.vLLMRolloutModel 方法）</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.prepare">prepare() （trinity.explorer.Explorer 方法）</a>
 </li>
@@ -4431,10 +4439,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.Trainer.prepare">prepare() （trinity.trainer.Trainer 方法）</a>
 </li>
-      <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.prepare">prepare() （trinity.trainer.trainer.TrainEngineWrapper 方法）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.prepare">prepare() （trinity.trainer.trainer.TrainEngineWrapper 方法）</a>
+</li>
       <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer.prepare">prepare() （trinity.trainer.trainer.Trainer 方法）</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare">prepare() （trinity.trainer.verl_trainer.VerlPPOTrainerWrapper 方法）</a>
@@ -4761,6 +4769,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow.repeatable">repeatable（trinity.common.workflows.workflow.Workflow 属性）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.repetition_penalty">repetition_penalty（trinity.common.config.InferenceModelConfig 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.ModelConfig.repetition_penalty">repetition_penalty（trinity.common.config.ModelConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExperienceBufferConfig.replay_buffer">replay_buffer（trinity.common.config.ExperienceBufferConfig 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.StorageConfig.replay_buffer">replay_buffer（trinity.common.config.StorageConfig 属性）</a>
@@ -4831,10 +4843,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.response_key">response_key（trinity.common.config.FormatConfig 属性）</a>
 </li>
-      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.response_structure">response_structure（trinity.common.workflows.agentscope.react.templates.Template 属性）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.response_structure">response_structure（trinity.common.workflows.agentscope.react.templates.Template 属性）</a>
+</li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.response_text">response_text（trinity.common.experience.Experience 属性）</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.response">response（trinity.buffer.schema.sql_schema.ExperienceModel 属性）</a>

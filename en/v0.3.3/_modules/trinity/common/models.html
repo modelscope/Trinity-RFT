@@ -1071,11 +1071,10 @@ document.write(`
         <span class="n">model</span><span class="o">.</span><span class="n">engine_num</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">rollout_models</span><span class="p">,</span> <span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">create_inference_models</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="c1"># make sure models are started</span>
-    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">rollout_models</span><span class="p">:</span>
-        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
-    <span class="k">for</span> <span class="n">models</span> <span class="ow">in</span> <span class="n">auxiliary_models</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+    <span class="n">prepare_refs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">prepare_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">rollout_models</span><span class="p">]</span>
+    <span class="n">prepare_refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">models</span> <span class="ow">in</span> <span class="n">auxiliary_models</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">)</span>
+    <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prepare_refs</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
         <span class="s2">&quot;----------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="s2">&quot;Inference models started successfully for debugging.</span><span class="se">\n</span><span class="s2">&quot;</span>

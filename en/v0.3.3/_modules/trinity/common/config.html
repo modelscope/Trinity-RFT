@@ -1426,10 +1426,12 @@ document.write(`
     <span class="c1"># the maximum number of tokens for the response</span>
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># the minimum number of tokens for the response</span>
-    <span class="n">min_response_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">min_response_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens;</span>
     <span class="c1"># not applicable for OpenAI API</span>
     <span class="n">enable_prompt_truncation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># repetition penalty for response generation</span>
+    <span class="n">repetition_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
 
     <span class="c1"># lora config</span>
     <span class="n">lora_configs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">LoRAConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1447,7 +1449,7 @@ document.write(`
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">InferenceModelConfig</span><span class="p">:</span>
     <span class="c1"># ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path</span>
-    <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">model_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">engine_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vllm&quot;</span>
     <span class="n">engine_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1476,6 +1478,8 @@ document.write(`
     <span class="n">min_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># if not set, use `model.enable_prompt_truncation`</span>
     <span class="n">enable_prompt_truncation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># If not set, use `model.repetition_penalty`</span>
+    <span class="n">repetition_penalty</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># used for testing very long response generation, do not set it unless you know what you are doing</span>
     <span class="n">ignore_eos</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1490,6 +1494,7 @@ document.write(`
 
     <span class="c1"># For OpenAI API</span>
     <span class="n">enable_openai_api</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">enable_log_requests</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether to enable request logging in vLLM API server</span>
 
     <span class="c1"># For tool calls in OpenAI API</span>
     <span class="n">enable_auto_tool_choice</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2295,7 +2300,7 @@ document.write(`
 
         <span class="c1"># check explorer</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rollout_args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;top_p&quot;</span><span class="p">,</span> <span class="s2">&quot;top_k&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">]</span>
+            <span class="n">rollout_args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;top_p&quot;</span><span class="p">,</span> <span class="s2">&quot;top_k&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="s2">&quot;repetition_penalty&quot;</span><span class="p">]</span>
             <span class="n">length_args</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;max_model_len&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span>
@@ -2306,7 +2311,7 @@ document.write(`
             <span class="n">rope_args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rope_scaling&quot;</span><span class="p">,</span> <span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span>
             <span class="n">model_args</span> <span class="o">=</span> <span class="n">rollout_args</span> <span class="o">+</span> <span class="n">length_args</span> <span class="o">+</span> <span class="n">rope_args</span>
             <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">model_args</span><span class="p">:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
+                <span class="n">set_if_none</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span>
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>

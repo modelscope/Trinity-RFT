@@ -972,6 +972,13 @@ document.write(`
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
+<div class="viewcode-block" id="InferenceModel.prepare">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.prepare">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the model before inference.&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
 <div class="viewcode-block" id="InferenceModel.get_model_version">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_version">[docs]</a>
     <span class="nd">@abstractmethod</span>
@@ -992,7 +999,7 @@ document.write(`
 
 <div class="viewcode-block" id="InferenceModel.get_api_server_url">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_api_server_url">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_api_server_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_api_server_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the API server URL if available.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 

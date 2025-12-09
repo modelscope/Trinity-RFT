@@ -1024,6 +1024,7 @@ document.write(`
                 <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
                 <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_k</span><span class="p">,</span>
                 <span class="s2">&quot;max_new_tokens&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">,</span>
+                <span class="s2">&quot;repetition_penalty&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">repetition_penalty</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">disable_log_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
@@ -1032,7 +1033,7 @@ document.write(`
             <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>
-            <span class="n">engine_args</span><span class="o">.</span><span class="n">enable_log_requests</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">engine_args</span><span class="o">.</span><span class="n">enable_log_requests</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">engine_args</span><span class="o">.</span><span class="n">disable_log_requests</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
@@ -1049,6 +1050,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepared</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">async_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
 
 
@@ -1062,6 +1064,20 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">tokenizer</span>
+
+<div class="viewcode-block" id="vLLMRolloutModel.prepare">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.prepare">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the model for inference.&quot;&quot;&quot;</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_lock</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;apply_patches&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_api_server</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepared</span> <span class="o">=</span> <span class="kc">True</span></div>
+
 
 <div class="viewcode-block" id="vLLMRolloutModel.chat">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[docs]</a>
@@ -1488,43 +1504,48 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            success (bool): Whether the API server is started successfully.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_lock</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_openai_api</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Not enabled</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_openai_api</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;OpenAI API server is not enabled. Skipping...&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Not enabled</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># already running</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;OpenAI API server is already running. Skipping...&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># already running</span>
 
-            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-                <span class="n">run_api_server_in_ray_actor</span><span class="p">,</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+            <span class="n">run_api_server_in_ray_actor</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">api_server_host</span><span class="p">,</span> <span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
+                <span class="n">api_server_host</span><span class="p">,</span>
+                <span class="n">api_server_port</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span><span class="p">,</span>
             <span class="p">)</span>
-
-            <span class="n">api_server_host</span><span class="p">,</span> <span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
-                <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
-                    <span class="n">api_server_host</span><span class="p">,</span>
-                    <span class="n">api_server_port</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="n">api_server_host</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="n">api_server_port</span>
-            <span class="k">return</span> <span class="kc">True</span></div>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="n">api_server_host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="n">api_server_port</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.get_api_server_url">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_api_server_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_api_server_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the URL of the OpenAI API server.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            api_url (str): The URL of the OpenAI API server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_api_server</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepared</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model is not prepared. Please call `prepare()` first.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># openai api is not enabled</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
@@ -1544,7 +1565,7 @@ document.write(`
 <div class="viewcode-block" id="vLLMRolloutModel.get_model_path">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span>  <span class="c1"># type: ignore [return-value]</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.get_lora_request">

@@ -1269,6 +1269,7 @@ document.write(`
     <span class="n">enable_auto_tool_choice</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">tool_call_parser</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">reasoning_parser</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">enable_log_requests</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">vllm_version</span> <span class="o">=</span> <span class="n">get_vllm_version</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">vllm_version</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.8.5&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">vllm_version</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
@@ -1288,6 +1289,8 @@ document.write(`
         <span class="n">model_path</span><span class="p">,</span>
         <span class="s2">&quot;--enable-server-load-tracking&quot;</span><span class="p">,</span>  <span class="c1"># enable tracking for load balancing</span>
     <span class="p">]</span>
+    <span class="k">if</span> <span class="n">enable_log_requests</span><span class="p">:</span>
+        <span class="n">cli_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--enable-log-requests&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">enable_auto_tool_choice</span><span class="p">:</span>
         <span class="n">cli_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--enable-auto-tool-choice&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tool_call_parser</span><span class="p">:</span>
