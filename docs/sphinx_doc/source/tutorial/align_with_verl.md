@@ -1,11 +1,11 @@
-# Migrate from veRL to Trinity-RFT
+# Aligning with veRL
 
-This guide provides a migration guide from veRL to Trinity-RFT.
+This guide provides a guide for users familiar with veRL to align the parameters in Trinity-RFT with the ones in veRL.
 
 
 ## Parameter Mapping
 
-Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, and `synchronizer`. Such detailed and flexible configuration of parameters enables users to customize the training process.
+Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according to their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, and `synchronizer`. Such detailed and flexible configuration of parameters enables users to customize the training process.
 Please refer to the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
 
 In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. The core parameters in veRL are divided into these categories: `algorithm`, `data`, `actor_rollout_ref`, `critic`, `reward_model`, and `trainer`.
@@ -18,7 +18,7 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
-｜`algorithm.adv_estimator` | `algorithm.advantage_funcation` | Pass parameters with `algorithm.advantage_fn_args` |
+｜`algorithm.adv_estimator` | `algorithm.advantage_fn` | Pass parameters with `algorithm.advantage_fn_args` |
 ｜`algorithm.use_kl_in_reward` | `algorithm.kl_penalty_fn` | Disable KL in reward by setting `algorithm.kl_penalty_fn=none` |
 
 
@@ -36,9 +36,9 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 ｜`data.truncation` | - | Equivalent to `right` |
 
 💡 Detailed explanation:
-* For the parameters related to `batch size`, Trinity-RFT uses `buffer.batch_size` to control the number of tasks to be explored in each exploration step, and `buffer.train_batch_size` to control the number of tasks used in each gradient descent step. In most cases, contolling the following paramters can ensure the same effect as veRL:
+* For the parameters related to `batch size`, Trinity-RFT uses `buffer.batch_size` to control the number of tasks to be explored in each exploration step, and `buffer.train_batch_size` to control the number of tasks used in each gradient descent step. In most cases, controlling the following parameters can ensure the same effect as veRL:
     - `buffer.batch_size` in Trinity-RFT = `actor_rollout_ref.actor.ppo_mini_batch_size` in veRL
-    - `buffer.train_batch_size` in Trinity-RFT (automatically) = `actor_rollout_ref.rollout.n`* `actor_rollout_ref.actor.ppo_mini_batch_size` in veRL
+    - `buffer.train_batch_size` in Trinity-RFT (automatically) = `actor_rollout_ref.rollout.n` * `actor_rollout_ref.actor.ppo_mini_batch_size` in veRL
     - `synchronizer.sync_interval` in Trinity-RFT =  `data.train_batch_size` / `actor_rollout_ref.actor.ppo_mini_batch_size` in veRL
     - Do not set `ppo_mini_batch_size`, which is automatically set to match the effect of veRL, although the values may not be the same.
 
@@ -47,9 +47,9 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 
 **Actor, Rollout, and Critic**
 
-This section included the parameters for the actor and the rollout. For easy understanding, you may think the actor in veRL (`actor_rollout_ref.actor`) as the trainer in Trinity-RFT (`trainer`), and the rollout (`actor_rollout_ref.rollout`) as the explorer (`explorer.rollout_model`).
+This section includes the parameters for the actor and the rollout. For easy understanding, you may think the actor in veRL (`actor_rollout_ref.actor`) as the trainer in Trinity-RFT (`trainer`), and the rollout (`actor_rollout_ref.rollout`) as the explorer (`explorer.rollout_model`).
 
-For advanced training configuration of veRL you can setup them in the field of `trainer.trainer_config`. For example,`actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` in veRL is equivalent to `trainer.trainer_config.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` in Trinity-RFT. If you want to setup the parameters in the `trainer.trainer_config` dictionary, please read the source code in `trinity/common/verl_config.py` carefully!
+For advanced training configuration of veRL you can set these up in the field of `trainer.trainer_config`. For example,`actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` in veRL is equivalent to `trainer.trainer_config.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` in Trinity-RFT. If you want to setup the parameters in the `trainer.trainer_config` dictionary, please read the source code in `trinity/common/verl_config.py` carefully!
 
 
 | veRL | Trinity-RFT | Note |
@@ -60,7 +60,7 @@ For advanced training configuration of veRL you can setup them in the field of `
 | `actor_rollout_ref.actor.ppo_mini_batch_size` | `data.train_batch_size` | The number of tasks used in each gradient descent step |
 | `actor_rollout_ref.actor.use_dynamic_bsz` | `trainer.use_dynamic_bsz` | - |
 | `actor_rollout_ref.actor.ppo_max_token_len_per_gpu` | `trainer.max_token_len_per_gpu` | - |
-| `actor_rollout_ref.actor.ulysses_sequence_parallel_size` | `trainer.ulysses_sequence_parallel_size` | The sequence parallel size for the actor|
+| `actor_rollout_ref.actor.ulysses_sequence_parallel_size` | `trainer.ulysses_sequence_parallel_size` | The sequence parallel size for the actor |
 | `actor_rollout_ref.actor.grad_clip` | `trainer.grad_clip` | The gradient clip value for the actor |
 | `actor_rollout_ref.actor.use_kl_loss` | `algorithm.kl_fn` | If set to `none`, the KL divergence loss will not be computed |
 | `actor_rollout_ref.rollout.gpu_memory_utilization` | `explorer.rollout_model.gpu_memory_utilization` | - |
@@ -88,7 +88,7 @@ Please refer to the [configuration](https://github.com/modelscope/Trinity-RFT/bl
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
-| `trainer.logger` | `monitor.monitor_type` | Support a chosen type and (not need to set) `console` |
+| `trainer.logger` | `monitor.monitor_type` | Support a chosen type and (no need to set) `console` |
 | `trainer.project_name` | `project` | - |
 | `trainer.experiment_name` | `trainer.experiment_name` | - |
 | `trainer.n_gpus_per_node` | `cluster.gpu_per_node` | - |
@@ -198,7 +198,7 @@ cluster:
 
 buffer:
   total_epochs: 15  # trainer.total_epochs
-  batch_size: 1024  # actor_rollout_ref.actor.ppo_mini_batch_size
+  batch_size: 256  # actor_rollout_ref.actor.ppo_mini_batch_size
   train_batch_size: 256  # actor_rollout_ref.actor.ppo_mini_batch_size * actor_rollout_ref.rollout.n=256*1=256
   explorer_input:
     tasksets:
