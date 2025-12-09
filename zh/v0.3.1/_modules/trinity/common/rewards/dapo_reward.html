@@ -911,8 +911,8 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.naive_dapo_score</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_score</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_score</span>
 
 
 <div class="viewcode-block" id="MathDAPORewardFn">
@@ -940,7 +940,7 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">response_token</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="n">accuracy_score</span> <span class="o">=</span> <span class="n">compute_score</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>

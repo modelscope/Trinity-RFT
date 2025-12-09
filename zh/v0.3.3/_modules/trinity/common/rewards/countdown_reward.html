@@ -918,12 +918,12 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">evaluate_equation</span><span class="p">,</span>
     <span class="n">extract_solution</span><span class="p">,</span>
     <span class="n">validate_equation</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
 
 
 <div class="viewcode-block" id="CountDownRewardFn">

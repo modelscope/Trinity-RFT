@@ -730,9 +730,12 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.agents_reward.html">trinity.common.rewards.agents_reward module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.countdown_reward.html">trinity.common.rewards.countdown_reward module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.dapo_reward.html">trinity.common.rewards.dapo_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.eval_utils.html">trinity.common.rewards.eval_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.format_reward.html">trinity.common.rewards.format_reward module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.human_reward.html">trinity.common.rewards.human_reward module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.math_reward.html">trinity.common.rewards.math_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.naive_dapo_score.html">trinity.common.rewards.naive_dapo_score module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.qwen25_eval.html">trinity.common.rewards.qwen25_eval module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.reward_fn.html">trinity.common.rewards.reward_fn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.tool_reward.html">trinity.common.rewards.tool_reward module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.rewards.utils.html">trinity.common.rewards.utils module</a></li>
@@ -763,10 +766,8 @@ window.addEventListener("load", load);
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.annotations.html">trinity.utils.annotations module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.distributed.html">trinity.utils.distributed module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.dlc_utils.html">trinity.utils.dlc_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.eval_utils.html">trinity.utils.eval_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.log.html">trinity.utils.log module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.lora_utils.html">trinity.utils.lora_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.math_eval_utils.html">trinity.utils.math_eval_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.monitor.html">trinity.utils.monitor module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.plugin_loader.html">trinity.utils.plugin_loader module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.utils.registry.html">trinity.utils.registry module</a></li>
@@ -1023,9 +1024,9 @@ document.write(`
 
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
-<div class="viewcode-block" id="extract_solution_v0">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.extract_solution_v0">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract_solution_v0</span><span class="p">(</span><span class="n">tool_call_str</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_solution_v0_toolN1">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.extract_solution_v0_toolN1">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_solution_v0_toolN1</span><span class="p">(</span><span class="n">tool_call_str</span><span class="p">):</span>
     <span class="n">output_string</span> <span class="o">=</span> <span class="n">tool_call_str</span>
 
     <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&lt;tool_call&gt;(.*?)&lt;/tool_call&gt;&quot;</span>
@@ -1040,16 +1041,17 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="compute_score_v0">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_score_v0">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_score_v0</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+<span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
+<div class="viewcode-block" id="compute_score_v0_toolN1">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_score_v0_toolN1">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_score_v0_toolN1</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">solution_str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">,</span>
     <span class="n">do_print</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">answer</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>
 
-    <span class="n">result</span><span class="p">,</span> <span class="n">output_string</span> <span class="o">=</span> <span class="n">extract_solution_v0</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">output_string</span> <span class="o">=</span> <span class="n">extract_solution_v0_toolN1</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1132,7 +1134,7 @@ document.write(`
     <span class="n">solution_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">compute_score_v0</span><span class="p">(</span><span class="n">solution_str</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">compute_score_v0_toolN1</span><span class="p">(</span><span class="n">solution_str</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

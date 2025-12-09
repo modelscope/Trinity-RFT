@@ -1023,9 +1023,9 @@ document.write(`
 
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
-<div class="viewcode-block" id="extract_solution_v0">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.extract_solution_v0">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract_solution_v0</span><span class="p">(</span><span class="n">tool_call_str</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_solution_v0_toolN1">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.extract_solution_v0_toolN1">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_solution_v0_toolN1</span><span class="p">(</span><span class="n">tool_call_str</span><span class="p">):</span>
     <span class="n">output_string</span> <span class="o">=</span> <span class="n">tool_call_str</span>
 
     <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&lt;tool_call&gt;(.*?)&lt;/tool_call&gt;&quot;</span>
@@ -1040,16 +1040,17 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="compute_score_v0">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_score_v0">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_score_v0</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+<span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
+<div class="viewcode-block" id="compute_score_v0_toolN1">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_score_v0_toolN1">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_score_v0_toolN1</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">solution_str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">,</span>
     <span class="n">do_print</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">answer</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>
 
-    <span class="n">result</span><span class="p">,</span> <span class="n">output_string</span> <span class="o">=</span> <span class="n">extract_solution_v0</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">output_string</span> <span class="o">=</span> <span class="n">extract_solution_v0_toolN1</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1132,7 +1133,7 @@ document.write(`
     <span class="n">solution_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">compute_score_v0</span><span class="p">(</span><span class="n">solution_str</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">compute_score_v0_toolN1</span><span class="p">(</span><span class="n">solution_str</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

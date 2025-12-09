@@ -910,13 +910,13 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.accuracy_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyReward</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.format_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatReward</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">compute_score</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">compute_score_v0</span><span class="p">,</span>
     <span class="n">simple_answer_parser</span><span class="p">,</span>
     <span class="n">validate_think_pattern</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.format_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatReward</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
 
 
 <div class="viewcode-block" id="MathRewardFn">
@@ -976,7 +976,7 @@ document.write(`
         <span class="n">format_score_coef</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="n">accuracy_score</span> <span class="o">=</span> <span class="n">compute_score</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
+        <span class="n">accuracy_score</span> <span class="o">=</span> <span class="n">compute_score_v0</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
 
         <span class="n">format_score</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">if</span> <span class="n">with_think</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">validate_think_pattern</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>

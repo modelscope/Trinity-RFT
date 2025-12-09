@@ -570,9 +570,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -588,23 +586,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> 目录 </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.verify_math_answer"><code class="docutils literal notranslate"><span class="pre">verify_math_answer()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.extract_answer"><code class="docutils literal notranslate"><span class="pre">extract_answer()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.convert_word_number"><code class="docutils literal notranslate"><span class="pre">convert_word_number()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.math_equal"><code class="docutils literal notranslate"><span class="pre">math_equal()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.numeric_equal"><code class="docutils literal notranslate"><span class="pre">numeric_equal()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.symbolic_equal"><code class="docutils literal notranslate"><span class="pre">symbolic_equal()</span></code></a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -614,75 +595,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-trinity.utils.math_eval_utils">
-<span id="trinity-utils-math-eval-utils-module"></span><h1>trinity.utils.math_eval_utils module<a class="headerlink" href="#module-trinity.utils.math_eval_utils" title="Link to this heading">#</a></h1>
-<p>Utility functions for strictly parsing and evaluating mathematical answers.</p>
-<p>This module is a modified and simplified version of the official evaluation code
-for Qwen2.5-Math, designed for easier standalone use.</p>
-<p>Original source: <a class="github reference external" href="https://github.com/QwenLM/Qwen2.5-Math">QwenLM/Qwen2.5-Math</a></p>
-<p>Key modifications include:</p>
-<ol class="arabic simple">
-<li><p>Retained only the core parsing logic for the common <cite>qwen_boxed</cite> prompt format.</p></li>
-<li><p>Consolidated essential parsing and evaluation functions from multiple files
-into this single module.</p></li>
-<li><p>Simplified benchmark handling and conditional logic for broader applicability.</p></li>
-<li><p>Simplified or removed calls to external tools like TIR.</p></li>
-</ol>
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.verify_math_answer">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">verify_math_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#verify_math_answer"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.verify_math_answer" title="Link to this definition">#</a></dt>
-<dd><p>Strictly compare the equality of response and groundtruth.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.extract_answer">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">extract_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#extract_answer"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.extract_answer" title="Link to this definition">#</a></dt>
-<dd><p>Extract the equation from the string.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.strip_string">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">strip_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#strip_string"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.strip_string" title="Link to this definition">#</a></dt>
-<dd><p>Clean and normalize math answer strings.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_fracs">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_fracs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_fracs"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_fracs" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_a_slash_b">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_a_slash_b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_a_slash_b"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_a_slash_b" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_sqrt">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_sqrt"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_sqrt" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.convert_word_number">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">convert_word_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#convert_word_number"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.convert_word_number" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.math_equal">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">math_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#math_equal"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.math_equal" title="Link to this definition">#</a></dt>
-<dd><p>Checks the mathematical equality of two strings by trying different methods.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.numeric_equal">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">numeric_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#numeric_equal"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.numeric_equal" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.symbolic_equal">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">symbolic_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#symbolic_equal"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.symbolic_equal" title="Link to this definition">#</a></dt>
-<dd><p>Compares two strings for symbolic equivalence using sympy.</p>
-</dd></dl>
-
+  <section id="trinity-utils-math-eval-utils-module">
+<h1>trinity.utils.math_eval_utils module<a class="headerlink" href="#trinity-utils-math-eval-utils-module" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -720,30 +634,6 @@ into this single module.</p></li>
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> 目录
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.verify_math_answer"><code class="docutils literal notranslate"><span class="pre">verify_math_answer()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.extract_answer"><code class="docutils literal notranslate"><span class="pre">extract_answer()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.convert_word_number"><code class="docutils literal notranslate"><span class="pre">convert_word_number()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.math_equal"><code class="docutils literal notranslate"><span class="pre">math_equal()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.numeric_equal"><code class="docutils literal notranslate"><span class="pre">numeric_equal()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.utils.math_eval_utils.symbolic_equal"><code class="docutils literal notranslate"><span class="pre">symbolic_equal()</span></code></a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
