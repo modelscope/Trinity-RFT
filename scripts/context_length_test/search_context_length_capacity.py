@@ -104,6 +104,7 @@ def run_command_with_monitor(
 
         exception_event = threading.Event()
         oom_event = threading.Event()
+        is_timeout = False
 
         with open(log_path, "w", encoding="utf-8") as log_file:
             # Start subprocess with merged stdout/stderr
@@ -134,12 +135,13 @@ def run_command_with_monitor(
                 if timeout:
                     monitor_thread.join(timeout)
                     if monitor_thread.is_alive():
-                        exception_event.set()
+                        is_timeout = True
+                        timeout *= 1.3
                 else:
                     monitor_thread.join()
 
                 # Handle process termination based on events
-                if exception_event.is_set():
+                if exception_event.is_set() or is_timeout:
                     process.terminate()
                     try:
                         process.wait(timeout=2)
@@ -148,6 +150,8 @@ def run_command_with_monitor(
 
                     if oom_event.is_set():  # CUDA OOM
                         retry_flag = False
+                    elif is_timeout:
+                        print("Timeout reached, retrying...")
                     else:
                         print("Exception detected, retrying...")
 
@@ -420,7 +424,8 @@ if __name__ == "__main__":
         "--timeout",
         type=int,
         default=2400,
-        help="Timeout for each experiment in seconds.",
+        help="Base timeout duration per experiment in seconds. "
+        "Each retry increases the timeout by 30% (multiplied by 1.3).",
     )
     parser.add_argument(
         "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
