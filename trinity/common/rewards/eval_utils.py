@@ -4,7 +4,7 @@ import concurrent.futures
 import regex as re
 from math_verify import parse, verify
 
-from trinity.utils.qwen25_eval_utils import strip_string
+from trinity.common.rewards.qwen25_eval import strip_string
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 INVALID_ANS = "[invalid]"

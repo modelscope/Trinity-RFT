@@ -14,7 +14,7 @@ class NaiveDapoRewardFn(MathBoxedRewardFn):
         format_score_coef: Optional[float] = 0.1,
         **kwargs,
     ) -> dict[str, float]:
-        from trinity.utils.math_utils import compute_score
+        from trinity.common.rewards.naive_dapo_score import compute_score
 
         score = compute_score(response, truth)  # type: ignore
         return {"accuracy": score, "format_score": 0}

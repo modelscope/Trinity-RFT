@@ -1,7 +1,7 @@
 from typing import Optional
 
+from trinity.common.rewards.eval_utils import validate_think_pattern
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
-from trinity.utils.eval_utils import validate_think_pattern
 
 
 @REWARD_FUNCTIONS.register_module("bots_math_boxed_reward")

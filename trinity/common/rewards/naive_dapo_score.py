@@ -1,17 +1,7 @@
-# Copyright 2024 Bytedance Ltd. and/or its affiliates
-# Copyright 2022 EleutherAI and the HuggingFace Inc. team. All rights reserved.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
+"""
+This file contaims the naive dapo reward function for math tasks.
+Adapted from https://github.com/LLM360/Reasoning360/blob/main/verl/utils/reward_score/naive_dapo.py
+"""
 
 import concurrent
 import math
@@ -24,6 +14,7 @@ from pylatexenc import latex2text
 from sympy.parsing import sympy_parser
 from verl.utils.reward_score.prime_math import math_normalize
 from verl.utils.reward_score.prime_math.grader import math_equal
+
 
 # Constants for normalization
 SUBSTITUTIONS = [

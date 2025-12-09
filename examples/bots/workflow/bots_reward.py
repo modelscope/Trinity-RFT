@@ -12,9 +12,9 @@ from sympy.parsing.sympy_parser import parse_expr
 from verl.utils.py_functional import timeout_limit
 from verl.utils.reward_score.prime_math.grader import math_equal as verl_math_equal
 
-from trinity.utils.eval_utils import remove_right_units
-from trinity.utils.math_utils import grade_answer, match_answer
-from trinity.utils.qwen25_eval_utils import fix_fracs
+from trinity.common.rewards.eval_utils import remove_right_units
+from trinity.common.rewards.naive_dapo_score import grade_answer, match_answer
+from trinity.common.rewards.qwen25_eval import fix_fracs
 
 _fix_fracs = fix_fracs
 _remove_right_units = remove_right_units

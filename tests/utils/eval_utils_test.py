@@ -3,8 +3,8 @@
 
 import unittest
 
-from trinity.utils.eval_utils import compute_score_v0, is_equiv
-from trinity.utils.qwen25_eval_utils import extract_answer, verify_math_answer
+from trinity.common.rewards.eval_utils import compute_score_v0, is_equiv
+from trinity.common.rewards.qwen25_eval import extract_answer, verify_math_answer
 
 
 class TestComputeScore(unittest.TestCase):

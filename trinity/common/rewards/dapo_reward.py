@@ -4,8 +4,8 @@ from typing import Optional
 
 import torch
 
+from trinity.common.rewards.naive_dapo_score import compute_score
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
-from trinity.utils.math_utils import compute_score
 
 
 @REWARD_FUNCTIONS.register_module("math_dapo_reward")
