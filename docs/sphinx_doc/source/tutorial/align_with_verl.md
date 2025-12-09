@@ -1,6 +1,6 @@
 # Aligning with veRL
 
-This guide provides a guide for users familiar with veRL to align the parameters in Trinity-RFT with the ones in veRL.
+This guide provides a guide for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters in Trinity-RFT with the ones in veRL.
 
 
 ## Parameter Mapping
@@ -70,22 +70,22 @@ For advanced training configuration of veRL you can set these up in the field of
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
-| `actor_rollout_ref.model.path` | `model.path` | - |
+| `actor_rollout_ref.model.path` | `model.model_path` | - |
 | `actor_rollout_ref.actor.optim` | `algorithm.optimizer` | Such as `lr` and `weight_decay` |
 | `actor_rollout_ref.rollout.n` | `algorithm.repeat_times` | Task-specific: `taskset.repeat_times` |
-| `actor_rollout_ref.actor.ppo_mini_batch_size` | `data.train_batch_size` | The number of tasks used in each gradient descent step |
+| `actor_rollout_ref.actor.ppo_mini_batch_size` | `buffer.batch_size` | The number of tasks to be explored in each exploration step |
 | `actor_rollout_ref.actor.use_dynamic_bsz` | `trainer.use_dynamic_bsz` | - |
 | `actor_rollout_ref.actor.ppo_max_token_len_per_gpu` | `trainer.max_token_len_per_gpu` | - |
 | `actor_rollout_ref.actor.ulysses_sequence_parallel_size` | `trainer.ulysses_sequence_parallel_size` | The sequence parallel size for the actor |
 | `actor_rollout_ref.actor.grad_clip` | `trainer.grad_clip` | The gradient clip value for the actor |
-| `actor_rollout_ref.actor.use_kl_loss` | `algorithm.kl_fn` | If set to `none`, the KL divergence loss will not be computed |
+| `actor_rollout_ref.actor.use_kl_loss` | `algorithm.kl_loss_fn` | If set to `none`, the KL divergence loss will not be computed |
 | `actor_rollout_ref.rollout.gpu_memory_utilization` | `explorer.rollout_model.gpu_memory_utilization` | - |
 | `actor_rollout_ref.rollout.temperature` | `model.temperature` | Can be task-specific |
 | `actor_rollout_ref.rollout.top_p` | `model.top_p` | Can be task-specific |
 | `actor_rollout_ref.rollout.top_k` | `model.top_k` | Can be task-specific |
 | `actor_rollout_ref.rollout.tensor_model_parallel_size` | `explorer.rollout_model.tensor_parallel_size` | - |
 | `actor_rollout_ref.rollout.val_kwargs` | `buffer.explorer_input.eval_tasksets[i]` | Task-specific |
-| `critic.model.path` | `model.critic_path` | Defaults to `model.path` |
+| `critic.model.path` | `model.critic_model_path` | Defaults to `model.model_path` |
 
 💡 Detailed explanation:
 * The note `can be task-specific` (take `temperature` as an example) means you can set `model.temperature` for all the tasks, or set different values for each task in `buffer.explorer_input.taskset.rollout_args.temperature` or `buffer.explorer_input.eval_tasksets[i].rollout_args.temperature`. A concrete example is as follows:
@@ -111,7 +111,7 @@ buffer:
 Trinity-RFT supports the task-specific reward functions as well as the reward models. For custom reward functions, you can set `explorer.auxiliary_models` and use them within your workflow. For example,
 ```yaml
 explorer:
-    auxiliary_models:
+  auxiliary_models:
     - model_path: Qwen/Qwen3-30B-A3B-Instruct-2507
       engine_num: 1
       tensor_parallel_size: 2

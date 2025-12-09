@@ -23,6 +23,7 @@
    tutorial/develop_selector.md
    tutorial/trinity_configs.md
    tutorial/synchronizer.md
+   tutorial/align_with_verl.md
 
 .. toctree::
    :maxdepth: 1
