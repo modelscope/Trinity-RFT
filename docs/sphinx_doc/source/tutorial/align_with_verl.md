@@ -1,6 +1,6 @@
 # Aligning with veRL
 
-This guide provides a guide for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters in Trinity-RFT with the ones in veRL.
+This guide provides a guide for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters and metrics in Trinity-RFT with the ones in veRL.
 
 
 ## Parameter Mapping
@@ -14,12 +14,12 @@ In the following, we show how to map the parameters in veRL to the ones in Trini
 To match the default training setup of veRL, we set `synchronizer.sync_style=fixed` and `synchronizer.sync_offset=1` in Trinity-RFT.
 ```
 
-**Algorithm**
+### Algorithm
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
 | `algorithm.adv_estimator` | `algorithm.advantage_fn` | Pass parameters with `algorithm.advantage_fn_args` |
-| `algorithm.gamma` | `advantage_fn_args.gamma` | Along with `advantage_fn: ppo` |
+| `algorithm.gamma` | `advantage_fn_args.gamma` | Along with `advantage_fn: ppo/reinforceplusplus` |
 | `algorithm.lam` | `advantage_fn_args.lam` | Along with `advantage_fn: ppo` |
 | `algorithm.use_kl_in_reward` | `algorithm.kl_penalty_fn` | Disable KL in reward by setting `algorithm.kl_penalty_fn=none` |
 | `algorithm.kl_penalty` | `algorithm.kl_penalty_fn` | Choose from `k2`, `low_var_kl`, etc |
@@ -29,7 +29,7 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 * Before using args of advantage function or policy loss function, a good practice is to check the source code to ensure these parameters can be processed by the corresponding function properly.
 
 
-**Data**
+### Data
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
@@ -57,7 +57,7 @@ To match the default training setup of veRL, we set `synchronizer.sync_style=fix
 * If you want to filter the overlong prompts, you can set `model.enable_prompt_truncation=True` in Trinity-RFT. In this case, the corresponding experiences will not be counted in loss computation, and thus `truncation` side does not matter anymore.
 
 
-**Actor, Rollout, and Critic**
+### Actor, Rollout, and Critic
 
 This section includes the parameters for the actor and the rollout. For easy understanding, you may think the actor in veRL (`actor_rollout_ref.actor`) as the trainer in Trinity-RFT (`trainer`), and the rollout (`actor_rollout_ref.rollout`) as the explorer (`explorer.rollout_model`).
 
@@ -106,7 +106,7 @@ buffer:
           top_p: 0.7
 ```
 
-**Reward Model**
+### Reward Model
 
 Trinity-RFT supports the task-specific reward functions as well as the reward models. For custom reward functions, you can set `explorer.auxiliary_models` and use them within your workflow. For example,
 ```yaml
@@ -123,7 +123,7 @@ explorer:
 Please refer to the [configuration](https://github.com/modelscope/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml) and [workflow](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py) with LLM-as-a-judge for more details.
 
 
-**Trainer**
+### Trainer
 
 | veRL | Trinity-RFT | Note |
 |:-----|:-----|:-----|
@@ -143,6 +143,19 @@ Please refer to the [configuration](https://github.com/modelscope/Trinity-RFT/bl
 | `trainer.resume_from_path` | - | Explained later |
 
 * If you want to resume training from a checkpoint, you can set `continue_from_checkpoint` to `True` and the training will start from the latest checkpoint in the checkpoint path `<checkpoint_root_dir>/<project>/<name>/` (if any).
+
+
+## Metrics Mapping
+
+### Why do we see two runs for each experiment?
+
+In Trinity-RFT, the explorer is responsible for the rollout process, while the trainer is responsible for the training process. Metrics from these two processes are calculated independently and uploaded to the monitor as separate runs. This is why you will see two runs for each experiment, distinguished by the "_explorer" or "_trainer" suffix.
+
+
+### Why are some metrics different from veRL?
+
+Trinity-RFT uses [vllm](https://github.com/vllm-project/vllm) as the rollout engine and veRL as the training backend. Due to precision differences between these frameworks, the log probabilities computed on the given tokens may differ. As a result, some metrics (e.g., `actor/ppo_kl` and `actor/pg_clipfrac`) may differ from those observed in veRL. However, when using the same parameters with veRL, these differences are expected to be small.
+
 
 ## Example: PPO Training
 
