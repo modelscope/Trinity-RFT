@@ -37,6 +37,26 @@ model:
 
 ---
 
+## 💡 显存使用与 `max_token_len_per_gpu` 的关系
+
+Trinity Trainer 默认启用了动态批大小（`trainer.use_dynamic_bsz=True`），在固定模型的情况下，实际显存消耗主要由以下两个参数决定：
+
+- `trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu`
+- `trainer.trainer_config.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu`
+
+如果未手动设置，Trinity会自动用该默认值：
+```python
+trainer.max_token_len_per_gpu = ceil(2 * model.max_model_len / trainer.ulysses_sequence_parallel_size)
+```
+
+📌 **这意味着**：
+- 上下文越长，每张 GPU 要处理的 token 越多，显存压力越大。
+- 如果想支持**更长上下文**，可以手动设置上述参数（但可能影响训练效率）。
+
+> 本指南中的所有实验结果都是基于上述默认设置得出的。如需极限优化，请根据实际情况调整这些参数。
+
+---
+
 ## A100 80GB 显卡配置建议
 
 > ⚠️ **单卡限制**：在 1 张 A100 上训练 ≥4B 模型或 >20K 上下文时，显存压力极大，**强烈建议使用多卡方案**。

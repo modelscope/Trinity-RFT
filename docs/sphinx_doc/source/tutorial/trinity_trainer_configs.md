@@ -37,6 +37,26 @@ model:
 
 ---
 
+## 💡 Relationship Between GPU Memory Usage and `max_token_len_per_gpu`
+
+Trinity Trainer enables dynamic batch sizing by default (`trainer.use_dynamic_bsz=True`). With a fixed model, actual GPU memory consumption is primarily determined by the following two parameters:
+
+- `trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu`
+- `trainer.trainer_config.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu`
+
+If these parameters are not manually configured, Trinity automatically uses the following default value:
+```python
+trainer.max_token_len_per_gpu = ceil(2 * model.max_model_len / trainer.ulysses_sequence_parallel_size)
+```
+
+📌 **This implies that**:
+- The longer the context length, the more tokens each GPU must process, resulting in higher memory pressure.
+- To support **longer context lengths**, you can manually adjust the parameters above (though this may impact training efficiency).
+
+> All experimental results presented in this guide are based on the aforementioned default settings. For extreme optimization, please fine-tune these parameters according to your specific requirements.
+
+---
+
 ## A100 80GB GPU Configuration Recommendations
 
 > ⚠️ **Single-GPU Limitation**: Training models ≥4B or with context lengths >20K on a single A100 GPU places extreme pressure on VRAM. **Multi-GPU setups are strongly recommended**.
