@@ -2,25 +2,27 @@
 
 This guide provides guidance for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters and metrics in Trinity-RFT with the ones in veRL.
 
-Trinity-RFT decouples the reinforcement fine-tuning process into three components: `explorer`, `trainer`, and `buffer`. The `explorer` is responsible for generating experience data (e.g., via agent-environment interaction), the `trainer` is responsible for updating model weights by minimizing losses on the data, and the `buffer` is responsible for pipeline data processing throughout the RFT lifecycle.
-
-Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according to their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, and `synchronizer`. The `synchronizer` controls the model weight synchronization between the `explorer` and the `trainer`.
-Such detailed and flexible configuration of parameters enables users to customize the training process.
-Please refer to the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
-
 
 ## Parameter Mapping
 
-In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. The core parameters in veRL are divided into these categories: `algorithm`, `data`, `actor_rollout_ref`, `critic`, `reward_model`, and `trainer`.
+The core parameters in veRL are divided into these categories: `algorithm`, `data`, `actor_rollout_ref`, `critic`, `reward_model`, and `trainer`.
+Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according to their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, and `synchronizer`.
 
-Roughly speaking, the parameters in veRL can be mapped to the following parts in Trinity-RFT:
-* `algorithm`: `algorithm`
-* `data`: `buffer.explorer_input`
-* `actor_rollout_ref.actor`: `model` and `trainer`
-* `actor_rollout_ref.rollout`: `explorer.rollout_model`
-* `critic`: `trainer.trainer_config.critic`
-* `reward_model`: `explorer.auxiliary_models`
-* `trainer`: Several global configurations
+Roughly speaking, the parameters in veRL are mapped to the following modules in Trinity-RFT:
+
+| Configuration | veRL | Trinity-RFT |
+|:----------|:-----|:-----|
+| Algorithm, e.g., advantage function| `algorithm` | `algorithm` |
+| Training and evaluation tasksets | `data` | `buffer.explorer_input` |
+| Batch size (💡 explained later) | `data.train_batch_size` and `actor_rollout_ref.actor.ppo_mini_batch_size` | `buffer.batch_size` and `buffer.train_batch_size` |
+| Actor | `actor_rollout_ref.actor` | `model` and `trainer` |
+| Rollout | `actor_rollout_ref.rollout` | `explorer.rollout_model` |
+| Critic | `critic` | `trainer.trainer_config.critic` |
+| Reward model | `reward_model` | `explorer.auxiliary_models` |
+| Some global configurations | `trainer` | `monitor`, `synchronizer`, etc |
+
+
+In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. Please refer to the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
 
 ```{note}
 To match the default training setup of veRL, we set `synchronizer.sync_style=fixed` and `synchronizer.sync_offset=0` in Trinity-RFT.
