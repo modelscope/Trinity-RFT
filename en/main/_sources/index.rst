@@ -25,6 +25,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/trinity_configs.md
    tutorial/trinity_gpu_configs.md
    tutorial/synchronizer.md
+   tutorial/align_with_verl.md
 
 
 .. toctree::
