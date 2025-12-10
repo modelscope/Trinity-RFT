@@ -475,7 +475,7 @@ class WorkflowTest(unittest.TestCase):
         (DummyAsyncMultiTurnWorkflow,),
     ],
 )
-class MultiTurnWorkflowTest(unittest.TestCase):
+class MultiTurnWorkflowTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         # configure the model
         self.config = get_template_config()
@@ -490,7 +490,8 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
-    def test_multi_turn_workflow(self):
+    async def test_multi_turn_workflow(self):
+        await asyncio.gather(*[engine.prepare.remote() for engine in self.engines])
         task = Task(
             workflow=self.workflow_cls,
             repeat_times=3,
@@ -500,7 +501,7 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         workflow = task.to_workflow(self.model_wrapper)
         workflow.set_repeat_times(2, run_id_base=0)
         if workflow.asynchronous:
-            answer = asyncio.run(workflow.run_async())
+            answer = await workflow.run_async()
         else:
             answer = workflow.run()
         self.assertEqual(len(answer), 2)
@@ -727,7 +728,7 @@ class TestWorkflowRunner(unittest.IsolatedAsyncioTestCase):
         config.explorer.rollout_model.enable_history = True
         config.check_and_update()
         engines, auxiliary_engines = create_inference_models(config)
-
+        await asyncio.gather(*[engine.prepare.remote() for engine in engines])
         runner = WorkflowRunner(
             config,
             model=engines[0],

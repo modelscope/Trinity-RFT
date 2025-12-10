@@ -4,7 +4,7 @@ import concurrent.futures
 import regex as re
 from math_verify import parse, verify
 
-from trinity.utils.math_eval_utils import strip_string
+from trinity.common.rewards.qwen25_eval import strip_string
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 INVALID_ANS = "[invalid]"
@@ -125,7 +125,11 @@ def validate_think_pattern(text):
 
 
 # Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
-def compute_score(solution_str, ground_truth) -> float:
+def compute_score_v0(solution_str, ground_truth) -> float:
+    """
+    Compute the score of the solution string against the ground truth.
+    This function suits easily-verifiable problems; the answer is put within `\boxed{}`.
+    """
     retval = 0.0
     try:
         string_in_last_boxed = last_boxed_only_string(solution_str)
@@ -143,7 +147,6 @@ def compute_score(solution_str, ground_truth) -> float:
                 ground_truth = original_ground_truth
             if is_equiv(answer, ground_truth):
                 retval = 1.0
-        # logger.warning(answer, " ", ground_truth, " ", retval)
 
     except Exception as e:
         print(e)
@@ -186,6 +189,7 @@ def remove_boxed(s):
 
 # Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
 def last_boxed_only_string(string):
+    """Extracts the last `\boxed{...}` or `\fbox{...}` substring from the input string."""
     idx = string.rfind("\\boxed")
     if "\\boxed " in string:
         return "\\boxed " + string.split("\\boxed ")[-1].split("$")[0]

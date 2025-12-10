@@ -3,8 +3,8 @@
 
 import unittest
 
-from trinity.utils.eval_utils import compute_score, is_equiv
-from trinity.utils.math_eval_utils import extract_answer, verify_math_answer
+from trinity.common.rewards.eval_utils import compute_score_v0, is_equiv
+from trinity.common.rewards.qwen25_eval import extract_answer, verify_math_answer
 
 
 class TestComputeScore(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = "The final answer is \\boxed{42}"
         truth = "The correct result is \\boxed{42}"
-        self.assertEqual(compute_score(solution, truth), 1.0)
+        self.assertEqual(compute_score_v0(solution, truth), 1.0)
 
     def test_solution_raw_and_ground_truth_boxed_equivalent(self):
         """
@@ -28,7 +28,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = "The answer is \\boxed{42}"
         truth = "The answer is \\boxed{42}"
-        self.assertEqual(compute_score(solution, truth), 1.0)
+        self.assertEqual(compute_score_v0(solution, truth), 1.0)
 
     def test_solution_boxed_truth_raw_and_equivalent(self):
         """
@@ -37,7 +37,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = "Let's see, the result is \\boxed{100}"
         truth = "100"
-        self.assertEqual(compute_score(solution, truth), 1.0)
+        self.assertEqual(compute_score_v0(solution, truth), 1.0)
 
     def test_both_boxed_and_not_equivalent(self):
         """
@@ -46,7 +46,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = "I think the answer is \\boxed{-1}"
         truth = "The answer is \\boxed{1}"
-        self.assertEqual(compute_score(solution, truth), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth), 0.0)
 
     def test_solution_boxed_truth_raw_and_not_equivalent(self):
         """
@@ -55,7 +55,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = "The answer is \\boxed{apple}"
         truth = "orange"
-        self.assertEqual(compute_score(solution, truth), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth), 0.0)
 
     def test_solution_not_boxed(self):
         """
@@ -65,8 +65,8 @@ class TestComputeScore(unittest.TestCase):
         solution = "The answer is 42, but I'm not boxing it."
         truth_boxed = "The answer is \\boxed{42}"
         truth_raw = "42"
-        self.assertEqual(compute_score(solution, truth_boxed), 0.0)
-        self.assertEqual(compute_score(solution, truth_raw), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth_boxed), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth_raw), 0.0)
 
     def test_empty_solution_string(self):
         """
@@ -75,7 +75,7 @@ class TestComputeScore(unittest.TestCase):
         """
         solution = ""
         truth = "\\boxed{10}"
-        self.assertEqual(compute_score(solution, truth), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth), 0.0)
 
     def test_empty_ground_truth(self):
         """
@@ -85,8 +85,8 @@ class TestComputeScore(unittest.TestCase):
         solution_correct = "The answer is \\boxed{}"
         solution_incorrect = "The answer is \\boxed{1}"
         truth = ""
-        self.assertEqual(compute_score(solution_correct, truth), 1.0)
-        self.assertEqual(compute_score(solution_incorrect, truth), 0.0)
+        self.assertEqual(compute_score_v0(solution_correct, truth), 1.0)
+        self.assertEqual(compute_score_v0(solution_incorrect, truth), 0.0)
 
     def test_multiple_boxed_answers_in_solution(self):
         """
@@ -95,8 +95,8 @@ class TestComputeScore(unittest.TestCase):
         solution = "First I thought it was \\boxed{A}, but then I realized it is \\boxed{B}"
         truth_correct = "\\boxed{B}"
         truth_incorrect = "\\boxed{A}"
-        self.assertEqual(compute_score(solution, truth_correct), 1.0)
-        self.assertEqual(compute_score(solution, truth_incorrect), 0.0)
+        self.assertEqual(compute_score_v0(solution, truth_correct), 1.0)
+        self.assertEqual(compute_score_v0(solution, truth_incorrect), 0.0)
 
 
 class TestMathEvalUtils(unittest.TestCase):

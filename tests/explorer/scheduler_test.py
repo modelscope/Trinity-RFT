@@ -175,6 +175,9 @@ class DummyModel(InferenceModel):
     def sync_model(self, model_version, update_weight_args_list):
         return True
 
+    async def prepare(self):
+        return
+
     def get_model_version(self):
         return 0
 
@@ -190,7 +193,7 @@ class DummyModel(InferenceModel):
     ) -> None:
         pass
 
-    async def get_api_server_url(self) -> Optional[str]:
+    def get_api_server_url(self) -> Optional[str]:
         return None
 
 
@@ -214,7 +217,7 @@ class DummyAuxiliaryModel(InferenceModel):
     ) -> None:
         pass
 
-    async def get_api_server_url(self) -> str:
+    def get_api_server_url(self) -> str:
         return "http://localhost:12345"
 
 

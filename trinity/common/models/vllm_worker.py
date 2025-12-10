@@ -12,6 +12,11 @@ from trinity.utils.log import get_logger
 
 
 class WorkerExtension:
+    def apply_patches(self):
+        """Apply necessary patches to vLLM."""
+        patch_vllm_moe_model_weight_loader(self.model_runner.model)
+        patch_vllm_prompt_logprobs(self.model_runner)
+
     def init_process_group(
         self,
         master_address: str,
@@ -56,8 +61,6 @@ class WorkerExtension:
         self._namespace = namespace
         self.synchronizer = Synchronizer.get_actor(namespace=self._namespace)
         self._checkpoint_converter = None
-        patch_vllm_moe_model_weight_loader(self.model_runner.model)
-        patch_vllm_prompt_logprobs(self.model_runner)
 
     def update_weight(self):
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""

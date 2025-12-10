@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 from trinity.buffer import get_buffer_reader, get_buffer_writer
-from trinity.common.config import Config, ExperienceBufferConfig
+from trinity.common.config import Config, StorageConfig
 from trinity.common.experience import Experience
 from trinity.common.models import get_debug_inference_model
 from trinity.common.models.model import InferenceModel, ModelWrapper
@@ -247,12 +247,13 @@ class DebugWorkflowRunner(WorkflowRunner):
             "experiences.db",
         )
         self.sqlite_writer = get_buffer_writer(
-            ExperienceBufferConfig(
+            StorageConfig(
                 name="debug_buffer",
                 schema_type="experience",
                 path=self.output_sqlite_file,
                 storage_type="sql",
                 batch_size=1,
+                wrap_in_ray=False,
             )
         )
 

@@ -44,6 +44,10 @@ class InferenceModel(ABC):
         """Convert a list of messages into an experience in async."""
         raise NotImplementedError
 
+    async def prepare(self) -> None:
+        """Prepare the model before inference."""
+        pass
+
     @abstractmethod
     def get_model_version(self) -> int:
         """Get the checkpoint version."""
@@ -56,7 +60,7 @@ class InferenceModel(ABC):
             port = s.getsockname()[1]
         return address, port
 
-    async def get_api_server_url(self) -> Optional[str]:
+    def get_api_server_url(self) -> Optional[str]:
         """Get the API server URL if available."""
         return None
 

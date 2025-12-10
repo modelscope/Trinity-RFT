@@ -1,7 +1,7 @@
+import asyncio
 import os
 import unittest
 
-import ray
 import torch
 from openai import BadRequestError
 from parameterized import parameterized_class
@@ -13,7 +13,6 @@ from tests.tools import (
     get_model_path,
     get_template_config,
 )
-from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.models.utils import (
@@ -27,6 +26,16 @@ DEBUG = False
 def print_debug(*args):
     if DEBUG:
         print(*args)
+
+
+async def prepare_engines(engines, auxiliary_engines):
+    prepare_model_refs = []
+    for engine in engines:
+        prepare_model_refs.append(engine.prepare.remote())
+    for engines in auxiliary_engines:
+        for engine in engines:
+            prepare_model_refs.append(engine.prepare.remote())
+    await asyncio.gather(*prepare_model_refs)
 
 
 # Qwen2.5 chat template with {% generation %} mark
@@ -127,6 +136,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
     async def test_generate(
         self,
     ):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         self.assertEqual(self.model_wrapper.model_path, self.config.model.model_path)
         self.assertEqual(await self.model_wrapper.model_path_async, self.config.model.model_path)
@@ -244,6 +254,7 @@ class TestModelLen(RayUnittestBaseAysnc):
         self.tokenizer = AutoTokenizer.from_pretrained(self.config.model.model_path)
 
     async def test_model_len(self):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -311,6 +322,7 @@ class TestModelLenWithoutPromptTruncation(RayUnittestBaseAysnc):
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
     async def test_model_len(self):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         messages = [
             {"role": "user", "content": "How are you?"},
@@ -362,6 +374,7 @@ class TestAPIServer(RayUnittestBaseAysnc):
         )
 
     async def test_api(self):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         await self.model_wrapper_no_history.prepare()
         openai_client = self.model_wrapper.get_openai_client()
@@ -435,12 +448,42 @@ class TestAPIServer(RayUnittestBaseAysnc):
         self.assertEqual(len(self.model_wrapper_no_history.history), 0)
 
 
-class DummySynchronizer:
-    def __init__(self):
-        pass
+SYSTEM_PROMPT = """
+You are Qwen, created by Alibaba Cloud. You are a helpful assistant. You are walking on a frozen lake.
 
-    def do_nothing(self):
-        pass
+FrozenLake Quick Guide
+Goal: Reach the goal (G). Player (P) and Goal (G) must overlap.
+
+Symbols:
+_ Frozen | O Hole | G Goal | P Player
+
+Rules:
+1. Avoid falling into holes (O).
+2. Frozen tiles are slippery, you may move perpendicular to your intended direction.
+
+Valid Action (separated by | ):
+Up | Down | Left | Right
+
+Rewards:
+Fall into hole: 0
+Reach goal: +1.0
+
+You will be provided the current observation, please decide on the next Action.
+You should show your thought process and then input the final action in ``` ```.
+You should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```.
+You should plan ahead and need to achieve it in minimum number of steps.
+You should be aware that frozen tiles can be slippery, but the chance is small and you should not overthink it.
+
+Please show your thinking process and put the final action in ``` ```. In every turn, the final action MUST be one of Up, Down, Left, Right.
+"""
+
+USER_PROMPT = """Current Observation (0):
+ _ 	 G 	 _
+ _ 	 _ 	 _
+ P 	 O 	 O
+You have not achieved the goal, P has not reached G yet. Please give the next action.
+The maximum number of steps remaining is 10.
+"""
 
 
 class TestLogprobs(RayUnittestBaseAysnc):
@@ -458,31 +501,35 @@ class TestLogprobs(RayUnittestBaseAysnc):
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
-    async def test_logprobs(self):
-        # use init process group to apply patches
-        sync = (
-            ray.remote(DummySynchronizer)
-            .options(name="synchronizer", namespace=self.config.ray_namespace)
-            .remote()
-        )
-        await sync.__ray_ready__.remote()
+    async def test_logprobs_api(self):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
-        master_address, master_port = await self.engines[0].get_available_address.remote()
-        await self.engines[0].init_process_group.remote(
-            master_address,
-            master_port,
-            world_size=1,
-            rank_offset=0,
-            group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
-            explorer_name=self.config.explorer.name,
-            timeout=20,
-        )
         messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "What is your name?"},
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": USER_PROMPT},
         ]
-        response_1 = self.model_wrapper.chat(messages, n=1, temperature=1.0, logprobs=True)[0]
-        response_2 = self.model_wrapper.chat(messages, n=1, temperature=0.8, logprobs=True)[0]
+
+        # Test openai api logprobs with different temperature
+
+        self.model_client = self.model_wrapper.get_openai_async_client()
+        _ = await self.model_client.chat.completions.create(
+            model=self.model_client.model_path,
+            messages=messages,
+            n=1,
+            temperature=1.0,
+            logprobs=True,
+            max_tokens=15,
+        )
+        response_1 = self.model_wrapper.extract_experience_from_history()[0]
+        _ = await self.model_client.chat.completions.create(
+            model=self.model_client.model_path,
+            messages=messages,
+            n=1,
+            temperature=0.8,
+            logprobs=True,
+            max_tokens=15,
+        )
+        response_2 = self.model_wrapper.extract_experience_from_history()[0]
         self.assertTrue(response_1.logprobs is not None)
         self.assertTrue(len(response_1.logprobs) > 0)
         self.assertTrue(response_2.logprobs is not None)
@@ -517,6 +564,97 @@ class TestLogprobs(RayUnittestBaseAysnc):
         self.assertTrue(torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.8))
         self.assertFalse(torch.allclose(response_2.logprobs, logprobs_3_response, rtol=0.8))
 
+        # test vllm engine logprobs with different temperature
+        response_1 = self.model_wrapper.chat(
+            messages, n=1, temperature=1.0, logprobs=True, max_tokens=15
+        )[0]
+        response_2 = self.model_wrapper.chat(
+            messages, n=1, temperature=0.8, logprobs=True, max_tokens=15
+        )[0]
+        self.assertTrue(response_1.logprobs is not None)
+        self.assertTrue(len(response_1.logprobs) > 0)
+        self.assertTrue(response_2.logprobs is not None)
+        self.assertTrue(len(response_2.logprobs) > 0)
+        logprobs_1 = self.model_wrapper.logprobs(response_1.tokens.tolist(), temperature=1.0)
+        logprobs_2 = self.model_wrapper.logprobs(response_1.tokens.tolist(), temperature=0.8)
+        logprobs_3 = self.model_wrapper.logprobs(response_2.tokens.tolist(), temperature=1.0)
+        logprobs_4 = self.model_wrapper.logprobs(response_2.tokens.tolist(), temperature=0.8)
+        self.assertEqual(logprobs_1.shape, logprobs_2.shape)
+        self.assertEqual(logprobs_3.shape, logprobs_4.shape)
+        self.assertFalse(torch.allclose(logprobs_1, logprobs_2, rtol=0.4))
+        self.assertFalse(torch.allclose(logprobs_3, logprobs_4, atol=0.4))
+        logprobs_1_prompt = logprobs_1[: response_1.prompt_length - 1]
+        logprobs_2_prompt = logprobs_2[: response_1.prompt_length - 1]
+        logprobs_3_prompt = logprobs_3[: response_2.prompt_length - 1]
+        logprobs_4_prompt = logprobs_4[: response_2.prompt_length - 1]
+        self.assertEqual(logprobs_1_prompt.shape, logprobs_2_prompt.shape)
+        self.assertFalse(torch.allclose(logprobs_1_prompt, logprobs_2_prompt, rtol=0.4))
+        self.assertFalse(torch.allclose(logprobs_3_prompt, logprobs_4_prompt, rtol=0.4))
+        self.assertTrue(torch.allclose(logprobs_1_prompt, logprobs_3_prompt, rtol=0.4))
+        self.assertTrue(torch.allclose(logprobs_2_prompt, logprobs_4_prompt, rtol=0.4))
+        logprobs_1_response = logprobs_1[response_1.prompt_length - 1 :]
+        logprobs_2_response = logprobs_2[response_1.prompt_length - 1 :]
+        logprobs_3_response = logprobs_3[response_2.prompt_length - 1 :]
+        logprobs_4_response = logprobs_4[response_2.prompt_length - 1 :]
+        self.assertEqual(logprobs_1_response.shape, logprobs_2_response.shape)
+        self.assertEqual(logprobs_3_response.shape, logprobs_4_response.shape)
+        self.assertEqual(logprobs_1_response.shape, logprobs_2_response.shape)
+        self.assertEqual(response_1.logprobs.shape, logprobs_1_response.shape)
+        self.assertTrue(torch.allclose(response_1.logprobs, logprobs_1_response, rtol=0.5))
+        self.assertFalse(torch.allclose(response_1.logprobs, logprobs_2_response, rtol=0.5))
+        self.assertTrue(torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.8))
+        self.assertFalse(torch.allclose(response_2.logprobs, logprobs_3_response, rtol=0.8))
+
+        # test openai api and vllm engine logprobs consistency
+        await self.model_wrapper.clean_workflow_state()
+        _ = await self.model_client.chat.completions.create(
+            model=self.model_client.model_path,
+            messages=messages,
+            n=1,
+            temperature=1.0,
+            logprobs=0,
+            max_tokens=1,
+        )
+        response_openai_1 = self.model_wrapper.extract_experience_from_history()[0]
+        _ = await self.model_client.chat.completions.create(
+            model=self.model_client.model_path,
+            messages=messages,
+            n=1,
+            temperature=0.8,
+            logprobs=0,
+            max_tokens=1,
+        )
+        response_openai_2 = self.model_wrapper.extract_experience_from_history()[0]
+        response_vllm_1 = self.model_wrapper.chat(
+            messages,
+            n=1,
+            temperature=1.0,
+            logprobs=0,
+            max_tokens=1,
+        )[0]
+        response_vllm_2 = self.model_wrapper.chat(
+            messages,
+            n=1,
+            temperature=0.8,
+            logprobs=0,
+            max_tokens=1,
+        )[0]
+        self.assertEqual(len(response_openai_1.tokens), len(response_vllm_1.tokens))
+        self.assertTrue(
+            torch.allclose(
+                response_openai_1.logprobs,
+                response_vllm_1.logprobs,
+                rtol=0.1,
+            )
+        )
+        self.assertTrue(
+            torch.allclose(
+                response_openai_2.logprobs,
+                response_vllm_2.logprobs,
+                rtol=0.1,
+            )
+        )
+
 
 class TestAsyncAPIServer(RayUnittestBaseAysnc):
     def setUp(self):
@@ -537,6 +675,7 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         )
 
     async def test_api_async(self):
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         await self.model_wrapper_no_history.prepare()
         openai_client = self.model_wrapper.get_openai_async_client()
@@ -758,6 +897,7 @@ class TestAPIServerToolCall(RayUnittestBaseAysnc):
         import json
         import time
 
+        await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
         await self.model_wrapper_no_history.prepare()
         tokenizer = AutoTokenizer.from_pretrained(get_api_model_path())

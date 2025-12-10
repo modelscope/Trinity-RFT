@@ -9,8 +9,8 @@ import openai
 from trinity.common.config import GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.rewards.qwen25_eval import verify_math_answer
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-from trinity.utils.math_eval_utils import verify_math_answer
 
 
 @WORKFLOWS.register_module("math_eval_workflow")
