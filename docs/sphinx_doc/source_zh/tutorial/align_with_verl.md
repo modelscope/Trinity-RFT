@@ -1,4 +1,4 @@
-# 如何与 veRL 对齐参数
+# 如何对齐 veRL 的参数
 
 本指南为熟悉 [veRL](https://github.com/volcengine/verl) 的用户提供了将 Trinity-RFT 的参数与 veRL 的参数和指标对齐的方法。
 
