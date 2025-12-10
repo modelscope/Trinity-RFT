@@ -1,6 +1,6 @@
-# 如何对齐 veRL 的参数
+# 如何和 veRL 对齐配置
 
-本指南为熟悉 [veRL](https://github.com/volcengine/verl) 的用户提供了将 Trinity-RFT 的参数与 veRL 的参数和指标对齐的方法。
+本指南为熟悉 [veRL](https://github.com/volcengine/verl) 的用户提供了将 Trinity-RFT 与 veRL 的参数和指标对齐的方法。
 
 Trinity-RFT 使用 [veRL](https://github.com/volcengine/verl) 作为训练后端（`trainer`），包括 actor、reference 和 critic 模型。Trinity-RFT 中的 `explorer` 模块基于 [vllm](https://github.com/vllm-project/vllm) 实现，取代了 veRL 原生的 rollout 引擎。此外，Trinity-RFT 引入了新模块 `buffer` 来增强 RFT 的全生命周期数据管理，可以理解为对 veRL 的 RL dataset 和 DataProto 的进一步强化。
 
