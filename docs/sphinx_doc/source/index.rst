@@ -23,7 +23,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/develop_operator.md
    tutorial/develop_selector.md
    tutorial/trinity_configs.md
-   tutorial/trinity_trainer_configs.md
+   tutorial/trinity_gpu_configs.md
    tutorial/synchronizer.md
 
 
