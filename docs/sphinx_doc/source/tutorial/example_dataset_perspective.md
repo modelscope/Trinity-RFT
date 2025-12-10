@@ -43,5 +43,3 @@ This guide provide an example list from the dataset perspective, where you can f
 | [open-r1/Mixture-of-Thoughts](https://huggingface.co/datasets/open-r1/Mixture-of-Thoughts) | SFT | Regular SFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html#configuration-for-sft) |
 | [HumanLLMs/Human-Like-DPO-Dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset) | DPO | Training based on prepared human preferences | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html) |
 | toy dataset | DPO | Training based on human-in-the-loop preference annotation | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html#example-human-in-the-loop) |
-
-
