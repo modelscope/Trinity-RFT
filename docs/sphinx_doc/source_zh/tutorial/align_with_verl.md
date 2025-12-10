@@ -2,24 +2,29 @@
 
 本指南为熟悉 [veRL](https://github.com/volcengine/verl) 的用户提供了将 Trinity-RFT 的参数与 veRL 的参数和指标对齐的方法。
 
-Trinity-RFT 将强化微调过程分为三个组件：`explorer`、`trainer` 和 `buffer`。`explorer` 负责生成经验数据（例如通过代理-环境交互），`trainer` 负责通过最小化数据上的损失来更新模型权重，`buffer` 负责在整个 RFT 生命周期中的流水线数据处理。
-
-Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，包括 `algorithm`、`model`、`buffer`、`explorer`、`trainer`、`monitor` 和 `synchronizer`。这种详细且灵活的参数配置使用户能够自定义训练过程。模块 `synchronizer` 控制了 `explorer` 和 `trainer` 之间的模型权重同步。
-请参考 [文档](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) 了解 Trinity-RFT 的详细参数配置。
-
+Trinity-RFT 使用 [veRL](https://github.com/volcengine/verl) 作为训练后端（`trainer`），包括 actor、reference 和 critic 模型。探索引擎（`explorer`）基于 [vllm](https://github.com/vllm-project/vllm) 实现，取代了 veRL 原生的 rollout 功能。此外，Trinity-RFT 引入了新模块 `buffer` 来增强 RFT 的全生命周期数据管理，可以理解为对 veRL 的 RL dataset 和 DataProto 的进一步强化。
 
 ## 参数映射
 
-下面，我们展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。veRL 中的核心参数分为以下几类：`algorithm`、`data`、`actor_rollout_ref`、`critic`、`reward_model` 和 `trainer`。
+veRL 中的核心参数分为以下几类：`algorithm`、`data`、`actor_rollout_ref`、`critic`、`reward_model` 和 `trainer`。
+Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，例如 `algorithm`、`model`、`buffer`、`explorer`、`trainer`、`monitor`、`synchronizer` 和 `cluster`。
 
-粗略地说，veRL 中的参数可以映射到 Trinity-RFT 中的以下部分：
-* `algorithm`: `algorithm`
-* `data`: `buffer.explorer_input`
-* `actor_rollout_ref.actor`: `model` and `trainer`
-* `actor_rollout_ref.rollout`: `explorer.rollout_model`
-* `critic`: `trainer.trainer_config.critic`
-* `reward_model`: `explorer.auxiliary_models`
-* `trainer`: Several global configurations
+大致来说，veRL 中的参数可以按照下面的方式映射到 Trinity-RFT 中：
+
+| 配置 | veRL | Trinity-RFT |
+|:----------|:-----|:-----|
+| 算法，例如 Advantage 函数 | `algorithm` | `algorithm` |
+| 训练和评估任务集 | `data` | `buffer.explorer_input` |
+| 批次大小（💡 稍后说明） | `data.train_batch_size` 和 `actor_rollout_ref.actor.ppo_mini_batch_size` | `buffer.batch_size` 和 `buffer.train_batch_size` |
+| Actor | `actor_rollout_ref.actor` | `model` 和 `trainer` |
+| Rollout | `actor_rollout_ref.rollout` | `explorer.rollout_model` |
+| Critic | `critic` | `trainer.trainer_config.critic` |
+| 奖励模型 | `reward_model` | `explorer.auxiliary_models` |
+| 一些全局配置 | `trainer` | `monitor`、`synchronizer`、`cluster` 等 |
+
+
+在以下内容中，我们将展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。有关 Trinity-RFT 的详细参数配置，请参考[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)。
+
 
 ```{note}
 为了匹配 veRL 的默认训练设置，我们在 Trinity-RFT 中设置 `synchronizer.sync_style=fixed` 和 `synchronizer.sync_offset=0`。

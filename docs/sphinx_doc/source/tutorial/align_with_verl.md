@@ -2,11 +2,13 @@
 
 This guide provides guidance for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters and metrics in Trinity-RFT with the ones in veRL.
 
+Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend (`trainer`), including the actor, reference, and critic models. The rollout engine (`explorer`) is implemented based on [vllm](https://github.com/vllm-project/vllm), replacing veRL's native rollout functionality. Besides, Trinity-RFT introduces a new module `buffer` to enhance RFT's full-lifecycle data pipeline, which can be understood as a further enhancement of veRL's RL dataset and DataProto.
+
 
 ## Parameter Mapping
 
 The core parameters in veRL are divided into these categories: `algorithm`, `data`, `actor_rollout_ref`, `critic`, `reward_model`, and `trainer`.
-Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according to their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, and `synchronizer`.
+Trinity-RFT divides massive parameters of reinforcement fine-tuning into several parts according to their functions, e.g., `algorithm`, `model`, `buffer`, `explorer`, `trainer`, `monitor`, `synchronizer`, and `cluster`.
 
 Roughly speaking, the parameters in veRL are mapped to the following modules in Trinity-RFT:
 
@@ -19,7 +21,7 @@ Roughly speaking, the parameters in veRL are mapped to the following modules in 
 | Rollout | `actor_rollout_ref.rollout` | `explorer.rollout_model` |
 | Critic | `critic` | `trainer.trainer_config.critic` |
 | Reward model | `reward_model` | `explorer.auxiliary_models` |
-| Some global configurations | `trainer` | `monitor`, `synchronizer`, etc |
+| Some global configurations | `trainer` | `monitor`, `synchronizer`, `cluster`, etc |
 
 
 In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. Please refer to the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
