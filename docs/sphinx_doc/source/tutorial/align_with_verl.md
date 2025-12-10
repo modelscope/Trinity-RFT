@@ -2,7 +2,7 @@
 
 This guide provides guidance for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters and metrics in Trinity-RFT with the ones in veRL.
 
-Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend (`trainer`), including the actor, reference, and critic models. The rollout engine (`explorer`) is implemented based on [vllm](https://github.com/vllm-project/vllm), replacing veRL's native rollout functionality. Besides, Trinity-RFT introduces a new module `buffer` to enhance RFT's full-lifecycle data pipeline, which can be understood as a further enhancement of veRL's RL dataset and DataProto.
+Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend (`trainer`), including the actor, reference, and critic models. The `explorer` module in Trinity-RFT is implemented based on [vllm](https://github.com/vllm-project/vllm), replacing veRL's native rollout engine. Besides, Trinity-RFT introduces a new module `buffer` to enhance RFT's full-lifecycle data pipeline, which can be understood as a further enhancement of veRL's RL dataset and DataProto.
 
 
 ## Parameter Mapping
