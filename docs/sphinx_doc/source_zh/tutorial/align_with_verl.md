@@ -2,16 +2,27 @@
 
 本指南为熟悉 [veRL](https://github.com/volcengine/verl) 的用户提供了将 Trinity-RFT 的参数与 veRL 的参数和指标对齐的方法。
 
+Trinity-RFT 将强化微调过程分为三个组件：`explorer`、`trainer` 和 `buffer`。`explorer` 负责生成经验数据（例如通过代理-环境交互），`trainer` 负责通过最小化数据上的损失来更新模型权重，`buffer` 负责在整个 RFT 生命周期中的流水线数据处理。
+
+Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，包括 `algorithm`、`model`、`buffer`、`explorer`、`trainer`、`monitor` 和 `synchronizer`。这种详细且灵活的参数配置使用户能够自定义训练过程。模块 `synchronizer` 控制了 `explorer` 和 `trainer` 之间的模型权重同步。
+请参考 [文档](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) 了解 Trinity-RFT 的详细参数配置。
+
 
 ## 参数映射
 
-Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，包括 `algorithm`、`model`、`buffer`、`explorer`、`trainer`、`monitor` 和 `synchronizer`。这种详细且灵活的参数配置使用户能够自定义训练过程。
-请参考 [文档](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) 了解 Trinity-RFT 的详细参数配置。
-
 下面，我们展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。veRL 中的核心参数分为以下几类：`algorithm`、`data`、`actor_rollout_ref`、`critic`、`reward_model` 和 `trainer`。
 
+粗略地说，veRL 中的参数可以映射到 Trinity-RFT 中的以下部分：
+* `algorithm`: `algorithm`
+* `data`: `buffer.explorer_input`
+* `actor_rollout_ref.actor`: `model` and `trainer`
+* `actor_rollout_ref.rollout`: `explorer.rollout_model`
+* `critic`: `trainer.trainer_config.critic`
+* `reward_model`: `explorer.auxiliary_models`
+* `trainer`: Several global configurations
+
 ```{note}
-为了匹配 veRL 的默认训练设置，我们在 Trinity-RFT 中设置 `synchronizer.sync_style=fixed` 和 `synchronizer.sync_offset=1`。
+为了匹配 veRL 的默认训练设置，我们在 Trinity-RFT 中设置 `synchronizer.sync_style=fixed` 和 `synchronizer.sync_offset=0`。
 ```
 
 ### Algorithm
@@ -19,8 +30,8 @@ Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，包�
 | veRL | Trinity-RFT | 说明 |
 |:-----|:-----|:-----|
 | `algorithm.adv_estimator` | `algorithm.advantage_fn` | 通过 `algorithm.advantage_fn_args` 传递参数 |
-| `algorithm.gamma` | `advantage_fn_args.gamma` | 与 `advantage_fn: ppo/reinforceplusplus` 一起使用 |
-| `algorithm.lam` | `advantage_fn_args.lam` | 与 `advantage_fn: ppo` 一起使用 |
+| `algorithm.gamma` | `algorithm.advantage_fn_args.gamma` | 与 `algorithm.advantage_fn: ppo/reinforceplusplus` 一起使用 |
+| `algorithm.lam` | `algorithm.advantage_fn_args.lam` | 与 `algorithm.advantage_fn: ppo` 一起使用 |
 | `algorithm.use_kl_in_reward` | `algorithm.kl_penalty_fn` | 通过设置 `algorithm.kl_penalty_fn=none` 禁用奖励中的 KL |
 | `algorithm.kl_penalty` | `algorithm.kl_penalty_fn` | 从 `k2`、`low_var_kl` 等中选择 |
 | `algorithm.kl_ctrl.kl_coef` | `algorithm.kl_penalty_fn_args.kl_coef` | - |
@@ -64,7 +75,7 @@ Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，包�
 本节包括 actor 和 rollout 的参数。为了便于理解，您可以将 veRL 中的 actor（`actor_rollout_ref.actor`）视为 Trinity-RFT 中的 trainer（`trainer`），将 rollout（`actor_rollout_ref.rollout`）视为 explorer（`explorer.rollout_model`）。
 
 ```{note}
-Trinity 中 `actor_rollout_ref.rollout` 的任何参数都无效；请在其他字段中正确设置它们。
+Trinity-RFT 中 `actor_rollout_ref.rollout` 的任何参数都无效；请在其他字段中正确设置它们。
 ```
 
 对于 veRL 的高级训练配置，您可以在 `trainer.trainer_config` 字段中设置这些参数。例如，veRL 中的 `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` 等同于 Trinity-RFT 中的 `trainer.trainer_config.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`。如果您想在 `trainer.trainer_config` 字典中设置参数，请仔细阅读 `trinity/common/verl_config.py` 中的源代码！
@@ -91,7 +102,7 @@ Trinity 中 `actor_rollout_ref.rollout` 的任何参数都无效；请在其他�
 
 💡 详细说明：
 
-* 注释 `可以是taskset-specifc`（以 `temperature` 为例）意味着您可以为所有任务集设置 `model.temperature`，或者在 `buffer.explorer_input.taskset.rollout_args.temperature` 或 `buffer.explorer_input.eval_tasksets[i].rollout_args.temperature` 中为每个任务设置不同的值。具体示例如下：
+* 注释 `可以是taskset-specific`（以 `temperature` 为例）意味着您可以为所有任务集设置 `model.temperature`，或者在 `buffer.explorer_input.taskset.rollout_args.temperature` 或 `buffer.explorer_input.eval_tasksets[i].rollout_args.temperature` 中为每个任务设置不同的值。具体示例如下：
 ```yaml
 buffer:
   explorer_input:
@@ -151,6 +162,16 @@ explorer:
 💡 详细说明：
 
 * 如果您想从检查点恢复训练，可以将 `continue_from_checkpoint` 设置为 `True`，训练将从检查点路径 `<checkpoint_root_dir>/<project>/<name>/` 中的最新检查点开始（如果有的话）。
+
+
+## GPU 资源分配
+
+在 Trinity-RFT 中，GPU 资源需要手动分配给 `explorer`、`auxiliary models`（如果有）和 `trainer`。
+
+* 总共有 `cluster.node_num` 个节点，每个节点有 `cluster.gpu_per_node` 个 GPU。
+* `explorer` 使用的 GPU 数量为 `explorer.rollout_model.engine_num` * `explorer.rollout_model.tensor_parallel_size`。
+* 辅助模型的 GPU 数量为 `explorer.auxiliary_models[i].engine_num` * `explorer.auxiliary_models[i].tensor_parallel_size`。
+* 剩余的 GPU 用于 `trainer`。
 
 
 ## 指标映射
