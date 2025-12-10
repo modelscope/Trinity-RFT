@@ -1,7 +1,10 @@
-# Trainer Configuration Guide
+# GPU Configuration Guide
 
 This document provides recommended training configurations for Qwen3 series models on **NVIDIA A100 80GB** and **H20 96GB** GPUs.
 Based on model size (0.6B ~ 14B) and context length (`model.max_model_len`), we present feasible Trainer module setups across varying numbers of GPUs.
+
+> ⚠️ **Note**:
+> Due to the sparation design of rollout and training with Trinity. The following description of the number of GPUs refers to the number available for `Trainer`, not the total number of GPUs used by Trinity.
 
 > 💡 **Terminology**
 >
