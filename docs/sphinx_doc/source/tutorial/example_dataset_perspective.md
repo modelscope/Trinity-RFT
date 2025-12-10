@@ -1,22 +1,22 @@
 # Example List from the Dataset Perspective
 
-This guide provide an example list from the dataset perspective, where you can find out what datasets the examples have covered easily.
+This guide provides an example list from the dataset perspective, where you can find out what datasets the examples have covered easily.
 
 | Dataset | Algorithm | Use Case | References |
 | --- | --- | --- | --- |
 | [openai/gsm8k](https://huggingface.co/datasets/openai/gsm8k) | GRPO | Regular RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html) |
-| | GRPO | Asynchronous training | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/async_gsm8k), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html#) |
+| | GRPO | Asynchronous training | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/async_gsm8k), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html) |
 | | Multi-Step GRPO | AgentScope ReAct agent training | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_react), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html) |
 | | AsymRE | Regular RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/asymre_gsm8k) |
 | | CISPO | Regular RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/cispo_gsm8k) |
-| | GRPO | Training with prioritized tasks | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline), [doc](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline) |
+| | GRPO | Training with prioritized tasks | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html#example-data-processor-for-task-pipeline) |
 | | GRPO | Training with reward reshaping on experiences | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html#example-data-processor-for-experience-pipeline) |
 | | GRPO | Training with RULER (Relative Universal LLM-Elicited Rewards) | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler) |
 | | GRPO | Training a policy model as its own reward model | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler) |
 | | GRPO | Training using LoRA | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_lora_gsm8k) |
 | | OPMD | Off-policy RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/opmd_gsm8k), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html) |
 | | REC | Training with group-relative reinforce variants | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) |
-| | sPPO | Training with sPPO algorithm | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k)  |
+| | sPPO | Training with sPPO algorithm | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sppo_gsm8k) |
 | | TOPR | Tapered off-policy RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/topr_gsm8k) |
 | math | GRPO | Training with rewards from RM-Gallery | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_math) |
 | | AsymRE | Regular RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/asymre_math) |
@@ -25,7 +25,7 @@ This guide provide an example list from the dataset perspective, where you can f
 | [LLM360/guru-RL-92k](https://huggingface.co/datasets/LLM360/guru-RL-92k) | GRPO | Training with bayesian online task selection | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) |
 | [callanwu/WebWalkerQA](https://huggingface.co/datasets/callanwu/WebWalkerQA) | Multi-Step GRPO | Multi-turn web search agent training | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
 | [ALFWorld](https://github.com/alfworld/alfworld) | GRPO | Concatenated multi-turn RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html) |
-| | Multi-Step GRPO | General multi-step RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html#) |
+| | Multi-Step GRPO | General multi-step RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html) |
 | [corbt/enron-emails](https://huggingface.co/datasets/corbt/enron-emails) | Multi-Step GRPO | Multi-turn email search agent training | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search), [doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_search_email.html) |
 | [Frozen Lake](https://gymnasium.farama.org/environments/toy_text/frozen_lake/) | GRPO | Concatenated multi-turn RFT | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_frozen_lake) |
 | [anisha2102/RaR-Medicine](https://huggingface.co/datasets/anisha2102/RaR-Medicine) | GRPO | Training with rewards from LLM judge and rubrics for a non-verifiable medicine QA task | [example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
