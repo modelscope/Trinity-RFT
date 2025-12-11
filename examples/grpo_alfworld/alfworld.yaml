@@ -56,3 +56,25 @@ trainer:
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
+# If needed, uncomment the following lines to enable SFT warmup before RFT
+# stages:
+#   - stage_name: sft_warmup
+#     mode: train
+#     algorithm:
+#       algorithm_type: sft
+#       optimizer:
+#         lr: 5e-6
+#         lr_warmup_steps_ratio: 0.0
+#         warmup_style: constant
+#     buffer:
+#       total_epochs: 1
+#       train_batch_size: 32
+#       trainer_input:
+#         experience_buffer:
+#           name: sft_warmup_dataset
+#           storage_type: file
+#           path: ${oc.env:TRINITY_SFT_DATASET_PATH}
+#           format:
+#             prompt_type: messages
+#             messages_key: 'messages'
+#   - stage_name: rft

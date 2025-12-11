@@ -75,5 +75,6 @@ trainer:
 #       trainer_input:
 #         experience_buffer:
 #           name: sft_warmup_dataset
+#           storage_type: file
 #           path: ${oc.env:TRINITY_SFT_DATASET_PATH}
 #   - stage_name: rft  # leave empty to use the original configs for RFT

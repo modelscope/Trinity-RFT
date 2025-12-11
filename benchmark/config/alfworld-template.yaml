@@ -6,10 +6,10 @@ checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
-  loss_agg_mode: "seq-mean-token-sum"
+  loss_agg_mode: "token-mean"
   optimizer:
     lr: 1e-6
-  sample_strategy: warmup
+  sample_strategy: default
   policy_loss_fn: ppo
   advantage_fn: grpo
   kl_penalty_fn: none

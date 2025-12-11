@@ -18,7 +18,7 @@ We evaluate the performance of the following methods in Trinity-RFT framework wi
 Since rLLM does not support ALFWorld environment yet, we implement this task in rLLM for comparison.
 
 In Trinity-RFT and rLLM, we respectively evaluate the performance using GRPO algorithm on this task.
-We fine-tune a `Qwen2.5-3B-Instruct` model, which has been trained on a SFT dataset, on the training tasks with GRPO and other methods. For all methods, we fix key parameters to `batch_size=32`, `repeat_times=8`, `lr=1e-6`, and `kl_coef=0.001`.
+We fine-tune a `Qwen2.5-3B-Instruct` model, which has been trained on a SFT dataset (will be released soon), on the training tasks with GRPO and other methods. For all methods, we fix key parameters to `batch_size=32`, `repeat_times=8`, `lr=1e-6`, and `kl_coef=0.001`.
 
 For better efficiency, we use 64 rollout workers in rLLM and set the `explorer.engine_num` to 4 and `explorer.runner_per_model` to 8 in Trinity-RFT.
 
