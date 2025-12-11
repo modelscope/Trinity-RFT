@@ -1,4 +1,4 @@
-# How to align configuration with veRL
+# Align configuration with veRL
 
 This guide provides guidance for users familiar with [veRL](https://github.com/volcengine/verl) to align the parameters and metrics in Trinity-RFT with the ones in veRL.
 

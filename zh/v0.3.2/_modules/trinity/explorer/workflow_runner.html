@@ -989,11 +989,12 @@ document.write(`
             <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
             <span class="n">enable_history</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_history</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">ModelWrapper</span><span class="p">(</span>
                 <span class="n">model</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">(</span><span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[])</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_async_clients</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1013,9 +1014,9 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the runner.&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="o">.</span><span class="n">prepare</span><span class="p">(),</span>
-            <span class="o">*</span><span class="p">(</span><span class="n">aux_model</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span> <span class="k">for</span> <span class="n">aux_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">(</span><span class="n">aux_model</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span> <span class="k">for</span> <span class="n">aux_model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span><span class="p">:</span>
             <span class="n">api_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
             <span class="n">async_api_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span>
@@ -1198,6 +1199,16 @@ document.write(`
                 <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DebugWorkflowRunner.prepare">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.DebugWorkflowRunner.prepare">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># make sure models are started</span>
+        <span class="n">prepare_refs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()]</span>
+        <span class="n">prepare_refs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">prepare_refs</span><span class="p">)</span>
+        <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DebugWorkflowRunner.debug">

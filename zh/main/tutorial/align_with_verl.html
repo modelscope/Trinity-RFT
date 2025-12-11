@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>如何和 veRL 对齐配置 &#8212; Trinity-RFT 0.3.3 文档</title>
+    <title>与 veRL 对齐训练配置 &#8212; Trinity-RFT 0.3.3 文档</title>
   
   
   
@@ -191,7 +191,7 @@
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">参数配置指南</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_gpu_configs.html">GPU 资源相关配置指南</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">如何和 veRL 对齐配置</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">与 veRL 对齐训练配置</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
 <ul class="nav bd-sidenav">
@@ -591,7 +591,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>如何和 veRL 对齐配置</h1>
+    <h1>与 veRL 对齐训练配置</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -629,7 +629,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="verl">
-<h1>如何和 veRL 对齐配置<a class="headerlink" href="#verl" title="Link to this heading">#</a></h1>
+<h1>与 veRL 对齐训练配置<a class="headerlink" href="#verl" title="Link to this heading">#</a></h1>
 <p>本指南为熟悉 <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> 的用户提供了将 Trinity-RFT 与 veRL 的参数和指标对齐的方法。</p>
 <p>Trinity-RFT 使用 <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> 作为训练后端（<code class="docutils literal notranslate"><span class="pre">trainer</span></code>），包括 actor、reference 和 critic 模型。Trinity-RFT 中的 <code class="docutils literal notranslate"><span class="pre">explorer</span></code> 模块基于 <a class="reference external" href="https://github.com/vllm-project/vllm">vllm</a> 实现，取代了 veRL 原生的 rollout 引擎。此外，Trinity-RFT 引入了新模块 <code class="docutils literal notranslate"><span class="pre">buffer</span></code> 来增强 RFT 的全生命周期数据管理，可以理解为对 veRL 的 RL dataset 和 DataProto 的进一步强化。</p>
 <section id="id1">

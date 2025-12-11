@@ -553,7 +553,7 @@ window.addEventListener("load", load);
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_gpu_configs.html">GPU Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/synchronizer.html">Synchronizer in Trinity-RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/align_with_verl.html">How to align configuration with veRL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/align_with_verl.html">Align configuration with veRL</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="nav bd-sidenav">
@@ -988,14 +988,17 @@ document.write(`
                     <span class="n">StorageConfig</span><span class="p">(</span>
                         <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
+                        <span class="n">schema_type</span><span class="o">=</span><span class="s2">&quot;experience&quot;</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
                     <span class="n">StorageConfig</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pipeline_input&quot;</span><span class="p">,</span>
                         <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                         <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
+                        <span class="n">schema_type</span><span class="o">=</span><span class="s2">&quot;experience&quot;</span><span class="p">,</span>
                         <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">)</span>

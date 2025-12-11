@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How to align configuration with veRL &#8212; Trinity-RFT 0.3.3 documentation</title>
+    <title>Align configuration with veRL &#8212; Trinity-RFT 0.3.3 documentation</title>
   
   
   
@@ -189,7 +189,7 @@
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_gpu_configs.html">GPU Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">How to align configuration with veRL</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Align configuration with veRL</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="nav bd-sidenav">
@@ -589,7 +589,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>How to align configuration with veRL</h1>
+    <h1>Align configuration with veRL</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -626,8 +626,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="how-to-align-configuration-with-verl">
-<h1>How to align configuration with veRL<a class="headerlink" href="#how-to-align-configuration-with-verl" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="align-configuration-with-verl">
+<h1>Align configuration with veRL<a class="headerlink" href="#align-configuration-with-verl" title="Link to this heading">#</a></h1>
 <p>This guide provides guidance for users familiar with <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> to align the parameters and metrics in Trinity-RFT with the ones in veRL.</p>
 <p>Trinity-RFT uses <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> as the training backend (<code class="docutils literal notranslate"><span class="pre">trainer</span></code>), including the actor, reference, and critic models. The <code class="docutils literal notranslate"><span class="pre">explorer</span></code> module in Trinity-RFT is implemented based on <a class="reference external" href="https://github.com/vllm-project/vllm">vllm</a>, replacing veRL’s native rollout engine. Besides, Trinity-RFT introduces a new module <code class="docutils literal notranslate"><span class="pre">buffer</span></code> to enhance RFT’s full-lifecycle data pipeline, which can be understood as a further enhancement of veRL’s RL dataset and DataProto.</p>
 <section id="parameter-mapping">

@@ -555,7 +555,7 @@ window.addEventListener("load", load);
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">参数配置指南</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_gpu_configs.html">GPU 资源相关配置指南</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/synchronizer.html">Synchronizer 介绍</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/align_with_verl.html">如何和 veRL 对齐配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/align_with_verl.html">与 veRL 对齐训练配置</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
 <ul class="nav bd-sidenav">
@@ -988,7 +988,7 @@ document.write(`
 
 <div class="viewcode-block" id="render_experience">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.viewer.html#trinity.buffer.viewer.render_experience">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">render_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">:</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">exp_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">:</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Render a single experience sequence in Streamlit.&quot;&quot;&quot;</span>
     <span class="n">token_ids</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">tokens</span>
     <span class="n">logprobs</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span>
@@ -1030,76 +1030,57 @@ document.write(`
             <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;#39;&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="c1"># Build full HTML (with CSS)</span>
-    <span class="n">html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="c1"># === Use Streamlit Native Components for Prompt and Response ===</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experience [</span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Prompt section using st.text_area</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**📝 Prompt:**&quot;</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">code</span><span class="p">(</span><span class="n">prompt_text</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wrap_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">line_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Response section using st.text_area</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**💬 Response:**&quot;</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">code</span><span class="p">(</span><span class="n">response_text</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wrap_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">line_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Reward and other info</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**🏆 Reward and Other Info:**&quot;</span><span class="p">)</span>
+    <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">reward</span><span class="o">.</span><span class="n">metric</span><span class="p">(</span><span class="s2">&quot;**Reward:**&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mf">0.0</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Metrics:**&quot;</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Info:**&quot;</span><span class="p">)</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Response Tokens Detail section using components.html</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**🔍 Response Tokens Detail:**&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Build HTML only for Response Tokens Detail</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    &lt;!DOCTYPE html&gt;</span>
 <span class="s2">    &lt;html&gt;</span>
 <span class="s2">    &lt;head&gt;</span>
 <span class="s2">        &lt;meta charset=&quot;UTF-8&quot;&gt;</span>
 <span class="s2">        &lt;style&gt;</span>
-<span class="s2">            * </span><span class="se">{{</span>
+<span class="s2">            * {</span>
 <span class="s2">                margin: 0;</span>
 <span class="s2">                padding: 0;</span>
 <span class="s2">                box-sizing: border-box;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            body </span><span class="se">{{</span>
+<span class="s2">            body {</span>
 <span class="s2">                font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, &#39;Roboto&#39;, sans-serif;</span>
 <span class="s2">                padding: 10px;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            .sequence-container </span><span class="se">{{</span>
-<span class="s2">                border: 2px solid #e0e0e0;</span>
-<span class="s2">                border-radius: 10px;</span>
-<span class="s2">                padding: 20px;</span>
-<span class="s2">                background-color: #f8f9fa;</span>
-<span class="s2">                height: auto;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .sequence-header </span><span class="se">{{</span>
-<span class="s2">                font-size: 18px;</span>
-<span class="s2">                font-weight: bold;</span>
-<span class="s2">                margin-bottom: 15px;</span>
-<span class="s2">                color: #333;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .text-section </span><span class="se">{{</span>
-<span class="s2">                background-color: white;</span>
-<span class="s2">                padding: 15px;</span>
-<span class="s2">                border-radius: 5px;</span>
-<span class="s2">                margin-bottom: 15px;</span>
-<span class="s2">                border-left: 4px solid #4CAF50;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .prompt-section </span><span class="se">{{</span>
-<span class="s2">                background-color: #e3f2fd;</span>
-<span class="s2">                padding: 10px;</span>
-<span class="s2">                border-radius: 5px;</span>
-<span class="s2">                margin-bottom: 10px;</span>
-<span class="s2">                font-family: &#39;Courier New&#39;, monospace;</span>
-<span class="s2">                white-space: pre-wrap;</span>
-<span class="s2">                word-wrap: break-word;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .response-section </span><span class="se">{{</span>
-<span class="s2">                background-color: #fff3e0;</span>
-<span class="s2">                padding: 10px;</span>
-<span class="s2">                border-radius: 5px;</span>
-<span class="s2">                font-family: &#39;Courier New&#39;, monospace;</span>
-<span class="s2">                white-space: pre-wrap;</span>
-<span class="s2">                word-wrap: break-word;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .token-container </span><span class="se">{{</span>
+<span class="s2">            .token-container {</span>
 <span class="s2">                display: flex;</span>
 <span class="s2">                flex-wrap: wrap;</span>
 <span class="s2">                gap: 5px;</span>
 <span class="s2">                padding: 15px;</span>
 <span class="s2">                background-color: white;</span>
 <span class="s2">                border-radius: 5px;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            .token-box </span><span class="se">{{</span>
+<span class="s2">            .token-box {</span>
 <span class="s2">                display: inline-flex;</span>
 <span class="s2">                flex-direction: column;</span>
 <span class="s2">                align-items: center;</span>
@@ -1108,15 +1089,15 @@ document.write(`
 <span class="s2">                border: 1px solid #ddd;</span>
 <span class="s2">                min-width: 60px;</span>
 <span class="s2">                transition: transform 0.2s, box-shadow 0.2s;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            .token-box:hover </span><span class="se">{{</span>
+<span class="s2">            .token-box:hover {</span>
 <span class="s2">                transform: scale(1.5);</span>
 <span class="s2">                box-shadow: 0 4px 8px rgba(0,0,0,0.2);</span>
 <span class="s2">                z-index: 10;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            .token-text </span><span class="se">{{</span>
+<span class="s2">            .token-text {</span>
 <span class="s2">                font-family: &#39;Courier New&#39;, monospace;</span>
 <span class="s2">                font-size: 14px;</span>
 <span class="s2">                font-weight: bold;</span>
@@ -1124,44 +1105,18 @@ document.write(`
 <span class="s2">                text-align: center;</span>
 <span class="s2">                word-break: break-all;</span>
 <span class="s2">                max-width: 100px;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 
-<span class="s2">            .token-logprob </span><span class="se">{{</span>
+<span class="s2">            .token-logprob {</span>
 <span class="s2">                font-size: 11px;</span>
 <span class="s2">                color: #555;</span>
 <span class="s2">                font-family: &#39;Courier New&#39;, monospace;</span>
 <span class="s2">                text-align: center;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .label-text </span><span class="se">{{</span>
-<span class="s2">                font-weight: bold;</span>
-<span class="s2">                color: #1976d2;</span>
-<span class="s2">                margin-bottom: 5px;</span>
-<span class="s2">                margin-top: 10px;</span>
-<span class="s2">            </span><span class="se">}}</span>
-
-<span class="s2">            .section-divider </span><span class="se">{{</span>
-<span class="s2">                margin: 20px 0;</span>
-<span class="s2">                border-top: 2px dashed #ccc;</span>
-<span class="s2">            </span><span class="se">}}</span>
+<span class="s2">            }</span>
 <span class="s2">        &lt;/style&gt;</span>
 <span class="s2">    &lt;/head&gt;</span>
 <span class="s2">    &lt;body&gt;</span>
-<span class="s2">        &lt;div class=&quot;sequence-container&quot;&gt;</span>
-<span class="s2">            &lt;div class=&quot;sequence-header&quot;&gt;Experience </span><span class="si">{</span><span class="n">exp_index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
-
-<span class="s2">            &lt;div class=&quot;text-section&quot;&gt;</span>
-<span class="s2">                &lt;div class=&quot;label-text&quot;&gt;📝 Prompt:&lt;/div&gt;</span>
-<span class="s2">                &lt;div class=&quot;prompt-section&quot;&gt;</span><span class="si">{</span><span class="n">html_escape</span><span class="p">(</span><span class="n">prompt_text</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
-
-<span class="s2">                &lt;div class=&quot;label-text&quot;&gt;💬 Response:&lt;/div&gt;</span>
-<span class="s2">                &lt;div class=&quot;response-section&quot;&gt;</span><span class="si">{</span><span class="n">html_escape</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
-<span class="s2">            &lt;/div&gt;</span>
-
-<span class="s2">            &lt;div class=&quot;section-divider&quot;&gt;&lt;/div&gt;</span>
-
-<span class="s2">            &lt;div class=&quot;label-text&quot;&gt;🔍 Response Tokens Detail:&lt;/div&gt;</span>
-<span class="s2">            &lt;div class=&quot;token-container&quot;&gt;</span>
+<span class="s2">        &lt;div class=&quot;token-container&quot;&gt;</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Add each response token</span>
@@ -1175,19 +1130,17 @@ document.write(`
         <span class="n">html</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">                &lt;div class=&quot;token-box&quot; style=&quot;background-color: </span><span class="si">{</span><span class="n">bg_color</span><span class="si">}</span><span class="s2">;&quot;&gt;</span>
 <span class="s2">                    &lt;div class=&quot;token-text&quot;&gt;</span><span class="si">{</span><span class="n">token_display</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
-<span class="s2">                    &lt;div class=&quot;token-logprob&quot;&gt;</span><span class="si">{</span><span class="n">logprob</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
+<span class="s2">                    &lt;div class=&quot;token-logprob&quot;&gt;</span><span class="si">{</span><span class="n">logprob</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
 <span class="s2">                &lt;/div&gt;</span>
 <span class="s2">        &quot;&quot;&quot;</span>
-
     <span class="n">html</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            &lt;/div&gt;</span>
 <span class="s2">        &lt;/div&gt;</span>
 <span class="s2">    &lt;/body&gt;</span>
 <span class="s2">    &lt;/html&gt;</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Use components.html instead of st.markdown</span>
-    <span class="n">components</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">scrolling</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="c1"># Use components.html for token details only</span>
+    <span class="n">components</span><span class="o">.</span><span class="n">html</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">scrolling</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 
@@ -1284,10 +1237,22 @@ document.write(`
 
     <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">)</span>
 
-    <span class="c1"># Render experiences</span>
+    <span class="c1"># Generate catalog in sidebar</span>
+    <span class="n">exp_catalog</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># [(eid, subheader_text)]</span>
     <span class="k">if</span> <span class="n">experiences</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiences</span><span class="p">):</span>
-            <span class="n">render_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+            <span class="n">exp_catalog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">exp_catalog</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;---&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Contents**&quot;</span><span class="p">)</span>
+        <span class="n">catalog_md</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;- [ </span><span class="si">{</span><span class="n">eid</span><span class="si">}</span><span class="s2"> ](#exp-</span><span class="si">{</span><span class="n">eid</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">exp_catalog</span><span class="p">])</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">catalog_md</span><span class="p">,</span> <span class="n">unsafe_allow_html</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">experiences</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;a name=&quot;exp-</span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="si">}</span><span class="s1">&quot;&gt;&lt;/a&gt;&#39;</span><span class="p">,</span> <span class="n">unsafe_allow_html</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">render_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No experience data found&quot;</span><span class="p">)</span>
 

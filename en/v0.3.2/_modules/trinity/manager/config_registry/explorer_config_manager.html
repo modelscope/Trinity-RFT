@@ -977,13 +977,13 @@ document.write(`
             <span class="s2">&quot;Please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that at least one GPU is reserved for the `trainer`.&quot;</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="p">(</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
         <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">%</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
     <span class="p">):</span>
         <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;engine_num&quot;</span><span class="p">)</span>
         <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">)</span>
         <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;When `node_num &gt; 1`, please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`&quot;</span>
+            <span class="s2">&quot;When GPUs reserved for `trainer` is more than `gpu_per_node`, please check the settings of each `engine_num` and `tensor_parallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`&quot;</span>
         <span class="p">)</span>
 
 
