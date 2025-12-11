@@ -494,6 +494,21 @@
 <div class="article-header-buttons">
 
 
+<a href="https://github.com/modelscope/Trinity-RFT" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
 
 
 
@@ -601,10 +616,7 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-configurations">Part 1: Configurations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-common-errors">Part 2: Common Errors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-the-workflow">Debugging the Workflow</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-4-other-questions">Part 4: Other Questions</a></li>
 </ul>
             </nav>
@@ -621,10 +633,14 @@ document.write(`
 <h1>FAQ<a class="headerlink" href="#faq" title="Link to this heading">#</a></h1>
 <section id="part-1-configurations">
 <h2>Part 1: Configurations<a class="headerlink" href="#part-1-configurations" title="Link to this heading">#</a></h2>
-<p><strong>Q:</strong> How do I configure the parameters?</p>
-<p><strong>A:</strong> You can use the config manager to configure the parameters by running <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">studio</span> <span class="pre">--port</span> <span class="pre">8080</span></code>. This approach provides a convenient way to configure the parameters.</p>
-<p>Advanced users can also edit the config file directly, referred to the YAML files in <code class="docutils literal notranslate"><span class="pre">examples</span></code>.
-Trinity-RFT uses <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> as the training backend, which can have massive parameters, referred to <a class="reference external" href="https://verl.readthedocs.io/en/latest/examples/config.html">veRL documentation</a>. You may specify these parameters in the <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config</span></code> dictionary.</p>
+<p><strong>Q:</strong> How to write Trinity-RFT configuration files?</p>
+<p><strong>A:</strong> The recommended way to write configurations is to use the Trinity Studio. You can launch it with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>studio<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+</pre></div>
+</div>
+<p>This provides an intuitive and user-friendly way to create and modify configuration files.</p>
+<p>For advanced users, we recommend referring to the <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">configuration documentation</span></a> for detailed explanations of all configuration options. You can also directly edit the YAML configuration files (see the <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory for templates and examples).</p>
+<p>If you are already familiar with veRL, please refer to the <a class="reference internal" href="align_with_verl.html"><span class="std std-doc">Align with veRL</span></a> tutorial. This guide explains how to align Trinity-RFT configuration parameters with those used in veRL, making it easier to migrate or reuse your existing veRL setups.</p>
 <hr class="docutils" />
 <p><strong>Q:</strong> What’s the relationship between <code class="docutils literal notranslate"><span class="pre">buffer.batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer.train_batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code> and other batch sizes?</p>
 <p><strong>A:</strong> The following parameters are closely related:</p>
@@ -699,24 +715,50 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 <li><p>For trainer, adjust <code class="docutils literal notranslate"><span class="pre">trainer.max_token_len_per_gpu</span></code> when <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=false</span></code>; adjust <code class="docutils literal notranslate"><span class="pre">trainer.ppo_max_token_len_per_gpu</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer.ulysses_sequence_parallel_size</span></code> when <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=true</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true</span></code> may also help.</p></li>
 <li><p>For explorer, adjust <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.tensor_parallel_size</span></code>.</p></li>
 </ul>
+<p>Besides, Trinity-RFT provides <a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html">GPU related configuration guide</a>, which you may refer to for suggestions on adjusting the configurations.</p>
 </section>
 <section id="part-3-debugging-methods">
 <h2>Part 3: Debugging Methods<a class="headerlink" href="#part-3-debugging-methods" title="Link to this heading">#</a></h2>
-<p>Trinity-RFT now supports the actor-level logs, which automatically saves the logs for each actor (such as explorer and trainer) to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/&lt;actor_name&gt;</span></code>. To see the more detailed logs, change the default log level (<code class="docutils literal notranslate"><span class="pre">info</span></code>) to <code class="docutils literal notranslate"><span class="pre">debug</span></code>, by setting <code class="docutils literal notranslate"><span class="pre">log.level=debug</span></code> in config file.</p>
+<p><strong>Q:</strong> How to find logs for debugging?</p>
+<p><strong>A:</strong> Trinity-RFT supports the actor-level logs, which automatically saves the logs for each actor (such as explorer and trainer) to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/&lt;actor_name&gt;</span></code>.</p>
+<p>Some important logs are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/explorer.log</span></code>: Logs generated by the explorer process. It contains:</p>
+<ul>
+<li><p>The begin and end time of each explorer step.</p></li>
+<li><p>The metrics generated at each explorer step and evaluation step.</p></li>
+<li><p>Model weight synchronization status from the explorer side.</p></li>
+<li><p>Workflow exceptions (if any). The workflow running logs are not included here, please check <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/explorer_runner_&lt;n&gt;.log</span></code> for details.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/trainer.log</span></code>: Logs generated by the trainer process. It contains:</p>
+<ul>
+<li><p>The begin and end time of each training iteration.</p></li>
+<li><p>The metrics generated at each training iteration and evaluation iteration.</p></li>
+<li><p>Model weight synchronization status from the trainer side.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_job_dir&gt;/log/explorer_runner_&lt;n&gt;.log</span></code>: Logs generated by workflow runner process. It contains:</p>
+<ul>
+<li><p>The logs printed by each workflow. (Must use the <code class="docutils literal notranslate"><span class="pre">self.logger</span></code> in Workflow to print logs.)</p></li>
+<li><p>Exceptions occurred during the workflow running (if any).</p></li>
+</ul>
+</li>
+</ul>
+<p>To see more detailed logs, change the default log level (<code class="docutils literal notranslate"><span class="pre">info</span></code>) to <code class="docutils literal notranslate"><span class="pre">debug</span></code>, by setting <code class="docutils literal notranslate"><span class="pre">log.level=debug</span></code> in config file.</p>
 <p>Alternatively, if you want to look at the full logs of all processes and save it to <code class="docutils literal notranslate"><span class="pre">debug.log</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">RAY_DEDUP_LOGS</span><span class="o">=</span><span class="m">0</span>
 trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>grpo_gsm8k/gsm8k.yaml<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>debug.log
 </pre></div>
 </div>
-<section id="debugging-the-workflow">
-<h3>Debugging the Workflow<a class="headerlink" href="#debugging-the-workflow" title="Link to this heading">#</a></h3>
-<p>To debug a new workflow, use Trinity-RFT’s debug mode with the following steps:</p>
+<hr class="docutils" />
+<p><strong>Q:</strong> How to debug a workflow without running a full experiment?</p>
+<p><strong>A</strong>: To debug a workflow, use Trinity-RFT’s debug mode with the following steps:</p>
 <ol class="arabic simple">
 <li><p>Launch the inference model via <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">inference_model</span></code></p></li>
 <li><p>Debug the workflow in another terminal via <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">workflow</span> <span class="pre">--output-file</span> <span class="pre">&lt;output_file_path&gt;</span> <span class="pre">--plugin-dir</span> <span class="pre">&lt;plugin_dir&gt;</span></code></p></li>
 </ol>
 <p>Please refer to <a class="reference internal" href="develop_workflow.html#workflows"><span class="std std-ref">Workflow Development Guide</span></a> section for details.</p>
-</section>
 </section>
 <section id="part-4-other-questions">
 <h2>Part 4: Other Questions<a class="headerlink" href="#part-4-other-questions" title="Link to this heading">#</a></h2>
@@ -764,6 +806,15 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">load_fsdp_state_dict_from_verl_checkpoint</span><span class="p">(</span><span class="n">ckp_path</span><span class="p">))</span>
 </pre></div>
 </div>
+<hr class="docutils" />
+<p><strong>Q:</strong> What’s the difference between Trinity-RFT and veRL?</p>
+<p><strong>A:</strong> Trinity-RFT uses veRL as the trainer backend, and extends it with a more modular and flexible architecture. The main differences include:</p>
+<ul class="simple">
+<li><p><strong>Modular Algorithm Module</strong>: Trinity-RFT extracts algorithm-related components (e.g., advantage function, loss function) from veRL’s <code class="docutils literal notranslate"><span class="pre">core_algos.py</span></code> into independent modules, allowing users to easily implement and register new algorithms without modifying the core codebase.</p></li>
+<li><p><strong>Separation of Explorer and Trainer</strong>: Trinity-RFT replaces the rollout model in veRL with a separate Explorer module, which handles agent-environment interactions. This separation allows for more flexible workflow designs and rollout-training scheduling.</p></li>
+<li><p><strong>Full-lifecycle Data Pipeline</strong>: Trinity-RFT adds a Buffer module between Explorer and Trainer, providing a complete data pipeline for experience storage, processing, and sampling. This design enables advanced data handling strategies, such as experience replay and prioritized sampling.</p></li>
+</ul>
+<p>We also provide benchmarks comparing Trinity-RFT with veRL and systems built on veRL (e.g., <a class="reference external" href="https://github.com/rllm-org/rllm">rLLM</a>), which show comparable or better performance and efficiency. Please refer to <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/benchmark">Benchmark</a> for more details.</p>
 </section>
 </section>
 
@@ -814,10 +865,7 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-configurations">Part 1: Configurations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-common-errors">Part 2: Common Errors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-the-workflow">Debugging the Workflow</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-4-other-questions">Part 4: Other Questions</a></li>
 </ul>
   </nav></div>
