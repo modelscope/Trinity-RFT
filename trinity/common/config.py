@@ -892,6 +892,8 @@ class Config:
                 )
 
     def _check_explorer_input(self) -> None:
+        from trinity.buffer.selector import SELECTORS
+
         if self.mode in {"train", "serve"}:
             # no need to check explorer_input in serve mode
             return
@@ -933,8 +935,6 @@ class Config:
             set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
 
             # check if selector is supported
-            from trinity.buffer.selector import SELECTORS
-
             selector = SELECTORS.get(taskset.task_selector.selector_type)
             if selector is None:
                 raise ValueError(
