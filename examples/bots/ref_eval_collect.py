@@ -17,7 +17,6 @@ def main():
     prompt2linenum = {}
     for i, d in enumerate(original_data["prompt"]):
         prompt2linenum[d[0]["content"]] = i
-    args.ref_eval_path = "./bots_ref_eval_log.jsonl"
     eval_results = [0.0 for _ in range(len(original_data))]
     print(f"Loading reference evaluation results from {args.ref_eval_path}...")
     print(f"Results will be written to the original dataset at a new column {args.ref_eval_key}...")
@@ -26,7 +25,7 @@ def main():
             item = json.loads(line)
             eval_results[prompt2linenum[item["question"][0]["content"]]] = np.mean(item["rewards"])
     original_data[args.ref_eval_key] = eval_results
-    print(f"Dataset overwritten at {args.ref_eval_path}...")
+    print(f"Dataset overwritten at {args.data_path}...")
     original_data.to_parquet(args.data_path)
 
 

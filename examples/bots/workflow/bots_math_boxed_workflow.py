@@ -1,3 +1,5 @@
+import fcntl
+import json
 import os
 from typing import List, Union
 
@@ -41,9 +43,6 @@ class BOTSRefEvalCollectMathBoxedWorkflow(MathBoxedWorkflow):
 
     def run(self) -> List[Experience]:
         responses = super().run()
-
-        import fcntl
-        import json
 
         rewards = [response.reward for response in responses]
 
