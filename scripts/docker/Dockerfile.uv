@@ -22,14 +22,13 @@ RUN chmod 1777 /tmp && apt update && apt install -y \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && ln -sf /usr/bin/pip3 /usr/bin/pip
 
-# For Aliyun users: update pip mirror to aliyun to speed up pip install
-# ENV PIP_INDEX_URL=http://mirrors.cloud.aliyuncs.com/pypi/simple/
-# ENV PIP_TRUSTED_HOST=mirrors.cloud.aliyuncs.com
-
 ENV VIRTUAL_ENV=/opt/venv
 
 # copy the Trinity-RFT dir into the workspace
 COPY . .
+
+# For Aliyun users: update pip mirror to aliyun to speed up pip install
+# ENV UV_DEFAULT_INDEX=http://mirrors.cloud.aliyuncs.com/pypi/simple/
 
 # Install uv
 RUN pip install uv && uv venv /opt/venv --python=python3.12
@@ -40,7 +39,7 @@ RUN . /opt/venv/bin/activate && \
 
 # Install flash_attn and Megatron
 RUN . /opt/venv/bin/activate && \
-    uv pip install flash_attn==2.8.1 --no-deps --no-cache-dir && \
+    uv pip install flash_attn==2.8.1 --no-cache-dir && \
     uv pip install -e .[megatron] && \
     NVCC_APPEND_FLAGS="--threads 4" APEX_PARALLEL_BUILD=8 \
     uv pip install -v --no-build-isolation \

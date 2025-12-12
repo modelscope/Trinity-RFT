@@ -1,4 +1,4 @@
-"""Patch for vllm OpenAI API server.
+"""Patch for vllm OpenAI API server. Only for vllm versions >=0.8.5, <=0.11.0.
 
 1. Mocks the `add_signal_handler` method to do nothing.
 2. Adds `token_ids` and `prompt_token_ids` to the `ChatCompletionResponse`.
@@ -51,7 +51,6 @@ class PatchedChatCompletionResponse(ChatCompletionResponse):
     choices: list[PatchedChatCompletionResponseChoice] = list[ChatCompletionResponseChoice]
 
 
-# TODO: add patch to stream generator
 async def chat_completion_full_generator(  # noqa C901
     self,
     request,
@@ -304,7 +303,11 @@ async def patch_and_serve_http(app, sock, args):
     loop = asyncio.get_event_loop()
     original_add_signal_handler = loop.add_signal_handler
     loop.add_signal_handler = functools.partial(dummy_add_signal_handler, loop)
-    OpenAIServingChat.chat_completion_full_generator = chat_completion_full_generator
+    vllm_version = get_vllm_version()
+
+    # from 0.10.2, vllm added token_ids to ChatCompletionResponseChoice, so no need to patch
+    if vllm_version < parse_version("0.10.2"):
+        OpenAIServingChat.chat_completion_full_generator = chat_completion_full_generator
 
     try:
         shutdown_task = await serve_http(

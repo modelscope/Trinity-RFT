@@ -3,7 +3,6 @@
 import asyncio
 import socket
 from abc import ABC, abstractmethod
-from functools import partial
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import httpx
@@ -96,7 +95,17 @@ class ModelWrapper:
         engine_type: str = "vllm",
         enable_lora: bool = False,
         enable_history: bool = False,
+        enable_thinking: Optional[bool] = None,
     ):
+        """Initialize the ModelWrapper.
+
+        Args:
+            model (InferenceModel): The inference model Ray actor.
+            engine_type (str): The type of the model engine. Default to "vllm".
+            enable_lora (bool): Whether to enable LoRA. Default to False.
+            enable_history (bool): Whether to enable history recording. Default to False.
+            enable_thinking (Optional[bool]): Whether to enable thinking mode. Default to None. Only used for Qwen3 series models.
+        """
         assert engine_type.startswith("vllm"), "Only vLLM model is supported for now."
         self.model = model
         self.api_address: str = None
@@ -105,6 +114,7 @@ class ModelWrapper:
         self.logger = get_logger(__name__)
         self.enable_lora = enable_lora
         self.enable_history = enable_history
+        self.enable_thinking = enable_thinking
         self.history = []
         self.status = RunningStatus.RUNNING
         self.workflow_state: Dict = {}
@@ -303,10 +313,18 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = partial(self.openai_client.chat.completions.create, logprobs=True)
+
+            ori_create = self.openai_client.chat.completions.create
 
             def record_chat_completions(*args, **kwargs):
-                response = ori_create(*args, **kwargs)
+                logprobs = kwargs.pop("logprobs", True)
+                extra_body = kwargs.pop("extra_body", {})
+                if self.enable_thinking is not None:
+                    if "chat_template_kwargs" not in extra_body:
+                        extra_body["chat_template_kwargs"] = {}
+                    extra_body["chat_template_kwargs"]["enable_thinking"] = self.enable_thinking
+                extra_body["return_token_ids"] = True
+                response = ori_create(*args, extra_body=extra_body, logprobs=logprobs, **kwargs)
                 self.history.extend(convert_api_output_to_experience(response))
                 return response
 
@@ -333,10 +351,20 @@ class ModelWrapper:
         )
         if self.enable_history:
             # add a decorator to the openai client to record history
-            ori_create = partial(self.openai_async_client.chat.completions.create, logprobs=True)
+
+            ori_create = self.openai_async_client.chat.completions.create
 
             async def record_chat_completions(*args, **kwargs):
-                response = await ori_create(*args, **kwargs)
+                logprobs = kwargs.pop("logprobs", True)
+                extra_body = kwargs.pop("extra_body", {})
+                if self.enable_thinking is not None:
+                    if "chat_template_kwargs" not in extra_body:
+                        extra_body["chat_template_kwargs"] = {}
+                    extra_body["chat_template_kwargs"]["enable_thinking"] = self.enable_thinking
+                extra_body["return_token_ids"] = True
+                response = await ori_create(
+                    *args, extra_body=extra_body, logprobs=logprobs, **kwargs
+                )
                 self.history.extend(convert_api_output_to_experience(response))
                 return response
 
