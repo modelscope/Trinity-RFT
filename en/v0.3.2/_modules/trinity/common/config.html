@@ -1923,6 +1923,8 @@ document.write(`
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_explorer_input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">SELECTORS</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;serve&quot;</span><span class="p">}:</span>
             <span class="c1"># no need to check explorer_input in serve mode</span>
             <span class="k">return</span>
@@ -1962,6 +1964,13 @@ document.write(`
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">logprobs</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span> <span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="s2">&quot;chat_template&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span><span class="p">)</span>
+
+            <span class="c1"># check if selector is supported</span>
+            <span class="n">selector</span> <span class="o">=</span> <span class="n">SELECTORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">task_selector</span><span class="o">.</span><span class="n">selector_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Selector </span><span class="si">{</span><span class="n">taskset</span><span class="o">.</span><span class="n">task_selector</span><span class="o">.</span><span class="n">selector_type</span><span class="si">}</span><span class="s2"> is not supported.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">eval_tasksets</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>

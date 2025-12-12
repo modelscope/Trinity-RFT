@@ -60,7 +60,7 @@ Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，例�
 | `data.max_response_length` | `model.max_response_tokens` | - |
 | `data.filter_overlong_prompts` | `model.enable_prompt_truncation` | 稍后说明 |
 | `data.truncation` | - | 等同于 `right` |
-| `data.shuffle` | `buffer.explorer_input.taskset.task_selector.selector_type:random` | Taskset-specific |
+| `data.shuffle` | `buffer.explorer_input.taskset.task_selector.selector_type:shuffle` | Taskset-specific |
 
 💡 详细说明：
 
