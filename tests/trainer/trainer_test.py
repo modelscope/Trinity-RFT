@@ -1,5 +1,6 @@
 """Tests for trainer."""
 
+import asyncio
 import json
 import multiprocessing
 import os
@@ -10,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from unittest import mock
 
+import httpx
 import ray
 from parameterized import parameterized_class
 
@@ -23,7 +25,8 @@ from tests.tools import (
     get_unittest_dataset_config,
     get_vision_language_model_path,
 )
-from trinity.cli.launcher import bench, both, explore, run, train
+from trinity.buffer import get_buffer_reader
+from trinity.cli.launcher import bench, both, explore, run, serve, train
 from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,
@@ -42,6 +45,7 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
+from trinity.explorer.explorer_client import ExplorerClient
 from trinity.manager.state_manager import StateManager
 
 
@@ -502,6 +506,19 @@ def run_both(config: Config) -> None:
     both(config)
 
 
+def run_serve(config: Config) -> None:
+    ray.init(
+        namespace=config.ray_namespace,
+        runtime_env={
+            "env_vars": {
+                LOG_DIR_ENV_VAR: config.log.save_dir,
+                LOG_LEVEL_ENV_VAR: "INFO",
+            }
+        },
+    )
+    serve(config)
+
+
 @parameterized_class(
     ("use_priority_queue", "strategy"),
     [(False, "fsdp"), (True, "fsdp"), (True, "megatron")],
@@ -890,6 +907,133 @@ class TestTrainerMIX(BaseTrainerCase):
 
     def tearDown(self):
         shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+async def run_math_workflow(serve_url: str, task: dict):
+    from trinity.common.rewards.math_reward import MathRewardFn
+
+    explorer_client = ExplorerClient(serve_url)
+    openai_client = explorer_client.get_openai_async_client()
+
+    query = task["question"]
+    truth = task["answer"]
+
+    reward_fn = MathRewardFn()
+
+    system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
+<think> reasoning process here </think>
+<answer> answer here </answer>.
+"""
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": query},
+    ]
+
+    models = await openai_client.models.list()
+    model = models.data[0].id
+
+    response = await openai_client.chat.completions.create(
+        model=model,
+        messages=messages,
+    )
+    answer = response.choices[0].message.content
+    reward = reward_fn(response=answer, truth=truth, prompt=query)
+    await explorer_client.feedback_async(sum(reward.values()))
+
+
+class TestServeWithTrainer(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        if multiprocessing.get_start_method(allow_none=True) != "spawn":
+            multiprocessing.set_start_method("spawn", force=True)
+        checkpoint_path = get_checkpoint_path()
+        shutil.rmtree(os.path.join(checkpoint_path, "unittest"), ignore_errors=True)
+
+    async def test_serve_with_trainer(self):
+        config = get_template_config()
+        config.project = "unittest"
+        config.name = f"serve_with_trainer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        config.checkpoint_root_dir = get_checkpoint_path()
+        config.model.model_path = get_model_path()
+        config.buffer.batch_size = 4
+        config.algorithm.algorithm_type = "ppo"
+        config.algorithm.repeat_times = 1
+        config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="exp_buffer",
+            storage_type=StorageType.SQL,
+            schema_type="experience",
+        )
+        config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        config.buffer.train_batch_size = 4
+        config.trainer.total_steps = 4
+        config.trainer.save_interval = 4
+        config.synchronizer.sync_interval = 2
+        config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+        config.explorer.rollout_model.engine_num = 2
+        config.explorer.rollout_model.enable_openai_api = True
+        config.explorer.rollout_model.tensor_parallel_size = 1
+        config.explorer.service_status_check_interval = 10
+
+        trainer_config = deepcopy(config)
+        trainer_config.mode = "train"
+        trainer_config.check_and_update()
+
+        trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))
+        trainer_process.start()
+
+        await asyncio.sleep(10)
+        serve_config = deepcopy(config)
+        serve_config.mode = "serve"
+        serve_config.check_and_update()
+        serve_process = multiprocessing.Process(target=run_serve, args=(serve_config,))
+        serve_process.start()
+
+        ray.init(ignore_reinit_error=True)
+        while True:
+            try:
+                ray.get_actor("sql-exp_buffer", namespace=trainer_config.ray_namespace)
+                break
+            except ValueError:
+                print("waiting for trainer to start.")
+                await asyncio.sleep(5)
+
+        state_manager = StateManager(
+            path=serve_config.checkpoint_job_dir,
+            explorer_name=serve_config.explorer.name,
+        )
+
+        # wait for explorer initialization
+        for i in range(30):
+            try:
+                server_url = state_manager.load_explorer_server_url()
+            except Exception:
+                server_url = None
+            if server_url:
+                break
+            await asyncio.sleep(3)
+        if not server_url:
+            raise RuntimeError("Explorer server URL not found.")
+        # wait for server setup
+        for i in range(10):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(f"{server_url}/health")
+                    if response.status_code == 200:
+                        break
+            except Exception:
+                pass
+            await asyncio.sleep(2)
+
+        reader = get_buffer_reader(serve_config.buffer.explorer_input.taskset, serve_config.buffer)
+
+        for i in range(2):
+            # generate data for 2 trainer steps
+            tasks = reader.read(batch_size=8)
+            await asyncio.gather(*(run_math_workflow(server_url, task.raw_task) for task in tasks))
+
+            # wait for synchronizer started
+            end_time = time.time()
+            while time.time() - end_time < config.explorer.service_status_check_interval:
+                await asyncio.sleep(1)
 
 
 class TestMultiModalGRPO(BaseTrainerCase):
