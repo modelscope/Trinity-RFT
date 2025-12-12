@@ -1,9 +1,9 @@
 import os
-from typing import Union, List
+from typing import List, Union
 
+from trinity.common.experience import Experience
 from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow, Task
 from trinity.common.workflows.workflow import WORKFLOWS
-from trinity.common.experience import Experience
 
 
 @WORKFLOWS.register_module("bots_math_boxed_workflow")
@@ -42,8 +42,8 @@ class BOTSRefEvalCollectMathBoxedWorkflow(MathBoxedWorkflow):
     def run(self) -> List[Experience]:
         responses = super().run()
 
-        import json
         import fcntl
+        import json
 
         rewards = [response.reward for response in responses]
 
@@ -51,7 +51,7 @@ class BOTSRefEvalCollectMathBoxedWorkflow(MathBoxedWorkflow):
             "model_version": self.model.model_version,
             "rewards": rewards,
             "question": self.task_desc,
-            "truth": self.truth
+            "truth": self.truth,
         }
 
         log_file_path = os.environ.get("BOTS_REF_EVAL_LOG_FILE", "./bots_ref_eval_log.jsonl")

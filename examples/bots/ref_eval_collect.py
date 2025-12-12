@@ -1,7 +1,8 @@
 import argparse
 import json
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
     for i, d in enumerate(original_data["prompt"]):
         prompt2linenum[d[0]["content"]] = i
     args.ref_eval_path = "./bots_ref_eval_log.jsonl"
-    eval_results = [0. for _ in range(len(original_data))]
+    eval_results = [0.0 for _ in range(len(original_data))]
     print(f"Loading reference evaluation results from {args.ref_eval_path}...")
     print(f"Results will be written to the original dataset at a new column {args.ref_eval_key}...")
     with open(args.ref_eval_path, "r") as f:
