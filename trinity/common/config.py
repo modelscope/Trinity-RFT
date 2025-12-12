@@ -932,6 +932,15 @@ class Config:
             set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
             set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
 
+            # check if selector is supported
+            from trinity.buffer.selector import SELECTORS
+
+            selector = SELECTORS.get(taskset.task_selector.selector_type)
+            if selector is None:
+                raise ValueError(
+                    f"Selector {taskset.task_selector.selector_type} is not supported."
+                )
+
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
             if not dataset.path:
                 raise ValueError(f"Eval dataset [{dataset}]'s path is not configured.")
