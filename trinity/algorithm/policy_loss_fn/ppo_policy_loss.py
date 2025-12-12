@@ -23,6 +23,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         loss_agg_mode: Optional[str] = "token-mean",
         enable_sequence_masking: bool = False,  # introduced in DeepseekV3.2
         delta_sequence_masking: float = 0.1,
+        fallback_to_policy_gradient: bool = False,
     ) -> None:
         super().__init__(backend=backend)
         if clip_range_low is None:
@@ -40,6 +41,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         self.loss_agg_mode = loss_agg_mode
         self.enable_sequence_masking = enable_sequence_masking
         self.delta_sequence_masking = delta_sequence_masking
+        self.fallback_to_policy_gradient = fallback_to_policy_gradient
 
     def __call__(  # type: ignore
         self,
@@ -50,6 +52,11 @@ class PPOPolicyLossFn(PolicyLossFn):
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         negative_approx_kl = logprob - old_logprob
+        if self.fallback_to_policy_gradient:
+            print('------')
+            print('logprob shape:', logprob.shape)
+            print('------')
+            negative_approx_kl = logprob - logprob.detach()
         # Clamp negative_approx_kl for stability
         negative_approx_kl = torch.clamp(negative_approx_kl, min=-20.0, max=20.0)
         ratio = torch.exp(negative_approx_kl)
@@ -119,4 +126,5 @@ class PPOPolicyLossFn(PolicyLossFn):
             "loss_agg_mode": "token-mean",
             "enable_sequence_masking": False,
             "delta_sequence_masking": 0.1,
+            "fallback_to_policy_gradient": False,
         }
