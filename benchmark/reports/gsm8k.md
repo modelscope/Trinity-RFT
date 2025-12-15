@@ -8,7 +8,7 @@
 
 ## 2. Experimental Setup
 
-Due to inherent stochasticity in both vLLM-based rollouts and the training process itself, we designed three controlled experiments to isolate sources of divergence and ensure a fair comparison between **veRL** and **Trinity**:
+Due to inherent stochasticity in both vLLM-based rollouts and the training process itself, we designed four controlled experiments to isolate sources of divergence and ensure a fair comparison between **veRL** and **Trinity**:
 
 - **Experiment 1 (Exact Reproduction)**: veRL saves both the input batch and the full model/optimizer state at every `update_actor` step. Trinity loads both artifacts to exactly reproduce veRL’s training trajectory.
 - **Experiment 2 (State-Aligned Training)**: veRL saves only the model and optimizer states after each step. Trinity loads these states but generates its own rollout data (i.e., does not reuse veRL’s input batches).
@@ -117,7 +117,10 @@ The primary changes enable Trinity to load checkpoints and batch data saved by v
 - In `verl_trainer.py`, added logic to load veRL-saved input batches (used in Experiment 1).
 - Implemented checkpoint loading for the actor model and optimizer state at corresponding training steps.
 
-> ⚠️ **Note**: Both `batch_file` and `verl_checkpoint_folder` use local paths. Experiment 2 does not require batch loading; Experiment 3 and 4 uses unmodified code. Paths should be adjusted per experimental needs.
+> ⚠️ **Note**: Both `batch_file` and `verl_checkpoint_folder` currently use hardcoded local paths for demonstration.
+> - **Experiment 1** uses batch loading and checkpoint restoration as shown.
+> - **Experiment 2** does not require batch loading; the relevant code should be disabled.
+> - **Experiments 3 and 4** were run using the *original, unmodified* version of `verl_trainer.py` (i.e., without the changes in this patch). To reproduce those experiments, these modifications must be reverted or disabled.
 
 <details><summary>Click to expand patch</summary>
 
@@ -590,7 +593,7 @@ PYTHONUNBUFFERED=1 python3 -m verl.trainer.main_ppo \
  trainer.project_name=$project_name \
  trainer.experiment_name=$exp_name \
  trainer.val_before_train=false \
- trainer.n_gpus_per_node=8 \
+ trainer.n_gpus_per_node=6 \
  trainer.nnodes=1 \
  trainer.save_freq=1 \
  trainer.test_freq=1000 \
@@ -741,7 +744,7 @@ PYTHONUNBUFFERED=1 python3 -m verl.trainer.main_ppo \
  trainer.project_name=$project_name \
  trainer.experiment_name=$exp_name \
  trainer.val_before_train=false \
- trainer.n_gpus_per_node=8 \
+ trainer.n_gpus_per_node=6 \
  trainer.nnodes=1 \
  trainer.save_freq=1 \
  trainer.test_freq=1000 \
@@ -860,7 +863,6 @@ The following figures compare the performance of Trinity (blue) and veRL (red).
 
 ![](../../docs/sphinx_doc/assets/gsm8k-setup-1-explorer.png)
 
-
 > ✅ The curves are nearly indistinguishable, confirming that under strictly controlled conditions—identical inputs and model states—Trinity and veRL exhibit virtually identical behavior, with only negligible floating-point discrepancies.
 
 #### Experiment 2: Aligned Model States with Independent Rollouts (vLLM Stochasticity)
@@ -869,8 +871,6 @@ The following figures compare the performance of Trinity (blue) and veRL (red).
 
 ![](../../docs/sphinx_doc/assets/gsm8k-setup-2-explorer.png)
 
-
-
 > 🔍 When only model states are synchronized, metrics such as `Reward`, `Grad Norm`, `Entropy`, and `KL loss` remain closely aligned. However, `PG loss` and `PPO KL` show slightly larger deviations—consistent with expectations, as these quantities are more sensitive to variations in rollout data.
 
 #### Experiment 3: Independent Training, Zero Regularization
@@ -878,7 +878,6 @@ The following figures compare the performance of Trinity (blue) and veRL (red).
 ![](../../docs/sphinx_doc/assets/gsm8k-setup-3-trainer.png)
 
 ![](../../docs/sphinx_doc/assets/gsm8k-setup-3-explorer.png)
-
 
 > Primary performance indicators (`Reward`, `Grad Norm`) maintain reasonable alignment, while secondary metrics (`Entropy`, `KL loss`, `PG loss`, `PPO KL`) demonstrate increased divergence due to compounded stochastic effects from both independent rollouts and optimization trajectories.
 
