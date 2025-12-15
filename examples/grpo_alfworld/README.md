@@ -8,9 +8,7 @@ The config file is located in [`alfworld.yaml`](alfworld.yaml).
 
 NOTE: For the Concatenated Multi-Turn RFT setup in the Qwen-2.5 series, the model may not follow the `<think></think><action></action>` format. You may need to perform SFT first, then GRPO.
 
-The SFT data should be named as `<TRINITY_SFT_DATASET_PATH>/data.json`, following the format: 
-
-
+The SFT data should be named as `<TRINITY_SFT_DATASET_PATH>/data.json`, following the format:
 
 ```
 [
