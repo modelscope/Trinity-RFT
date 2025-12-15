@@ -30,10 +30,6 @@ from trinity.utils.monitor import MONITOR, Monitor
 
 class TestRegistry(unittest.TestCase):
     """Test registry functionality."""
-    # TODO: algorithm: algorithm, advantage_fn, entropy_loss_fn, kl_fn, policy_loss_fn, sample_strategy
-    # buffer: experience_operator, reader, formatter, sql_schema, selectors, priority_fn
-    # common: reward_function, workflow
-    # utils: monitor
 
     def test_common_module_registry_mapping(self):
         """Test registry mapping in common module"""
