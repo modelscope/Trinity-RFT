@@ -5,13 +5,11 @@ from typing import Dict, List, Optional
 import ray
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.buffer.reader.reader import READER
 from trinity.buffer.storage.sql import SQLStorage
 from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
-@READER.register_module("sql")
 class SQLReader(BufferReader):
     """Reader of the SQL buffer."""
 

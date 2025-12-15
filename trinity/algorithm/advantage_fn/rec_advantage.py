@@ -5,11 +5,10 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 
-from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN, GroupAdvantage
+from trinity.algorithm.advantage_fn.advantage_fn import GroupAdvantage
 from trinity.common.experience import Experience, group_by
 
 
-@ADVANTAGE_FN.register_module("rec")
 class RECGroupedAdvantage(GroupAdvantage):
     """An advantage class that calculates REC advantages."""
 

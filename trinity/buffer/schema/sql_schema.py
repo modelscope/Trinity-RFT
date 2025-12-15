@@ -9,14 +9,10 @@ from sqlalchemy.pool import NullPool
 
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
-
-SQL_SCHEMA = Registry("sql_schema")
 
 Base = declarative_base()
 
 
-@SQL_SCHEMA.register_module("task")
 class TaskModel(Base):  # type: ignore
     """Model for storing tasks in SQLAlchemy."""
 
@@ -30,7 +26,6 @@ class TaskModel(Base):  # type: ignore
         return cls(raw_task=dict)
 
 
-@SQL_SCHEMA.register_module("experience")
 class ExperienceModel(Base):  # type: ignore
     """SQLAlchemy model for Experience."""
 
@@ -63,7 +58,6 @@ class ExperienceModel(Base):  # type: ignore
         )
 
 
-@SQL_SCHEMA.register_module("sft")
 class SFTDataModel(Base):  # type: ignore
     """SQLAlchemy model for SFT data."""
 
@@ -86,7 +80,6 @@ class SFTDataModel(Base):  # type: ignore
         )
 
 
-@SQL_SCHEMA.register_module("dpo")
 class DPODataModel(Base):  # type: ignore
     """SQLAlchemy model for DPO data."""
 
@@ -118,6 +111,8 @@ def init_engine(db_url: str, table_name, schema_type: Optional[str]) -> Tuple:
 
     if schema_type is None:
         schema_type = "task"
+
+    from trinity.buffer.schema import SQL_SCHEMA
 
     base_class = SQL_SCHEMA.get(schema_type)
 

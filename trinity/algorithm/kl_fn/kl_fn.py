@@ -12,9 +12,6 @@ from typing import Any, Dict, Optional, Tuple
 import torch
 
 from trinity.algorithm.utils import aggregate_loss, masked_mean
-from trinity.utils.registry import Registry
-
-KL_FN = Registry("kl_fn")
 
 
 class KLFn(ABC):
@@ -122,7 +119,6 @@ class KLFn(ABC):
         return {"adaptive": False, "kl_coef": 0.001}
 
 
-@KL_FN.register_module("none")
 class DummyKLFn(KLFn):
     """
     Dummy KL function.
@@ -152,7 +148,6 @@ class DummyKLFn(KLFn):
         return torch.tensor(0.0), {}
 
 
-@KL_FN.register_module("k1")
 class K1Fn(KLFn):
     """
     KL K1 function.
@@ -167,7 +162,6 @@ class K1Fn(KLFn):
         return logprob - ref_logprob
 
 
-@KL_FN.register_module("k2")
 class K2Fn(KLFn):
     """
     KL K2 function.
@@ -182,7 +176,6 @@ class K2Fn(KLFn):
         return (logprob - ref_logprob).square() * 0.5
 
 
-@KL_FN.register_module("k3")
 class K3Fn(KLFn):
     """
     KL K3 function.
@@ -198,7 +191,6 @@ class K3Fn(KLFn):
         return logr.exp() - 1 - logr
 
 
-@KL_FN.register_module("low_var_kl")
 class LowVarKLFn(KLFn):
     """
     Low Variance KL function.
@@ -217,7 +209,6 @@ class LowVarKLFn(KLFn):
         return torch.clamp(kld, min=-10, max=10)
 
 
-@KL_FN.register_module("abs")
 class AbsFn(KLFn):
     """
     KL Abs function.
@@ -232,7 +223,6 @@ class AbsFn(KLFn):
         return torch.abs(logprob - ref_logprob)
 
 
-@KL_FN.register_module("corrected_k3")
 class CorrectedK3Fn(KLFn):
     """
     Corrected K3 function with importance sampling.

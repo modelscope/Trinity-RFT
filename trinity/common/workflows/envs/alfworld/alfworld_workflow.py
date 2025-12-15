@@ -4,7 +4,7 @@ from typing import List, Optional
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.step_wise_workflow import RewardPropagationWorkflow
-from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
+from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
 
 EXAMPLE_PROMPT = """
 Observation:
@@ -93,7 +93,6 @@ def parse_action(response):
         return ""
 
 
-@WORKFLOWS.register_module("alfworld_workflow")
 class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
 
@@ -176,7 +175,6 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         return await self.generate_env_inference_samples(env)
 
 
-@WORKFLOWS.register_module("step_wise_alfworld_workflow")
 class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
     """
     An Alfworld workflow refactored to use the RewardPropagationWorkflow base class.

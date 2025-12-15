@@ -7,12 +7,11 @@ import openai
 
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 from trinity.utils.annotations import Deprecated
 
 
 @Deprecated
-@WORKFLOWS.register_module("agentscopev0_react_math_workflow")
 class AgentScopeV0ReactMathWorkflow(Workflow):
     """
     This workflow serves as an example of how to use the agentscope framework within the trinity workflow.

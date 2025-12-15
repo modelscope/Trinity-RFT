@@ -4,9 +4,6 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.utils import aggregate_loss
-from trinity.utils.registry import Registry
-
-ENTROPY_LOSS_FN = Registry("entropy_loss_fn")
 
 
 class EntropyLossFn(ABC):
@@ -40,7 +37,6 @@ class EntropyLossFn(ABC):
         return {"entropy_coef": 0.0}
 
 
-@ENTROPY_LOSS_FN.register_module("default")
 class DefaultEntropyLossFn(EntropyLossFn):
     """
     Basic entropy loss function.
@@ -60,7 +56,6 @@ class DefaultEntropyLossFn(EntropyLossFn):
         return entropy_loss * self.entropy_coef, {"entropy_loss": entropy_loss.detach().item()}
 
 
-@ENTROPY_LOSS_FN.register_module("mix")
 class MixEntropyLossFn(EntropyLossFn):
     """
     Basic entropy loss function for mix algorithm.
@@ -88,7 +83,6 @@ class MixEntropyLossFn(EntropyLossFn):
         return entropy_loss * self.entropy_coef, {"entropy_loss": entropy_loss.detach().item()}
 
 
-@ENTROPY_LOSS_FN.register_module("none")
 class DummyEntropyLossFn(EntropyLossFn):
     """
     Dummy entropy loss function.

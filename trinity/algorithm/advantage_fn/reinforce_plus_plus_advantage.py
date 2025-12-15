@@ -8,11 +8,10 @@ from typing import Dict, Tuple
 import torch
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
+from trinity.algorithm.advantage_fn import AdvantageFn
 from trinity.algorithm.utils import masked_whiten
 
 
-@ADVANTAGE_FN.register_module("reinforceplusplus")
 class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
     def __init__(self, gamma: float = 1.0) -> None:
         self.gamma = gamma

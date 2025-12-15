@@ -5,9 +5,6 @@ from typing import Dict, List, Tuple
 
 from trinity.common.config import OperatorConfig
 from trinity.common.experience import Experience
-from trinity.utils.registry import Registry
-
-EXPERIENCE_OPERATORS = Registry("experience_operators")
 
 
 class ExperienceOperator(ABC):
@@ -37,6 +34,9 @@ class ExperienceOperator(ABC):
         Returns:
             List[ExperienceOperator]: List of instantiated ExperienceOperator objects.
         """
+        # Import here to avoid circular import
+        from trinity.buffer.operators import EXPERIENCE_OPERATORS
+
         operators = []
         for config in operator_configs:
             operator_class = EXPERIENCE_OPERATORS.get(config.name)

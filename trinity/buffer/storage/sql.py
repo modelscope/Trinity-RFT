@@ -9,8 +9,8 @@ from datasets import Dataset
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import sessionmaker
 
-from trinity.buffer.schema import init_engine
-from trinity.buffer.schema.formatter import FORMATTER, TaskFormatter
+from trinity.buffer.schema import FORMATTER, init_engine
+from trinity.buffer.schema.formatter import TaskFormatter
 from trinity.buffer.utils import retry_session
 from trinity.common.config import StorageConfig
 from trinity.common.experience import Experience

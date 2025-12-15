@@ -3,7 +3,8 @@ from typing import Dict, Optional, Type
 
 from pydantic import BaseModel, Field
 
-from trinity.common.rewards import MathBoxedRewardFn, RewardFn
+from trinity.common.rewards import RewardFn
+from trinity.common.rewards.math_reward import MathBoxedRewardFn
 
 # For GSM8K task
 GSM8KSystemPrompt = """You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute Python code to perform calculation or verify your answer. You should return your final answer within \\boxed{{}}."""
@@ -22,7 +23,7 @@ class GSM8KRewardFn(MathBoxedRewardFn):
         truth: str,
         format_score_coef: float = 0.1,
         **kwargs,
-    ) -> dict[str, float]:
+    ) -> Dict[str, float]:
         # parse GSM8K truth
         if isinstance(truth, str) and "####" in truth:
             truth = truth.split("####")[1].strip()

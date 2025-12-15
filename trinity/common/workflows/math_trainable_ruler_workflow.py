@@ -10,13 +10,12 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 # the probability that the ground truth is assumed to be available for RL
 PROBABILITY_GROUND_TRUTH_AVAILABLE = 0.2
 
 
-@WORKFLOWS.register_module("math_trainable_ruler_workflow")
 class MathTrainableRULERWorkflow(SimpleWorkflow):
     """A workflow for math, where the policy model itself serves as a RULER reward model.
     Modified from `MathRULERWorkflow`.

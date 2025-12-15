@@ -7,11 +7,8 @@ from typing import Dict
 from trinity.common.config import Config
 from trinity.common.constants import SyncMethod
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
 
 logger = get_logger(__name__)
-
-ALGORITHM_TYPE = Registry("algorithm")
 
 
 class ConstantMeta(ABCMeta):
@@ -48,7 +45,6 @@ class AlgorithmType(ABC, metaclass=ConstantMeta):
         pass
 
 
-@ALGORITHM_TYPE.register_module("sft")
 class SFTAlgorithm(AlgorithmType):
     """SFT Algorithm."""
 
@@ -68,7 +64,6 @@ class SFTAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("ppo")
 class PPOAlgorithm(AlgorithmType):
     """PPO Algorithm."""
 
@@ -91,7 +86,6 @@ class PPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("grpo")
 class GRPOAlgorithm(AlgorithmType):
     """GRPO algorithm."""
 
@@ -114,7 +108,6 @@ class GRPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("reinforceplusplus")
 class ReinforcePlusPlusAlgorithm(AlgorithmType):
     """Reinforce++ algorithm."""
 
@@ -137,7 +130,6 @@ class ReinforcePlusPlusAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("rloo")
 class RLOOAlgorithm(AlgorithmType):
     """RLOO algorithm."""
 
@@ -160,7 +152,6 @@ class RLOOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 
@@ -183,7 +174,6 @@ class OPMDAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("asymre")
 class AsymREAlgorithm(AlgorithmType):
     """AsymRE algorithm."""
 
@@ -206,7 +196,6 @@ class AsymREAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("dpo")
 class DPOAlgorithm(AlgorithmType):
     """DPO algorithm."""
 
@@ -250,7 +239,6 @@ class DPOAlgorithm(AlgorithmType):
             logger.warning("DPO must use KL loss. Set `algorithm.kl_loss_fn` to `k2`")
 
 
-@ALGORITHM_TYPE.register_module("topr")
 class TOPRAlgorithm(AlgorithmType):
     """TOPR algorithm. See https://arxiv.org/pdf/2503.14286v1"""
 
@@ -273,7 +261,6 @@ class TOPRAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("cispo")
 class CISPOAlgorithm(AlgorithmType):
     """CISPO algorithm. See https://arxiv.org/abs/2506.13585"""
 
@@ -296,7 +283,6 @@ class CISPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("gspo")
 class GSPOAlgorithm(AlgorithmType):
     """GSPO algorithm. See https://arxiv.org/pdf/2507.18071"""
 
@@ -319,7 +305,6 @@ class GSPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("sapo")
 class SAPOAlgorithm(AlgorithmType):
     """SAPO (Soft Adaptive Policy Optimization) algorithm.
 
@@ -346,7 +331,6 @@ class SAPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("mix")
 class MIXAlgorithm(AlgorithmType):
     """MIX algorithm."""
 
@@ -368,7 +352,6 @@ class MIXAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("mix_chord")
 class MIXCHORDAlgorithm(AlgorithmType):
     """MIX algorithm."""
 
@@ -390,7 +373,6 @@ class MIXCHORDAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("raft")
 class RAFTAlgorithm(AlgorithmType):
     """RAFT Algorithm.
     This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
@@ -413,7 +395,6 @@ class RAFTAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("sppo")
 class sPPOAlgorithm(AlgorithmType):
     """sPPO Algorithm."""
 
@@ -436,7 +417,6 @@ class sPPOAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("rec")
 class RECAlgorithm(AlgorithmType):
     """REC Algorithm."""
 
@@ -459,7 +439,6 @@ class RECAlgorithm(AlgorithmType):
         }
 
 
-@ALGORITHM_TYPE.register_module("multi_step_grpo")
 class MultiStepGRPOAlgorithm(AlgorithmType):
     """Multi-Step GRPO Algorithm."""
 

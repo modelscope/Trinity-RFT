@@ -7,18 +7,18 @@ from typing import List
 import streamlit as st
 import yaml
 
-from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN
-from trinity.algorithm.algorithm import ALGORITHM_TYPE
-from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import ENTROPY_LOSS_FN
-from trinity.algorithm.kl_fn.kl_fn import KL_FN
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
-from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
+from trinity.algorithm import ALGORITHM_TYPE
+from trinity.algorithm.advantage_fn import ADVANTAGE_FN
+from trinity.algorithm.entropy_loss_fn import ENTROPY_LOSS_FN
+from trinity.algorithm.kl_fn import KL_FN
+from trinity.algorithm.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
+from trinity.manager.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.buffer_config_manager import (
     get_train_batch_size,
     parse_priority_fn_args,
 )
-from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
 from trinity.utils.plugin_loader import load_plugins
 

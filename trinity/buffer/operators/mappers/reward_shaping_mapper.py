@@ -1,11 +1,10 @@
 from typing import Dict, List, Optional, Tuple
 
-from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.buffer.operators import ExperienceOperator
 from trinity.common.constants import OpType
 from trinity.common.experience import Experience
 
 
-@EXPERIENCE_OPERATORS.register_module("reward_shaping_mapper")
 class RewardShapingMapper(ExperienceOperator):
     """Re-shaping the existing rewards of experiences based on rules or other advanced methods.
 

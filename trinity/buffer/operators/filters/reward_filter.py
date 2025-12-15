@@ -2,11 +2,10 @@ from typing import List, Tuple
 
 import numpy as np
 
-from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.buffer.operators import ExperienceOperator
 from trinity.common.experience import Experience, group_by
 
 
-@EXPERIENCE_OPERATORS.register_module("reward_filter")
 class RewardFilter(ExperienceOperator):
     """
     Filter experiences based on the reward value.
@@ -24,7 +23,6 @@ class RewardFilter(ExperienceOperator):
         return filtered_exps, metrics
 
 
-@EXPERIENCE_OPERATORS.register_module("reward_std_filter")
 class RewardSTDFilter(ExperienceOperator):
     """
     Filter experiences based on the standard deviation of rewards within each group.

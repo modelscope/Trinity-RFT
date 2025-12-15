@@ -6,11 +6,10 @@ from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig
 
 from trinity.common.rewards.eval_utils import parse_with_timeout, verify_with_timeout
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
 
 
-@REWARD_FUNCTIONS.register_module("accuracy_reward")
 class AccuracyReward(RewardFn):
     """A reward function that rewards correct answers.
     Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py

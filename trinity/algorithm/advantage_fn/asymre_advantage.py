@@ -6,17 +6,12 @@ from typing import Dict, List, Tuple
 import torch
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn.advantage_fn import (
-    ADVANTAGE_FN,
-    AdvantageFn,
-    GroupAdvantage,
-)
+from trinity.algorithm.advantage_fn import AdvantageFn, GroupAdvantage
 from trinity.common.experience import Experience, group_by
 from trinity.utils.annotations import Deprecated
 
 
 @Deprecated
-@ADVANTAGE_FN.register_module("asymre_verl")
 class ASYMREAdvantageFn(AdvantageFn):
     """AsymRE advantage computation"""
 
@@ -87,7 +82,6 @@ class ASYMREAdvantageFn(AdvantageFn):
         }
 
 
-@ADVANTAGE_FN.register_module("asymre")
 class ASYMREGroupAdvantage(GroupAdvantage):
     """asymre Group Advantage computation"""
 

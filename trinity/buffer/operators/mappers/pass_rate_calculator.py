@@ -3,15 +3,11 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from trinity.buffer.operators.experience_operator import (
-    EXPERIENCE_OPERATORS,
-    ExperienceOperator,
-)
+from trinity.buffer.operators.experience_operator import ExperienceOperator
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.common.experience import Experience
 
 
-@EXPERIENCE_OPERATORS.register_module("pass_rate_calculator")
 class PassRateCalculator(ExperienceOperator):
     def __init__(self, **kwargs):
         pass

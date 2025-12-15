@@ -9,10 +9,9 @@ from typing import Dict, Tuple
 import torch
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
+from trinity.algorithm.advantage_fn import AdvantageFn
 
 
-@ADVANTAGE_FN.register_module("rloo")
 class RLOOAdvantageFn(AdvantageFn):
     def __init__(self) -> None:
         pass

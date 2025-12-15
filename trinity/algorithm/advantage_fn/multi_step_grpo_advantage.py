@@ -4,13 +4,12 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 
-from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN, AdvantageFn
+from trinity.algorithm.advantage_fn.advantage_fn import AdvantageFn
 from trinity.buffer.operators import ExperienceOperator
 from trinity.common.experience import Experience, group_by
 from trinity.utils.monitor import gather_metrics
 
 
-@ADVANTAGE_FN.register_module("step_wise_grpo")
 class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
     """
     An advantage function that broadcasts advantages from the last step to previous steps.

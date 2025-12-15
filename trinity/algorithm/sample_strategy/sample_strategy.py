@@ -7,10 +7,7 @@ from trinity.common.config import BufferConfig
 from trinity.common.experience import Experience, Experiences
 from trinity.utils.annotations import Deprecated
 from trinity.utils.monitor import gather_metrics
-from trinity.utils.registry import Registry
 from trinity.utils.timer import Timer
-
-SAMPLE_STRATEGY = Registry("sample_strategy")
 
 
 class SampleStrategy(ABC):
@@ -52,7 +49,6 @@ class SampleStrategy(ABC):
         """Load the state dict of the sample strategy."""
 
 
-@SAMPLE_STRATEGY.register_module("default")
 class DefaultSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
@@ -81,7 +77,6 @@ class DefaultSampleStrategy(SampleStrategy):
 
 
 @Deprecated
-@SAMPLE_STRATEGY.register_module("warmup")
 class WarmupSampleStrategy(DefaultSampleStrategy):
     """The warmup sample strategy.
     Deprecated, keep this class for backward compatibility only.
