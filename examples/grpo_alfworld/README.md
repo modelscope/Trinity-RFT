@@ -8,7 +8,7 @@ The config file is located in [`alfworld.yaml`](alfworld.yaml).
 
 NOTE: For the Concatenated Multi-Turn RFT setup in the Qwen-2.5 series, you need to perform SFT first, then GRPO, or else the reward will be -0.1 during GRPO training due to not following the `<think></think><action></action>` format.
 
-The SFT data should be named as xxx.json, following the format: 
+The SFT data should be named as `<TRINITY_SFT_DATASET_PATH>/data.json`, following the format: 
 
 
 
@@ -28,11 +28,11 @@ The SFT data should be named as xxx.json, following the format:
                 "role": "assistant",
                 "content": "<think>think process</think><action>action</action>"
             },
-             {
+            {
                 "role": "user",
                 "content": "Observation: {observation by alfworld}"
             },
-             {
+            {
                 "role": "assistant",
                 "content": "<think>think process</think><action>action</action>"
             },
