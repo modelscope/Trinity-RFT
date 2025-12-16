@@ -89,7 +89,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
         return {"opmd_baseline": "mean", "tau": 1.0}
 ```
 
-After implementation, you need to register this module through {class}`trinity.algorithm.ADVANTAGE_FN`. Once registered, the module can be configured in the configuration file using the registered name.
+After implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/__init__.py`. Once registered, the module can be configured in the configuration file using the registered name.
 
 
 #### Step 1.2: Implement `PolicyLossFn`
@@ -99,7 +99,7 @@ Developers need to implement the {class}`trinity.algorithm.PolicyLossFn` interfa
 - `__call__`: Calculates the loss based on input parameters. Unlike `AdvantageFn`, the input parameters here are all `torch.Tensor`. This interface automatically scans the parameter list of the `__call__` method and converts it to the corresponding fields in the experience data. Therefore, please write all tensor names needed for loss calculation directly in the parameter list, rather than selecting parameters from `kwargs`.
 - `default_args`: Returns default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
 
-Similarly, after implementation, you need to register this module through {class}`trinity.algorithm.POLICY_LOSS_FN`.
+Similarly, after implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/policy_loss_fn/__init__.py`.
 
 Here's an implementation example for the OPMD algorithm's Policy Loss Fn. Since OPMD's Policy Loss only requires logprob, action_mask, and advantages, only these three items are specified in the parameter list of the `__call__` method:
 
@@ -132,7 +132,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
 
 The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.
 
-To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in {class}`trinity.algorithm.ALGORITHM_TYPE`, enabling one-click configuration.
+To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in `trinity/algorithm/__init__.py`, enabling one-click configuration.
 
 The `AlgorithmType` class includes the following attributes and methods:
 
@@ -143,7 +143,7 @@ The `AlgorithmType` class includes the following attributes and methods:
 - `schema`: The format of experience data corresponding to the algorithm
 - `default_config`: Gets the default configuration of the algorithm, which will override attributes with the same name in `ALGORITHM_TYPE`
 
-Similarly, after implementation, you need to register this module through `ALGORITHM_TYPE`.
+Similarly, after implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/__init__.py`.
 
 Below is the implementation for the OPMD algorithm.
 Since the OPMD algorithm doesn't need to use the Critic model, `use_critic` is set to `False`.
