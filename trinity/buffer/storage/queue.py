@@ -106,6 +106,9 @@ class LinearDecayUseCountControlPriority(PriorityFunction):
 
 
 class QueueBuffer(ABC):
+    async def set_oldest_valid_version(self, oldest_valid_version: int):
+        self.oldest_valid_version = oldest_valid_version
+
     @abstractmethod
     async def put(self, exps: List[Experience]) -> None:
         """Put a list of experiences into the queue."""
@@ -155,6 +158,21 @@ class AsyncQueue(asyncio.Queue, QueueBuffer):
         """
         super().__init__(maxsize=capacity)
         self._closed = False
+        self.oldest_valid_version = -1
+
+    async def put(self, item: List[Experience]):
+        if len(item) == 0:
+            return
+        await super().put(item)
+
+    async def get(self):
+        while True:
+            item = await super().get()
+            if (
+                self.oldest_valid_version < 0
+                or item[0].info["model_version"] >= self.oldest_valid_version
+            ):
+                return item
 
     async def close(self) -> None:
         """Close the queue."""
@@ -208,6 +226,7 @@ class AsyncPriorityQueue(QueueBuffer):
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
         self._closed = False
+        self.oldest_valid_version = -1
 
     async def _put(self, item: List[Experience], delay: float = 0) -> None:
         """
@@ -259,16 +278,23 @@ class AsyncPriorityQueue(QueueBuffer):
             - After retrieval, the item is optionally reinserted after a cooldown period.
         """
         async with self._condition:
-            while len(self.priority_groups) == 0:
-                if self._closed:
-                    raise StopAsyncIteration()
-                await self._condition.wait()
+            while True:
+                while len(self.priority_groups) == 0:
+                    if self._closed:
+                        raise StopAsyncIteration()
+                    await self._condition.wait()
 
-            _, item_queue = self.priority_groups.peekitem(index=-1)
-            item = item_queue.popleft()
-            self.item_count -= 1
-            if not item_queue:
-                self.priority_groups.popitem(index=-1)
+                _, item_queue = self.priority_groups.peekitem(index=-1)
+                item = item_queue.popleft()
+                self.item_count -= 1
+                if not item_queue:
+                    self.priority_groups.popitem(index=-1)
+
+                if (
+                    self.oldest_valid_version < 0
+                    or item[0].info["model_version"] >= self.oldest_valid_version
+                ):
+                    break
 
         for exp in item:
             exp.info["use_count"] += 1
@@ -352,10 +378,22 @@ class QueueStorage:
         if self.writer is not None:
             self.writer.write(exp_list)
 
-    async def get_batch(self, batch_size: int, timeout: float) -> List:
+    async def get_batch(
+        self, batch_size: int, timeout: float, oldest_valid_version: int = -1
+    ) -> List:
         """Get batch of experience."""
+        await self.queue.set_oldest_valid_version(oldest_valid_version)
         start_time = time.time()
-        while len(self.exp_pool) < batch_size:
+        result = []
+        while len(result) < batch_size:
+            while len(self.exp_pool) > 0 and len(result) < batch_size:
+                exp = self.exp_pool.popleft()
+                if oldest_valid_version >= 0 and exp.info["model_version"] < oldest_valid_version:
+                    continue
+                result.append(exp)
+            if len(result) >= batch_size:
+                break
+
             if self.queue.stopped():
                 # If the queue is stopped, ignore the rest of the experiences in the pool
                 raise StopAsyncIteration("Queue is closed and no more items to get.")
@@ -372,7 +410,7 @@ class QueueStorage:
                     batch = list(self.exp_pool)
                     self.exp_pool.clear()
                     return batch
-        return [self.exp_pool.popleft() for _ in range(batch_size)]
+        return result
 
     @classmethod
     def get_wrapper(cls, config: StorageConfig):

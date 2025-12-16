@@ -34,6 +34,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
                 prompt_length=i,
                 reward=float(i),
                 logprobs=torch.tensor([0.1]),
+                info={"model_version": i},
             )
             for i in range(1, put_batch_size + 1)
         ]
@@ -52,6 +53,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
                     reward=float(i),
                     logprobs=torch.tensor([0.1]),
                     action_mask=torch.tensor([j % 2 for j in range(i + 1)]),
+                    info={"model_version": i},
                 )
                 for i in range(1, put_batch_size * 2 + 1)
             ]
