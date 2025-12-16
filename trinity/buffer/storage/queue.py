@@ -11,7 +11,6 @@ import numpy as np
 import ray
 from sortedcontainers import SortedDict
 
-from trinity.buffer.storage import PRIORITY_FUNC
 from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
@@ -193,6 +192,8 @@ class AsyncPriorityQueue(QueueBuffer):
             priority_fn (`str`): Name of the function to use for determining item priority.
             kwargs: Additional keyword arguments for the priority function.
         """
+        from trinity.buffer.storage import PRIORITY_FUNC
+
         self.capacity = capacity
         self.item_count = 0
         self.priority_groups = SortedDict()  # Maps priority -> deque of items

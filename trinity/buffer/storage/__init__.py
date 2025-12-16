@@ -1,3 +1,4 @@
+from trinity.buffer.storage.queue import PriorityFunction
 from trinity.utils.registry import Registry
 
 PRIORITY_FUNC = Registry(

@@ -16,12 +16,12 @@ from trinity.algorithm import (
     PolicyLossFn,
     SampleStrategy,
 )
+from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
 from trinity.buffer.reader import READER
 from trinity.buffer.schema import FORMATTER, SQL_SCHEMA
 from trinity.buffer.selector import SELECTORS, BaseSelector
 from trinity.buffer.storage import PRIORITY_FUNC
-from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.storage.queue import PriorityFunction
 from trinity.common.rewards import REWARD_FUNCTIONS, RewardFn
 from trinity.common.workflows import WORKFLOWS, Workflow
@@ -39,12 +39,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(workflow_name=workflow_name):
                 workflow_cls = WORKFLOWS.get(workflow_name)
                 self.assertIsNotNone(
-                    workflow_cls,
-                    f"{workflow_name} should be retrievable from registry"
+                    workflow_cls, f"{workflow_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(workflow_cls, Workflow),
-                    f"{workflow_name} should be a subclass of Workflow"
+                    f"{workflow_name} should be a subclass of Workflow",
                 )
         workflow_cls = WORKFLOWS.get("non_existent_workflow")
         self.assertIsNone(workflow_cls, "Non-existent workflow should return None")
@@ -55,12 +54,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(reward_fn_name=reward_fn_name):
                 reward_fn_cls = REWARD_FUNCTIONS.get(reward_fn_name)
                 self.assertIsNotNone(
-                    reward_fn_cls,
-                    f"{reward_fn_name} should be retrievable from registry"
+                    reward_fn_cls, f"{reward_fn_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(reward_fn_cls, RewardFn),
-                    f"{reward_fn_name} should be a subclass of RewardFn"
+                    f"{reward_fn_name} should be a subclass of RewardFn",
                 )
         reward_fn_cls = REWARD_FUNCTIONS.get("non_existent_reward_fn")
         self.assertIsNone(reward_fn_cls, "Non-existent reward function should return None")
@@ -73,12 +71,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(algorithm_name=algorithm_name):
                 algorithm_cls = ALGORITHM_TYPE.get(algorithm_name)
                 self.assertIsNotNone(
-                    algorithm_cls,
-                    f"{algorithm_name} should be retrievable from registry"
+                    algorithm_cls, f"{algorithm_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(algorithm_cls, AlgorithmType),
-                    f"{algorithm_name} should be a subclass of AlgorithmType"
+                    f"{algorithm_name} should be a subclass of AlgorithmType",
                 )
         algorithm_cls = ALGORITHM_TYPE.get("non_existent_algorithm")
         self.assertIsNone(algorithm_cls, "Non-existent algorithm should return None")
@@ -89,12 +86,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(advantage_fn_name=advantage_fn_name):
                 advantage_fn_cls = ADVANTAGE_FN.get(advantage_fn_name)
                 self.assertIsNotNone(
-                    advantage_fn_cls,
-                    f"{advantage_fn_name} should be retrievable from registry"
+                    advantage_fn_cls, f"{advantage_fn_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(advantage_fn_cls, AdvantageFn),
-                    f"{advantage_fn_name} should be a subclass of AdvantageFn"
+                    f"{advantage_fn_name} should be a subclass of AdvantageFn",
                 )
         advantage_fn_cls = ADVANTAGE_FN.get("non_existent_advantage_fn")
         self.assertIsNone(advantage_fn_cls, "Non-existent advantage function should return None")
@@ -106,27 +102,25 @@ class TestRegistry(unittest.TestCase):
                 entropy_loss_fn_cls = ENTROPY_LOSS_FN.get(entropy_loss_fn_name)
                 self.assertIsNotNone(
                     entropy_loss_fn_cls,
-                    f"{entropy_loss_fn_name} should be retrievable from registry"
+                    f"{entropy_loss_fn_name} should be retrievable from registry",
                 )
                 self.assertTrue(
                     issubclass(entropy_loss_fn_cls, EntropyLossFn),
-                    f"{entropy_loss_fn_name} should be a subclass of EntropyLossFn"
+                    f"{entropy_loss_fn_name} should be a subclass of EntropyLossFn",
                 )
         entropy_loss_fn_cls = ENTROPY_LOSS_FN.get("non_existent_entropy_loss_fn")
-        self.assertIsNone(entropy_loss_fn_cls, "Non-existent entropy loss function should return None")
+        self.assertIsNone(
+            entropy_loss_fn_cls, "Non-existent entropy loss function should return None"
+        )
 
         # test kl function
         kl_fn_names = list(KL_FN._default_mapping.keys())
         for kl_fn_name in kl_fn_names:
             with self.subTest(kl_fn_name=kl_fn_name):
                 kl_fn_cls = KL_FN.get(kl_fn_name)
-                self.assertIsNotNone(
-                    kl_fn_cls,
-                    f"{kl_fn_name} should be retrievable from registry"
-                )
+                self.assertIsNotNone(kl_fn_cls, f"{kl_fn_name} should be retrievable from registry")
                 self.assertTrue(
-                    issubclass(kl_fn_cls, KLFn),
-                    f"{kl_fn_name} should be a subclass of KLFn"
+                    issubclass(kl_fn_cls, KLFn), f"{kl_fn_name} should be a subclass of KLFn"
                 )
         kl_fn_cls = KL_FN.get("non_existent_kl_fn")
         self.assertIsNone(kl_fn_cls, "Non-existent KL function should return None")
@@ -137,15 +131,16 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(policy_loss_fn_name=policy_loss_fn_name):
                 policy_loss_fn_cls = POLICY_LOSS_FN.get(policy_loss_fn_name)
                 self.assertIsNotNone(
-                    policy_loss_fn_cls,
-                    f"{policy_loss_fn_name} should be retrievable from registry"
+                    policy_loss_fn_cls, f"{policy_loss_fn_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(policy_loss_fn_cls, PolicyLossFn),
-                    f"{policy_loss_fn_name} should be a subclass of PolicyLossFn"
+                    f"{policy_loss_fn_name} should be a subclass of PolicyLossFn",
                 )
         policy_loss_fn_cls = POLICY_LOSS_FN.get("non_existent_policy_loss_fn")
-        self.assertIsNone(policy_loss_fn_cls, "Non-existent policy loss function should return None")
+        self.assertIsNone(
+            policy_loss_fn_cls, "Non-existent policy loss function should return None"
+        )
 
         # test sample strategy
         sample_strategy_names = list(SAMPLE_STRATEGY._default_mapping.keys())
@@ -154,11 +149,11 @@ class TestRegistry(unittest.TestCase):
                 sample_strategy_cls = SAMPLE_STRATEGY.get(sample_strategy_name)
                 self.assertIsNotNone(
                     sample_strategy_cls,
-                    f"{sample_strategy_name} should be retrievable from registry"
+                    f"{sample_strategy_name} should be retrievable from registry",
                 )
                 self.assertTrue(
                     issubclass(sample_strategy_cls, SampleStrategy),
-                    f"{sample_strategy_name} should be a subclass of SampleStrategy"
+                    f"{sample_strategy_name} should be a subclass of SampleStrategy",
                 )
         sample_strategy_cls = SAMPLE_STRATEGY.get("non_existent_sample_strategy")
         self.assertIsNone(sample_strategy_cls, "Non-existent sample strategy should return None")
@@ -171,12 +166,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(operator_name=operator_name):
                 operator_cls = EXPERIENCE_OPERATORS.get(operator_name)
                 self.assertIsNotNone(
-                    operator_cls,
-                    f"{operator_name} should be retrievable from registry"
+                    operator_cls, f"{operator_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(operator_cls, ExperienceOperator),
-                    f"{operator_name} should be a subclass of ExperienceOperator"
+                    f"{operator_name} should be a subclass of ExperienceOperator",
                 )
         operator_cls = EXPERIENCE_OPERATORS.get("non_existent_operator")
         self.assertIsNone(operator_cls, "Non-existent operator should return None")
@@ -187,12 +181,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(reader_name=reader_name):
                 reader_cls = READER.get(reader_name)
                 self.assertIsNotNone(
-                    reader_cls,
-                    f"{reader_name} should be retrievable from registry"
+                    reader_cls, f"{reader_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(reader_cls, BufferReader),
-                    f"{reader_name} should be a subclass of BufferReader"
+                    f"{reader_name} should be a subclass of BufferReader",
                 )
         reader_cls = READER.get("non_existent_reader")
         self.assertIsNone(reader_cls, "Non-existent reader should return None")
@@ -203,8 +196,7 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(formatter_name=formatter_name):
                 formatter_cls = FORMATTER.get(formatter_name)
                 self.assertIsNotNone(
-                    formatter_cls,
-                    f"{formatter_name} should be retrievable from registry"
+                    formatter_cls, f"{formatter_name} should be retrievable from registry"
                 )
         formatter_cls = FORMATTER.get("non_existent_formatter")
         self.assertIsNone(formatter_cls, "Non-existent formatter should return None")
@@ -215,8 +207,7 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(schema_name=schema_name):
                 schema_cls = SQL_SCHEMA.get(schema_name)
                 self.assertIsNotNone(
-                    schema_cls,
-                    f"{schema_name} should be retrievable from registry"
+                    schema_cls, f"{schema_name} should be retrievable from registry"
                 )
         schema_cls = SQL_SCHEMA.get("non_existent_schema")
         self.assertIsNone(schema_cls, "Non-existent schema should return None")
@@ -227,29 +218,27 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(selector_name=selector_name):
                 selector_cls = SELECTORS.get(selector_name)
                 self.assertIsNotNone(
-                    selector_cls,
-                    f"{selector_name} should be retrievable from registry"
+                    selector_cls, f"{selector_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(selector_cls, BaseSelector),
-                    f"{selector_name} should be a subclass of BaseSelector"
+                    f"{selector_name} should be a subclass of BaseSelector",
                 )
         selector_cls = SELECTORS.get("non_existent_selector")
         self.assertIsNone(selector_cls, "Non-existent selector should return None")
 
         # test priority function
         priority_fn_names = list(PRIORITY_FUNC._default_mapping.keys())
-        
+
         for priority_fn_name in priority_fn_names:
             with self.subTest(priority_fn_name=priority_fn_name):
                 priority_fn_cls = PRIORITY_FUNC.get(priority_fn_name)
                 self.assertIsNotNone(
-                    priority_fn_cls,
-                    f"{priority_fn_name} should be retrievable from registry"
+                    priority_fn_cls, f"{priority_fn_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(priority_fn_cls, PriorityFunction),
-                    f"{priority_fn_name} should be a subclass of PriorityFunction"
+                    f"{priority_fn_name} should be a subclass of PriorityFunction",
                 )
         priority_fn_cls = PRIORITY_FUNC.get("non_existent_priority_fn")
         self.assertIsNone(priority_fn_cls, "Non-existent priority function should return None")
@@ -262,12 +251,11 @@ class TestRegistry(unittest.TestCase):
             with self.subTest(monitor_name=monitor_name):
                 monitor_cls = MONITOR.get(monitor_name)
                 self.assertIsNotNone(
-                    monitor_cls,
-                    f"{monitor_name} should be retrievable from registry"
+                    monitor_cls, f"{monitor_name} should be retrievable from registry"
                 )
                 self.assertTrue(
                     issubclass(monitor_cls, Monitor),
-                    f"{monitor_name} should be a subclass of Monitor"
+                    f"{monitor_name} should be a subclass of Monitor",
                 )
 
         monitor_cls = MONITOR.get("non_existent_monitor")
