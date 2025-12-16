@@ -14,7 +14,6 @@ Algorithm:
 from typing import List, Optional
 
 import openai
-import torch
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -70,13 +69,12 @@ class OnPolicyDistillWorkflow(BaseSimpleWorkflow):
             teacher_resp_logprobs = teacher_logprobs[resp_start:]
             student_resp_logprobs = response.logprobs
 
-            # Match lengths
-            target_len = len(student_resp_logprobs)
-            if len(teacher_resp_logprobs) > target_len:
-                teacher_resp_logprobs = teacher_resp_logprobs[:target_len]
-            elif len(teacher_resp_logprobs) < target_len:
-                padding = torch.zeros(target_len - len(teacher_resp_logprobs))
-                teacher_resp_logprobs = torch.cat([teacher_resp_logprobs, padding])
+            # Verify lengths match (they should be equal for the same token sequence)
+            assert len(teacher_resp_logprobs) == len(student_resp_logprobs), (
+                f"Length mismatch: teacher_logprobs={len(teacher_resp_logprobs)}, "
+                f"student_logprobs={len(student_resp_logprobs)}. "
+                f"tokens={len(response.tokens)}, prompt_length={response.prompt_length}"
+            )
 
             # Step 3: Store teacher_logprobs for advantage_fn
             response.teacher_logprobs = teacher_resp_logprobs
