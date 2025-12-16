@@ -174,12 +174,11 @@ from typing import List, Optional
 import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 
 from verl.utils.reward_score import gsm8k
 
 
-@WORKFLOWS.register_module("verl_gsm8k_workflow")
 class VerlGSM8kWorkflow(Workflow):
     can_reset: bool = True
     can_repeat: bool = True

@@ -40,11 +40,10 @@ class ExperienceOperator(ABC):
 Here is an implementation of a simple operator that filters out experiences with rewards below a certain threshold:
 
 ```python
-from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.buffer.operators import ExperienceOperator
 from trinity.common.experience import Experience
 
 
-@EXPERIENCE_OPERATORS.register_module("reward_filter")
 class RewardFilter(ExperienceOperator):
 
     def __init__(self, threshold: float = 0.0) -> None:

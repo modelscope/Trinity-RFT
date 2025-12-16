@@ -47,9 +47,8 @@ For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorith
 Here's an implementation example for the OPMD algorithm's advantage function:
 
 ```python
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
+from trinity.algorithm.advantage_fn import GroupAdvantage
 
-@ADVANTAGE_FN.register_module("opmd")
 class OPMDGroupAdvantage(GroupAdvantage):
     """OPMD Group Advantage computation"""
 
@@ -106,7 +105,6 @@ Here's an implementation example for the OPMD algorithm's Policy Loss Fn. Since 
 
 
 ```python
-@POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(self, tau: float = 1.0) -> None:
         self.tau = tau
@@ -152,7 +150,6 @@ Since the OPMD algorithm doesn't need to use the Critic model, `use_critic` is s
 The dictionary returned by the `default_config` method indicates that OPMD will use the `opmd` type `AdvantageFn` and `PolicyLossFn` implemented in Step 1, will not apply KL Penalty on rewards, but will add a `k2` type KL loss when calculating the final loss.
 
 ```python
-@ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 

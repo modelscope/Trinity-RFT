@@ -42,9 +42,8 @@ OPMD 与 PPO 算法的主要区别在于优势值和策略损失的计算。OPMD
 以下是 OPMD 算法优势函数的实现示例：
 
 ```python
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
+from trinity.algorithm.advantage_fn import GroupAdvantage
 
-@ADVANTAGE_FN.register_module("opmd")
 class OPMDGroupAdvantage(GroupAdvantage):
     """OPMD Group Advantage computation"""
 
@@ -99,7 +98,6 @@ class OPMDGroupAdvantage(GroupAdvantage):
 以下是 OPMD 算法策略损失函数的实现示例。由于 OPMD 的策略损失仅需 logprob、action_mask 和 advantages，因此 `__call__` 方法的参数列表中仅指定这三个项：
 
 ```python
-@POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(
         self, backend: str = "verl", tau: float = 1.0, loss_agg_mode: str = "token-mean"
@@ -149,7 +147,6 @@ class OPMDPolicyLossFn(PolicyLossFn):
 `default_config` 方法返回的字典表明 OPMD 将使用步骤 1 中实现的 `opmd` 类型的 `AdvantageFn` 和 `PolicyLossFn`，不会对奖励应用 KL 惩罚，但在计算最终损失时会添加 `k2` 类型的 KL 损失。
 
 ```python
-@ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 

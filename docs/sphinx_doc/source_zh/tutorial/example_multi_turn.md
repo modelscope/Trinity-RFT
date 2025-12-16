@@ -128,7 +128,6 @@ class AlfworldWorkflow(MultiTurnWorkflow):
 
 同时，记得注册你的 workflow：
 ```python
-@WORKFLOWS.register_module("alfworld_workflow")
 class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
     ...

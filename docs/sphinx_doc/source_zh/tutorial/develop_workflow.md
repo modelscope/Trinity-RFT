@@ -170,27 +170,15 @@ class ExampleWorkflow(Workflow):
 
 #### 注册你的工作流
 
-为了让 Trinity-RFT 能够通过配置文件中的名称自动找到你的工作流，你需要使用 `WORKFLOWS.register_module` 装饰器注册。
+为了让 Trinity-RFT 能够通过配置文件中的名称自动找到你的工作流，你需要在 `trinity/common/workflows/__init__.py` 中的 `default_mapping` 中注册。
 
 ```python
-# import some packages
-from trinity.common.workflows.workflow import WORKFLOWS
-
-@WORKFLOWS.register_module("example_workflow")
-class ExampleWorkflow(Workflow):
-    pass
-```
-
-对于准备贡献给 Trinity-RFT 项目的模块，你需要将上述代码放入 `trinity/common/workflows` 文件夹中，例如 `trinity/common/workflows/example_workflow.py`。并在 `trinity/common/workflows/__init__.py` 中添加以下行：
-
-```python
-# existing import lines
-from trinity.common.workflows.example_workflow import ExampleWorkflow
-
-__all__ = [
-    # existing __all__ lines
-    "ExampleWorkflow",
-]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+        "example_workflow": "trinity.common.workflows.workflow.ExampleWorkflow",
+    },
+)
 ```
 
 #### 性能调优
@@ -207,7 +195,6 @@ __all__ = [
 `reset` 方法接受一个新的 `Task` 实例，并使用该实例更新工作流的状态。
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_reset: bool = True
 
@@ -229,7 +216,6 @@ class ExampleWorkflow(Workflow):
 `set_repeat_times` 方法接受两个参数：`repeat_times` 指定了在 `run` 方法内需要执行的次数，`run_id_base` 是一个整数，用于标识多次运行中第一次的运行 ID，之后各次的 ID 基于此递增（该参数用于多轮交互场景，单次模型调用即可完成的任务可以忽略该项）。
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_repeat: bool = True
     # some code
@@ -270,7 +256,6 @@ class ExampleWorkflow(Workflow):
 #### 完整代码示例
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_reset: bool = True
     can_repeat: bool = True
@@ -354,7 +339,6 @@ trinity run --config <your_yaml_file>
 本节样例主要针对同步模式，如果你的工作流需要使用异步方法（例如异步 API）,你可以将 `is_async` 属性设置为 `True`，然后实现 `run_async` 方法，在这种情况下不再需要实现 `run` 方法，并且初始化参数 `auxiliary_models` 也会自动变为 `List[openai.AsyncOpenAI]` 类型，其余方法和属性保持不变。
 
 ```python
-@WORKFLOWS.register_module("example_workflow_async")
 class ExampleWorkflowAsync(Workflow):
 
     is_async: bool = True
@@ -384,7 +368,6 @@ explorer:
 ```
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
 
     def __init__(self, task: Task, model: ModelWrapper, auxiliary_models: List):

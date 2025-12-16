@@ -74,6 +74,8 @@ class Registry(object):
                     )
                     raise ImportError(f"Cannot dynamically import {class_name} from {module_path}")
                 self._register_module(module_name=module_key, module_cls=module)
+            else:
+                raise ValueError(f"Invalid module key: {module_key}")
         return module
 
     def _register_module(self, module_name=None, module_cls=None, force=False):
