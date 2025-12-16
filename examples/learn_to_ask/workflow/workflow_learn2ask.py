@@ -55,11 +55,11 @@ class Learn2AskWorkflow(SimpleWorkflow):
 
     def reset(self, task: Task):
         if self.train_mode == "Ra":  # we have a different system prompt for this training mode.
-            from trinity.plugins.prompt_learn2ask import (
+            from examples.learn_to_ask.workflow.prompt_learn2ask import (
                 rollout_prompt_med_Ra as system_prompt,
             )
         else:  # other modes use the same system prompt
-            from trinity.plugins.prompt_learn2ask import (
+            from examples.learn_to_ask.workflow.prompt_learn2ask import (
                 rollout_prompt_med as system_prompt,
             )
 
@@ -128,7 +128,9 @@ class Learn2AskWorkflow(SimpleWorkflow):
         return responses
 
     def llm_reward(self, response):
-        from trinity.plugins.prompt_learn2ask import reward_prompt_med as reward_prompt
+        from examples.learn_to_ask.workflow.prompt_learn2ask import (
+            reward_prompt_med as reward_prompt,
+        )
 
         history = self.merge_msg_list(self.task_desc + [{"role": "assistant", "content": response}])
         messages = [

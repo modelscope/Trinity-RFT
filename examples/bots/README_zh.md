@@ -33,7 +33,7 @@ BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。
 ##### 第三步：训练
 执行以下命令启动训练：
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
+trinity run --config examples/bots/bots.yaml
 ```
 相比随机选择基线的提升可以被稳定地观察到🤖🤖🤖.
 

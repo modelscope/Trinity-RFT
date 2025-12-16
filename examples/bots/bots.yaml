@@ -50,7 +50,7 @@ buffer:
         response_key: 'reward_model.ground_truth'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'bots_math_boxed_workflow'
+    default_workflow_type: 'examples.bots.workflow.bots_math_boxed_workflow.BOTSMathBoxedWorkflow'
   trainer_input:
     experience_buffer:
       name: exp_buffer

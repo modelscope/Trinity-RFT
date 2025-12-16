@@ -1,16 +1,14 @@
 from typing import Union
 
+from examples.bots.workflow.bots_math_boxed_reward import BOTSMathBoxedRewardFn
 from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow, Task
-from trinity.common.workflows.workflow import WORKFLOWS
 
 
-@WORKFLOWS.register_module("bots_math_boxed_workflow")
 class BOTSMathBoxedWorkflow(MathBoxedWorkflow):
     """A workflow for math tasks that give answers in boxed format for BOTS."""
 
     def reset(self, task: Task):
         super().reset(task)
-        from trinity.plugins.bots_math_boxed_reward import BOTSMathBoxedRewardFn
 
         self.reward_fn = BOTSMathBoxedRewardFn(**self.reward_fn_args)
         self.task_desc = nested_query(self.format_args.prompt_key, self.raw_task)

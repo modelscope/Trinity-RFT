@@ -36,7 +36,7 @@ Remember to modify the model/data path in `bots.yaml` and `random.yaml` accordin
 ##### Step 3: Training
 Launch training by executing:
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
+trinity run --config examples/bots/bots.yaml
 ```
 The improvement over random selection baseline can be stably obtained 🤖🤖🤖.
 
