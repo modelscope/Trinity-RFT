@@ -111,6 +111,7 @@ class WorkflowRunner:
                     if task.workflow.is_async
                     else self.auxiliary_model_clients
                 ),
+                auxiliary_model_wrappers=self.auxiliary_models,
             )
         else:
             self.workflow_instance.reset(task)

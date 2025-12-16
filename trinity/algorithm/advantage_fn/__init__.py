@@ -11,6 +11,9 @@ from trinity.algorithm.advantage_fn.grpo_advantage import (
 from trinity.algorithm.advantage_fn.multi_step_grpo_advantage import (
     StepWiseGRPOAdvantageFn,
 )
+from trinity.algorithm.advantage_fn.on_policy_distill_advantage import (
+    OnPolicyDistillAdvantage,
+)
 from trinity.algorithm.advantage_fn.opmd_advantage import (
     OPMDAdvantageFn,
     OPMDGroupAdvantage,
@@ -40,4 +43,5 @@ __all__ = [
     "REINFORCEGroupAdvantage",
     "ASYMREAdvantageFn",
     "RECGroupedAdvantage",
+    "OnPolicyDistillAdvantage",
 ]

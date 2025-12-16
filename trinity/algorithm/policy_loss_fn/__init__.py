@@ -6,6 +6,9 @@ from trinity.algorithm.policy_loss_fn.chord_policy_loss import (
 from trinity.algorithm.policy_loss_fn.cispo_policy_loss import CISPOPolicyLossFn
 from trinity.algorithm.policy_loss_fn.dpo_loss import DPOLossFn
 from trinity.algorithm.policy_loss_fn.gspo_policy_loss import GSPOLossFn
+from trinity.algorithm.policy_loss_fn.importance_sampling_policy_loss import (
+    ImportanceSamplingLossFn,
+)
 from trinity.algorithm.policy_loss_fn.mix_policy_loss import MIXPolicyLossFn
 from trinity.algorithm.policy_loss_fn.opmd_policy_loss import OPMDPolicyLossFn
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
@@ -31,4 +34,5 @@ __all__ = [
     "SFTPhiLossFn",
     "sPPOPolicyLossFn",
     "RECPolicyLossFn",
+    "ImportanceSamplingLossFn",
 ]

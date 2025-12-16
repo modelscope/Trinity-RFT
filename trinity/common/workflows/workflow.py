@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import inspect
 from dataclasses import asdict, dataclass, field
 from typing import Any, List, Optional, Type, Union
 
@@ -40,13 +41,18 @@ class Task(dict):
     index: dict = field(default_factory=dict)
 
     def to_workflow(
-        self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None
+        self,
+        model: Any,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_model_wrappers: Optional[List["ModelWrapper"]] = None,
     ) -> Workflow:
         """Convert the task to a workflow.
 
         Args:
             model (ModelWrapper): The rollout model for the workflow.
-            auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow.
+            auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow (OpenAI clients).
+            auxiliary_model_wrappers (List[ModelWrapper]): The auxiliary model wrappers.
+                Only passed to workflows that explicitly declare this parameter in __init__.
 
         Note:
             `model_path` attribute is added to the `auxiliary_models` for use within the workflow.
@@ -54,11 +60,22 @@ class Task(dict):
         Returns:
             Workflow: The generated workflow object.
         """
-        return self.workflow(
-            model=model,
-            task=self,
-            auxiliary_models=auxiliary_models,
-        )
+        # Check if the workflow supports auxiliary_model_wrappers parameter
+        sig = inspect.signature(self.workflow.__init__)
+        if "auxiliary_model_wrappers" in sig.parameters:
+            return self.workflow(
+                model=model,
+                task=self,
+                auxiliary_models=auxiliary_models,
+                auxiliary_model_wrappers=auxiliary_model_wrappers,
+            )
+        else:
+            # Backward compatibility: existing workflows don't need this parameter
+            return self.workflow(
+                model=model,
+                task=self,
+                auxiliary_models=auxiliary_models,
+            )
 
     # Deprecated property, will be removed in the future
     @property
@@ -92,10 +109,12 @@ class Workflow:
         task: Task,
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_model_wrappers: Optional[List[ModelWrapper]] = None,
     ):
         self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
+        self.auxiliary_model_wrappers = auxiliary_model_wrappers
         self.run_id_base = 0
         self.logger = get_logger(__name__)
 

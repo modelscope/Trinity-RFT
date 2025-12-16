@@ -47,6 +47,10 @@ from trinity.common.workflows.math_ruler_workflow import (
 from trinity.common.workflows.math_trainable_ruler_workflow import (
     MathTrainableRULERWorkflow,
 )
+from trinity.common.workflows.on_policy_distill_workflow import (
+    AsyncOnPolicyDistillWorkflow,
+    OnPolicyDistillWorkflow,
+)
 from trinity.common.workflows.rubric_judge_workflow import RubricJudgeWorkflow
 from trinity.common.workflows.simple_mm_workflow import (
     AsyncSimpleMMWorkflow,
@@ -96,4 +100,7 @@ __all__ = [
     "RubricJudgeWorkflow",
     "AgentScopeWorkflowAdapter",
     "FrozenLakeWorkflow",
+    # On-policy distillation workflows
+    "OnPolicyDistillWorkflow",
+    "AsyncOnPolicyDistillWorkflow",
 ]
