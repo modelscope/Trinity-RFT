@@ -53,9 +53,7 @@ class PPOPolicyLossFn(PolicyLossFn):
     ) -> Tuple[torch.Tensor, Dict]:
         negative_approx_kl = logprob - old_logprob
         if self.fallback_to_policy_gradient:
-            print('------')
-            print('logprob shape:', logprob.shape)
-            print('------')
+            # ignore vllm logprob difference and use pure policy gradient loss
             negative_approx_kl = logprob - logprob.detach()
         # Clamp negative_approx_kl for stability
         negative_approx_kl = torch.clamp(negative_approx_kl, min=-20.0, max=20.0)
