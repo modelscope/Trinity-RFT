@@ -166,11 +166,9 @@ class Explorer:
                 await self.experience_pipeline.prepare.remote()
             self.logger.info("Experience pipeline is ready.")
             # make sure all rollout models are ready
-            run_api_ref = [model.run_api_server.remote() for model in self.models]
+            run_api_ref = [model.prepare.remote() for model in self.models]
             run_api_ref.extend(
-                model.run_api_server.remote()
-                for models in self.auxiliary_models
-                for model in models
+                model.prepare.remote() for models in self.auxiliary_models for model in models
             )
             await asyncio.gather(*run_api_ref)
             self.logger.info("All models are ready.")
@@ -359,7 +357,7 @@ class Explorer:
 
     async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
-            self.logger.info(f"Log metrics of step {step}")
+            self.logger.info(f"Waiting for step {step}")
             await self._finish_explore_step(step=step, model_version=model_version)
             await self._finish_eval_step(step=step)
 

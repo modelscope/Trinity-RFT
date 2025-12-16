@@ -456,10 +456,12 @@ class ModelConfig:
     # the maximum number of tokens for the response
     max_response_tokens: Optional[int] = None
     # the minimum number of tokens for the response
-    min_response_tokens: int = 1
+    min_response_tokens: int = 0
     # whether to truncate the prompt; if set to True, the prompt will be truncated to `max_prompt_tokens` tokens;
     # not applicable for OpenAI API
     enable_prompt_truncation: bool = True
+    # repetition penalty for response generation
+    repetition_penalty: float = 1.0
 
     # lora config
     lora_configs: Optional[List[LoRAConfig]] = None
@@ -474,7 +476,7 @@ class ModelConfig:
 @dataclass
 class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
-    model_path: str = ""
+    model_path: Optional[str] = None
 
     engine_type: str = "vllm"
     engine_num: int = 1
@@ -503,6 +505,8 @@ class InferenceModelConfig:
     min_response_tokens: Optional[int] = None
     # if not set, use `model.enable_prompt_truncation`
     enable_prompt_truncation: Optional[bool] = None
+    # If not set, use `model.repetition_penalty`
+    repetition_penalty: Optional[float] = None
     # used for testing very long response generation, do not set it unless you know what you are doing
     ignore_eos: bool = False
 
@@ -517,6 +521,7 @@ class InferenceModelConfig:
 
     # For OpenAI API
     enable_openai_api: bool = False
+    enable_log_requests: bool = False  # whether to enable request logging in vLLM API server
 
     # For tool calls in OpenAI API
     enable_auto_tool_choice: bool = False
@@ -887,6 +892,8 @@ class Config:
                 )
 
     def _check_explorer_input(self) -> None:
+        from trinity.buffer.selector import SELECTORS
+
         if self.mode in {"train", "serve"}:
             # no need to check explorer_input in serve mode
             return
@@ -926,6 +933,13 @@ class Config:
             set_if_none(taskset.rollout_args, "logprobs", self.model.logprobs)
             set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
             set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
+
+            # check if selector is supported
+            selector = SELECTORS.get(taskset.task_selector.selector_type)
+            if selector is None:
+                raise ValueError(
+                    f"Selector {taskset.task_selector.selector_type} is not supported."
+                )
 
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
             if not dataset.path:
@@ -1012,8 +1026,8 @@ class Config:
         experience_pipeline = self.data_processor.experience_pipeline
         if experience_pipeline is not None and self.mode in {"explore", "both", "serve"}:
             if experience_pipeline.save_input and experience_pipeline.input_save_path is None:
-                experience_pipeline.input_save_path = os.path.join(
-                    self.buffer.cache_dir, "explorer_output.jsonl"  # type: ignore[arg-type]
+                experience_pipeline.input_save_path = self._default_storage_path(
+                    StorageType.SQL.value, "explorer_output"
                 )
                 logger.info(
                     f"Auto set `data_processor.experience_pipeline.input_save_path` to {experience_pipeline.input_save_path}"
@@ -1275,7 +1289,7 @@ class Config:
 
         # check explorer
         if self.explorer is not None:
-            rollout_args = ["temperature", "top_p", "top_k", "logprobs"]
+            rollout_args = ["temperature", "top_p", "top_k", "logprobs", "repetition_penalty"]
             length_args = [
                 "max_model_len",
                 "max_prompt_tokens",
@@ -1286,7 +1300,7 @@ class Config:
             rope_args = ["rope_scaling", "rope_theta"]
             model_args = rollout_args + length_args + rope_args
             for args in ["model_path"] + model_args:
-                setattr(self.explorer.rollout_model, args, getattr(self.model, args))
+                set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
             if (
                 self.explorer.rollout_model.chat_template is None
                 and self.model.custom_chat_template is not None

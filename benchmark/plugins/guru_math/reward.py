@@ -14,10 +14,10 @@ class NaiveDapoRewardFn(MathBoxedRewardFn):
         format_score_coef: Optional[float] = 0.1,
         **kwargs,
     ) -> dict[str, float]:
-        from .naive_dapo import compute_score
+        from trinity.common.rewards.naive_dapo_score import compute_score
 
-        ret = compute_score(response, truth, None)  # type: ignore
-        return {"accuracy": ret["score"], "format_score": 0}
+        score = compute_score(response, truth)  # type: ignore
+        return {"accuracy": score, "format_score": 0}
 
 
 @REWARD_FUNCTIONS.register_module("math_boxed_reward_prime_math")
@@ -32,5 +32,5 @@ class PrimeMathRewardFn(MathBoxedRewardFn):
     ) -> dict[str, float]:
         from verl.utils.reward_score.prime_math import compute_score
 
-        ret = compute_score(response, truth)
-        return {"accuracy": ret["score"], "format_score": 0}
+        res = compute_score(response, truth)
+        return {"accuracy": res["score"], "format_score": 0}

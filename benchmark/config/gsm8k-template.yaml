@@ -10,7 +10,7 @@ algorithm:
     lr: 1e-5
     lr_warmup_steps_ratio: 0.0
     warmup_style: constant
-  sample_strategy: warmup
+  sample_strategy: default
   policy_loss_fn: ppo
   advantage_fn: grpo
   kl_penalty_fn: none

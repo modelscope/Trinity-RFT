@@ -41,6 +41,7 @@ class TestLauncherMain(unittest.TestCase):
 
     def tearDown(self):
         sys.argv = self._orig_argv
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
     @mock.patch("trinity.cli.launcher.serve")
     @mock.patch("trinity.cli.launcher.explore")
@@ -254,31 +255,100 @@ class TestLauncherMain(unittest.TestCase):
     @mock.patch("trinity.cli.launcher.load_config")
     def test_debug_mode(self, mock_load):
         process = multiprocessing.Process(target=debug_inference_model_process)
-        process.start()
-        time.sleep(15)  # wait for the model to be created
-        for _ in range(10):
-            try:
-                get_debug_inference_model(self.config)
-                break
-            except Exception:
-                time.sleep(3)
-        output_file = os.path.join(self.config.checkpoint_job_dir, "debug.html")
-        self.config.buffer.explorer_input.tasksets = [get_unittest_dataset_config("gsm8k")]
-        mock_load.return_value = self.config
-        with mock.patch(
-            "argparse.ArgumentParser.parse_args",
-            return_value=mock.Mock(
-                command="debug",
-                config="dummy.yaml",
-                module="workflow",
-                output_file=output_file,
-                plugin_dir="",
-            ),
-        ):
-            launcher.main()
-        process.join(timeout=10)
-        process.terminate()
-        self.assertTrue(os.path.exists(output_file))
+        try:
+            process.start()
+            time.sleep(15)  # wait for the model to be created
+            for _ in range(10):
+                try:
+                    get_debug_inference_model(self.config)
+                    break
+                except Exception:
+                    time.sleep(3)
+            output_file = os.path.join(self.config.checkpoint_job_dir, "debug.html")
+            output_dir = os.path.join(self.config.checkpoint_job_dir, "debug_output")
+            self.config.buffer.explorer_input.tasksets = [get_unittest_dataset_config("gsm8k")]
+            mock_load.return_value = self.config
+            with mock.patch(
+                "argparse.ArgumentParser.parse_args",
+                return_value=mock.Mock(
+                    command="debug",
+                    config="dummy.yaml",
+                    module="workflow",
+                    enable_profiling=True,
+                    disable_overwrite=False,
+                    output_dir=output_dir,
+                    output_file=output_file,
+                    plugin_dir="",
+                ),
+            ):
+                launcher.main()
+
+            self.assertFalse(os.path.exists(output_file))
+            self.assertTrue(os.path.exists(output_dir))
+            self.assertTrue(os.path.exists(os.path.join(output_dir, "profiling.html")))
+            self.assertTrue(os.path.exists(os.path.join(output_dir, "experiences.db")))
+            # add a dummy file to test overwrite behavior
+            with open(os.path.join(output_dir, "dummy.txt"), "w") as f:
+                f.write("not empty")
+
+            with mock.patch(
+                "argparse.ArgumentParser.parse_args",
+                return_value=mock.Mock(
+                    command="debug",
+                    config="dummy.yaml",
+                    module="workflow",
+                    enable_profiling=False,
+                    disable_overwrite=False,
+                    output_dir=output_dir,
+                    output_file=output_file,
+                    plugin_dir="",
+                ),
+            ):
+                launcher.main()
+
+            dirs = os.listdir(self.config.checkpoint_job_dir)
+            target_output_dir = [d for d in dirs if d.startswith("debug_output_")]
+            self.assertEqual(len(target_output_dir), 0)
+
+            with mock.patch(
+                "argparse.ArgumentParser.parse_args",
+                return_value=mock.Mock(
+                    command="debug",
+                    config="dummy.yaml",
+                    module="workflow",
+                    enable_profiling=False,
+                    disable_overwrite=True,
+                    output_dir=output_dir,
+                    output_file=output_file,
+                    plugin_dir="",
+                ),
+            ):
+                launcher.main()
+
+            self.assertFalse(os.path.exists(output_file))
+            # test the original files are not overwritten
+            self.assertTrue(os.path.exists(output_dir))
+            self.assertTrue(os.path.exists(os.path.join(output_dir, "dummy.txt")))
+            dirs = os.listdir(self.config.checkpoint_job_dir)
+            target_output_dir = [d for d in dirs if d.startswith("debug_output_")]
+            self.assertEqual(len(target_output_dir), 1)
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        self.config.checkpoint_job_dir, target_output_dir[0], "profiling.html"
+                    )
+                )
+            )
+            self.assertTrue(
+                os.path.exists(
+                    os.path.join(
+                        self.config.checkpoint_job_dir, target_output_dir[0], "experiences.db"
+                    )
+                )
+            )
+        finally:
+            process.join(timeout=10)
+            process.terminate()
 
 
 def debug_inference_model_process():

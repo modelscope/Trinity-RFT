@@ -210,6 +210,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     ref_logprob=data.get("ref_log_prob", None),
                     response_mask=response_mask,
                     loss_agg_mode=self.loss_agg_mode,
+                    old_logprob=data.get("old_log_probs", None),
                 )
                 prefix_metrics(
                     src_metrics=kl_loss_metrics,

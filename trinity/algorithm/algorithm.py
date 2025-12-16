@@ -114,6 +114,52 @@ class GRPOAlgorithm(AlgorithmType):
         }
 
 
+@ALGORITHM_TYPE.register_module("reinforceplusplus")
+class ReinforcePlusPlusAlgorithm(AlgorithmType):
+    """Reinforce++ algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = True
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "reinforceplusplus",
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
+@ALGORITHM_TYPE.register_module("rloo")
+class RLOOAlgorithm(AlgorithmType):
+    """RLOO algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = True
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "rloo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
 @ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
@@ -244,6 +290,56 @@ class CISPOAlgorithm(AlgorithmType):
             "advantage_fn": "grpo",
             "sample_strategy": "default",
             "policy_loss_fn": "cispo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
+@ALGORITHM_TYPE.register_module("gspo")
+class GSPOAlgorithm(AlgorithmType):
+    """GSPO algorithm. See https://arxiv.org/pdf/2507.18071"""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "grpo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "gspo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
+@ALGORITHM_TYPE.register_module("sapo")
+class SAPOAlgorithm(AlgorithmType):
+    """SAPO (Soft Adaptive Policy Optimization) algorithm.
+
+    SAPO uses a smooth, temperature-controlled soft gate instead of hard clipping
+    to stabilize training while maintaining effective learning.
+    """
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "advantage_fn": "grpo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "sapo",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",

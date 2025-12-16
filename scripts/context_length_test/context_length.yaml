@@ -1,0 +1,112 @@
+mode: both
+project: Trinity-RFT-context-length-exp
+group: length-test
+name: length-test
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints/length-test}
+continue_from_checkpoint: false
+algorithm:
+  algorithm_type: grpo
+  repeat_times: ${oc.env:REPEAT_TIMES,8}
+  advantage_fn: grpo
+  sample_strategy: default
+  policy_loss_fn: ppo
+  kl_penalty_fn: none
+  kl_loss_fn: k2
+  entropy_loss_fn: default
+  optimizer:
+    lr: 1.0e-05
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
+data_processor: {}
+model:
+  model_path: ${oc.env:MODEL_PATH,Qwen/Qwen3-0.6B}
+  max_prompt_tokens: ${oc.env:PROMPT_LEN,2048}
+  max_model_len: ${oc.env:MAX_MODEL_LEN,4096}
+  rope_scaling: ${oc.decode:${oc.env:ROPE_SCALING,null}}
+cluster:
+  node_num: 1
+  gpu_per_node: ${oc.env:GPU_NUM,8}
+buffer:
+  batch_size: 1
+  total_steps: 2
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: openai/gsm8k
+      split: train
+      subset_name: main
+      format:
+        prompt_key: question
+        response_key: answer
+      rollout_args:
+        temperature: 1.0
+        logprobs: 0
+      workflow_args:
+        prompt_len: ${model.max_prompt_tokens}
+        max_model_len: ${model.max_model_len}
+    eval_tasksets: []
+    default_workflow_type: synthetic_exp_workflow
+    default_reward_fn_type: math_reward
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      replay_buffer:
+        enable: false
+        priority_fn: linear_decay
+        reuse_cooldown_time: null
+        priority_fn_args:
+          decay: 2.0
+explorer:
+  runner_per_model: 8
+  rollout_model:
+    engine_num: ${oc.env:ENGINE_NUM,1}
+    tensor_parallel_size: 1
+    enforce_eager: true
+    enable_prefix_caching: false
+    enable_chunked_prefill: false
+    gpu_memory_utilization: 0.9
+    dtype: bfloat16
+    seed: 42
+    enable_thinking: false
+    enable_history: false
+    enable_openai_api: false
+    enable_auto_tool_choice: false
+    tool_call_parser: null
+    reasoning_parser: null
+  auxiliary_models: []
+  eval_interval: 1000
+trainer:
+  trainer_type: verl
+  trainer_strategy: ${oc.env:TRAINER_STRATEGY,fsdp}
+  save_interval: 100
+  enable_preview: true
+  grad_clip: 1.0
+  ulysses_sequence_parallel_size: ${oc.env:SP_NUM,1}
+  save_hf_checkpoint: ${oc.env:SAVE_HF_CHECKPOINT,last}
+  trainer_config:
+    actor_rollout_ref:
+      actor:
+        entropy_from_logits_with_chunking: ${oc.env:ENTROPY_SAVING,false}
+        entropy_checkpointing: ${oc.env:ENTROPY_SAVING,false}
+        fsdp_config:
+          param_offload: ${oc.env:OFFLOAD,false}
+          optimizer_offload: ${oc.env:OFFLOAD,false}
+          offload_policy: ${oc.env:OFFLOAD,false}
+      ref:
+        entropy_from_logits_with_chunking: ${oc.env:ENTROPY_SAVING,false}
+        entropy_checkpointing: ${oc.env:ENTROPY_SAVING,false}
+        fsdp_config:
+          param_offload: ${oc.env:OFFLOAD,false}
+          optimizer_offload: ${oc.env:OFFLOAD,false}
+          offload_policy: ${oc.env:OFFLOAD,false}
+monitor:
+  monitor_type: tensorboard
+synchronizer:
+  sync_method: nccl
+  sync_style: fixed
+  sync_interval: 1
+  sync_timeout: 1200
+log:
+  level: INFO

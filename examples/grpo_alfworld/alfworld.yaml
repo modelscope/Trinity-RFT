@@ -7,9 +7,9 @@ algorithm:
   optimizer:
     lr: 1e-6
 model:
-  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
-  max_response_tokens: 16384
-  max_model_len: 20480
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-3B-Instruct}
+  max_prompt_tokens: 10240 # input max tokens every turn
+  max_response_tokens: 4096 # output max tokens every turn
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -56,3 +56,26 @@ trainer:
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
+# If needed, uncomment the following lines to enable SFT warmup before RFT
+# stages:
+#   - stage_name: sft_warmup
+#     mode: train
+#     algorithm:
+#       algorithm_type: sft
+#       optimizer:
+#         lr: 5e-6
+#         lr_warmup_steps_ratio: 0.0
+#         warmup_style: constant
+#     buffer:
+#       total_epochs: 1
+#       train_batch_size: 32
+#       trainer_input:
+#         experience_buffer:
+#           name: sft_warmup_dataset
+#           storage_type: file
+#           path: ${oc.env:TRINITY_SFT_DATASET_PATH}
+#           format:
+#             prompt_type: messages
+#             messages_key: 'messages'
+#.            enable_concatenated_multi_turn: true # Enable concatenated multi-turn SFT data preprocess, default is false
+#   - stage_name: rft

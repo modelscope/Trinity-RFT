@@ -112,6 +112,7 @@ class RunnerWrapper:
     async def update_state(self) -> None:
         """Get the runner state."""
         self.state = await self.runner.get_runner_state.remote()
+        self.state["running_time"] = time.time() - self.state.get("begin_time", time.time())
 
     async def run_with_retry(
         self, task: TaskWrapper, repeat_times: int, run_id_base: int, timeout: float

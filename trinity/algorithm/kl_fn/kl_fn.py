@@ -82,9 +82,18 @@ class KLFn(ABC):
         ref_logprob: torch.Tensor,
         response_mask: torch.Tensor,
         loss_agg_mode: str,
+        old_logprob: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Dict]:
-        """Compute KL loss."""
-        kl = self.calculate_kl(logprob, ref_logprob)
+        """Compute KL loss.
+
+        Args:
+            logprob: Log probabilities from current policy
+            ref_logprob: Log probabilities from reference policy
+            response_mask: Mask for valid response tokens
+            loss_agg_mode: Loss aggregation mode
+            old_logprob: Log probabilities from old policy (for importance sampling)
+        """
+        kl = self.calculate_kl(logprob, ref_logprob, old_logprob)
         kl_loss = aggregate_loss(kl, response_mask, loss_agg_mode=loss_agg_mode)
         metrics = {
             "kl_loss": kl_loss.detach().item(),
@@ -93,8 +102,19 @@ class KLFn(ABC):
         return kl_loss * self.kl_coef, metrics
 
     @abstractmethod
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
-        """Compute KL divergence between logprob and ref_logprob."""
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        """Compute KL divergence between logprob and ref_logprob.
+
+        Args:
+            logprob: Log probabilities from current policy
+            ref_logprob: Log probabilities from reference policy
+            old_logprob: Log probabilities from old policy (for importance sampling)
+        """
 
     @classmethod
     def default_args(cls):
@@ -108,7 +128,12 @@ class DummyKLFn(KLFn):
     Dummy KL function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         return torch.zeros_like(logprob)
 
     def apply_kl_penalty_to_reward(self, experiences: Any) -> Tuple[Any, Dict]:
@@ -121,6 +146,7 @@ class DummyKLFn(KLFn):
         ref_logprob: torch.Tensor,
         response_mask: torch.Tensor,
         loss_agg_mode: str,
+        old_logprob: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Dict]:
         # return a zero tensor
         return torch.tensor(0.0), {}
@@ -132,7 +158,12 @@ class K1Fn(KLFn):
     KL K1 function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         return logprob - ref_logprob
 
 
@@ -142,7 +173,12 @@ class K2Fn(KLFn):
     KL K2 function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         return (logprob - ref_logprob).square() * 0.5
 
 
@@ -152,7 +188,12 @@ class K3Fn(KLFn):
     KL K3 function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         logr = ref_logprob - logprob
         return logr.exp() - 1 - logr
 
@@ -163,7 +204,12 @@ class LowVarKLFn(KLFn):
     Low Variance KL function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         kl = ref_logprob - logprob
         kl = torch.clamp(kl, min=-20, max=20)
         ratio = torch.exp(kl)
@@ -177,5 +223,66 @@ class AbsFn(KLFn):
     KL Abs function.
     """
 
-    def calculate_kl(self, logprob: torch.Tensor, ref_logprob: torch.Tensor) -> torch.Tensor:
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         return torch.abs(logprob - ref_logprob)
+
+
+@KL_FN.register_module("corrected_k3")
+class CorrectedK3Fn(KLFn):
+    """
+    Corrected K3 function with importance sampling.
+
+    This method applies importance sampling correction to the standard K3 KL divergence.
+    The corrected KL is computed as:
+
+        KL_corrected = (π_θ / π_old) * KL_standard(π_ref || π_θ)
+
+    where:
+        - π_θ: current policy
+        - π_old: old policy (from rollout)
+        - π_ref: reference policy
+        - KL_standard: exp(log(π_ref/π_θ)) - log(π_ref/π_θ) - 1
+
+    If old_logprob is not provided, it falls back to standard K3.
+    """
+
+    def calculate_kl(
+        self,
+        logprob: torch.Tensor,
+        ref_logprob: torch.Tensor,
+        old_logprob: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        """Compute corrected K3 KL divergence with importance sampling.
+
+        Args:
+            logprob: Log probabilities from current policy (log π_θ)
+            ref_logprob: Log probabilities from reference policy (log π_ref)
+            old_logprob: Log probabilities from old policy (log π_old), optional
+
+        Returns:
+            KL divergence tensor with same shape as input
+        """
+        # Standard K3 KL term: exp(log_ratio) - log_ratio - 1
+        # where log_ratio = log(π_ref / π_θ) = ref_logprob - logprob
+        logr = ref_logprob - logprob
+        kl_term = logr.exp() - 1 - logr
+
+        if old_logprob is None:
+            # Fall back to standard K3 if old_logprob is not provided
+            return kl_term
+
+        # Compute importance sampling ratio: π_θ / π_old
+        log_ratio_is = logprob - old_logprob
+        ratio_is = log_ratio_is.exp()
+        # Clamp ratio for numerical stability, range [0, 2]
+        ratio_is = torch.clamp(ratio_is, min=0.0, max=2.0)
+
+        # Corrected KL with importance sampling
+        corrected_kl = ratio_is * kl_term
+
+        return corrected_kl

@@ -4,8 +4,8 @@ from typing import Optional
 
 import torch
 
+from trinity.common.rewards.naive_dapo_score import compute_score
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
-from trinity.utils.eval_utils import compute_score
 
 
 @REWARD_FUNCTIONS.register_module("math_dapo_reward")
@@ -28,7 +28,7 @@ class MathDAPORewardFn(RewardFn):
         self,
         response: str,
         response_token: torch.Tensor,
-        truth: Optional[str] = None,
+        truth: str,
         **kwargs,
     ) -> dict[str, float]:
         accuracy_score = compute_score(response, truth)

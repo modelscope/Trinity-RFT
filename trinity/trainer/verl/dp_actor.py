@@ -162,6 +162,7 @@ class DataParallelPPOActor(DPActor):
                         ref_logprob=model_inputs.get("ref_log_prob", None),
                         response_mask=response_mask,
                         loss_agg_mode=self.loss_agg_mode,
+                        old_logprob=model_inputs.get("old_log_probs", None),
                     )
                     prefix_metrics(
                         src_metrics=kl_loss_metrics,

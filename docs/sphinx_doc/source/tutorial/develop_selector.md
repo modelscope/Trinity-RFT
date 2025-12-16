@@ -1,4 +1,4 @@
-# 🧪 Experimental: Task Selection & Scheduling System
+# 🧪 Experimental: Task Selection
 
 ```{note}
 This module is currently in **experimental status**. Interfaces may change in future versions.

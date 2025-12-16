@@ -1,4 +1,4 @@
-import time
+import asyncio
 from collections import defaultdict
 from typing import List, Tuple
 
@@ -140,10 +140,8 @@ def create_inference_models(
     return rollout_engines, auxiliary_engines
 
 
-def create_debug_inference_model(config: Config) -> None:
+async def create_debug_inference_model(config: Config) -> None:
     """Create inference models for debugging."""
-    import ray
-
     logger = get_logger(__name__)
     logger.info("Creating inference models for debugging...")
     # only create one engine for each model
@@ -152,11 +150,9 @@ def create_debug_inference_model(config: Config) -> None:
         model.engine_num = 1
     rollout_models, auxiliary_models = create_inference_models(config)
     # make sure models are started
-    for m in rollout_models:
-        ray.get(m.run_api_server.remote())
-    for models in auxiliary_models:
-        for m in models:
-            ray.get(m.run_api_server.remote())
+    prepare_refs = [m.prepare.remote() for m in rollout_models]
+    prepare_refs.extend(m.prepare.remote() for models in auxiliary_models for m in models)
+    await asyncio.gather(*prepare_refs)
     logger.info(
         "----------------------------------------------------\n"
         "Inference models started successfully for debugging.\n"
@@ -166,7 +162,7 @@ def create_debug_inference_model(config: Config) -> None:
 
     try:
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
     except KeyboardInterrupt:
         logger.info("Exiting...")
 

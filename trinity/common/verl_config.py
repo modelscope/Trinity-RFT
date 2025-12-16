@@ -376,14 +376,26 @@ class veRLConfig:
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node - rollout_gpu_num
         else:
             # for multi-node scenarios, some nodes for rollout, others for training
-            assert (
-                rollout_gpu_num % config.cluster.gpu_per_node == 0
-            ), f"rollout_gpu_num ({rollout_gpu_num}) must be divisible by `gpu_per_node` ({config.cluster.gpu_per_node})"
-            rollout_node_num = math.ceil(rollout_gpu_num / config.cluster.gpu_per_node)
-            self.trainer.nnodes = config.cluster.node_num - rollout_node_num
-            if self.trainer.nnodes < 1:
-                raise ValueError("The number of training nodes must be greater than 0")
-            self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
+            trainer_gpu_num = (
+                config.cluster.node_num * config.cluster.gpu_per_node - rollout_gpu_num
+            )
+            if (
+                trainer_gpu_num > config.cluster.gpu_per_node
+                and trainer_gpu_num % config.cluster.gpu_per_node != 0
+            ):
+                raise ValueError(
+                    f"Trainer must use an integer number of nodes, but got trainer_gpu_num ({trainer_gpu_num}) with gpu_per_node ({config.cluster.gpu_per_node})"
+                )
+            elif trainer_gpu_num <= 0:
+                raise ValueError(
+                    f"Not enough GPUs for training after allocating {rollout_gpu_num} GPUs for explorer."
+                )
+            if trainer_gpu_num > 0 and trainer_gpu_num <= config.cluster.gpu_per_node:
+                self.trainer.nnodes = 1
+                self.trainer.n_gpus_per_node = trainer_gpu_num
+            else:
+                self.trainer.nnodes = trainer_gpu_num // config.cluster.gpu_per_node
+                self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
 
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
         if world_size <= 0:

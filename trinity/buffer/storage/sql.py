@@ -34,6 +34,9 @@ class SQLStorage:
         self.logger = get_logger(f"sql_{config.name}", in_ray_actor=True)
         if not config.path:
             raise ValueError("`path` is required for SQL storage type.")
+        self.logger.info(
+            f"Init engine {config.path} with table {config.name} with schema {config.schema_type}"
+        )
         self.engine, self.table_model_cls = init_engine(
             db_url=config.path,
             table_name=config.name,

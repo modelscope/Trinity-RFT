@@ -335,6 +335,7 @@ async def run_api_server_in_ray_actor(
     enable_auto_tool_choice: bool = False,
     tool_call_parser: Optional[str] = None,
     reasoning_parser: Optional[str] = None,
+    enable_log_requests: bool = False,
 ):
     vllm_version = get_vllm_version()
     if vllm_version < parse_version("0.8.5") or vllm_version > parse_version("0.11.0"):
@@ -354,6 +355,8 @@ async def run_api_server_in_ray_actor(
         model_path,
         "--enable-server-load-tracking",  # enable tracking for load balancing
     ]
+    if enable_log_requests:
+        cli_args.append("--enable-log-requests")
     if enable_auto_tool_choice:
         cli_args.append("--enable-auto-tool-choice")
     if tool_call_parser:

@@ -179,7 +179,11 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
         # Trainer:
         #     | 1 | 2 |sync| 3 | 4 |
         #     |---|---|sync|---|---|
-        self.config.buffer.total_epochs = 1
+        self.config.buffer.batch_size = 6
+        self.config.buffer.total_steps = 4
+        # use 3 GPU in a 2 x 2 cluster, the trainer only have 1 GPU
+        self.config.explorer.rollout_model.engine_num = 3
+        self.config.explorer.rollout_model.tensor_parallel_size = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         self.config.trainer.save_interval = 4
         self.config.synchronizer.sync_interval = 2

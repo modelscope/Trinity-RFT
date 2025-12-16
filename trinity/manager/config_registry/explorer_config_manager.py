@@ -62,13 +62,13 @@ def check_tensor_parallel_size(unfinished_fields: set, key: str):
             "Please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that at least one GPU is reserved for the `trainer`."
         )
     elif (
-        st.session_state["node_num"] > 1
+        st.session_state["trainer_gpu_num"] > st.session_state["gpu_per_node"]
         and st.session_state["trainer_gpu_num"] % st.session_state["gpu_per_node"] != 0
     ):
         unfinished_fields.add("engine_num")
         unfinished_fields.add("tensor_parallel_size")
         st.warning(
-            "When `node_num > 1`, please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`"
+            "When GPUs reserved for `trainer` is more than `gpu_per_node`, please check the settings of each `engine_num` and `tensor_parallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`"
         )
 
 

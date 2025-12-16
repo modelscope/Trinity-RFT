@@ -1,8 +1,9 @@
+import traceback
 from typing import Any, Type
 
+from trinity.utils.log import get_logger
 
-# TODO: support lazy load
-# e.g. @MODULES.register_module("name", lazy=True)
+
 class Registry(object):
     """A class for registry."""
 
@@ -13,6 +14,7 @@ class Registry(object):
         """
         self._name = name
         self._modules = {}
+        self.logger = get_logger()
 
     @property
     def name(self) -> str:
@@ -45,7 +47,21 @@ class Registry(object):
         Returns:
             `Any`: the module object
         """
-        return self._modules.get(module_key, None)
+        module = self._modules.get(module_key, None)
+        if module is None:
+            # try to dynamic import
+            if isinstance(module_key, str) and "." in module_key:
+                module_path, class_name = module_key.rsplit(".", 1)
+                try:
+                    module = self._dynamic_import(module_path, class_name)
+                except Exception:
+                    self.logger.error(
+                        f"Failed to dynamically import {class_name} from {module_path}:\n"
+                        + traceback.format_exc()
+                    )
+                    raise ImportError(f"Cannot dynamically import {class_name} from {module_path}")
+                self._register_module(module_name=module_key, module_cls=module)
+        return module
 
     def _register_module(self, module_name=None, module_cls=None, force=False):
         """
@@ -56,6 +72,10 @@ class Registry(object):
             module_name = module_cls.__name__
 
         if module_name in self._modules and not force:
+            self.logger.warning(
+                f"{module_name} is already registered in {self._name}, "
+                f"if you want to override it, please set force=True."
+            )
             raise KeyError(f"{module_name} is already registered in {self._name}")
 
         self._modules[module_name] = module_cls
@@ -111,3 +131,20 @@ class Registry(object):
             return module_cls
 
         return _register
+
+    def _dynamic_import(self, module_path: str, class_name: str) -> Type:
+        """
+        Dynamically import a module class object from the specified module path.
+
+        Args:
+            module_path (`str`): The module path. For example, "my_package.my_module".
+            class_name (`str`): The class name. For example, "MyWorkflow".
+
+        Returns:
+            `Type`: The imported module class object.
+        """
+        import importlib
+
+        module = importlib.import_module(module_path)
+        module_cls = getattr(module, class_name)
+        return module_cls

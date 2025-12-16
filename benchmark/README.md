@@ -52,6 +52,7 @@ python bench.py gsm8k --node_num 1 --gpu_per_node 8 --model_path /your/model/pat
 ## 📂 What Gets Saved
 
 After running a benchmark, results are stored in `runs/<timestamp>/`:
+
 - `config.yaml`: The exact settings used for your run.
 - `checkpoints/`: Model snapshots saved during training.
 
@@ -60,32 +61,70 @@ After running a benchmark, results are stored in `runs/<timestamp>/`:
 ## 📊 Benchmark Examples
 
 ### 1. GSM8K
+
 To reproduce this experiment:
+
 ```bash
 python bench.py gsm8k --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
 ```
+
 #### GSM8K Results
+
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
 
 ### 2. Countdown
+
 To reproduce this experiment:
+
 ```bash
 python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
 ```
+
 #### Countdown Results
+
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/countdown-bench.png)
 
 ### 3. Guru-Math
+
 To reproduce this experiment:
+
 ```bash
 python bench.py guru_math --model_path /path/to/Qwen/Qwen2.5-7B
 ```
 
 #### Guru Results
+
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/fbf6c967bcd637bfd9f81fb4d7dd4961d7d5a407).
 ![View Results](../docs/sphinx_doc/assets/guru-bench.png)
+
+See [full report](./reports/guru_math.md) for details.
+
+### 4. FrozenLake
+
+To reproduce this experiment:
+
+```bash
+python bench.py frozen_lake --model_path /path/to/Qwen/Qwen2.5-3B
+```
+
+#### Frozen Lake Results
+
+The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/3861859cbd9c40de07429db2d9b19fd3d4d31703).
+![View Results](../docs/sphinx_doc/assets/bench_frozenlake_step.png)
+
+See [full report](./reports/frozenlake.md) for details.
+
+### 5. Alfworld
+
+Please follow the instructions in [Alfworld report](./reports/alfworld.md) to run the benchmark.
+
+#### ALFWorld Results
+
+The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/3861859cbd9c40de07429db2d9b19fd3d4d31703).
+![View Results](../docs/sphinx_doc/assets/bench_alfworld_step.png)
+
 
 *More benchmarks will be added soon!*
 

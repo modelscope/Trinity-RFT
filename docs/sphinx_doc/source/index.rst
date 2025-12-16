@@ -23,7 +23,9 @@ Welcome to Trinity-RFT's documentation!
    tutorial/develop_operator.md
    tutorial/develop_selector.md
    tutorial/trinity_configs.md
+   tutorial/trinity_gpu_configs.md
    tutorial/synchronizer.md
+   tutorial/align_with_verl.md
 
 
 .. toctree::
@@ -42,6 +44,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/example_dpo.md
    tutorial/example_megatron.md
    tutorial/example_data_functionalities.md
+   tutorial/example_dataset_perspective.md
 
 .. toctree::
    :maxdepth: 2
