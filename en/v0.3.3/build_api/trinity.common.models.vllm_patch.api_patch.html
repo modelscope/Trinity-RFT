@@ -637,7 +637,7 @@ document.write(`
                   
   <section id="module-trinity.common.models.vllm_patch.api_patch">
 <span id="trinity-common-models-vllm-patch-api-patch-module"></span><h1>trinity.common.models.vllm_patch.api_patch module<a class="headerlink" href="#module-trinity.common.models.vllm_patch.api_patch" title="Link to this heading">#</a></h1>
-<p>Patch for vllm OpenAI API server.</p>
+<p>Patch for vllm OpenAI API server. Only for vllm versions &gt;=0.8.5, &lt;=0.11.0.</p>
 <ol class="arabic simple">
 <li><p>Mocks the <cite>add_signal_handler</cite> method to do nothing.</p></li>
 <li><p>Adds <cite>token_ids</cite> and <cite>prompt_token_ids</cite> to the <cite>ChatCompletionResponse</cite>.</p></li>

@@ -939,17 +939,15 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoProcessor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.lora.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoRARequest</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModelConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
@@ -959,7 +957,7 @@ document.write(`
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_action_mask_method</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vllm_version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vllm_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 
@@ -979,20 +977,25 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">config</span><span class="p">:</span> <span class="n">InferenceModelConfig</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">=</span> <span class="n">get_vllm_version</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_v1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">use_v1</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_WORKER_MULTIPROC_METHOD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;spawn&quot;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_RAY_BUNDLE_INDICES&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">bundle_indices</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">vllm</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">is_set</span><span class="p">(</span><span class="s2">&quot;VLLM_USE_V1&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&lt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vllm</span><span class="o">.</span><span class="n">envs</span><span class="o">.</span><span class="n">is_set</span><span class="p">(</span><span class="s2">&quot;VLLM_USE_V1&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using vLLM v</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">use_v1</span><span class="p">)</span><span class="si">}</span><span class="s2"> engine&quot;</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_USE_V1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">use_v1</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">use_v1</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;shm&quot;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_RAY_PER_WORKER_GPUS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">use_v1</span><span class="p">))</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_WORKER_MULTIPROC_METHOD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;spawn&quot;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_ENABLE_V1_MULTIPROCESSING&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-        <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_ALLREDUCE_USE_SYMM_MEM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">enforce_eager</span><span class="p">:</span>
             <span class="c1"># To avoid torch compile conflicts when multiple model are started simultaneously.</span>
@@ -1022,11 +1025,22 @@ document.write(`
         <span class="n">max_model_len</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;default_lora_path&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">rope_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rope_scaling&quot;</span><span class="p">,</span> <span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.12.0&quot;</span><span class="p">):</span>
+            <span class="n">rope_params</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">rope_scaling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rope_params</span><span class="p">[</span><span class="s2">&quot;rope_parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">rope_scaling</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">rope_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rope_params</span><span class="p">[</span><span class="s2">&quot;rope_parameters&quot;</span><span class="p">][</span><span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">rope_theta</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rope_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rope_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hf_overrides&quot;</span><span class="p">:</span> <span class="n">rope_params</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rope_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rope_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;rope_scaling&quot;</span><span class="p">,</span> <span class="s2">&quot;rope_theta&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">}</span>
         <span class="n">engine_args</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncEngineArgs</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
             <span class="n">enforce_eager</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enforce_eager</span><span class="p">,</span>
@@ -1040,7 +1054,6 @@ document.write(`
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span>
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
-            <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
             <span class="n">override_generation_config</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># TODO: find a way to unittest this</span>
                 <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
@@ -1055,12 +1068,13 @@ document.write(`
             <span class="o">**</span><span class="n">rope_kwargs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>
             <span class="n">engine_args</span><span class="o">.</span><span class="n">enable_log_requests</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">engine_args</span><span class="o">.</span><span class="n">disable_log_requests</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span>
-        <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&gt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
             <span class="n">engine_args</span><span class="o">.</span><span class="n">reasoning_parser</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncLLMEngine</span><span class="o">.</span><span class="n">from_engine_args</span><span class="p">(</span><span class="n">engine_args</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1104,9 +1118,7 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.chat">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">lora_request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages in async.</span>
 
 <span class="sd">        Args:</span>
@@ -1140,9 +1152,7 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.generate">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lora_request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response from the provided prompt in async.</span>
 
 <span class="sd">        Args:</span>
@@ -1320,7 +1330,7 @@ document.write(`
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span>  <span class="c1"># type: ignore [override]</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-        <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lora_request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the logprobs of the given tokens in async. Please slice the result carefully</span>
@@ -1352,9 +1362,7 @@ document.write(`
         <span class="p">)</span></div>
 
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_internal</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_internal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">lora_request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="c1"># Send the request to the LLM engine.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
@@ -1535,23 +1543,42 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;OpenAI API server is already running. Skipping...&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># already running</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-            <span class="n">run_api_server_in_ray_actor</span><span class="p">,</span>
-        <span class="p">)</span>
-
         <span class="n">api_server_host</span><span class="p">,</span> <span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
-            <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
-                <span class="n">api_server_host</span><span class="p">,</span>
-                <span class="n">api_server_port</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span><span class="p">,</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vllm_version</span> <span class="o">&lt;=</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.11.0&quot;</span><span class="p">):</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">run_api_server_in_ray_actor</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+                <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
+                    <span class="n">api_server_host</span><span class="p">,</span>
+                    <span class="n">api_server_port</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.api_patch_v12</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">run_api_server_in_ray_actor_v12</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+                <span class="n">run_api_server_in_ray_actor_v12</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
+                    <span class="n">api_server_host</span><span class="p">,</span>
+                    <span class="n">api_server_port</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                    <span class="n">enable_auto_tool_choice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
+                    <span class="n">tool_call_parser</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
+                    <span class="n">reasoning_parser</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
+                    <span class="n">enable_log_requests</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_log_requests</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="n">api_server_host</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="n">api_server_port</span>
         <span class="k">return</span> <span class="kc">True</span></div>
@@ -1593,7 +1620,9 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.get_lora_request">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_lora_request">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lora_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoRARequest</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lora_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.lora.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoRARequest</span>
+
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lora_modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">lora_request</span> <span class="o">=</span> <span class="n">LoRARequest</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lora_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">lora_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

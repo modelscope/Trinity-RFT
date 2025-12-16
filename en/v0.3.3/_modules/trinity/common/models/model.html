@@ -932,8 +932,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -942,7 +941,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.lora.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoRARequest</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunningStatus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
@@ -1059,7 +1057,17 @@ document.write(`
         <span class="n">engine_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;vllm&quot;</span><span class="p">,</span>
         <span class="n">enable_lora</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">enable_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">enable_thinking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the ModelWrapper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (InferenceModel): The inference model Ray actor.</span>
+<span class="sd">            engine_type (str): The type of the model engine. Default to &quot;vllm&quot;.</span>
+<span class="sd">            enable_lora (bool): Whether to enable LoRA. Default to False.</span>
+<span class="sd">            enable_history (bool): Whether to enable history recording. Default to False.</span>
+<span class="sd">            enable_thinking (Optional[bool]): Whether to enable thinking mode. Default to None. Only used for Qwen3 series models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">engine_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">),</span> <span class="s2">&quot;Only vLLM model is supported for now.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_address</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1068,6 +1076,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="n">enable_lora</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_history</span> <span class="o">=</span> <span class="n">enable_history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="o">=</span> <span class="n">enable_thinking</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_state</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1275,7 +1284,7 @@ document.write(`
 
 <div class="viewcode-block" id="ModelWrapper.get_lora_request">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_lora_request">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoRARequest</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_lora_request</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1284,7 +1293,7 @@ document.write(`
 
 <div class="viewcode-block" id="ModelWrapper.get_lora_request_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_lora_request_async">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoRARequest</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">:</span>
             <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_lora_request</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1317,10 +1326,18 @@ document.write(`
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_history</span><span class="p">:</span>
             <span class="c1"># add a decorator to the openai client to record history</span>
-            <span class="n">ori_create</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">,</span> <span class="n">logprobs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">ori_create</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">record_chat_completions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">ori_create</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">logprobs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">extra_body</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extra_body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;chat_template_kwargs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extra_body</span><span class="p">:</span>
+                        <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;chat_template_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;chat_template_kwargs&quot;</span><span class="p">][</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span>
+                <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;return_token_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">ori_create</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">extra_body</span><span class="o">=</span><span class="n">extra_body</span><span class="p">,</span> <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">convert_api_output_to_experience</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
                 <span class="k">return</span> <span class="n">response</span>
 
@@ -1350,10 +1367,20 @@ document.write(`
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_history</span><span class="p">:</span>
             <span class="c1"># add a decorator to the openai client to record history</span>
-            <span class="n">ori_create</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_async_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">,</span> <span class="n">logprobs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">ori_create</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_async_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span>
 
             <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">record_chat_completions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ori_create</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">logprobs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">extra_body</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extra_body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s2">&quot;chat_template_kwargs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extra_body</span><span class="p">:</span>
+                        <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;chat_template_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;chat_template_kwargs&quot;</span><span class="p">][</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span>
+                <span class="n">extra_body</span><span class="p">[</span><span class="s2">&quot;return_token_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ori_create</span><span class="p">(</span>
+                    <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">extra_body</span><span class="o">=</span><span class="n">extra_body</span><span class="p">,</span> <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">convert_api_output_to_experience</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
                 <span class="k">return</span> <span class="n">response</span>
 

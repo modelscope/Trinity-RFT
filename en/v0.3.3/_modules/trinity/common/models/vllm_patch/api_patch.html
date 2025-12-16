@@ -927,7 +927,7 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for trinity.common.models.vllm_patch.api_patch</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Patch for vllm OpenAI API server.</span>
+<span></span><span class="sd">&quot;&quot;&quot;Patch for vllm OpenAI API server. Only for vllm versions &gt;=0.8.5, &lt;=0.11.0.</span>
 
 <span class="sd">1. Mocks the `add_signal_handler` method to do nothing.</span>
 <span class="sd">2. Adds `token_ids` and `prompt_token_ids` to the `ChatCompletionResponse`.</span>
@@ -986,7 +986,6 @@ document.write(`
 
 
 
-<span class="c1"># TODO: add patch to stream generator</span>
 <div class="viewcode-block" id="chat_completion_full_generator">
 <a class="viewcode-back" href="../../../../../build_api/trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.chat_completion_full_generator">[docs]</a>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_completion_full_generator</span><span class="p">(</span>  <span class="c1"># noqa C901</span>
@@ -1250,7 +1249,11 @@ document.write(`
     <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
     <span class="n">original_add_signal_handler</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">add_signal_handler</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">add_signal_handler</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">dummy_add_signal_handler</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
-    <span class="n">OpenAIServingChat</span><span class="o">.</span><span class="n">chat_completion_full_generator</span> <span class="o">=</span> <span class="n">chat_completion_full_generator</span>
+    <span class="n">vllm_version</span> <span class="o">=</span> <span class="n">get_vllm_version</span><span class="p">()</span>
+
+    <span class="c1"># from 0.10.2, vllm added token_ids to ChatCompletionResponseChoice, so no need to patch</span>
+    <span class="k">if</span> <span class="n">vllm_version</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.2&quot;</span><span class="p">):</span>
+        <span class="n">OpenAIServingChat</span><span class="o">.</span><span class="n">chat_completion_full_generator</span> <span class="o">=</span> <span class="n">chat_completion_full_generator</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">shutdown_task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">serve_http</span><span class="p">(</span>

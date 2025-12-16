@@ -947,15 +947,17 @@ document.write(`
 
 <div class="viewcode-block" id="patch_vllm_prompt_logprobs">
 <a class="viewcode-back" href="../../../../../build_api/trinity.common.models.vllm_patch.worker_patch.html#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">patch_vllm_prompt_logprobs</span><span class="p">(</span><span class="n">model_runner</span><span class="p">:</span> <span class="n">GPUModelRunner</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_vllm_prompt_logprobs</span><span class="p">(</span><span class="n">model_runner</span><span class="p">:</span> <span class="n">GPUModelRunner</span><span class="p">):</span>  <span class="c1"># noqa: C901</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Patch vLLM model runner to support prompt logprobs extraction.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.2&quot;</span><span class="p">):</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">get_vllm_version</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.2&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">version</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.12.0&quot;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Unsupported vllm version: </span><span class="si">{</span><span class="n">vllm</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">. &quot;</span>
-            <span class="s2">&quot;This patch requires vllm version &gt;= 0.10.2, &lt;= 0.11.0.&quot;</span>
+            <span class="s2">&quot;This patch requires vllm version &gt;= 0.10.2, &lt;= 0.12.0.&quot;</span>
         <span class="p">)</span>
+    <span class="n">is_v0102</span> <span class="o">=</span> <span class="n">version</span> <span class="o">==</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.2&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_prompt_logprobs_dict</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_prompt_logprobs_dict_v11</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">hidden_states</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">num_scheduled_tokens</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
@@ -982,7 +984,131 @@ document.write(`
         <span class="c1"># maintainable loop over optimal performance.</span>
         <span class="n">completed_prefill_reqs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">req_id</span><span class="p">,</span> <span class="n">num_prompt_logprobs</span> <span class="ow">in</span> <span class="n">num_prompt_logprobs_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">num_tokens</span> <span class="o">=</span> <span class="n">num_scheduled_tokens</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
+            <span class="n">num_tokens</span> <span class="o">=</span> <span class="n">num_scheduled_tokens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">req_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># This can happen if the request was preempted in prefill stage.</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Get metadata for this request.</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">prompt_token_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Prompt logprobs is incompatible with prompt embeddings</span>
+                <span class="k">continue</span>
+
+            <span class="n">num_prompt_tokens</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">)</span>
+            <span class="n">prompt_token_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Set up target LogprobsTensors object.</span>
+            <span class="n">logprobs_tensors</span> <span class="o">=</span> <span class="n">in_progress_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">req_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">logprobs_tensors</span><span class="p">:</span>
+                <span class="c1"># Create empty logprobs CPU tensors for the entire prompt.</span>
+                <span class="c1"># If chunked, we&#39;ll copy in slice by slice.</span>
+                <span class="n">logprobs_tensors</span> <span class="o">=</span> <span class="n">LogprobsTensors</span><span class="o">.</span><span class="n">empty_cpu</span><span class="p">(</span>
+                    <span class="n">num_prompt_tokens</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_prompt_logprobs</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="p">)</span>
+                <span class="n">in_progress_dict</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">logprobs_tensors</span>
+
+            <span class="c1"># Determine number of logits to retrieve.</span>
+            <span class="n">start_idx</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">num_computed_tokens</span>
+            <span class="n">start_tok</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">num_remaining_tokens</span> <span class="o">=</span> <span class="n">num_prompt_tokens</span> <span class="o">-</span> <span class="n">start_tok</span>
+            <span class="k">if</span> <span class="n">num_tokens</span> <span class="o">&lt;=</span> <span class="n">num_remaining_tokens</span><span class="p">:</span>
+                <span class="c1"># This is a chunk, more tokens remain.</span>
+                <span class="c1"># In the == case, there are no more prompt logprobs to produce</span>
+                <span class="c1"># but we want to defer returning them to the next step where we</span>
+                <span class="c1"># have new generated tokens to return.</span>
+                <span class="n">num_logits</span> <span class="o">=</span> <span class="n">num_tokens</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># This is the last chunk of prompt tokens to return.</span>
+                <span class="n">num_logits</span> <span class="o">=</span> <span class="n">num_remaining_tokens</span>
+                <span class="n">completed_prefill_reqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">req_id</span><span class="p">)</span>
+                <span class="n">prompt_logprobs_dict</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">logprobs_tensors</span>
+
+            <span class="k">if</span> <span class="n">num_logits</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># This can happen for the final chunk if we prefilled exactly</span>
+                <span class="c1"># (num_prompt_tokens - 1) tokens for this request in the prior</span>
+                <span class="c1"># step. There are no more prompt logprobs to produce.</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Get the logits corresponding to this req&#39;s prompt tokens.</span>
+            <span class="c1"># If this is a partial request (i.e. chunked prefill),</span>
+            <span class="c1"># then there is prompt logprob generated for each index.</span>
+            <span class="n">req_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_batch</span><span class="o">.</span><span class="n">req_id_to_index</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_start_loc</span><span class="o">.</span><span class="n">np</span><span class="p">[</span><span class="n">req_idx</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">prompt_hidden_states</span> <span class="o">=</span> <span class="n">hidden_states</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">num_logits</span><span class="p">]</span>
+            <span class="c1"># PATCH START</span>
+            <span class="k">if</span> <span class="n">is_v0102</span><span class="p">:</span>
+                <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compute_logits</span><span class="p">(</span><span class="n">prompt_hidden_states</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compute_logits</span><span class="p">(</span><span class="n">prompt_hidden_states</span><span class="p">)</span>
+
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">sampling_params</span><span class="o">.</span><span class="n">temperature</span>
+            <span class="k">if</span> <span class="n">temp</span> <span class="o">&gt;=</span> <span class="mf">1e-5</span><span class="p">:</span>
+                <span class="n">logits</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+            <span class="c1"># PATCH END</span>
+
+            <span class="c1"># Get the &quot;target&quot; tokens for each index. For prompt at index i,</span>
+            <span class="c1"># the token at prompt index i+1 is the &quot;sampled&quot; token we want</span>
+            <span class="c1"># to gather the logprob for.</span>
+            <span class="n">tgt_token_ids</span> <span class="o">=</span> <span class="n">prompt_token_ids</span><span class="p">[</span><span class="n">start_tok</span> <span class="p">:</span> <span class="n">start_tok</span> <span class="o">+</span> <span class="n">num_logits</span><span class="p">]</span>
+
+            <span class="c1"># Compute prompt logprobs.</span>
+            <span class="n">logprobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">compute_logprobs</span><span class="p">(</span><span class="n">logits</span><span class="p">)</span>
+            <span class="n">token_ids</span><span class="p">,</span> <span class="n">logprobs</span><span class="p">,</span> <span class="n">ranks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">gather_logprobs</span><span class="p">(</span>
+                <span class="n">logprobs</span><span class="p">,</span> <span class="n">num_prompt_logprobs</span><span class="p">,</span> <span class="n">tgt_token_ids</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Transfer GPU-&gt;CPU async.</span>
+            <span class="n">chunk_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="n">num_logits</span><span class="p">)</span>
+            <span class="n">logprobs_tensors</span><span class="o">.</span><span class="n">logprob_token_ids</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">token_ids</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">logprobs_tensors</span><span class="o">.</span><span class="n">logprobs</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">logprobs_tensors</span><span class="o">.</span><span class="n">selected_token_ranks</span><span class="p">[</span><span class="n">chunk_slice</span><span class="p">]</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">ranks</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Remove requests that have completed prefill from the batch</span>
+        <span class="c1"># num_prompt_logprobs_dict.</span>
+        <span class="k">for</span> <span class="n">req_id</span> <span class="ow">in</span> <span class="n">completed_prefill_reqs</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">num_prompt_logprobs_dict</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">in_progress_dict</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
+
+        <span class="c1"># Must synchronize the non-blocking GPU-&gt;CPU transfers.</span>
+        <span class="k">if</span> <span class="n">prompt_logprobs_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sync_device</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">prompt_logprobs_dict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_prompt_logprobs_dict_v12</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">hidden_states</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">num_scheduled_tokens</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LogprobsTensors</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Patched version of _get_prompt_logprobs_dict.</span>
+
+<span class="sd">        This is a monkey-patched version of `_get_prompt_logprobs_dict` from</span>
+<span class="sd">        `vllm.v1.worker.gpu_model_runner.GPUModelRunner` (vLLM versions</span>
+<span class="sd">        0.10.2 to 0.11.0).</span>
+
+<span class="sd">        The original function does not apply temperature scaling to logits when</span>
+<span class="sd">        calculating prompt logprobs, which can lead to incorrect logprob values</span>
+<span class="sd">        when the temperature is not 1.0. This patch adds the missing</span>
+<span class="sd">        temperature scaling.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_prompt_logprobs_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_prompt_logprobs</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">num_prompt_logprobs_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">in_progress_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_batch</span><span class="o">.</span><span class="n">in_progress_prompt_logprobs_cpu</span>
+        <span class="n">prompt_logprobs_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LogprobsTensors</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Since prompt logprobs are a rare feature, prioritize simple,</span>
+        <span class="c1"># maintainable loop over optimal performance.</span>
+        <span class="n">completed_prefill_reqs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">req_id</span><span class="p">,</span> <span class="n">num_prompt_logprobs</span> <span class="ow">in</span> <span class="n">num_prompt_logprobs_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">num_tokens</span> <span class="o">=</span> <span class="n">num_scheduled_tokens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">req_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># This can happen if the request was preempted in prefill stage.</span>
+                <span class="k">continue</span>
 
             <span class="c1"># Get metadata for this request.</span>
             <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="p">[</span><span class="n">req_id</span><span class="p">]</span>
@@ -1070,7 +1196,14 @@ document.write(`
 
         <span class="k">return</span> <span class="n">prompt_logprobs_dict</span>
 
-    <span class="n">model_runner</span><span class="o">.</span><span class="n">_get_prompt_logprobs_dict</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">_get_prompt_logprobs_dict</span><span class="p">,</span> <span class="n">model_runner</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.12.0&quot;</span><span class="p">):</span>
+        <span class="n">model_runner</span><span class="o">.</span><span class="n">_get_prompt_logprobs_dict</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span>
+            <span class="n">_get_prompt_logprobs_dict_v11</span><span class="p">,</span> <span class="n">model_runner</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model_runner</span><span class="o">.</span><span class="n">_get_prompt_logprobs_dict</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span>
+            <span class="n">_get_prompt_logprobs_dict_v12</span><span class="p">,</span> <span class="n">model_runner</span>
+        <span class="p">)</span></div>
 
 </pre></div>
 
