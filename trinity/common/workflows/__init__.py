@@ -28,6 +28,9 @@ from trinity.common.workflows.envs.alfworld.RAFT_alfworld_workflow import (
 from trinity.common.workflows.envs.alfworld.RAFT_reflect_alfworld_workflow import (
     RAFTReflectAlfworldWorkflow,
 )
+from trinity.common.workflows.envs.browse_comp_plus.bcp_simple_react_workflow import (
+    BCPSimpleToolReActWorkflow,
+)
 from trinity.common.workflows.envs.email_searcher.workflow import EmailSearchWorkflow
 from trinity.common.workflows.envs.frozen_lake.workflow import FrozenLakeWorkflow
 from trinity.common.workflows.envs.sciworld.sciworld_workflow import SciWorldWorkflow
@@ -88,6 +91,7 @@ __all__ = [
     "AgentScopeV1ReactSearchWorkflow",
     "AgentScopeReActWorkflow",
     "EmailSearchWorkflow",
+    "BCPSimpleToolReActWorkflow",
     "AsyncMathRULERWorkflow",
     "MathRULERWorkflow",
     "MathTrainableRULERWorkflow",
