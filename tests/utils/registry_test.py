@@ -1,4 +1,4 @@
-# -*- codia tutf-8 -*-
+# -*- coding: utf-8 -*-
 """Test cases for workflows registry mapping."""
 import unittest
 

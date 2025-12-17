@@ -30,7 +30,7 @@ For modules you plan to contribute to Trinity-RFT, please follow these steps:
    WORKFLOWS: Registry = Registry(
        "workflows",
        default_mapping={
-           "example_workflow": "rinity.common.workflows.workflow.ExampleWorkflow",
+           "example_workflow": "trinity.common.workflows.workflow.ExampleWorkflow",
        },
    )
    ```
