@@ -28,7 +28,7 @@ buffer:
   batch_size: 60
   explorer_input:
     default_workflow_type: math_boxed_workflow
-    default_reward_fn_type: benchmark.plugins.guru_math.reward.NaiveDapoRewardFn
+    default_reward_fn_type: math_boxed_reward_naive_dapo
     taskset:
       name: math
       storage_type: file

@@ -1,8 +1,10 @@
 from typing import Optional
 
+from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
 
 
+@REWARD_FUNCTIONS.register_module("math_boxed_reward_naive_dapo")
 class NaiveDapoRewardFn(MathBoxedRewardFn):
     def __call__(  # type: ignore
         self,
@@ -18,6 +20,7 @@ class NaiveDapoRewardFn(MathBoxedRewardFn):
         return {"accuracy": score, "format_score": 0}
 
 
+@REWARD_FUNCTIONS.register_module("math_boxed_reward_prime_math")
 class PrimeMathRewardFn(MathBoxedRewardFn):
     def __call__(  # type: ignore
         self,
