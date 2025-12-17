@@ -89,7 +89,7 @@ class TestRegistry(unittest.TestCase):
                     f"{workflow_name} should be a subclass of Workflow",
                 )
         with self.assertRaises(ValueError):
-            _ = WORKFLOWS.get("non_existent_workflow")
+            WORKFLOWS.get("non_existent_workflow")
 
         # test reward function
         reward_fn_names = list(REWARD_FUNCTIONS._default_mapping.keys())
@@ -104,7 +104,7 @@ class TestRegistry(unittest.TestCase):
                     f"{reward_fn_name} should be a subclass of RewardFn",
                 )
         with self.assertRaises(ValueError):
-            _ = REWARD_FUNCTIONS.get("non_existent_reward_fn")
+            REWARD_FUNCTIONS.get("non_existent_reward_fn")
 
     def test_algorithm_registry_mapping(self):
         """Test registry mapping in algorithm module"""
@@ -121,7 +121,7 @@ class TestRegistry(unittest.TestCase):
                     f"{algorithm_name} should be a subclass of AlgorithmType",
                 )
         with self.assertRaises(ValueError):
-            _ = ALGORITHM_TYPE.get("non_existent_algorithm")
+            ALGORITHM_TYPE.get("non_existent_algorithm")
 
         # test advantage function
         advantage_fn_names = list(ADVANTAGE_FN._default_mapping.keys())
@@ -136,7 +136,7 @@ class TestRegistry(unittest.TestCase):
                     f"{advantage_fn_name} should be a subclass of AdvantageFn",
                 )
         with self.assertRaises(ValueError):
-            _ = ADVANTAGE_FN.get("non_existent_advantage_fn")
+            ADVANTAGE_FN.get("non_existent_advantage_fn")
 
         # test entropy loss function
         entropy_loss_fn_names = list(ENTROPY_LOSS_FN._default_mapping.keys())
@@ -152,7 +152,7 @@ class TestRegistry(unittest.TestCase):
                     f"{entropy_loss_fn_name} should be a subclass of EntropyLossFn",
                 )
         with self.assertRaises(ValueError):
-            _ = ENTROPY_LOSS_FN.get("non_existent_entropy_loss_fn")
+            ENTROPY_LOSS_FN.get("non_existent_entropy_loss_fn")
 
         # test kl function
         kl_fn_names = list(KL_FN._default_mapping.keys())
@@ -164,7 +164,7 @@ class TestRegistry(unittest.TestCase):
                     issubclass(kl_fn_cls, KLFn), f"{kl_fn_name} should be a subclass of KLFn"
                 )
         with self.assertRaises(ValueError):
-            _ = KL_FN.get("non_existent_kl_fn")
+            KL_FN.get("non_existent_kl_fn")
 
         # test policy loss function
         policy_loss_fn_names = list(POLICY_LOSS_FN._default_mapping.keys())
@@ -179,7 +179,7 @@ class TestRegistry(unittest.TestCase):
                     f"{policy_loss_fn_name} should be a subclass of PolicyLossFn",
                 )
         with self.assertRaises(ValueError):
-            _ = POLICY_LOSS_FN.get("non_existent_policy_loss_fn")
+            POLICY_LOSS_FN.get("non_existent_policy_loss_fn")
 
         # test sample strategy
         sample_strategy_names = list(SAMPLE_STRATEGY._default_mapping.keys())
@@ -195,7 +195,7 @@ class TestRegistry(unittest.TestCase):
                     f"{sample_strategy_name} should be a subclass of SampleStrategy",
                 )
         with self.assertRaises(ValueError):
-            _ = SAMPLE_STRATEGY.get("non_existent_sample_strategy")
+            SAMPLE_STRATEGY.get("non_existent_sample_strategy")
 
     def test_buffer_module_registry_mapping(self):
         """Test registry mapping in buffer module"""
@@ -212,7 +212,7 @@ class TestRegistry(unittest.TestCase):
                     f"{operator_name} should be a subclass of ExperienceOperator",
                 )
         with self.assertRaises(ValueError):
-            _ = EXPERIENCE_OPERATORS.get("non_existent_operator")
+            EXPERIENCE_OPERATORS.get("non_existent_operator")
 
         # test reader
         reader_names = list(READER._default_mapping.keys())
@@ -227,7 +227,7 @@ class TestRegistry(unittest.TestCase):
                     f"{reader_name} should be a subclass of BufferReader",
                 )
         with self.assertRaises(ValueError):
-            _ = READER.get("non_existent_reader")
+            READER.get("non_existent_reader")
 
         # test formatter
         formatter_names = list(FORMATTER._default_mapping.keys())
@@ -238,7 +238,7 @@ class TestRegistry(unittest.TestCase):
                     formatter_cls, f"{formatter_name} should be retrievable from registry"
                 )
         with self.assertRaises(ValueError):
-            _ = FORMATTER.get("non_existent_formatter")
+            FORMATTER.get("non_existent_formatter")
 
         # test sql schema
         schema_names = list(SQL_SCHEMA._default_mapping.keys())
@@ -249,7 +249,7 @@ class TestRegistry(unittest.TestCase):
                     schema_cls, f"{schema_name} should be retrievable from registry"
                 )
         with self.assertRaises(ValueError):
-            _ = SQL_SCHEMA.get("non_existent_schema")
+            SQL_SCHEMA.get("non_existent_schema")
 
         # test selector
         selector_names = list(SELECTORS._default_mapping.keys())
@@ -264,7 +264,7 @@ class TestRegistry(unittest.TestCase):
                     f"{selector_name} should be a subclass of BaseSelector",
                 )
         with self.assertRaises(ValueError):
-            _ = SELECTORS.get("non_existent_selector")
+            SELECTORS.get("non_existent_selector")
 
         # test priority function
         priority_fn_names = list(PRIORITY_FUNC._default_mapping.keys())
@@ -280,7 +280,7 @@ class TestRegistry(unittest.TestCase):
                     f"{priority_fn_name} should be a subclass of PriorityFunction",
                 )
         with self.assertRaises(ValueError):
-            _ = PRIORITY_FUNC.get("non_existent_priority_fn")
+            PRIORITY_FUNC.get("non_existent_priority_fn")
 
     def test_utils_module_registry_mapping(self):
         """Test registry mapping in utils module"""
@@ -297,7 +297,7 @@ class TestRegistry(unittest.TestCase):
                     f"{monitor_name} should be a subclass of Monitor",
                 )
         with self.assertRaises(ValueError):
-            _ = MONITOR.get("non_existent_monitor")
+            MONITOR.get("non_existent_monitor")
 
     def test_register_module(self):
         """Test register module functionality"""

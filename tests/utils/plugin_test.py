@@ -55,8 +55,8 @@ class TestPluginLoader(unittest.TestCase):
     @parameterized.expand(PLUGIN_DIR_PARAMS)
     def test_load_plugins_local(self, plugin_dir):
         if os.path.isabs(plugin_dir):
-            my_workflow_cls = WORKFLOWS.get("my_workflow")
-            self.assertIsNone(my_workflow_cls)
+            with self.assertRaises(ValueError):
+                my_workflow_cls = WORKFLOWS.get("my_workflow")
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
         try:
             load_plugins()
@@ -84,15 +84,15 @@ class TestPluginLoader(unittest.TestCase):
             ignore_reinit_error=True,
             runtime_env={"env_vars": {PLUGIN_DIRS_ENV_VAR: plugin_dir}},
         )
-        my_workflow_cls = WORKFLOWS.get("my_workflow")
         # disable plugin and use custom class from registry
         remote_plugin = ray.remote(PluginActor).remote(config, enable_load_plugins=False)
-        remote_plugin.run.remote(my_workflow_cls)
         with self.assertRaises(ray.exceptions.ActorDiedError):
+            # During initialization, enable_workflow=True (default) will try to get "my_workflow"
             ray.get(remote_plugin.__ray_ready__.remote())
 
         # enable plugin
         remote_plugin = ray.remote(PluginActor).remote(config)
+        my_workflow_cls = WORKFLOWS.get("my_workflow")
         remote_res = ray.get(remote_plugin.run.remote(my_workflow_cls))
         self.assertEqual(remote_res[0], "Hello world")
         self.assertEqual(remote_res[1], "Hi")

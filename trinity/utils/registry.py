@@ -74,6 +74,9 @@ class Registry(object):
                     )
                     raise ImportError(f"Cannot dynamically import {class_name} from {module_path}")
                 self._register_module(module_name=module_key, module_cls=module)
+            elif module_key is None:
+                self.logger.warning(f"Cannot find module {module_key} from {self._name}")
+                return None
             else:
                 raise ValueError(f"Invalid module key: {module_key}")
         return module

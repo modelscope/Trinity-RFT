@@ -8,7 +8,7 @@ from tests.tools import (
     get_unittest_dataset_config,
     get_vision_language_model_path,
 )
-from trinity.buffer.schema.formatter import FORMATTER
+from trinity.buffer.schema import FORMATTER
 from trinity.common.config import FormatConfig, StorageConfig
 from trinity.common.constants import PromptType
 from trinity.common.experience import Experience
