@@ -25,12 +25,12 @@ For modules you plan to contribute to Trinity-RFT, please follow these steps:
 1. Implement your code in the appropriate directory, such as `trinity/common/workflows` for `Workflow`, `trinity/algorithm` for `Algorithm`, and `trinity/buffer/operators` for `Operator`.
 
 2. Register your module in the corresponding mapping dictionary in the `__init__.py` file of the directory.
-   For example, if you want to register a new workflow called `MyWorkflow`, you need to add the following code to the `__init__.py` file:
+   For example, if you want to register a new workflow class `ExampleWorkflow`, you need to modify the `default_mapping` dictionary of `WORKFLOWS` in the `trinity/common/workflows/__init__.py` file:
    ```python
    WORKFLOWS: Registry = Registry(
        "workflows",
        default_mapping={
-           "my_workflow": "rinity.common.workflows.workflow.ExampleWorkflow",
+           "example_workflow": "rinity.common.workflows.workflow.ExampleWorkflow",
        },
    )
    ```

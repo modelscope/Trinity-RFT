@@ -24,7 +24,7 @@ Trinity-RFT 也支持在运行时通过设置 `--plugin-dir` 选项来指定其�
 
 1. 在适当目录中实现你的代码，例如 `trinity/common/workflows` 用于 `Workflow`，`trinity/algorithm` 用于 `Algorithm`，`trinity/buffer/operators` 用于 `Operator`。
 
-2. 在目录对应的 `__init__.py` 文件中的 `default_mapping` 字典中注册你的模块。对于 `Workflow`，你需要在 `WORKFLOWS` 字典中添加你的模块，例如：
+2. 在目录对应的 `__init__.py` 文件中的 `default_mapping` 字典中注册你的模块。例如，对于新的 `ExampleWorkflow` 类，你需要在 `trinity/common/workflows/__init__.py` 文件中的 `WORKFLOWS` 中添加你的模块：
    ```python
    WORKFLOWS: Registry = Registry(
        "workflows",
