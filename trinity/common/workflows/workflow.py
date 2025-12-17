@@ -4,16 +4,17 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, List, Optional, Type, Union
-
-import openai
+from typing import TYPE_CHECKING, Any, List, Optional, Type, Union
 
 from trinity.common.config import FormatConfig, GenerationConfig
-from trinity.common.experience import Experience
-from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.math_reward import MathRewardFn
-from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
+
+if TYPE_CHECKING:
+    import openai
+
+    from trinity.common.experience import Experience
+    from trinity.common.models.model import ModelWrapper
+    from trinity.common.rewards.reward_fn import RewardFn
 
 
 @dataclass
@@ -165,6 +166,8 @@ class MultiTurnWorkflow(Workflow):
     def process_messages_to_experience(
         self, messages, reward, info={}, truncate_status=None
     ) -> Experience:
+        from trinity.common.experience import Experience
+
         converted_experience = self.model.convert_messages_to_experience(messages)
 
         if converted_experience.truncate_status == "response_truncated":
@@ -222,6 +225,8 @@ class BaseSimpleWorkflow(Workflow):
         self.truth = task.truth
 
         reward_fn = task.reward_fn
+        from trinity.common.rewards.reward_fn import RewardFn
+
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
@@ -324,6 +329,8 @@ class MathWorkflow(SimpleWorkflow):
         )
 
     def reset(self, task: Task):
+        from trinity.common.rewards.math_reward import MathRewardFn
+
         if task.reward_fn is None:
             task.reward_fn = MathRewardFn
         if task.reward_fn == MathRewardFn and task.format_args.system_prompt is None:

@@ -5,11 +5,12 @@ from __future__ import annotations
 import pickle
 import uuid
 from dataclasses import asdict, dataclass, field, fields
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
-import torch
+if TYPE_CHECKING:
+    import torch
+    from torch import Tensor
 from datasets import Dataset
-from torch import Tensor
 
 
 @dataclass
