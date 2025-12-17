@@ -490,7 +490,9 @@ class OnPolicyDistillAlgorithm(AlgorithmType):
 
     Workflow stores teacher_logprobs in experience.info["teacher_logprobs"].
     Trainer's advantage_fn computes: advantages = teacher_logprobs - student_logprobs
-    Trainer uses: importance_sampling loss (no clip)
+    Trainer uses:
+        importance_sampling loss if no clipping is needed
+        ppo loss if clipping is needed, for better stability
     """
 
     use_critic: bool = False
@@ -506,7 +508,7 @@ class OnPolicyDistillAlgorithm(AlgorithmType):
             "advantage_fn": "on_policy_distill",
             "advantage_fn_args": {"kl_coef": 1.0},
             "sample_strategy": "default",
-            "policy_loss_fn": "importance_sampling",
+            "policy_loss_fn": "ppo",  # or importance_sampling if no clipping is needed
             "kl_penalty_fn": "none",
             "kl_loss_fn": "none",
             "entropy_loss_fn": "none",
