@@ -48,7 +48,9 @@ from trinity.common.workflows.math_trainable_ruler_workflow import (
     MathTrainableRULERWorkflow,
 )
 from trinity.common.workflows.on_policy_distill_workflow import (
+    AsyncOnPolicyDistillMathWorkflow,
     AsyncOnPolicyDistillWorkflow,
+    OnPolicyDistillMathWorkflow,
     OnPolicyDistillWorkflow,
 )
 from trinity.common.workflows.rubric_judge_workflow import RubricJudgeWorkflow
@@ -103,4 +105,6 @@ __all__ = [
     # On-policy distillation workflows
     "OnPolicyDistillWorkflow",
     "AsyncOnPolicyDistillWorkflow",
+    "OnPolicyDistillMathWorkflow",
+    "AsyncOnPolicyDistillMathWorkflow",
 ]

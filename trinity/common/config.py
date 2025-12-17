@@ -80,7 +80,7 @@ class FormatConfig:
 class GenerationConfig:
     temperature: Optional[float] = None  # 1.0
     top_p: Optional[float] = None  # 1.0
-    top_k: Optional[int] = None  # -1
+    top_k: int = -1  # -1 means disabled
     logprobs: Optional[int] = None  # 0  # vLLM return `logprobs + 1` elements
     max_tokens: Optional[int] = None  # if None, use model.max_response_tokens
     # repeat each task for `n` times
