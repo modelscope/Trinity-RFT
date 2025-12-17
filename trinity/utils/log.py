@@ -6,6 +6,8 @@ import sys
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
+import ray
+
 from trinity.common.constants import (
     LOG_DIR_ENV_VAR,
     LOG_LEVEL_ENV_VAR,
@@ -78,8 +80,6 @@ def get_logger(
     logger.addHandler(stream_handler)
 
     if in_ray_actor:
-        import ray
-
         # File handler (rotating file log)
         log_dir = os.environ.get(LOG_DIR_ENV_VAR)
         assert name is not None, "Logger name must be set when logging from a Ray actor"

@@ -12,8 +12,6 @@ import resource
 import sympy
 from pylatexenc import latex2text
 from sympy.parsing import sympy_parser
-from verl.utils.reward_score.prime_math import math_normalize
-from verl.utils.reward_score.prime_math.grader import math_equal
 
 # Constants for normalization
 SUBSTITUTIONS = [
@@ -376,6 +374,7 @@ def grade_answer(given_answer: str, ground_truth: str) -> tuple[bool, str]:
     """
     if given_answer is None:
         return False
+    from verl.utils.reward_score.prime_math import math_normalize
 
     ground_truth_normalized_mathd = math_normalize.normalize_answer(ground_truth)
     given_answer_normalized_mathd = math_normalize.normalize_answer(given_answer)
@@ -478,6 +477,8 @@ def compute_score(solution_str: str, ground_truth: str) -> float:
     Returns:
         Reward score (1.0 for correct, 0.0 for incorrect)
     """
+    from verl.utils.reward_score.prime_math.grader import math_equal
+
     # First assert intended generation and gt type
     model_output = str(solution_str)
     ground_truth = str(ground_truth)

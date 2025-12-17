@@ -10,6 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+import ray
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -843,8 +844,6 @@ class Config:
         """Update config if `node_num` or `gpu_per_node` are not set."""
         if self.cluster.node_num is not None and self.cluster.gpu_per_node is not None:
             return
-        import ray
-
         # init ray cluster to detect node_num and gpu_per_node
         was_initialized = ray.is_initialized()
         if not was_initialized:
