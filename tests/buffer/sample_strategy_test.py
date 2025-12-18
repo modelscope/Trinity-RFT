@@ -6,10 +6,8 @@ import torch
 from parameterized import parameterized_class
 
 from tests.tools import RayUnittestBaseAysnc, get_template_config
-from trinity.algorithm.sample_strategy.sample_strategy import (
-    SAMPLE_STRATEGY,
-    SampleStrategy,
-)
+from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY
+from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.buffer.buffer import get_buffer_writer
 from trinity.common.config import ExperienceBufferConfig, ReplayBufferConfig
 from trinity.common.constants import StorageType
