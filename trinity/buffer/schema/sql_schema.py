@@ -44,8 +44,7 @@ class ExperienceModel(Base):  # type: ignore
     message_list = Column(JSON, nullable=True)
     reward = Column(Float, nullable=True)
     # for step info
-    train_step = Column(Integer, nullable=True)
-    explore_step = Column(Integer, nullable=True)
+    model_version = Column(Integer, nullable=True)
     # serialized experience object
     experience_bytes = Column(LargeBinary, nullable=True)
     consumed = Column(Integer, default=0, index=True)
@@ -62,8 +61,7 @@ class ExperienceModel(Base):  # type: ignore
             response=experience.response_text,
             message_list=experience.messages,
             reward=experience.reward,
-            train_step=experience.info["model_version"],
-            explore_step=experience.eid.batch,
+            model_version=experience.info["model_version"],
             experience_bytes=experience.serialize(),
         )
 

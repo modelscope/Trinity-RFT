@@ -107,7 +107,7 @@ class LinearDecayUseCountControlPriority(PriorityFunction):
 
 class QueueBuffer(ABC):
     async def set_oldest_valid_version(self, oldest_valid_version: int):
-        self.oldest_valid_version = oldest_valid_version
+        self.oldest_valid_version = max(oldest_valid_version, 0)
 
     @abstractmethod
     async def put(self, exps: List[Experience]) -> None:
@@ -158,7 +158,7 @@ class AsyncQueue(asyncio.Queue, QueueBuffer):
         """
         super().__init__(maxsize=capacity)
         self._closed = False
-        self.oldest_valid_version = -1
+        self.oldest_valid_version = 0
 
     async def put(self, item: List[Experience]):
         if len(item) == 0:
@@ -169,7 +169,7 @@ class AsyncQueue(asyncio.Queue, QueueBuffer):
         while True:
             item = await super().get()
             if (
-                self.oldest_valid_version < 0
+                self.oldest_valid_version <= 0
                 or item[0].info["model_version"] >= self.oldest_valid_version
             ):
                 return item
@@ -226,7 +226,7 @@ class AsyncPriorityQueue(QueueBuffer):
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
         self._closed = False
-        self.oldest_valid_version = -1
+        self.oldest_valid_version = 0
 
     async def _put(self, item: List[Experience], delay: float = 0) -> None:
         """
@@ -291,7 +291,7 @@ class AsyncPriorityQueue(QueueBuffer):
                     self.priority_groups.popitem(index=-1)
 
                 if (
-                    self.oldest_valid_version < 0
+                    self.oldest_valid_version <= 0
                     or item[0].info["model_version"] >= self.oldest_valid_version
                 ):
                     break
@@ -379,7 +379,7 @@ class QueueStorage:
             self.writer.write(exp_list)
 
     async def get_batch(
-        self, batch_size: int, timeout: float, oldest_valid_version: int = -1
+        self, batch_size: int, timeout: float, oldest_valid_version: int = 0
     ) -> List:
         """Get batch of experience."""
         await self.queue.set_oldest_valid_version(oldest_valid_version)
@@ -388,7 +388,7 @@ class QueueStorage:
         while len(result) < batch_size:
             while len(self.exp_pool) > 0 and len(result) < batch_size:
                 exp = self.exp_pool.popleft()
-                if oldest_valid_version >= 0 and exp.info["model_version"] < oldest_valid_version:
+                if oldest_valid_version > 0 and exp.info["model_version"] < oldest_valid_version:
                     continue
                 result.append(exp)
             if len(result) >= batch_size:

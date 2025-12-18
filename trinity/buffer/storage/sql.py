@@ -111,7 +111,7 @@ class SQLExperienceStorage(SQLStorage):
             session.add_all(experience_models)
         self.logger.info(f"Write {len(experience_models)} experiences to SQL storage.")
 
-    def _read_fifo(self, batch_size: int, oldest_valid_version: int = -1) -> List[Experience]:
+    def _read_fifo(self, batch_size: int) -> List[Experience]:
         """Read experiences in FIFO order."""
         exp_list = []
         start_time = time.time()
@@ -143,7 +143,7 @@ class SQLExperienceStorage(SQLStorage):
                 time.sleep(1)
         return exp_list
 
-    def _read_priority(self, batch_size: int, oldest_valid_version: int = -1) -> List[Experience]:
+    def _read_priority(self, batch_size: int, oldest_valid_version: int = 0) -> List[Experience]:
         exp_list = []
         start_time = time.time()
         latest_size = 0
@@ -161,8 +161,8 @@ class SQLExperienceStorage(SQLStorage):
                 query = session.query(self.table_model_cls).order_by(
                     asc(self.table_model_cls.consumed), desc(self.table_model_cls.id)
                 )
-                if oldest_valid_version >= 0:
-                    query = query.filter(self.table_model_cls.train_step >= oldest_valid_version)
+                if oldest_valid_version > 0:
+                    query = query.filter(self.table_model_cls.model_version >= oldest_valid_version)
                 experiences = query.limit(batch_size).with_for_update().all()
                 if len(experiences) != batch_size:
                     if latest_size != len(experiences):
@@ -190,8 +190,7 @@ class SQLExperienceStorage(SQLStorage):
             raise StopIteration()
 
         batch_size = batch_size or self.batch_size
-        oldest_valid_version = kwargs.pop("oldest_valid_version", -1)
-        return self._read_method(batch_size, oldest_valid_version=oldest_valid_version)
+        return self._read_method(batch_size, **kwargs)
 
     @classmethod
     def load_from_dataset(cls, dataset: Dataset, config: StorageConfig) -> "SQLExperienceStorage":

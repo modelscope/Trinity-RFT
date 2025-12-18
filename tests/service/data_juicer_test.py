@@ -182,24 +182,28 @@ class TestDataJuicerExperiencePipeline(unittest.IsolatedAsyncioTestCase):
                 prompt_length=3,
                 prompt_text="Hello, how are you?",
                 response_text="Hi, I am fine.",
+                info={"model_version": 0},
             ),
             Experience(  # too short response
                 tokens=torch.tensor([1, 2, 3, 4, 5]),
                 prompt_length=3,
                 prompt_text="What is your name?",
                 response_text="Trinity.",
+                info={"model_version": 0},
             ),
             Experience(  # repeated words
                 tokens=torch.tensor([1, 2, 3, 4, 5]),
                 prompt_length=3,
                 prompt_text="What day is it today?",
                 response_text="Today is Sunday Sunday Sunday Sunday Sunday and it's a happy day!",
+                info={"model_version": 0},
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3, 4, 5]),
                 prompt_length=3,
                 prompt_text="What is your favorite color?",
                 response_text="My favorite color is blue.",
+                info={"model_version": 0},
             ),
         ]
         metrics = await pipeline.process.remote(exps)

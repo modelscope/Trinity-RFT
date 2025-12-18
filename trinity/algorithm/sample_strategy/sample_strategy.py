@@ -87,7 +87,7 @@ class StalenessControlSampleStrategy(DefaultSampleStrategy):
         self.staleness_limit = kwargs.get("staleness_limit", float("inf"))
 
     async def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
-        oldest_valid_version = max(step - self.staleness_limit, -1)
+        oldest_valid_version = max(step - self.staleness_limit, 0)
         metrics = {}
         with Timer(metrics, "time/read_experience"):
             exp_list = await self.exp_buffer.read_async(oldest_valid_version=oldest_valid_version)

@@ -3,6 +3,7 @@ import shutil
 from collections import deque
 
 import torch
+from parameterized import parameterized_class
 
 from tests.tools import RayUnittestBaseAysnc, get_template_config
 from trinity.algorithm.sample_strategy.sample_strategy import (
@@ -10,14 +11,22 @@ from trinity.algorithm.sample_strategy.sample_strategy import (
     SampleStrategy,
 )
 from trinity.buffer.buffer import get_buffer_writer
+from trinity.common.config import ExperienceBufferConfig, ReplayBufferConfig
+from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 
 
+@parameterized_class(
+    ("exp_write_batch_size",),
+    [
+        (3,),
+        (6,),
+    ],
+)
 class ExperienceStorageTest(RayUnittestBaseAysnc):
     def setUp(self):
         self.config = get_template_config()
         self.num_steps = 20
-        self.exp_write_batch_size = 3  # 3 # 6
 
     def _default_exp_list(self):
         return [
@@ -35,6 +44,18 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
 
     def _default_steps(self):
         return [0, 5, 10, 15]
+
+    def _init_buffer_writer_and_sample_strategy(self):
+        # Initialize buffer writer and sample strategy
+        self.buffer_writer = get_buffer_writer(
+            self.config.buffer.trainer_input.experience_buffer,  # type: ignore [arg-type]
+        )
+        self.sample_strategy: SampleStrategy = SAMPLE_STRATEGY.get(
+            self.config.algorithm.sample_strategy
+        )(
+            buffer_config=self.config.buffer,
+            **self.config.algorithm.sample_strategy_args,
+        )
 
     async def _verify_model_version(self, step, expected_versions):
         batch, metrics, _ = await self.sample_strategy.sample(step=step)
@@ -58,16 +79,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         )
 
     async def _verify_sampling_model_versions(self, exps_list, expected_model_versions_map):
-        # Initialize buffer writer and sample strategy
-        self.buffer_writer = get_buffer_writer(
-            self.config.buffer.trainer_input.experience_buffer,  # type: ignore [arg-type]
-        )
-        self.sample_strategy: SampleStrategy = SAMPLE_STRATEGY.get(
-            self.config.algorithm.sample_strategy
-        )(
-            buffer_config=self.config.buffer,
-            **self.config.algorithm.sample_strategy_args,
-        )
+        self._init_buffer_writer_and_sample_strategy()
 
         # Write experiences to buffer, while sample and validate model versions
         current_task = None
@@ -84,9 +96,41 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         if current_task:
             await current_task
 
+    async def _flexible_verify_model_version(self, step, staleness_limit):
+        _, metrics, _ = await self.sample_strategy.sample(step=step)
+        self.assertGreaterEqual(
+            metrics["sample/model_version/min"],
+            step - staleness_limit,
+            f"Min model version mismatch at step {step}",
+        )
+
+    async def _flexible_verify_sampling_model_versions(
+        self, exps_list, check_steps, staleness_limit
+    ):
+        self._init_buffer_writer_and_sample_strategy()
+
+        # Write experiences to buffer, while sample and validate model versions
+        current_task = None
+        for step, exps in enumerate(exps_list):
+            await self.buffer_writer.write_async(exps)
+            if step in check_steps:
+                if current_task:
+                    await current_task
+                current_task = asyncio.create_task(
+                    self._flexible_verify_model_version(step, staleness_limit)
+                )
+                await asyncio.sleep(0.1)
+
+        if current_task:
+            await current_task
+
     async def test_default_queue_default_sample_strategy(self):
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="default_queue_default_strategy",
+            storage_type=StorageType.QUEUE.value,
+            replay_buffer=ReplayBufferConfig(enable=False),
+        )
         self.config.check_and_update()
-        self.config.buffer.trainer_input.experience_buffer.name = "default_queue_default_strategy"
 
         # init testing data
         exps_list = self._default_exp_list()
@@ -107,8 +151,12 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         staleness_limit = 3
         self.config.algorithm.sample_strategy = "staleness_control"
         self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="default_queue_staleness_control",
+            storage_type=StorageType.QUEUE.value,
+            replay_buffer=ReplayBufferConfig(enable=False),
+        )
         self.config.check_and_update()
-        self.config.buffer.trainer_input.experience_buffer.name = "default_queue_staleness_control"
 
         # init testing data
         exps_list = self._default_exp_list()
@@ -153,9 +201,12 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         return expected_model_versions_map
 
     async def test_priority_queue_default_sample_strategy(self):
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="priority_queue_default_strategy",
+            storage_type=StorageType.QUEUE.value,
+            replay_buffer=ReplayBufferConfig(enable=True),
+        )
         self.config.check_and_update()
-        self.config.buffer.trainer_input.experience_buffer.replay_buffer.enable = True
-        self.config.buffer.trainer_input.experience_buffer.name = "priority_queue_default_strategy"
 
         # init testing data
         exps_list = self._default_exp_list()
@@ -168,9 +219,12 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         staleness_limit = 2
         self.config.algorithm.sample_strategy = "staleness_control"
         self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="priority_queue_staleness_control",
+            storage_type=StorageType.QUEUE.value,
+            replay_buffer=ReplayBufferConfig(enable=True),
+        )
         self.config.check_and_update()
-        self.config.buffer.trainer_input.experience_buffer.replay_buffer.enable = True
-        self.config.buffer.trainer_input.experience_buffer.name = "priority_queue_staleness_control"
 
         # init testing data
         exps_list = self._default_exp_list()
@@ -179,21 +233,21 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
 
         await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
 
-    # async def test_sql_default_sample_strategy(self):  # debuging
-    #     self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
-    #         name="sql_default_strategy",
-    #         storage_type=StorageType.SQL.value,
-    #     )
-    #     self.config.check_and_update()
+    async def test_sql_staleness_control_sample_strategy(self):
+        staleness_limit = 2
+        self.config.algorithm.sample_strategy = "staleness_control"
+        self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
+            name="sql_staleness_control",
+            storage_type=StorageType.SQL.value,
+        )
+        self.config.check_and_update()
 
-    #     # init testing data
-    #     exps_list = self._default_exp_list()
-    #     steps = self._default_steps()
-    #     expected_model_versions_map = self._simulate_priority_queue(steps)
-    #     from pprint import pprint
-    #     pprint(expected_model_versions_map)
+        # init testing data
+        exps_list = self._default_exp_list()
+        steps = self._default_steps()
 
-    #     await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
+        await self._flexible_verify_sampling_model_versions(exps_list, steps, staleness_limit)
 
     def tearDown(self):
         asyncio.run(self.buffer_writer.release())
