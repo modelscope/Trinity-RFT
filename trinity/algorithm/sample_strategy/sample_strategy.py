@@ -76,7 +76,6 @@ class DefaultSampleStrategy(SampleStrategy):
             self.exp_buffer.load_state_dict(state_dict)
 
 
-@SAMPLE_STRATEGY.register_module("staleness_control")
 class StalenessControlSampleStrategy(DefaultSampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
