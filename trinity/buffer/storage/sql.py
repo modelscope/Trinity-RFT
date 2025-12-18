@@ -158,12 +158,17 @@ class SQLExperienceStorage(SQLStorage):
             with retry_session(
                 self.session, self.max_retry_times, self.max_retry_interval
             ) as session:
-                query = session.query(self.table_model_cls).order_by(
-                    asc(self.table_model_cls.consumed), desc(self.table_model_cls.id)
-                )
+                query = session.query(self.table_model_cls)
                 if min_model_version > 0:
                     query = query.filter(self.table_model_cls.model_version >= min_model_version)
-                experiences = query.limit(batch_size).with_for_update().all()
+                experiences = (
+                    query.order_by(
+                        asc(self.table_model_cls.consumed), desc(self.table_model_cls.id)
+                    )
+                    .limit(batch_size)
+                    .with_for_update()
+                    .all()
+                )
                 if len(experiences) != batch_size:
                     if latest_size != len(experiences):
                         latest_size = len(experiences)

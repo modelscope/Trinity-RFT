@@ -39,7 +39,7 @@ class ExperienceModel(Base):  # type: ignore
     message_list = Column(JSON, nullable=True)
     reward = Column(Float, nullable=True)
     # for step info
-    model_version = Column(Integer, nullable=True)
+    model_version = Column(Integer, nullable=True, index=True)
     # serialized experience object
     experience_bytes = Column(LargeBinary, nullable=True)
     consumed = Column(Integer, default=0, index=True)

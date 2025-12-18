@@ -112,7 +112,7 @@ algorithm:
 - `optimizer`: Actor 优化器的参数。
   - `lr`: 优化器的学习率。
   - `warmup_style`: 学习率的预热策略。
-- `sample_strategy`: 从 experience buffer 加载 experience 时使用的采样策略。
+- `sample_strategy`: 从 experience buffer 加载 experience 时使用的采样策略。支持类型：`default`、`staleness_control`、`mix`。
 - `advantage_fn`: 用于计算优势值的函数。
 - `kl_penalty_fn`: 用于在奖励中计算 KL 惩罚的函数。
 - `kl_loss_fn`: 用于计算 KL 损失的函数。

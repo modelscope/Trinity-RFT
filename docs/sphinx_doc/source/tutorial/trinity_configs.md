@@ -112,7 +112,7 @@ algorithm:
 - `optimizer`: Optimizer configuration for actor.
   - `lr`: Learning rate for actor.
   - `warmup_style`: Warmup style for actor's learning rate.
-- `sample_strategy`: The sampling strategy used for loading experiences from experience buffer.
+- `sample_strategy`: The sampling strategy used for loading experiences from experience buffer. Supported types: `default`, `staleness_control`, `mix`.
 - `advantage_fn`: The advantage function used for computing advantages.
 - `kl_penalty_fn`: The KL penalty function used for computing KL penalty applied in reward.
 - `kl_loss_fn`: The KL loss function used for computing KL loss.

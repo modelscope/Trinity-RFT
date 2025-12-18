@@ -94,17 +94,15 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         if current_task:
             await current_task
 
-    async def _flexible_verify_model_version(self, step, staleness_limit):
+    async def _flexible_verify_model_version(self, step, max_staleness):
         _, metrics, _ = await self.sample_strategy.sample(step=step)
         self.assertGreaterEqual(
             metrics["sample/model_version/min"],
-            step - staleness_limit,
+            step - max_staleness,
             f"Min model version mismatch at step {step}",
         )
 
-    async def _flexible_verify_sampling_model_versions(
-        self, exps_list, check_steps, staleness_limit
-    ):
+    async def _flexible_verify_sampling_model_versions(self, exps_list, check_steps, max_staleness):
         self._init_buffer_writer_and_sample_strategy()
 
         # Write experiences to buffer, while sample and validate model versions
@@ -115,7 +113,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
                 if current_task:
                     await current_task
                 current_task = asyncio.create_task(
-                    self._flexible_verify_model_version(step, staleness_limit)
+                    self._flexible_verify_model_version(step, max_staleness)
                 )
                 await asyncio.sleep(0.1)
 
@@ -146,9 +144,9 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
 
     async def test_default_queue_staleness_control_sample_strategy(self):
-        staleness_limit = 3
+        max_staleness = 3
         self.config.algorithm.sample_strategy = "staleness_control"
-        self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.algorithm.sample_strategy_args = {"max_staleness": max_staleness}
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="default_queue_staleness_control",
             storage_type=StorageType.QUEUE.value,
@@ -161,7 +159,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         steps = self._default_steps()
         expected_model_versions_map = {}
         for step in steps:
-            predict_version = max(step - staleness_limit, 0)
+            predict_version = max(step - max_staleness, 0)
             expected_model_versions_map[step] = [
                 predict_version + i // self.exp_write_batch_size
                 for i in range(self.config.buffer.train_batch_size)
@@ -169,7 +167,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
 
         await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
 
-    def _simulate_priority_queue(self, steps, staleness_limit=float("inf")):
+    def _simulate_priority_queue(self, steps, max_staleness=float("inf")):
         expected_model_versions_map = {}
         buffer = deque()
         exp_pool = deque()
@@ -187,7 +185,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
                         exp_pool.extend(buffer.pop())
                     while len(exp_pool) > 0 and len(batch_versions) < train_batch_size:
                         exp_version = exp_pool.popleft()
-                        if exp_version < step - staleness_limit:
+                        if exp_version < step - max_staleness:
                             continue
                         batch_versions.append(exp_version)
                     if len(batch_versions) >= train_batch_size:
@@ -214,9 +212,9 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
 
     async def test_priority_queue_staleness_control_sample_strategy(self):
-        staleness_limit = 2
+        max_staleness = 2
         self.config.algorithm.sample_strategy = "staleness_control"
-        self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.algorithm.sample_strategy_args = {"max_staleness": max_staleness}
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="priority_queue_staleness_control",
             storage_type=StorageType.QUEUE.value,
@@ -227,14 +225,14 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         # init testing data
         exps_list = self._default_exp_list()
         steps = self._default_steps()
-        expected_model_versions_map = self._simulate_priority_queue(steps, staleness_limit)
+        expected_model_versions_map = self._simulate_priority_queue(steps, max_staleness)
 
         await self._verify_sampling_model_versions(exps_list, expected_model_versions_map)
 
     async def test_sql_staleness_control_sample_strategy(self):
-        staleness_limit = 2
+        max_staleness = 2
         self.config.algorithm.sample_strategy = "staleness_control"
-        self.config.algorithm.sample_strategy_args = {"staleness_limit": staleness_limit}
+        self.config.algorithm.sample_strategy_args = {"max_staleness": max_staleness}
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="sql_staleness_control",
             storage_type=StorageType.SQL.value,
@@ -245,7 +243,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
         exps_list = self._default_exp_list()
         steps = self._default_steps()
 
-        await self._flexible_verify_sampling_model_versions(exps_list, steps, staleness_limit)
+        await self._flexible_verify_sampling_model_versions(exps_list, steps, max_staleness)
 
     def tearDown(self):
         asyncio.run(self.buffer_writer.release())
