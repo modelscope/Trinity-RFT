@@ -14,8 +14,6 @@ Algorithm:
 from dataclasses import asdict
 from typing import List, Optional
 
-import openai
-
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.qwen25_eval import verify_math_answer
@@ -43,21 +41,19 @@ class OnPolicyDistillWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
-        auxiliary_model_wrappers: Optional[List[ModelWrapper]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,
             model=model,
             auxiliary_models=auxiliary_models,
-            auxiliary_model_wrappers=auxiliary_model_wrappers,
         )
         self.reset(task)
 
         assert (
-            auxiliary_model_wrappers is not None and len(auxiliary_model_wrappers) >= 1
+            self.auxiliary_model_wrappers is not None and len(self.auxiliary_model_wrappers) >= 1
         ), "On-policy distillation requires at least one auxiliary model as teacher."
-        self.teacher_model = auxiliary_model_wrappers[0]
+        self.teacher_model = self.auxiliary_model_wrappers[0]
 
         self.temperature = task.workflow_args.get("temperature", 1.0)
 

@@ -3,8 +3,6 @@
 
 from typing import List, Optional
 
-import openai
-
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
 from trinity.common.workflows.workflow import Task, Workflow
@@ -24,7 +22,7 @@ class AgentScopeReactMathWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,

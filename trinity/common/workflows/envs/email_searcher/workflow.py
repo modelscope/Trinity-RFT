@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-import openai
-
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.envs.email_searcher.utils import (
     AnswerModel,
@@ -34,7 +32,7 @@ class EmailSearchWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         # get openai client from model
         self.openai_client = model.get_openai_async_client()

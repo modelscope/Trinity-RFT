@@ -1,7 +1,5 @@
 from typing import Awaitable, Callable, Dict, List, Optional
 
-import openai
-
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import Task, Workflow
@@ -17,7 +15,7 @@ class AgentScopeWorkflowAdapter(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         """Initialize the adapter with the task and model."""
         try:

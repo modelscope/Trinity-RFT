@@ -3,19 +3,16 @@
 
 from __future__ import annotations
 
-import inspect
 from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any, List, Optional, Type, Union
+from typing import List, Optional, Type, Union
+
+import openai
 
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
+from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
-
-if TYPE_CHECKING:
-    import openai
-
-    from trinity.common.models.model import ModelWrapper
 
 
 @dataclass
@@ -40,40 +37,25 @@ class Task(dict):
 
     def to_workflow(
         self,
-        model: Any,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
-        auxiliary_model_wrappers: Optional[List["ModelWrapper"]] = None,
+        model: ModelWrapper,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ) -> Workflow:
         """Convert the task to a workflow.
 
         Args:
             model (ModelWrapper): The rollout model for the workflow.
-            auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow (OpenAI clients).
-            auxiliary_model_wrappers (List[ModelWrapper]): The auxiliary model wrappers.
-                Only passed to workflows that explicitly declare this parameter in __init__.
-
-        Note:
-            `model_path` attribute is added to the `auxiliary_models` for use within the workflow.
+            auxiliary_models (List[ModelWrapper]): The auxiliary model wrappers.
+                Workflows can access both the ModelWrapper and OpenAI client via
+                self.auxiliary_model_wrappers and self.auxiliary_models respectively.
 
         Returns:
             Workflow: The generated workflow object.
         """
-        # Check if the workflow supports auxiliary_model_wrappers parameter
-        sig = inspect.signature(self.workflow.__init__)
-        if "auxiliary_model_wrappers" in sig.parameters:
-            return self.workflow(
-                model=model,
-                task=self,
-                auxiliary_models=auxiliary_models,
-                auxiliary_model_wrappers=auxiliary_model_wrappers,
-            )
-        else:
-            # Backward compatibility: existing workflows don't need this parameter
-            return self.workflow(
-                model=model,
-                task=self,
-                auxiliary_models=auxiliary_models,
-            )
+        return self.workflow(
+            model=model,
+            task=self,
+            auxiliary_models=auxiliary_models,
+        )
 
     # Deprecated property, will be removed in the future
     @property
@@ -95,6 +77,10 @@ class Workflow:
     """The base workflow class.
 
     A workflow is a runnable object which generates a list of experiences.
+
+    Attributes:
+        auxiliary_model_wrappers: List of ModelWrapper instances for auxiliary models.
+        auxiliary_models: List of OpenAI clients (sync or async based on is_async) for auxiliary models.
     """
 
     can_reset: bool = False  # whether the workflow can be reset with a new task. If true, `reset()` must be implemented.
@@ -106,13 +92,19 @@ class Workflow:
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
-        auxiliary_model_wrappers: Optional[List[ModelWrapper]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         self.task = task
         self.model = model
-        self.auxiliary_models = auxiliary_models
-        self.auxiliary_model_wrappers = auxiliary_model_wrappers
+        # Store ModelWrapper instances
+        self.auxiliary_model_wrappers = auxiliary_models
+        # Get OpenAI clients from ModelWrapper (async or sync based on workflow type)
+        self.auxiliary_models: Optional[Union[List[openai.OpenAI], List[openai.AsyncOpenAI]]] = None
+        if auxiliary_models:
+            if self.__class__.is_async:
+                self.auxiliary_models = [m.get_openai_async_client() for m in auxiliary_models]
+            else:
+                self.auxiliary_models = [m.get_openai_client() for m in auxiliary_models]
         self.run_id_base = 0
         self.logger = get_logger(__name__)
 
@@ -170,7 +162,7 @@ class MultiTurnWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,
@@ -222,7 +214,7 @@ class BaseSimpleWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         self.reset(task)
         super().__init__(
@@ -334,7 +326,7 @@ class MathWorkflow(SimpleWorkflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         self.reset(task)
         super().__init__(
