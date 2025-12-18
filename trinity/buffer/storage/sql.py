@@ -143,7 +143,7 @@ class SQLExperienceStorage(SQLStorage):
                 time.sleep(1)
         return exp_list
 
-    def _read_priority(self, batch_size: int, oldest_valid_version: int = 0) -> List[Experience]:
+    def _read_priority(self, batch_size: int, min_model_version: int = 0) -> List[Experience]:
         exp_list = []
         start_time = time.time()
         latest_size = 0
@@ -161,8 +161,8 @@ class SQLExperienceStorage(SQLStorage):
                 query = session.query(self.table_model_cls).order_by(
                     asc(self.table_model_cls.consumed), desc(self.table_model_cls.id)
                 )
-                if oldest_valid_version > 0:
-                    query = query.filter(self.table_model_cls.model_version >= oldest_valid_version)
+                if min_model_version > 0:
+                    query = query.filter(self.table_model_cls.model_version >= min_model_version)
                 experiences = query.limit(batch_size).with_for_update().all()
                 if len(experiences) != batch_size:
                     if latest_size != len(experiences):
