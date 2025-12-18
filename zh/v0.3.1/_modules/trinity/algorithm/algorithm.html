@@ -929,11 +929,8 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SyncMethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-<span class="n">ALGORITHM_TYPE</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;algorithm&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ConstantMeta">
@@ -987,7 +984,6 @@ document.write(`
 
 <div class="viewcode-block" id="SFTAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.SFTAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sft&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SFTAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SFT Algorithm.&quot;&quot;&quot;</span>
 
@@ -1013,7 +1009,6 @@ document.write(`
 
 <div class="viewcode-block" id="PPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.PPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;ppo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">PPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;PPO Algorithm.&quot;&quot;&quot;</span>
 
@@ -1042,7 +1037,6 @@ document.write(`
 
 <div class="viewcode-block" id="GRPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.GRPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GRPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;GRPO algorithm.&quot;&quot;&quot;</span>
 
@@ -1071,7 +1065,6 @@ document.write(`
 
 <div class="viewcode-block" id="ReinforcePlusPlusAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.ReinforcePlusPlusAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reinforceplusplus&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReinforcePlusPlusAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reinforce++ algorithm.&quot;&quot;&quot;</span>
 
@@ -1100,7 +1093,6 @@ document.write(`
 
 <div class="viewcode-block" id="RLOOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RLOOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rloo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RLOOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RLOO algorithm.&quot;&quot;&quot;</span>
 
@@ -1129,7 +1121,6 @@ document.write(`
 
 <div class="viewcode-block" id="OPMDAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.OPMDAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OPMDAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD algorithm.&quot;&quot;&quot;</span>
 
@@ -1158,7 +1149,6 @@ document.write(`
 
 <div class="viewcode-block" id="AsymREAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.AsymREAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;asymre&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsymREAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;AsymRE algorithm.&quot;&quot;&quot;</span>
 
@@ -1187,7 +1177,6 @@ document.write(`
 
 <div class="viewcode-block" id="DPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.DPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DPO algorithm.&quot;&quot;&quot;</span>
 
@@ -1240,7 +1229,6 @@ document.write(`
 
 <div class="viewcode-block" id="TOPRAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.TOPRAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;topr&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TOPRAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;TOPR algorithm. See https://arxiv.org/pdf/2503.14286v1&quot;&quot;&quot;</span>
 
@@ -1269,7 +1257,6 @@ document.write(`
 
 <div class="viewcode-block" id="CISPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.CISPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;cispo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CISPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CISPO algorithm. See https://arxiv.org/abs/2506.13585&quot;&quot;&quot;</span>
 
@@ -1298,7 +1285,6 @@ document.write(`
 
 <div class="viewcode-block" id="GSPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.GSPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;gspo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GSPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;GSPO algorithm. See https://arxiv.org/pdf/2507.18071&quot;&quot;&quot;</span>
 
@@ -1327,7 +1313,6 @@ document.write(`
 
 <div class="viewcode-block" id="SAPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.SAPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sapo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SAPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SAPO (Soft Adaptive Policy Optimization) algorithm.</span>
 
@@ -1360,7 +1345,6 @@ document.write(`
 
 <div class="viewcode-block" id="MIXAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.MIXAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MIXAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MIX algorithm.&quot;&quot;&quot;</span>
 
@@ -1388,7 +1372,6 @@ document.write(`
 
 <div class="viewcode-block" id="MIXCHORDAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.MIXCHORDAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix_chord&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MIXCHORDAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MIX algorithm.&quot;&quot;&quot;</span>
 
@@ -1416,7 +1399,6 @@ document.write(`
 
 <div class="viewcode-block" id="RAFTAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RAFTAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;raft&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RAFTAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RAFT Algorithm.</span>
 <span class="sd">    This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)</span>
@@ -1445,7 +1427,6 @@ document.write(`
 
 <div class="viewcode-block" id="sPPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.sPPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sppo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">sPPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;sPPO Algorithm.&quot;&quot;&quot;</span>
 
@@ -1474,7 +1455,6 @@ document.write(`
 
 <div class="viewcode-block" id="RECAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RECAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rec&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RECAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;REC Algorithm.&quot;&quot;&quot;</span>
 
@@ -1503,7 +1483,6 @@ document.write(`
 
 <div class="viewcode-block" id="MultiStepGRPOAlgorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.MultiStepGRPOAlgorithm">[文档]</a>
-<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;multi_step_grpo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MultiStepGRPOAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Multi-Step GRPO Algorithm.&quot;&quot;&quot;</span>
 

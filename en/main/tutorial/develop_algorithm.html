@@ -228,7 +228,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -671,9 +670,8 @@ To implement OPMD, developers need to implement advantage calculation in <code c
 <li><p><code class="docutils literal notranslate"><span class="pre">calculate_group_advantage</span></code>: This method calculates the advantage for each group of experiences.</p></li>
 </ul>
 <p>Here’s an implementation example for the OPMD algorithm’s advantage function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">GroupAdvantage</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupAdvantage</span>
 
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OPMDGroupAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD Group Advantage computation&quot;&quot;&quot;</span>
 
@@ -714,7 +712,7 @@ To implement OPMD, developers need to implement advantage calculation in <code c
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ADVANTAGE_FN</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
+<p>After implementation, you need to register this module in the <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> of <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/__init__.py</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
 </section>
 <section id="step-1-2-implement-policylossfn">
 <h3>Step 1.2: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code><a class="headerlink" href="#step-1-2-implement-policylossfn" title="Link to this heading">#</a></h3>
@@ -723,10 +721,9 @@ To implement OPMD, developers need to implement advantage calculation in <code c
 <li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: Calculates the loss based on input parameters. Unlike <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code>, the input parameters here are all <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. This interface automatically scans the parameter list of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method and converts it to the corresponding fields in the experience data. Therefore, please write all tensor names needed for loss calculation directly in the parameter list, rather than selecting parameters from <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: Returns default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
 </ul>
-<p>Similarly, after implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.POLICY_LOSS_FN</span></code>.</p>
+<p>Similarly, after implementation, you need to register this module in the <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> of <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/policy_loss_fn/__init__.py</span></code>.</p>
 <p>Here’s an implementation example for the OPMD algorithm’s Policy Loss Fn. Since OPMD’s Policy Loss only requires logprob, action_mask, and advantages, only these three items are specified in the parameter list of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OPMDPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OPMDPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
 
@@ -753,7 +750,7 @@ To implement OPMD, developers need to implement advantage calculation in <code c
 <section id="step-2-register-your-algorithm">
 <h2>Step 2: Register Your Algorithm<a class="headerlink" href="#step-2-register-your-algorithm" title="Link to this heading">#</a></h2>
 <p>The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.</p>
-<p>To simplify configuration, Trinity-RFT provides <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType" title="trinity.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AlgorithmType</span></code></a> to describe a complete algorithm and registers it in <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ALGORITHM_TYPE</span></code>, enabling one-click configuration.</p>
+<p>To simplify configuration, Trinity-RFT provides <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType" title="trinity.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AlgorithmType</span></code></a> to describe a complete algorithm and registers it in <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/__init__.py</span></code>, enabling one-click configuration.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">AlgorithmType</span></code> class includes the following attributes and methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">use_critic</span></code>: Whether to use the Critic model</p></li>
@@ -763,12 +760,11 @@ To implement OPMD, developers need to implement advantage calculation in <code c
 <li><p><code class="docutils literal notranslate"><span class="pre">schema</span></code>: The format of experience data corresponding to the algorithm</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_config</span></code>: Gets the default configuration of the algorithm, which will override attributes with the same name in <code class="docutils literal notranslate"><span class="pre">ALGORITHM_TYPE</span></code></p></li>
 </ul>
-<p>Similarly, after implementation, you need to register this module through <code class="docutils literal notranslate"><span class="pre">ALGORITHM_TYPE</span></code>.</p>
+<p>Similarly, after implementation, you need to register this module in the <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> of <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/__init__.py</span></code>.</p>
 <p>Below is the implementation for the OPMD algorithm.
 Since the OPMD algorithm doesn’t need to use the Critic model, <code class="docutils literal notranslate"><span class="pre">use_critic</span></code> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
 The dictionary returned by the <code class="docutils literal notranslate"><span class="pre">default_config</span></code> method indicates that OPMD will use the <code class="docutils literal notranslate"><span class="pre">opmd</span></code> type <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code> implemented in Step 1, will not apply KL Penalty on rewards, but will add a <code class="docutils literal notranslate"><span class="pre">k2</span></code> type KL loss when calculating the final loss.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OPMDAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OPMDAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD algorithm.&quot;&quot;&quot;</span>
 
     <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>

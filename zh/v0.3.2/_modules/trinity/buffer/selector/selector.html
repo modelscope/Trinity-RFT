@@ -938,13 +938,10 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskSelectorConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experimental</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">SELECTORS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;selectors&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BaseSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector">[文档]</a>
 <span class="nd">@Experimental</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseSelector</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -962,14 +959,14 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">:</span> <span class="n">_HFBatchReader</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_source</span> <span class="o">=</span> <span class="n">data_source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span></div>
 
 
 <div class="viewcode-block" id="BaseSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Select a batch of sample indices from the dataset.</span>
@@ -985,7 +982,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="BaseSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update internal state based on feedback (e.g., model loss, accuracy).</span>
@@ -1000,7 +997,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="BaseSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return serializable state of the selector for checkpointing.</span>
@@ -1012,7 +1009,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="BaseSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.BaseSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restore selector state from a saved dictionary.</span>
@@ -1026,8 +1023,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SequentialSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector">[文档]</a>
-<span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sequential&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SequentialSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects data sequentially in fixed order across epochs.</span>
@@ -1036,7 +1032,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SequentialSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">:</span> <span class="n">_HFBatchReader</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span> <span class="o">=</span> <span class="n">data_source</span><span class="o">.</span><span class="n">dataset_size</span>
@@ -1044,7 +1040,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SequentialSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">batch_size</span>
@@ -1055,14 +1051,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="SequentialSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: sequential selection doesn&#39;t adapt based on feedback</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="SequentialSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span><span class="p">,</span>
@@ -1070,7 +1066,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SequentialSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.SequentialSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;current_index&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 </div>
@@ -1078,8 +1074,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ShuffleSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector">[文档]</a>
-<span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;shuffle&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShuffleSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shuffles dataset once per epoch and iterates through it sequentially.</span>
@@ -1090,7 +1085,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ShuffleSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">:</span> <span class="n">_HFBatchReader</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span> <span class="o">=</span> <span class="n">data_source</span><span class="o">.</span><span class="n">dataset_size</span>  <span class="c1"># Total available samples</span>
@@ -1110,7 +1105,7 @@ document.write(`
         <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ShuffleSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">batch_size</span>
@@ -1129,14 +1124,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="ShuffleSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: static shuffling does not adapt</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="ShuffleSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span><span class="p">,</span>
@@ -1144,7 +1139,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ShuffleSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.ShuffleSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;current_index&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">orders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_orders</span><span class="p">()</span></div>
@@ -1153,8 +1148,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="RandomSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector">[文档]</a>
-<span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;random&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Uniformly samples batches randomly with replacement *per batch*.</span>
@@ -1164,7 +1158,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RandomSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">:</span> <span class="n">_HFBatchReader</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span> <span class="o">=</span> <span class="n">data_source</span><span class="o">.</span><span class="n">dataset_size</span>
@@ -1173,7 +1167,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="RandomSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># Seed varies per batch to ensure repeatability across runs</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span><span class="p">)</span>
@@ -1186,14 +1180,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="RandomSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: basic random selection doesn&#39;t adapt</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="RandomSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span><span class="p">,</span>
@@ -1201,7 +1195,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="RandomSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.RandomSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;current_index&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 </div>
@@ -1209,8 +1203,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector">[文档]</a>
-<span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;offline_easy2hard&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OfflineEasy2HardSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects samples in an &#39;easy-to-hard&#39; curriculum based on pre-defined difficulty features.</span>
@@ -1225,7 +1218,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;offline_easy2hard_selector&quot;</span><span class="p">)</span>
@@ -1253,14 +1246,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: this selector does not adapt based on runtime feedback</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns next batch of indices in curriculum order (easy → hard).</span>
@@ -1289,7 +1282,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save current position in the curriculum for checkpointing.</span>
@@ -1301,7 +1294,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="OfflineEasy2HardSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.OfflineEasy2HardSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restore progress through the curriculum from saved state.</span>
@@ -1312,8 +1305,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector">[文档]</a>
-<span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;difficulty_based&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DifficultyBasedSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adaptive difficulty-based selector using probabilistic modeling of sample difficulty.</span>
@@ -1327,7 +1319,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DifficultyBasedSelector.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;difficulty_based_selector&quot;</span><span class="p">)</span>
@@ -1347,7 +1339,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.build_diff_estimator">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.build_diff_estimator">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.build_diff_estimator">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_diff_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">feature_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs a Beta-distribution-based difficulty estimator from features.</span>
@@ -1376,7 +1368,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.update">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.update">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the difficulty estimator with observed performance on selected samples.</span>
@@ -1389,7 +1381,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.get_scores">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.get_scores">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.get_scores">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes selection scores: negative distance between predicted PR and target reward.</span>
@@ -1404,7 +1396,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.get_indices">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.get_indices">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.get_indices">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">return_extra_info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects batch of indices based on difficulty proximity to target.</span>
@@ -1451,7 +1443,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save current state for checkpointing.</span>
@@ -1463,7 +1455,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="DifficultyBasedSelector.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.selector.DifficultyBasedSelector.load_state_dict">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.load_state_dict">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restore selector state from checkpoint.</span>

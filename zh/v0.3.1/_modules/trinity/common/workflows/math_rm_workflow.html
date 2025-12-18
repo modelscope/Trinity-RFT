@@ -929,17 +929,16 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 
 
 <div class="viewcode-block" id="MathRMWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.MathRMWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_rm_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.math_rm_workflow.MathRMWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathRMWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for math tasks as introduced in DeepSeek-R1.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MathRMWorkflow.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.MathRMWorkflow.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.math_rm_workflow.MathRMWorkflow.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -956,7 +955,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathRMWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.MathRMWorkflow.run">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.math_rm_workflow.MathRMWorkflow.run">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
 
@@ -985,13 +984,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncMathRMWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.AsyncMathRMWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_math_rm_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.math_rm_workflow.AsyncMathRMWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncMathRMWorkflow</span><span class="p">(</span><span class="n">MathRMWorkflow</span><span class="p">):</span>
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncMathRMWorkflow.run_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.AsyncMathRMWorkflow.run_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html#trinity.common.workflows.math_rm_workflow.AsyncMathRMWorkflow.run_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
 

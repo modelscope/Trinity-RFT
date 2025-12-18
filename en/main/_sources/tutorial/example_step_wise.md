@@ -49,28 +49,14 @@ class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
         return self.final_reward
 ```
 
-Also, remember to register your workflow:
+Also, remember to register your workflow in the `default_mapping` of `trinity/common/workflows/__init__.py`.
 ```python
-@WORKFLOWS.register_module("step_wise_alfworld_workflow")
-class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
-    """A step-wise workflow for alfworld task."""
-    ...
-```
-
-and include it in the init file `trinity/common/workflows/__init__.py`
-
-```diff
- # -*- coding: utf-8 -*-
- """Workflow module"""
- from trinity.common.workflows.workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from trinity.common.workflows.envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow
-
- __all__ = [
-     "WORKFLOWS",
-     "SimpleWorkflow",
-     "MathWorkflow",
-+    "StepWiseAlfworldWorkflow",
- ]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+      "step_wise_alfworld_workflow": "trinity.common.workflows.step_wise_workflow.StepWiseAlfworldWorkflow",
+    },
+)
 ```
 
 ### Other Configuration

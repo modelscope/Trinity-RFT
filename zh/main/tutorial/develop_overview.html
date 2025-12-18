@@ -230,7 +230,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -659,12 +658,22 @@ document.write(`
 <p class="admonition-title">小技巧</p>
 <p>Trinity-RFT 提供了插件化的开发方式，可以在不修改框架代码的前提下，灵活地添加自定义模块。
 开发者可以将自己编写的模块代码放在 <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code> 目录下。Trinity-RFT 会在运行时自动加载该目录下的所有 Python 文件，并注册其中的自定义模块。
-Trinity-RFT 也支持在运行时通过设置 <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> 选项来指定其他目录，例如：<code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">&lt;config_file&gt;</span> <span class="pre">--plugin-dir</span> <span class="pre">&lt;your_plugin_dir&gt;</span></code>。</p>
+Trinity-RFT 也支持在运行时通过设置 <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> 选项来指定其他目录，例如：<code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">&lt;config_file&gt;</span> <span class="pre">--plugin-dir</span> <span class="pre">&lt;your_plugin_dir&gt;</span></code>。
+另外，你也可以使用相对路径来在 YAML 配置文件中指定自定义模块，例如：<code class="docutils literal notranslate"><span class="pre">default_workflow_type:</span> <span class="pre">'examples.agentscope_frozenlake.workflow.FrozenLakeWorkflow'</span></code>。</p>
 </div>
 <p>对于准备向 Trinity-RFT 提交的模块，请遵循以下步骤：</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>在适当目录中实现你的代码，例如 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> 用于 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>，<code class="docutils literal notranslate"><span class="pre">trinity/algorithm</span></code> 用于 <code class="docutils literal notranslate"><span class="pre">Algorithm</span></code>，<code class="docutils literal notranslate"><span class="pre">trinity/buffer/operators</span></code> 用于 <code class="docutils literal notranslate"><span class="pre">Operator</span></code>。</p></li>
-<li><p>在目录对应的 <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> 文件中注册你的模块。</p></li>
+<li><p>在目录对应的 <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> 文件中的 <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> 字典中注册你的模块。例如，对于新的 <code class="docutils literal notranslate"><span class="pre">ExampleWorkflow</span></code> 类，你需要在 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code> 文件中的 <code class="docutils literal notranslate"><span class="pre">WORKFLOWS</span></code> 中添加你的模块：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">WORKFLOWS</span><span class="p">:</span> <span class="n">Registry</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span>
+    <span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
+    <span class="n">default_mapping</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;example_workflow&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.common.workflows.workflow.ExampleWorkflow&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
 <li><p>在 <code class="docutils literal notranslate"><span class="pre">tests</span></code> 目录中为你的模块添加测试，遵循现有测试的命名约定和结构。</p></li>
 <li><p>提交代码前，确保通过 <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code> 完成代码风格检查。</p></li>
 <li><p>向 Trinity-RFT 仓库提交 Pull Request，在描述中详细说明你的模块功能和用途。</p></li>

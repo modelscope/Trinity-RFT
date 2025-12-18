@@ -934,7 +934,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.vllm_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch_vllm_moe_model_weight_loader</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_patch.worker_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch_vllm_prompt_logprobs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
@@ -949,6 +948,8 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.apply_patches">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply necessary patches to vLLM.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.vllm_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch_vllm_moe_model_weight_loader</span>
+
         <span class="n">patch_vllm_moe_model_weight_loader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_runner</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
         <span class="n">patch_vllm_prompt_logprobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_runner</span><span class="p">)</span></div>
 

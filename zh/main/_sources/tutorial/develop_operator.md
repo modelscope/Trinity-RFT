@@ -41,11 +41,10 @@ class ExperienceOperator(ABC):
 以下是一个简单数据处理算子的实现示例，该算子过滤掉奖励低于某一阈值的 experience：
 
 ```python
-from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.buffer.operators import ExperienceOperator
 from trinity.common.experience import Experience
 
 
-@EXPERIENCE_OPERATORS.register_module("reward_filter")
 class RewardFilter(ExperienceOperator):
 
     def __init__(self, threshold: float = 0.0) -> None:
@@ -57,7 +56,15 @@ class RewardFilter(ExperienceOperator):
         return filtered_exps, metrics
 ```
 
-实现后，你需要通过 {class}`trinity.buffer.operators.EXPERIENCE_OPERATORS` 注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
+实现后，你需要在 `trinity/buffer/operators/__init__.py` 中的 `default_mapping` 中注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
+```python
+EXPERIENCE_OPERATORS = Registry(
+    "experience_operators",
+    default_mapping={
+        "reward_filter": "trinity.buffer.operators.filters.reward_filter.RewardFilter",
+    },
+)
+```
 
 ### 步骤 2：使用此算子
 

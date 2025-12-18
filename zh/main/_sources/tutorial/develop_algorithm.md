@@ -42,9 +42,8 @@ OPMD 与 PPO 算法的主要区别在于优势值和策略损失的计算。OPMD
 以下是 OPMD 算法优势函数的实现示例：
 
 ```python
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
+from trinity.algorithm.advantage_fn import GroupAdvantage
 
-@ADVANTAGE_FN.register_module("opmd")
 class OPMDGroupAdvantage(GroupAdvantage):
     """OPMD Group Advantage computation"""
 
@@ -85,7 +84,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
         return {"opmd_baseline": "mean", "tau": 1.0}
 ```
 
-实现后，你需要通过 {class}`trinity.algorithm.ADVANTAGE_FN` 注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
+实现后，你需要在 `trinity/algorithm/__init__.py` 中的 `default_mapping` 中注册此模块。注册后，该模块可在配置文件中使用注册名称进行配置。
 
 #### 步骤 1.2：实现 `PolicyLossFn`
 
@@ -94,12 +93,11 @@ class OPMDGroupAdvantage(GroupAdvantage):
 - `__call__`：根据输入参数计算损失。与 `AdvantageFn` 不同，这里的输入参数均为 `torch.Tensor`。该接口会自动扫描 `__call__` 方法的参数列表，并将其转换为 experience 数据中的对应字段。因此，请直接在参数列表中写出损失计算所需的所有张量名称，而不是从 `kwargs` 中选择参数。
 - `default_args`：返回默认初始化参数（字典形式），当用户未在配置文件中指定初始化参数时，默认使用此方法返回的参数。
 
-同样，实现后需要通过 {class}`trinity.algorithm.POLICY_LOSS_FN` 注册此模块。
+同样，实现后需要在 `trinity/algorithm/policy_loss_fn/__init__.py` 中的 `default_mapping` 中注册此模块。
 
 以下是 OPMD 算法策略损失函数的实现示例。由于 OPMD 的策略损失仅需 logprob、action_mask 和 advantages，因此 `__call__` 方法的参数列表中仅指定这三个项：
 
 ```python
-@POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(
         self, backend: str = "verl", tau: float = 1.0, loss_agg_mode: str = "token-mean"
@@ -131,7 +129,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
 
 上述步骤实现了算法所需的组件，但这些组件是分散的，需要在多个地方配置才能生效。
 
-为简化配置，Trinity-RFT 提供了 {class}`trinity.algorithm.AlgorithmType` 来描述完整算法，并在 {class}`trinity.algorithm.ALGORITHM_TYPE` 中注册，实现一键配置。
+为简化配置，Trinity-RFT 提供了 {class}`trinity.algorithm.AlgorithmType` 来描述完整算法，并在 `trinity/algorithm/__init__.py` 中注册，实现一键配置。
 
 `AlgorithmType` 类包含以下属性和方法：
 
@@ -142,14 +140,13 @@ class OPMDPolicyLossFn(PolicyLossFn):
 - `schema`：算法对应的 experience 数据格式
 - `default_config`：获取算法的默认配置，将覆盖 `ALGORITHM_TYPE` 中同名属性
 
-同样，实现后需要通过 `ALGORITHM_TYPE` 注册此模块。
+同样，实现后需要在 `trinity/algorithm/__init__.py` 中的 `default_mapping` 中注册此模块。
 
 以下是 OPMD 算法的实现。
 由于 OPMD 算法不需要使用 Critic 模型，`use_critic` 设置为 `False`。
 `default_config` 方法返回的字典表明 OPMD 将使用步骤 1 中实现的 `opmd` 类型的 `AdvantageFn` 和 `PolicyLossFn`，不会对奖励应用 KL 惩罚，但在计算最终损失时会添加 `k2` 类型的 KL 损失。
 
 ```python
-@ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 

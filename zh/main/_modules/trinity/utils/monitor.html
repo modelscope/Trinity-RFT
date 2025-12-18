@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -959,7 +958,14 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
-<span class="n">MONITOR</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;monitor&quot;</span><span class="p">)</span>
+<span class="n">MONITOR</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span>
+    <span class="s2">&quot;monitor&quot;</span><span class="p">,</span>
+    <span class="n">default_mapping</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;tensorboard&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.TensorboardMonitor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;wandb&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.WandbMonitor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mlflow&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.MlflowMonitor&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="gather_metrics">
@@ -1061,7 +1067,6 @@ document.write(`
 
 <div class="viewcode-block" id="TensorboardMonitor">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.TensorboardMonitor">[文档]</a>
-<span class="nd">@MONITOR</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TensorboardMonitor</span><span class="p">(</span><span class="n">Monitor</span><span class="p">):</span>
 <div class="viewcode-block" id="TensorboardMonitor.__init__">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.TensorboardMonitor.__init__">[文档]</a>
@@ -1099,7 +1104,6 @@ document.write(`
 
 <div class="viewcode-block" id="WandbMonitor">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.WandbMonitor">[文档]</a>
-<span class="nd">@MONITOR</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;wandb&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WandbMonitor</span><span class="p">(</span><span class="n">Monitor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor with Weights &amp; Biases.</span>
 
@@ -1168,7 +1172,6 @@ document.write(`
 
 <div class="viewcode-block" id="MlflowMonitor">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.MlflowMonitor">[文档]</a>
-<span class="nd">@MONITOR</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mlflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MlflowMonitor</span><span class="p">(</span><span class="n">Monitor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor with MLflow.</span>
 

@@ -614,37 +614,6 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">RewardFn.__init__()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RMGalleryFn"><code class="docutils literal notranslate"><span class="pre">RMGalleryFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RMGalleryFn.__init__"><code class="docutils literal notranslate"><span class="pre">RMGalleryFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.AccuracyReward"><code class="docutils literal notranslate"><span class="pre">AccuracyReward</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.AccuracyReward.__init__"><code class="docutils literal notranslate"><span class="pre">AccuracyReward.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.CountDownRewardFn"><code class="docutils literal notranslate"><span class="pre">CountDownRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.CountDownRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">CountDownRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.FormatReward"><code class="docutils literal notranslate"><span class="pre">FormatReward</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.FormatReward.__init__"><code class="docutils literal notranslate"><span class="pre">FormatReward.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn"><code class="docutils literal notranslate"><span class="pre">MathRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.DEFAULT_FORMAT_PATTERN"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.DEFAULT_FORMAT_PATTERN</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.DEFAULT_ANSWER_PARSER"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.DEFAULT_ANSWER_PARSER()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathBoxedRewardFn"><code class="docutils literal notranslate"><span class="pre">MathBoxedRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathBoxedRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathBoxedRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn.compute_overlong_penalty"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn.compute_overlong_penalty()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -742,109 +711,6 @@ document.write(`
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.RMGalleryFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">RMGalleryFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reward_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/reward_fn.html#RMGalleryFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.RMGalleryFn" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>Reward Function from RMGallery.
-<a class="github reference external" href="https://github.com/modelscope/RM-Gallery">modelscope/RM-Gallery</a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.RMGalleryFn.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reward_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/reward_fn.html#RMGalleryFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.RMGalleryFn.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.AccuracyReward">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">AccuracyReward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">answer_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/accuracy_reward.html#AccuracyReward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.AccuracyReward" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that rewards correct answers.
-Ref: <a class="github reference external" href="https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py">huggingface/open-r1</a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.AccuracyReward.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">answer_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/accuracy_reward.html#AccuracyReward.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.AccuracyReward.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.CountDownRewardFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">CountDownRewardFn</span></span><a class="reference internal" href="../_modules/trinity/common/rewards/countdown_reward.html#CountDownRewardFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.CountDownRewardFn" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that rewards for countdown task.
-Ref: Jiayi-Pan/TinyZero verl/utils/reward_score/countdown.py</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.CountDownRewardFn.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/countdown_reward.html#CountDownRewardFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.CountDownRewardFn.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.FormatReward">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">FormatReward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/format_reward.html#FormatReward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.FormatReward" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that checks if the reasoning process is enclosed within &lt;think&gt; and &lt;/think&gt; tags, while the final answer is enclosed within &lt;answer&gt; and &lt;/answer&gt; tags.
-Ref: <a class="github reference external" href="https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py">huggingface/open-r1</a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.FormatReward.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/format_reward.html#FormatReward.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.FormatReward.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathRewardFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">MathRewardFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">answer_parser=&lt;function</span> <span class="pre">simple_answer_parser&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern='.*?&lt;think&gt;.*?&lt;/think&gt;\\s*&lt;answer&gt;.*?&lt;/answer&gt;\\s*$'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/math_reward.html#MathRewardFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathRewardFn" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that rewards for math task.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathRewardFn.DEFAULT_FORMAT_PATTERN">
-<span class="sig-name descname"><span class="pre">DEFAULT_FORMAT_PATTERN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.*?&lt;think&gt;.*?&lt;/think&gt;\\s*&lt;answer&gt;.*?&lt;/answer&gt;\\s*$'</span></em><a class="headerlink" href="#trinity.common.rewards.MathRewardFn.DEFAULT_FORMAT_PATTERN" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathRewardFn.DEFAULT_ANSWER_PARSER">
-<span class="sig-name descname"><span class="pre">DEFAULT_ANSWER_PARSER</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#trinity.common.rewards.MathRewardFn.DEFAULT_ANSWER_PARSER" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathRewardFn.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">answer_parser=&lt;function</span> <span class="pre">simple_answer_parser&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern='.*?&lt;think&gt;.*?&lt;/think&gt;\\s*&lt;answer&gt;.*?&lt;/answer&gt;\\s*$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/rewards/math_reward.html#MathRewardFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathRewardFn.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathBoxedRewardFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">MathBoxedRewardFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/math_reward.html#MathBoxedRewardFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathBoxedRewardFn" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that rewards for math task.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathBoxedRewardFn.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/rewards/math_reward.html#MathBoxedRewardFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathBoxedRewardFn.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathDAPORewardFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.rewards.</span></span><span class="sig-name descname"><span class="pre">MathDAPORewardFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_overlong_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_response_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/dapo_reward.html#MathDAPORewardFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathDAPORewardFn" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.common.rewards.reward_fn.html#trinity.common.rewards.reward_fn.RewardFn" title="trinity.common.rewards.reward_fn.RewardFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardFn</span></code></a></p>
-<p>A reward function that follows the definition in DAPO for math task.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathDAPORewardFn.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_overlong_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">penalty_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_response_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/rewards/dapo_reward.html#MathDAPORewardFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathDAPORewardFn.__init__" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.rewards.MathDAPORewardFn.compute_overlong_penalty">
-<span class="sig-name descname"><span class="pre">compute_overlong_penalty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response_token</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/rewards/dapo_reward.html#MathDAPORewardFn.compute_overlong_penalty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.rewards.MathDAPORewardFn.compute_overlong_penalty" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 </section>
 
@@ -897,37 +763,6 @@ Ref: <a class="github reference external" href="https://github.com/huggingface/o
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.common.rewards">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RewardFn"><code class="docutils literal notranslate"><span class="pre">RewardFn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">RewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RMGalleryFn"><code class="docutils literal notranslate"><span class="pre">RMGalleryFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.RMGalleryFn.__init__"><code class="docutils literal notranslate"><span class="pre">RMGalleryFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.AccuracyReward"><code class="docutils literal notranslate"><span class="pre">AccuracyReward</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.AccuracyReward.__init__"><code class="docutils literal notranslate"><span class="pre">AccuracyReward.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.CountDownRewardFn"><code class="docutils literal notranslate"><span class="pre">CountDownRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.CountDownRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">CountDownRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.FormatReward"><code class="docutils literal notranslate"><span class="pre">FormatReward</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.FormatReward.__init__"><code class="docutils literal notranslate"><span class="pre">FormatReward.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn"><code class="docutils literal notranslate"><span class="pre">MathRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.DEFAULT_FORMAT_PATTERN"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.DEFAULT_FORMAT_PATTERN</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.DEFAULT_ANSWER_PARSER"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.DEFAULT_ANSWER_PARSER()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathBoxedRewardFn"><code class="docutils literal notranslate"><span class="pre">MathBoxedRewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathBoxedRewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathBoxedRewardFn.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn.__init__"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.rewards.MathDAPORewardFn.compute_overlong_penalty"><code class="docutils literal notranslate"><span class="pre">MathDAPORewardFn.compute_overlong_penalty()</span></code></a></li>
 </ul>
 </li>
 </ul>

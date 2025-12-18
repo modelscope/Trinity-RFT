@@ -230,7 +230,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -738,8 +737,7 @@ document.write(`
 <section id="difficultybasedselector">
 <h4>示例：<code class="docutils literal notranslate"><span class="pre">DifficultyBasedSelector</span></code><a class="headerlink" href="#difficultybasedselector" title="Link to this heading">#</a></h4>
 <p>该选择器聚焦于模型预测表现最接近目标值的样本（例如 90% 成功率），从而挑选出“难度适中”的任务。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@SELECTORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;difficulty_based&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DifficultyBasedSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DifficultyBasedSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskSelectorConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;difficulty_based_selector&quot;</span><span class="p">)</span>
@@ -804,8 +802,16 @@ document.write(`
 </pre></div>
 </div>
 <blockquote>
-<div><p>🔁 定义完类后，请使用 <code class="docutils literal notranslate"><span class="pre">&#64;SELECTORS.register_module(&quot;your_name&quot;)</span></code> 注册，以便在配置文件中通过名称引用。</p>
+<div><p>🔁 定义完类后，请在 <code class="docutils literal notranslate"><span class="pre">trinity/buffer/selector/__init__.py</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> 中注册，以便在配置文件中通过名称引用。</p>
 </div></blockquote>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SELECTORS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span>
+    <span class="s2">&quot;selectors&quot;</span><span class="p">,</span>
+    <span class="n">default_mapping</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;difficulty_based&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.buffer.selector.selector.DifficultyBasedSelector&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="feedback-operator">
@@ -828,8 +834,7 @@ document.write(`
 </div>
 <section id="pass-rate-calculator">
 <h4>示例：通过率计算器（Pass Rate Calculator）<a class="headerlink" href="#pass-rate-calculator" title="Link to this heading">#</a></h4>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;pass_rate_calculator&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">PassRateCalculator</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PassRateCalculator</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">pass</span>
 
@@ -867,7 +872,7 @@ document.write(`
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">experience_pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">operators</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pass_rate_calculator</span><span class="w">  </span><span class="c1"># 必须与 @register_module 名称一致</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pass_rate_calculator</span>
 </pre></div>
 </div>
 </section>
@@ -880,7 +885,7 @@ document.write(`
 <span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
 <span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./path/to/tasks</span>
 <span class="w">        </span><span class="nt">task_selector</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">selector_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">difficulty_based</span><span class="w">   </span><span class="c1"># 必须与 @register_module 名称匹配</span>
+<span class="w">          </span><span class="nt">selector_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">difficulty_based</span>
 <span class="w">          </span><span class="nt">feature_keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;correct&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;uncertainty&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">kwargs</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">m</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>

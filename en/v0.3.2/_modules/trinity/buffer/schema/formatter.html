@@ -936,11 +936,8 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_action_mask_method</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">FORMATTER</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;formatter&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ExperienceFormatter">
@@ -957,7 +954,6 @@ document.write(`
 
 <div class="viewcode-block" id="TaskFormatter">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.TaskFormatter">[docs]</a>
-<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TaskFormatter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for task data.</span>
 
@@ -1013,7 +1009,6 @@ document.write(`
 
 <div class="viewcode-block" id="SFTFormatter">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTFormatter">[docs]</a>
-<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sft&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SFTFormatter</span><span class="p">(</span><span class="n">ExperienceFormatter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for SFT data, supporting both message list and plaintext formats.</span>
 
@@ -1247,7 +1242,6 @@ document.write(`
 
 <div class="viewcode-block" id="DPOFormatter">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOFormatter">[docs]</a>
-<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPOFormatter</span><span class="p">(</span><span class="n">ExperienceFormatter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for DPO plaintext data.</span>
 

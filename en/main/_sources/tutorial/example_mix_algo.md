@@ -47,7 +47,6 @@ The path to expert data is passed to `buffer.trainer_input.auxiliary_buffers.sft
 In `trinity/algorithm/algorithm.py`, we introduce a new algorithm type `MIX`.
 
 ```python
-@ALGORITHM_TYPE.register_module("mix")
 class MIXAlgorithm(AlgorithmType):
     """MIX algorithm."""
 
@@ -159,7 +158,6 @@ Here we use the `custom_fields` argument of `Experiences.gather_experiences` to 
 We define a `MixPolicyLoss` class in `trinity/algorithm/policy_loss_fn/mix_policy_loss.py`, which computes the sum of two loss terms regarding usual and expert experiences, respectively.
 
 ```python
-@POLICY_LOSS_FN.register_module("mix")
 class MIXPolicyLossFn(PolicyLossFn):
     def __init__(
         self,

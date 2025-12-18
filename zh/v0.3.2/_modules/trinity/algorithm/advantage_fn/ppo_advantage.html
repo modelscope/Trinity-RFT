@@ -937,16 +937,15 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">AdvantageFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdvantageFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_whiten</span>
 
 
 <div class="viewcode-block" id="PPOAdvantageFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.PPOAdvantageFn">[文档]</a>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;ppo&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.ppo_advantage.PPOAdvantageFn">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PPOAdvantageFn</span><span class="p">(</span><span class="n">AdvantageFn</span><span class="p">):</span>
 <div class="viewcode-block" id="PPOAdvantageFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.PPOAdvantageFn.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.ppo_advantage.PPOAdvantageFn.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -1013,7 +1012,7 @@ document.write(`
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span>
 
 <div class="viewcode-block" id="PPOAdvantageFn.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.PPOAdvantageFn.default_args">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html#trinity.algorithm.advantage_fn.ppo_advantage.PPOAdvantageFn.default_args">[文档]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>

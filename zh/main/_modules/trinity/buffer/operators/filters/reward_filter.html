@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -939,13 +938,12 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPERIENCE_OPERATORS</span><span class="p">,</span> <span class="n">ExperienceOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperienceOperator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">group_by</span>
 
 
 <div class="viewcode-block" id="RewardFilter">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardFilter">[文档]</a>
-<span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reward_filter&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardFilter">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RewardFilter</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter experiences based on the reward value.</span>
@@ -954,13 +952,13 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RewardFilter.__init__">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardFilter.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardFilter.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span></div>
 
 
 <div class="viewcode-block" id="RewardFilter.process">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardFilter.process">[文档]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardFilter.process">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter experiences based on reward value.&quot;&quot;&quot;</span>
         <span class="n">filtered_exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span> <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span>  <span class="c1"># type: ignore [operator]</span>
@@ -971,8 +969,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="RewardSTDFilter">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardSTDFilter">[文档]</a>
-<span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reward_std_filter&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardSTDFilter">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RewardSTDFilter</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter experiences based on the standard deviation of rewards within each group.</span>
@@ -981,13 +978,13 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RewardSTDFilter.__init__">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardSTDFilter.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardSTDFilter.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span></div>
 
 
 <div class="viewcode-block" id="RewardSTDFilter.process">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.RewardSTDFilter.process">[文档]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.RewardSTDFilter.process">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter experiences based on reward std.&quot;&quot;&quot;</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>

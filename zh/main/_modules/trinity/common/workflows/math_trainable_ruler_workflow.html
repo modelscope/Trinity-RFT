@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -947,15 +946,14 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.math_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathRewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 
 <span class="c1"># the probability that the ground truth is assumed to be available for RL</span>
 <span class="n">PROBABILITY_GROUND_TRUTH_AVAILABLE</span> <span class="o">=</span> <span class="mf">0.2</span>
 
 
 <div class="viewcode-block" id="MathTrainableRULERWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.MathTrainableRULERWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_trainable_ruler_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.math_trainable_ruler_workflow.MathTrainableRULERWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathTrainableRULERWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for math, where the policy model itself serves as a RULER reward model.</span>
 <span class="sd">    Modified from `MathRULERWorkflow`.</span>
@@ -963,7 +961,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MathTrainableRULERWorkflow.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.MathTrainableRULERWorkflow.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.math_trainable_ruler_workflow.MathTrainableRULERWorkflow.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -979,7 +977,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathTrainableRULERWorkflow.reset">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.MathTrainableRULERWorkflow.reset">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.math_trainable_ruler_workflow.MathTrainableRULERWorkflow.reset">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">MathRewardFn</span>
@@ -993,7 +991,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathTrainableRULERWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.MathTrainableRULERWorkflow.run">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.math_trainable_ruler_workflow.MathTrainableRULERWorkflow.run">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Modified from MathRULERWorkflow.run&quot;&quot;&quot;</span>
 
@@ -1074,7 +1072,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathTrainableRULERWorkflow.get_ruler_responses">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.MathTrainableRULERWorkflow.get_ruler_responses">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#trinity.common.workflows.math_trainable_ruler_workflow.MathTrainableRULERWorkflow.get_ruler_responses">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_ruler_responses</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">responses</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span>

@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -949,8 +948,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">sympy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pylatexenc</span><span class="w"> </span><span class="kn">import</span> <span class="n">latex2text</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing</span><span class="w"> </span><span class="kn">import</span> <span class="n">sympy_parser</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.reward_score.prime_math</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_normalize</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.reward_score.prime_math.grader</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_equal</span>
 
 <span class="c1"># Constants for normalization</span>
 <span class="n">SUBSTITUTIONS</span> <span class="o">=</span> <span class="p">[</span>
@@ -1333,6 +1330,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">given_answer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.reward_score.prime_math</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_normalize</span>
 
     <span class="n">ground_truth_normalized_mathd</span> <span class="o">=</span> <span class="n">math_normalize</span><span class="o">.</span><span class="n">normalize_answer</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>
     <span class="n">given_answer_normalized_mathd</span> <span class="o">=</span> <span class="n">math_normalize</span><span class="o">.</span><span class="n">normalize_answer</span><span class="p">(</span><span class="n">given_answer</span><span class="p">)</span>
@@ -1441,6 +1439,8 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        Reward score (1.0 for correct, 0.0 for incorrect)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.reward_score.prime_math.grader</span><span class="w"> </span><span class="kn">import</span> <span class="n">math_equal</span>
+
     <span class="c1"># First assert intended generation and gt type</span>
     <span class="n">model_output</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
     <span class="n">ground_truth</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>

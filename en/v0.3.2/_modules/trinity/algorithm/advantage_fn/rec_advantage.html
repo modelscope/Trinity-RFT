@@ -932,18 +932,17 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">GroupAdvantage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupAdvantage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">group_by</span>
 
 
 <div class="viewcode-block" id="RECGroupedAdvantage">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.RECGroupedAdvantage">[docs]</a>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rec&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RECGroupedAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An advantage class that calculates REC advantages.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RECGroupedAdvantage.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.RECGroupedAdvantage.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
@@ -964,13 +963,13 @@ document.write(`
 
 
 <div class="viewcode-block" id="RECGroupedAdvantage.group_experiences">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.RECGroupedAdvantage.group_experiences">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage.group_experiences">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">group_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">id_type</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RECGroupedAdvantage.calculate_group_advantage">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.RECGroupedAdvantage.calculate_group_advantage">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage.calculate_group_advantage">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_group_advantage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
@@ -1030,7 +1029,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="RECGroupedAdvantage.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.RECGroupedAdvantage.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.rec_advantage.html#trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>

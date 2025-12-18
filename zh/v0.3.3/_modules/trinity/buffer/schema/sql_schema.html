@@ -940,16 +940,12 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">SQL_SCHEMA</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;sql_schema&quot;</span><span class="p">)</span>
 
 <span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="TaskModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.TaskModel">[文档]</a>
-<span class="nd">@SQL_SCHEMA</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TaskModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Model for storing tasks in SQLAlchemy.&quot;&quot;&quot;</span>
 
@@ -969,7 +965,6 @@ document.write(`
 
 <div class="viewcode-block" id="ExperienceModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.ExperienceModel">[文档]</a>
-<span class="nd">@SQL_SCHEMA</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;experience&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExperienceModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for Experience.&quot;&quot;&quot;</span>
 
@@ -1011,7 +1006,6 @@ document.write(`
 
 <div class="viewcode-block" id="SFTDataModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.SFTDataModel">[文档]</a>
-<span class="nd">@SQL_SCHEMA</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sft&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SFTDataModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for SFT data.&quot;&quot;&quot;</span>
 
@@ -1043,7 +1037,6 @@ document.write(`
 
 <div class="viewcode-block" id="DPODataModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.DPODataModel">[文档]</a>
-<span class="nd">@SQL_SCHEMA</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPODataModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for DPO data.&quot;&quot;&quot;</span>
 
@@ -1084,6 +1077,8 @@ document.write(`
 
     <span class="k">if</span> <span class="n">schema_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">schema_type</span> <span class="o">=</span> <span class="s2">&quot;task&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQL_SCHEMA</span>
 
     <span class="n">base_class</span> <span class="o">=</span> <span class="n">SQL_SCHEMA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema_type</span><span class="p">)</span>
 

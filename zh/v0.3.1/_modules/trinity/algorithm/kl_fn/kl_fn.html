@@ -934,9 +934,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">KL_FN</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;kl_fn&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="KLFn">
@@ -1067,7 +1064,6 @@ document.write(`
 
 <div class="viewcode-block" id="DummyKLFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.DummyKLFn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyKLFn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dummy KL function.</span>
@@ -1109,7 +1105,6 @@ document.write(`
 
 <div class="viewcode-block" id="K1Fn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K1Fn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;k1&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">K1Fn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    KL K1 function.</span>
@@ -1130,7 +1125,6 @@ document.write(`
 
 <div class="viewcode-block" id="K2Fn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K2Fn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;k2&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">K2Fn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    KL K2 function.</span>
@@ -1151,7 +1145,6 @@ document.write(`
 
 <div class="viewcode-block" id="K3Fn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.K3Fn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;k3&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">K3Fn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    KL K3 function.</span>
@@ -1173,7 +1166,6 @@ document.write(`
 
 <div class="viewcode-block" id="LowVarKLFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.LowVarKLFn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;low_var_kl&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">LowVarKLFn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Low Variance KL function.</span>
@@ -1198,7 +1190,6 @@ document.write(`
 
 <div class="viewcode-block" id="AbsFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.AbsFn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;abs&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AbsFn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    KL Abs function.</span>
@@ -1219,7 +1210,6 @@ document.write(`
 
 <div class="viewcode-block" id="CorrectedK3Fn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.kl_fn.kl_fn.html#trinity.algorithm.CorrectedK3Fn">[文档]</a>
-<span class="nd">@KL_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;corrected_k3&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CorrectedK3Fn</span><span class="p">(</span><span class="n">KLFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Corrected K3 function with importance sampling.</span>

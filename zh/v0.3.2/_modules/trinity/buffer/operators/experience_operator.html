@@ -934,9 +934,6 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperatorConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">EXPERIENCE_OPERATORS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;experience_operators&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ExperienceOperator">
@@ -973,6 +970,9 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            List[ExperienceOperator]: List of instantiated ExperienceOperator objects.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Import here to avoid circular import</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPERIENCE_OPERATORS</span>
+
         <span class="n">operators</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">operator_configs</span><span class="p">:</span>
             <span class="n">operator_class</span> <span class="o">=</span> <span class="n">EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>

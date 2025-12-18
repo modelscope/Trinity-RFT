@@ -938,12 +938,11 @@ document.write(`
     <span class="n">validate_think_pattern</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.format_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatReward</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardFn</span>
 
 
 <div class="viewcode-block" id="MathRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.MathRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_reward&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.math_reward.MathRewardFn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
 
@@ -951,7 +950,7 @@ document.write(`
     <span class="n">DEFAULT_ANSWER_PARSER</span> <span class="o">=</span> <span class="n">simple_answer_parser</span>
 
 <div class="viewcode-block" id="MathRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.MathRewardFn.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.math_reward.MathRewardFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">answer_parser</span><span class="o">=</span><span class="n">DEFAULT_ANSWER_PARSER</span><span class="p">,</span>
@@ -976,13 +975,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathBoxedRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.MathBoxedRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_boxed_reward&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.math_reward.MathBoxedRewardFn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathBoxedRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MathBoxedRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.MathBoxedRewardFn.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.math_reward.MathBoxedRewardFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>

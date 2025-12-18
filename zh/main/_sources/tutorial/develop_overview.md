@@ -17,13 +17,22 @@ Trinity-RFT 将 RL 训练过程拆分为了三个模块：**Explorer**、**Train
 Trinity-RFT 提供了插件化的开发方式，可以在不修改框架代码的前提下，灵活地添加自定义模块。
 开发者可以将自己编写的模块代码放在 `trinity/plugins` 目录下。Trinity-RFT 会在运行时自动加载该目录下的所有 Python 文件，并注册其中的自定义模块。
 Trinity-RFT 也支持在运行时通过设置 `--plugin-dir` 选项来指定其他目录，例如：`trinity run --config <config_file> --plugin-dir <your_plugin_dir>`。
+另外，你也可以使用相对路径来在 YAML 配置文件中指定自定义模块，例如：`default_workflow_type: 'examples.agentscope_frozenlake.workflow.FrozenLakeWorkflow'`。
 ```
 
 对于准备向 Trinity-RFT 提交的模块，请遵循以下步骤：
 
 1. 在适当目录中实现你的代码，例如 `trinity/common/workflows` 用于 `Workflow`，`trinity/algorithm` 用于 `Algorithm`，`trinity/buffer/operators` 用于 `Operator`。
 
-2. 在目录对应的 `__init__.py` 文件中注册你的模块。
+2. 在目录对应的 `__init__.py` 文件中的 `default_mapping` 字典中注册你的模块。例如，对于新的 `ExampleWorkflow` 类，你需要在 `trinity/common/workflows/__init__.py` 文件中的 `WORKFLOWS` 中添加你的模块：
+   ```python
+   WORKFLOWS: Registry = Registry(
+       "workflows",
+       default_mapping={
+           "example_workflow": "trinity.common.workflows.workflow.ExampleWorkflow",
+       },
+   )
+   ```
 
 3. 在 `tests` 目录中为你的模块添加测试，遵循现有测试的命名约定和结构。
 

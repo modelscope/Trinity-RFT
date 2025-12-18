@@ -933,15 +933,14 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">AdvantageFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdvantageFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperienceOperator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">group_by</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">gather_metrics</span>
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn">[docs]</a>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;step_wise_grpo&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StepWiseGRPOAdvantageFn</span><span class="p">(</span><span class="n">AdvantageFn</span><span class="p">,</span> <span class="n">ExperienceOperator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An advantage function that broadcasts advantages from the last step to previous steps.</span>
@@ -949,7 +948,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
@@ -979,7 +978,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.calculate_last_step_advantage">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.calculate_last_step_advantage">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.calculate_last_step_advantage">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_last_step_advantage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">exps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Experience</span><span class="p">],</span>
@@ -1026,7 +1025,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.broadcast_advantages">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.broadcast_advantages">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.broadcast_advantages">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_advantages</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">run_exps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]],</span> <span class="n">scores</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]]:</span>
@@ -1051,7 +1050,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.process">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.process">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.process">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[],</span> <span class="p">{}</span>
@@ -1128,7 +1127,7 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.compute_in_trainer">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.compute_in_trainer">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.compute_in_trainer">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_in_trainer</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the advantage should be computed in the trainer loop.&quot;&quot;&quot;</span>
@@ -1136,7 +1135,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the default configuration for this strategy.&quot;&quot;&quot;</span>

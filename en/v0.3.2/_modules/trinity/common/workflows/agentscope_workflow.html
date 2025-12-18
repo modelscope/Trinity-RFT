@@ -931,19 +931,18 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
 
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.AgentScopeWorkflowAdapter">[docs]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;agentscope_workflow_adapter&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeWorkflowAdapter</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapter to wrap a agentscope trainable workflow function into a Trinity Workflow.&quot;&quot;&quot;</span>
 
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.AgentScopeWorkflowAdapter.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -987,7 +986,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter.construct_experiences">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.AgentScopeWorkflowAdapter.construct_experiences">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapter.construct_experiences">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">construct_experiences</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1007,7 +1006,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter.run_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.AgentScopeWorkflowAdapter.run_async">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapter.run_async">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow asynchronously and return experiences.&quot;&quot;&quot;</span>
         <span class="n">reward</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_model</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>

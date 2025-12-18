@@ -126,28 +126,15 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         return self.generate_env_inference_samples(env, rollout_n)
 ```
 
-同时，记得注册你的 workflow：
+同时，记得在 `trinity/common/workflows/__init__.py` 中的 `default_mapping` 中注册你的 workflow。
+
 ```python
-@WORKFLOWS.register_module("alfworld_workflow")
-class AlfworldWorkflow(MultiTurnWorkflow):
-    """A workflow for alfworld task."""
-    ...
-```
-
-并在初始化文件 `trinity/common/workflows/__init__.py` 中包含它：
-
-```diff
- # -*- coding: utf-8 -*-
- """Workflow module"""
- from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from .envs.alfworld.alfworld_workflow import AlfworldWorkflow
-
- __all__ = [
-     "WORKFLOWS",
-     "SimpleWorkflow",
-     "MathWorkflow",
-+    "AlfworldWorkflow",
- ]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+        "alfworld_workflow": "trinity.common.workflows.envs.alfworld.alfworld_workflow.AlfworldWorkflow",
+    },
+)
 ```
 
 这样就完成了！整个过程非常简单😄，并且在这两个环境中的训练过程都能收敛。

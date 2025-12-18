@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -942,17 +941,16 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 
 
 <div class="viewcode-block" id="SimpleMMWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.SimpleMMWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;simple_mm_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimpleMMWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for simple single-round task.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SimpleMMWorkflow.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.SimpleMMWorkflow.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -969,7 +967,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SimpleMMWorkflow.reset">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.SimpleMMWorkflow.reset">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow.reset">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.dataset.vision_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_image</span><span class="p">,</span> <span class="n">process_video</span>
 
@@ -1000,7 +998,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="SimpleMMWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.SimpleMMWorkflow.run">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow.run">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: test generate_mm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;start chat&quot;</span><span class="p">)</span>
@@ -1030,13 +1028,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncSimpleMMWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.AsyncSimpleMMWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_simple_mm_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.AsyncSimpleMMWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncSimpleMMWorkflow</span><span class="p">(</span><span class="n">SimpleMMWorkflow</span><span class="p">):</span>
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncSimpleMMWorkflow.run_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.AsyncSimpleMMWorkflow.run_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.AsyncSimpleMMWorkflow.run_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: test generate_mm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;start chat&quot;</span><span class="p">)</span>

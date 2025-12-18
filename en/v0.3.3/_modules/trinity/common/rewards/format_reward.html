@@ -932,19 +932,18 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardFn</span>
 
 
 <div class="viewcode-block" id="FormatReward">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.format_reward.html#trinity.common.rewards.FormatReward">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;format_reward&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.format_reward.html#trinity.common.rewards.format_reward.FormatReward">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FormatReward</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that checks if the reasoning process is enclosed within &lt;think&gt; and &lt;/think&gt; tags, while the final answer is enclosed within &lt;answer&gt; and &lt;/answer&gt; tags.</span>
 <span class="sd">    Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="FormatReward.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.format_reward.html#trinity.common.rewards.FormatReward.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.format_reward.html#trinity.common.rewards.format_reward.FormatReward.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span> <span class="k">if</span> <span class="n">pattern</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;^&lt;think&gt;\n.*?\n&lt;/think&gt;\n&lt;answer&gt;\n.*?\n&lt;/answer&gt;$&quot;</span></div>
 

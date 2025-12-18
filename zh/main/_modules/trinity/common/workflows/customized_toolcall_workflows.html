@@ -594,7 +594,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -948,7 +947,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <span class="n">qwen_tool_prompts</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;# Tool</span>
@@ -967,7 +966,7 @@ document.write(`
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <div class="viewcode-block" id="construct_prompt">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.construct_prompt">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.construct_prompt">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">construct_prompt</span><span class="p">(</span><span class="n">dp</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_tools</span><span class="p">(</span><span class="n">tools</span><span class="p">):</span>
         <span class="n">tools</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span>
@@ -999,7 +998,7 @@ document.write(`
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <div class="viewcode-block" id="validate_result">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.validate_result">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.validate_result">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">answer</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">answer</span><span class="p">):</span>
@@ -1031,7 +1030,7 @@ document.write(`
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <div class="viewcode-block" id="validate_format">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.validate_format">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.validate_format">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_format</span><span class="p">(</span><span class="n">tool_call_list</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tool_call_list</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -1045,7 +1044,7 @@ document.write(`
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <div class="viewcode-block" id="extract_solution_v0_toolN1">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.extract_solution_v0_toolN1">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.extract_solution_v0_toolN1">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_solution_v0_toolN1</span><span class="p">(</span><span class="n">tool_call_str</span><span class="p">):</span>
     <span class="n">output_string</span> <span class="o">=</span> <span class="n">tool_call_str</span>
 
@@ -1063,7 +1062,7 @@ document.write(`
 
 <span class="c1"># Adapted from https://github.com/NVlabs/Tool-N1</span>
 <div class="viewcode-block" id="compute_score_v0_toolN1">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_score_v0_toolN1">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.compute_score_v0_toolN1">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_score_v0_toolN1</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">solution_str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">,</span>
@@ -1149,7 +1148,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="compute_toolcall_reward">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.compute_toolcall_reward">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.compute_toolcall_reward">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_toolcall_reward</span><span class="p">(</span>
     <span class="n">solution_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ground_truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1163,8 +1162,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ToolCallWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.ToolCallWorkflow">[文档]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;toolcall_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ToolCallWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A workflow for toolcall tasks.</span>
@@ -1176,7 +1174,7 @@ document.write(`
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="ToolCallWorkflow.reset">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.ToolCallWorkflow.reset">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.reset">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span>
@@ -1191,7 +1189,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ToolCallWorkflow.format_prompt">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.ToolCallWorkflow.format_prompt">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.format_prompt">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">raw_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="n">construct_prompt</span><span class="p">(</span><span class="n">raw_task</span><span class="p">)</span>
@@ -1199,7 +1197,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ToolCallWorkflow.run_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.ToolCallWorkflow.run_async">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.run_async">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_prompt</span><span class="p">()</span>
 

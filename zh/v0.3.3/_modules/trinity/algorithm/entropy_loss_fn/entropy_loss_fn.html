@@ -935,9 +935,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">ENTROPY_LOSS_FN</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="EntropyLossFn">
@@ -979,7 +976,6 @@ document.write(`
 
 <div class="viewcode-block" id="DefaultEntropyLossFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.entropy_loss_fn.entropy_loss_fn.html#trinity.algorithm.DefaultEntropyLossFn">[文档]</a>
-<span class="nd">@ENTROPY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DefaultEntropyLossFn</span><span class="p">(</span><span class="n">EntropyLossFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic entropy loss function.</span>
@@ -1005,7 +1001,6 @@ document.write(`
 
 <div class="viewcode-block" id="MixEntropyLossFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.entropy_loss_fn.entropy_loss_fn.html#trinity.algorithm.MixEntropyLossFn">[文档]</a>
-<span class="nd">@ENTROPY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixEntropyLossFn</span><span class="p">(</span><span class="n">EntropyLossFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic entropy loss function for mix algorithm.</span>
@@ -1039,7 +1034,6 @@ document.write(`
 
 <div class="viewcode-block" id="DummyEntropyLossFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.entropy_loss_fn.entropy_loss_fn.html#trinity.algorithm.DummyEntropyLossFn">[文档]</a>
-<span class="nd">@ENTROPY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DummyEntropyLossFn</span><span class="p">(</span><span class="n">EntropyLossFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dummy entropy loss function.</span>

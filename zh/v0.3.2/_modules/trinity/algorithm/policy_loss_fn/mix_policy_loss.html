@@ -933,14 +933,13 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyLossFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.ppo_policy_loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPOPolicyLossFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.sft_loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFTLossFn</span>
 
 
 <div class="viewcode-block" id="MIXPolicyLossFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.MIXPolicyLossFn">[文档]</a>
-<span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.mix_policy_loss.MIXPolicyLossFn">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MIXPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a mixed policy loss combining GRPO and SFT losses.</span>
 
@@ -956,7 +955,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MIXPolicyLossFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.MIXPolicyLossFn.__init__">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.mix_policy_loss.MIXPolicyLossFn.__init__">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
@@ -1056,7 +1055,7 @@ document.write(`
         <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span>
 
 <div class="viewcode-block" id="MIXPolicyLossFn.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.MIXPolicyLossFn.default_args">[文档]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html#trinity.algorithm.policy_loss_fn.mix_policy_loss.MIXPolicyLossFn.default_args">[文档]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>

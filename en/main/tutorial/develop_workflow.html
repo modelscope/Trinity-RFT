@@ -593,7 +593,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -1034,9 +1033,9 @@ A qualified workflow needs to use a model to complete the specified task and obt
 <li><p><strong>Model</strong> (<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>): The model being trained. The workflow uses this model to generate responses based on the task. Trinity-RFT will provide the model instance to initialize the workflow.</p></li>
 <li><p><strong>Workflow</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>): It defines the interaction flow between Agents and Environments. It uses the <code class="docutils literal notranslate"><span class="pre">Task</span></code> to initialize itself and uses the <code class="docutils literal notranslate"><span class="pre">Model</span></code> to generate responses. Different from general Agent Applications, a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> also needs to calculate rewards based on the environment’s feedback. Trinity-RFT provides several built-in workflows, including:</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.MathWorkflow" title="trinity.common.workflows.MathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.MathWorkflow</span></code></a>): For math scenarios, submits problems to LLM, parses LLM responses, and calculates scores (rewards).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">WebShopWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow" title="trinity.common.workflows.WebShopWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.WebShopWorkflow</span></code></a>): For webshop scenarios, it contains multi-turn interaction with environment.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow" title="trinity.common.workflows.AgentScopeReActWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReActWorkflow</span></code></a>): It directly uses a pre-implemented ReActAgent (based on AgentScope) to solve tasks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.MathWorkflow</span></code>): For math scenarios, submits problems to LLM, parses LLM responses, and calculates scores (rewards).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WebShopWorkflow</span></code> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.WebShopWorkflow</span></code>): For webshop scenarios, it contains multi-turn interaction with environment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReActWorkflow</span></code>): It directly uses a pre-implemented ReActAgent (based on AgentScope) to solve tasks.</p></li>
 </ul>
 </li>
 <li><p><strong>Experience</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>): The output of running a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The number and structure of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> depend on the specific workflow. For example, for common PPO/GRPO algorithms, <code class="docutils literal notranslate"><span class="pre">Experience</span></code> includes lists of token IDs, action masks (identifying which tokens were generated by the LLM), log probabilities, rewards, etc.</p></li>
@@ -1178,24 +1177,14 @@ Finally, we construct a list of <code class="docutils literal notranslate"><span
 </section>
 <section id="registering-your-workflow">
 <h3>Registering Your Workflow<a class="headerlink" href="#registering-your-workflow" title="Link to this heading">#</a></h3>
-<p>Register your workflow using the <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> decorator.
+<p>Register your workflow using the <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> in <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code>.
 Ensure the name does not conflict with existing workflows.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import some packages</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span>
-
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p>For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> folder, e.g., <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>. And add the following line to <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c1"># existing __all__ lines</span>
-    <span class="s2">&quot;ExampleWorkflow&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">WORKFLOWS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span>
+    <span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
+    <span class="n">default_mapping</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;example_workflow&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.common.workflows.workflow.ExampleWorkflow&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -1207,8 +1196,7 @@ Ensure the name does not conflict with existing workflows.</p>
 In this case, you can set the <code class="docutils literal notranslate"><span class="pre">can_reset</span></code> property and implement <code class="docutils literal notranslate"><span class="pre">reset</span></code> method to avoid re-initialization.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">can_reset</span></code> is a class property that indicates whether the workflow supports resetting.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">reset</span></code> method accepts a <code class="docutils literal notranslate"><span class="pre">Task</span></code> parameter and resets the workflow’s internal state based on the new task.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># some code</span>
@@ -1226,8 +1214,7 @@ In this case, you can set the <code class="docutils literal notranslate"><span c
 For this case, you can implement the <code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> property and <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> is a class property that indicates whether the workflow supports multiple executions within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method accepts two parameters: <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> specifies the number of times to execute within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and <code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="c1"># some code</span>
 
@@ -1267,8 +1254,7 @@ For this case, you can implement the <code class="docutils literal notranslate">
 </section>
 <section id="full-code-example">
 <h3>Full Code Example<a class="headerlink" href="#full-code-example" title="Link to this heading">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -1346,8 +1332,7 @@ For this case, you can implement the <code class="docutils literal notranslate">
 <section id="async-support">
 <h3>Async Support<a class="headerlink" href="#async-support" title="Link to this heading">#</a></h3>
 <p>The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can set <code class="docutils literal notranslate"><span class="pre">is_async</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>, then implement the <code class="docutils literal notranslate"><span class="pre">run_async</span></code> method. In this case, you no longer need to implement the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and the initialization parameter <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> will also change to <code class="docutils literal notranslate"><span class="pre">List[openai.AsyncOpenAI]</span></code>, while other methods and properties remain changed.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow_async&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -1370,8 +1355,7 @@ For this case, you can implement the <code class="docutils literal notranslate">
 <span class="w">    </span><span class="c1"># Other fields</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>

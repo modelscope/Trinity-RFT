@@ -592,7 +592,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -941,24 +940,19 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ADVANTAGE_FN</span><span class="p">,</span>
-    <span class="n">AdvantageFn</span><span class="p">,</span>
-    <span class="n">GroupAdvantage</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdvantageFn</span><span class="p">,</span> <span class="n">GroupAdvantage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">group_by</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
 
 
 <div class="viewcode-block" id="ASYMREAdvantageFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREAdvantageFn">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREAdvantageFn">[docs]</a>
 <span class="nd">@Deprecated</span>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;asymre_verl&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ASYMREAdvantageFn</span><span class="p">(</span><span class="n">AdvantageFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;AsymRE advantage computation&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ASYMREAdvantageFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREAdvantageFn.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREAdvantageFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">baseline_shift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span>
@@ -1021,7 +1015,7 @@ document.write(`
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span>
 
 <div class="viewcode-block" id="ASYMREAdvantageFn.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREAdvantageFn.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREAdvantageFn.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1032,26 +1026,25 @@ document.write(`
 
 
 <div class="viewcode-block" id="ASYMREGroupAdvantage">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREGroupAdvantage">[docs]</a>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;asymre&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ASYMREGroupAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;asymre Group Advantage computation&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ASYMREGroupAdvantage.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREGroupAdvantage.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">baseline_shift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">baseline_shift</span> <span class="o">=</span> <span class="n">baseline_shift</span></div>
 
 
 <div class="viewcode-block" id="ASYMREGroupAdvantage.group_experiences">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREGroupAdvantage.group_experiences">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage.group_experiences">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">group_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">id_type</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ASYMREGroupAdvantage.calculate_group_advantage">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREGroupAdvantage.calculate_group_advantage">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage.calculate_group_advantage">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_group_advantage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
@@ -1073,7 +1066,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="ASYMREGroupAdvantage.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.ASYMREGroupAdvantage.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html#trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;baseline_shift&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">}</span></div>

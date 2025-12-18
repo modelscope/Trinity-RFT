@@ -592,7 +592,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -938,26 +937,22 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators.experience_operator</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">EXPERIENCE_OPERATORS</span><span class="p">,</span>
-    <span class="n">ExperienceOperator</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators.experience_operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperienceOperator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SELECTOR_METRIC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 
 
 <div class="viewcode-block" id="PassRateCalculator">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.PassRateCalculator">[docs]</a>
-<span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;pass_rate_calculator&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PassRateCalculator</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
 <div class="viewcode-block" id="PassRateCalculator.__init__">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.PassRateCalculator.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="PassRateCalculator.process">
-<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.PassRateCalculator.process">[docs]</a>
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.mappers.pass_rate_calculator.html#trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator.process">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="n">raw_metric</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>

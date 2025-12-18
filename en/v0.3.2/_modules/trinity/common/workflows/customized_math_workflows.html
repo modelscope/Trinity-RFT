@@ -932,17 +932,16 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.math_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathBoxedRewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 
 
 <div class="viewcode-block" id="MathBoxedWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.MathBoxedWorkflow">[docs]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_boxed_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathBoxedWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for math tasks that give answers in boxed format.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MathBoxedWorkflow.reset">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.MathBoxedWorkflow.reset">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span>
@@ -978,7 +977,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathBoxedWorkflow.format_prompt">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.MathBoxedWorkflow.format_prompt">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.format_prompt">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">prompt_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">:</span>
@@ -990,7 +989,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MathBoxedWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.MathBoxedWorkflow.run">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_base</span><span class="p">:</span>
             <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
@@ -1033,13 +1032,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncMathBoxedWorkflow">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.AsyncMathBoxedWorkflow">[docs]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_math_boxed_workflow&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.AsyncMathBoxedWorkflow">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncMathBoxedWorkflow</span><span class="p">(</span><span class="n">MathBoxedWorkflow</span><span class="p">):</span>
     <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncMathBoxedWorkflow.run_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.AsyncMathBoxedWorkflow.run_async">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.AsyncMathBoxedWorkflow.run_async">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_base</span><span class="p">:</span>
             <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>

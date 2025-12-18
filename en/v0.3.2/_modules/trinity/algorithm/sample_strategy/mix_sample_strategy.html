@@ -931,10 +931,7 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.sample_strategy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">SAMPLE_STRATEGY</span><span class="p">,</span>
-    <span class="n">SampleStrategy</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.sample_strategy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">representative_sample</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span>
@@ -943,13 +940,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="MixSampleStrategy">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy">[docs]</a>
-<span class="nd">@SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixSampleStrategy</span><span class="p">(</span><span class="n">SampleStrategy</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The default sample strategy.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MixSampleStrategy.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expert_data_ratio&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -990,7 +986,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MixSampleStrategy.sample">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.sample">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.sample">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/read_experience&quot;</span><span class="p">):</span>
@@ -1041,7 +1037,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MixSampleStrategy.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1051,7 +1047,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MixSampleStrategy.state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.state_dict">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.state_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;usual_buffer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
@@ -1060,7 +1056,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="MixSampleStrategy.load_state_dict">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.MixSampleStrategy.load_state_dict">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.load_state_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">state_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;usual_buffer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;usual_buffer&quot;</span><span class="p">])</span>

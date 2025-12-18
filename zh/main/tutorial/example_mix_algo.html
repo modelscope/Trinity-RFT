@@ -232,7 +232,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -669,8 +668,7 @@ document.write(`
 <section id="id2">
 <h2>步骤 1：定义算法<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
 <p>在 <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/algorithm.py</span></code> 中，我们引入一个新的算法类型 <code class="docutils literal notranslate"><span class="pre">MIX</span></code>。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MIXAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MIXAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MIX algorithm.&quot;&quot;&quot;</span>
 
     <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -775,8 +773,7 @@ document.write(`
 <section id="id4">
 <h2>步骤 3：定义策略损失函数<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
 <p>我们在 <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/policy_loss_fn/mix_policy_loss.py</span></code> 中定义一个 <code class="docutils literal notranslate"><span class="pre">MixPolicyLoss</span></code> 类，它分别计算关于普通 experience 和专家 experience 的两个 losses 之和。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MIXPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MIXPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>

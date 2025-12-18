@@ -592,7 +592,6 @@ window.addEventListener("load", load);
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -950,28 +949,24 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 
 <div class="viewcode-block" id="is_database_url">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.is_database_url">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.is_database_url">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_database_url</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sqlite:///&quot;</span><span class="p">,</span> <span class="s2">&quot;postgresql://&quot;</span><span class="p">,</span> <span class="s2">&quot;mysql://&quot;</span><span class="p">])</span></div>
 
 
 
 <div class="viewcode-block" id="is_json_file">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.is_json_file">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.is_json_file">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">is_json_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.jsonl&quot;</span><span class="p">)</span></div>
 
 
 
-<span class="n">PRIORITY_FUNC</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">)</span>
-
-
 <div class="viewcode-block" id="PriorityFunction">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.PriorityFunction">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.PriorityFunction">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PriorityFunction</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Each priority_fn,</span>
@@ -991,7 +986,7 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the priority of item.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PriorityFunction.default_config">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.PriorityFunction.default_config">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.PriorityFunction.default_config">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -1001,8 +996,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="LinearDecayPriority">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority">[docs]</a>
-<span class="nd">@PRIORITY_FUNC</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;linear_decay&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayPriority">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LinearDecayPriority</span><span class="p">(</span><span class="n">PriorityFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate priority by linear decay.</span>
 
@@ -1010,7 +1004,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LinearDecayPriority.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayPriority.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">=</span> <span class="n">decay</span></div>
 
@@ -1021,7 +1015,7 @@ document.write(`
         <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span>
 
 <div class="viewcode-block" id="LinearDecayPriority.default_config">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayPriority.default_config">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayPriority.default_config">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1032,8 +1026,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="LinearDecayUseCountControlPriority">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority">[docs]</a>
-<span class="nd">@PRIORITY_FUNC</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;decay_limit_randomization&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayUseCountControlPriority">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LinearDecayUseCountControlPriority</span><span class="p">(</span><span class="n">PriorityFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate priority by linear decay, use count control, and randomization.</span>
 
@@ -1041,7 +1034,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LinearDecayUseCountControlPriority.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayUseCountControlPriority.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">use_count_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">=</span> <span class="n">decay</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_count_limit</span> <span class="o">=</span> <span class="n">use_count_limit</span>
@@ -1058,7 +1051,7 @@ document.write(`
         <span class="k">return</span> <span class="n">priority</span><span class="p">,</span> <span class="n">put_into_queue</span>
 
 <div class="viewcode-block" id="LinearDecayUseCountControlPriority.default_config">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.LinearDecayUseCountControlPriority.default_config">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.LinearDecayUseCountControlPriority.default_config">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1071,45 +1064,45 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueBuffer">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QueueBuffer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <div class="viewcode-block" id="QueueBuffer.put">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.put">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.put">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Put a list of experiences into the queue.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="QueueBuffer.get">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.get">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.get">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of experience from the queue.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="QueueBuffer.qsize">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.qsize">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.qsize">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">qsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current size of the queue.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="QueueBuffer.close">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.close">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.close">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the queue.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="QueueBuffer.stopped">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.stopped">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.stopped">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if there is no more data to read.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="QueueBuffer.get_queue">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueBuffer.get_queue">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueBuffer.get_queue">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_queue</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QueueBuffer&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a queue instance based on the storage configuration.&quot;&quot;&quot;</span>
@@ -1132,10 +1125,10 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncQueue">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncQueue">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncQueue">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncQueue</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">,</span> <span class="n">QueueBuffer</span><span class="p">):</span>
 <div class="viewcode-block" id="AsyncQueue.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncQueue.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncQueue.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the async queue with a specified capacity.</span>
@@ -1148,7 +1141,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncQueue.close">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncQueue.close">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncQueue.close">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the queue.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1159,7 +1152,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncQueue.stopped">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncQueue.stopped">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncQueue.stopped">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if there is no more data to read.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty</span><span class="p">()</span></div>
@@ -1168,7 +1161,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncPriorityQueue">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncPriorityQueue</span><span class="p">(</span><span class="n">QueueBuffer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An asynchronous priority queue that manages a fixed-size buffer of experience items.</span>
@@ -1183,7 +1176,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AsyncPriorityQueue.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1200,6 +1193,8 @@ document.write(`
 <span class="sd">            priority_fn (`str`): Name of the function to use for determining item priority.</span>
 <span class="sd">            kwargs: Additional keyword arguments for the priority function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRIORITY_FUNC</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">capacity</span> <span class="o">=</span> <span class="n">capacity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">item_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">priority_groups</span> <span class="o">=</span> <span class="n">SortedDict</span><span class="p">()</span>  <span class="c1"># Maps priority -&gt; deque of items</span>
@@ -1249,13 +1244,13 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span><span class="o">.</span><span class="n">notify</span><span class="p">()</span>
 
 <div class="viewcode-block" id="AsyncPriorityQueue.put">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.put">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.put">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_put</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AsyncPriorityQueue.get">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.get">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.get">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve the highest-priority item from the queue.</span>
@@ -1288,13 +1283,13 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncPriorityQueue.qsize">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.qsize">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.qsize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">qsize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_count</span></div>
 
 
 <div class="viewcode-block" id="AsyncPriorityQueue.close">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.close">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.close">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Close the queue.</span>
@@ -1307,7 +1302,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AsyncPriorityQueue.stopped">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.AsyncPriorityQueue.stopped">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.AsyncPriorityQueue.stopped">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority_groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div>
 </div>
@@ -1315,12 +1310,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueStorage">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QueueStorage</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An wrapper of a async queue.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="QueueStorage.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;queue_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -1354,14 +1349,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueStorage.acquire">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.acquire">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.acquire">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_count</span></div>
 
 
 <div class="viewcode-block" id="QueueStorage.release">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.release">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.release">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Release the queue.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_count</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -1373,14 +1368,14 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueStorage.length">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.length">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.length">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The length of the queue.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="QueueStorage.put_batch">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.put_batch">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.put_batch">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_list</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Put batch of experience.&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
@@ -1389,7 +1384,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueStorage.get_batch">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.get_batch">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.get_batch">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get batch of experience.&quot;&quot;&quot;</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -1414,7 +1409,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="QueueStorage.get_wrapper">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.queue.QueueStorage.get_wrapper">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.queue.html#trinity.buffer.storage.QueueStorage.get_wrapper">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the queue actor.&quot;&quot;&quot;</span>

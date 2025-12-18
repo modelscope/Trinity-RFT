@@ -932,16 +932,15 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyLossFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_sum</span>
 
 
 <div class="viewcode-block" id="DPOLossFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.DPOLossFn">[docs]</a>
-<span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.dpo_loss.DPOLossFn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPOLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
 <div class="viewcode-block" id="DPOLossFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.DPOLossFn.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.dpo_loss.DPOLossFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
@@ -992,7 +991,7 @@ document.write(`
         <span class="p">}</span>
 
 <div class="viewcode-block" id="DPOLossFn.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.DPOLossFn.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.dpo_loss.DPOLossFn.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>

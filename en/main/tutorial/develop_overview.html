@@ -228,7 +228,6 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.reader.html">trinity.buffer.reader.reader module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
 </ul>
 </details></li>
@@ -657,12 +656,23 @@ document.write(`
 <p class="admonition-title">Tip</p>
 <p>Trinity-RFT provides a modular development approach, allowing you to flexibly add custom modules without modifying the framework code.
 You can place your module code in the <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code> directory. Trinity-RFT will automatically load all Python files in that directory at runtime and register the custom modules within them.
-Trinity-RFT also supports specifying other directories at runtime by setting the <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> option, for example: <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">&lt;config_file&gt;</span> <span class="pre">--plugin-dir</span> <span class="pre">&lt;your_plugin_dir&gt;</span></code>.</p>
+Trinity-RFT also supports specifying other directories at runtime by setting the <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> option, for example: <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">&lt;config_file&gt;</span> <span class="pre">--plugin-dir</span> <span class="pre">&lt;your_plugin_dir&gt;</span></code>.
+Alternatively, you can use the relative path to the custom module in the YAML configuration file, for example: <code class="docutils literal notranslate"><span class="pre">default_workflow_type:</span> <span class="pre">'examples.agentscope_frozenlake.workflow.FrozenLakeWorkflow'</span></code>.</p>
 </div>
 <p>For modules you plan to contribute to Trinity-RFT, please follow these steps:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>Implement your code in the appropriate directory, such as <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> for <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, <code class="docutils literal notranslate"><span class="pre">trinity/algorithm</span></code> for <code class="docutils literal notranslate"><span class="pre">Algorithm</span></code>, and <code class="docutils literal notranslate"><span class="pre">trinity/buffer/operators</span></code> for <code class="docutils literal notranslate"><span class="pre">Operator</span></code>.</p></li>
-<li><p>Register your module in the corresponding <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file of the directory.</p></li>
+<li><p>Register your module in the corresponding mapping dictionary in the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file of the directory.
+For example, if you want to register a new workflow class <code class="docutils literal notranslate"><span class="pre">ExampleWorkflow</span></code>, you need to modify the <code class="docutils literal notranslate"><span class="pre">default_mapping</span></code> dictionary of <code class="docutils literal notranslate"><span class="pre">WORKFLOWS</span></code> in the <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">WORKFLOWS</span><span class="p">:</span> <span class="n">Registry</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span>
+    <span class="s2">&quot;workflows&quot;</span><span class="p">,</span>
+    <span class="n">default_mapping</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;example_workflow&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.common.workflows.workflow.ExampleWorkflow&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
 <li><p>Add tests for your module in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory, following the naming conventions and structure of existing tests.</p></li>
 <li><p>Before submitting your code, ensure it passes the code style check by running <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code>.</p></li>
 <li><p>Submit a Pull Request to the Trinity-RFT repository, providing a detailed description of your module’s functionality and purpose.</p></li>
