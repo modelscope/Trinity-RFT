@@ -625,6 +625,7 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer"><code class="docutils literal notranslate"><span class="pre">QueueBuffer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.set_min_model_version"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.set_min_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.put"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.put()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.get"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.get()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.qsize"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.qsize()</span></code></a></li>
@@ -635,6 +636,8 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue"><code class="docutils literal notranslate"><span class="pre">AsyncQueue</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.__init__"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.put"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.put()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.get"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.get()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.close"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.close()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.stopped"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.stopped()</span></code></a></li>
 </ul>
@@ -753,6 +756,11 @@ put_into_queue: bool, decide whether to put item into queue</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.storage.queue.</span></span><span class="sig-name descname"><span class="pre">QueueBuffer</span></span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#QueueBuffer"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.QueueBuffer" title="Link to this definition">#</a></dt>
 <dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.storage.queue.QueueBuffer.set_min_model_version">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_min_model_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#QueueBuffer.set_min_model_version"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.QueueBuffer.set_min_model_version" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.storage.queue.QueueBuffer.put">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#QueueBuffer.put"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.QueueBuffer.put" title="Link to this definition">#</a></dt>
 <dd><p>Put a list of experiences into the queue.</p>
@@ -803,6 +811,21 @@ put_into_queue: bool, decide whether to put item into queue</p>
 <dd class="field-odd"><p><strong>capacity</strong> (<cite>int</cite>) -- The maximum number of items the queue can hold.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.storage.queue.AsyncQueue.put">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#AsyncQueue.put"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.AsyncQueue.put" title="Link to this definition">#</a></dt>
+<dd><p>Put an item into the queue.</p>
+<p>Put an item into the queue. If the queue is full, wait until a free
+slot is available before adding item.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.storage.queue.AsyncQueue.get">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#AsyncQueue.get"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.AsyncQueue.get" title="Link to this definition">#</a></dt>
+<dd><p>Remove and return an item from the queue.</p>
+<p>If queue is empty, wait until an item is available.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -965,7 +988,7 @@ adjusted to be at most twice the read batch size.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.storage.queue.QueueStorage.get_batch">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#QueueStorage.get_batch"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.QueueStorage.get_batch" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/storage/queue.html#QueueStorage.get_batch"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.storage.queue.QueueStorage.get_batch" title="Link to this definition">#</a></dt>
 <dd><p>Get batch of experience.</p>
 </dd></dl>
 
@@ -1041,6 +1064,7 @@ adjusted to be at most twice the read batch size.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer"><code class="docutils literal notranslate"><span class="pre">QueueBuffer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.set_min_model_version"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.set_min_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.put"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.put()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.get"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.get()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.QueueBuffer.qsize"><code class="docutils literal notranslate"><span class="pre">QueueBuffer.qsize()</span></code></a></li>
@@ -1051,6 +1075,8 @@ adjusted to be at most twice the read batch size.</p>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue"><code class="docutils literal notranslate"><span class="pre">AsyncQueue</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.__init__"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.put"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.put()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.get"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.get()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.close"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.close()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.storage.queue.AsyncQueue.stopped"><code class="docutils literal notranslate"><span class="pre">AsyncQueue.stopped()</span></code></a></li>
 </ul>
