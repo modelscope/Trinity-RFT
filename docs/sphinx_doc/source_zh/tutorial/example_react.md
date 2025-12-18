@@ -88,7 +88,7 @@ class AgentScopeReActWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         # initialize the agent
         self.agent = AgentScopeReActAgent(
