@@ -48,28 +48,14 @@ class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
         return self.final_reward
 ```
 
-同时，请记得注册你的工作流：
+同时，请记得在 `trinity/common/workflows/__init__.py` 中的 `default_mapping` 中注册你的工作流：
 ```python
-@WORKFLOWS.register_module("step_wise_alfworld_workflow")
-class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
-    """A step-wise workflow for alfworld task."""
-    ...
-```
-
-并将其添加到初始化文件 `trinity/common/workflows/__init__.py` 中：
-
-```diff
- # -*- coding: utf-8 -*-
- """Workflow module"""
- from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from .envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow
-
- __all__ = [
-     "WORKFLOWS",
-     "SimpleWorkflow",
-     "MathWorkflow",
-+    "StepWiseAlfworldWorkflow",
- ]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+      "step_wise_alfworld_workflow": "trinity.common.workflows.step_wise_workflow.StepWiseAlfworldWorkflow",
+    },
+)
 ```
 
 ### 其他配置

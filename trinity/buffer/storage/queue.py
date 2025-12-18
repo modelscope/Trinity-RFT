@@ -15,7 +15,6 @@ from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
 
 
 def is_database_url(path: str) -> bool:
@@ -24,9 +23,6 @@ def is_database_url(path: str) -> bool:
 
 def is_json_file(path: str) -> bool:
     return path.endswith(".json") or path.endswith(".jsonl")
-
-
-PRIORITY_FUNC = Registry("priority_fn")
 
 
 class PriorityFunction(ABC):
@@ -53,7 +49,6 @@ class PriorityFunction(ABC):
         """Return the default config."""
 
 
-@PRIORITY_FUNC.register_module("linear_decay")
 class LinearDecayPriority(PriorityFunction):
     """Calculate priority by linear decay.
 
@@ -75,7 +70,6 @@ class LinearDecayPriority(PriorityFunction):
         }
 
 
-@PRIORITY_FUNC.register_module("decay_limit_randomization")
 class LinearDecayUseCountControlPriority(PriorityFunction):
     """Calculate priority by linear decay, use count control, and randomization.
 
@@ -216,6 +210,8 @@ class AsyncPriorityQueue(QueueBuffer):
             priority_fn (`str`): Name of the function to use for determining item priority.
             kwargs: Additional keyword arguments for the priority function.
         """
+        from trinity.buffer.storage import PRIORITY_FUNC
+
         self.capacity = capacity
         self.item_count = 0
         self.priority_groups = SortedDict()  # Maps priority -> deque of items

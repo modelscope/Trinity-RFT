@@ -1,8 +1,3 @@
-import torch
-from peft import LoraConfig, TaskType, get_peft_model
-from transformers import AutoConfig, AutoModelForCausalLM
-
-
 def create_dummy_lora(
     model_path: str,
     checkpoint_job_dir: str,
@@ -10,6 +5,10 @@ def create_dummy_lora(
     lora_alpha: int,
     target_modules: str,
 ) -> str:
+    import torch
+    from peft import LoraConfig, TaskType, get_peft_model
+    from transformers import AutoConfig, AutoModelForCausalLM
+
     config = AutoConfig.from_pretrained(model_path)
     model = AutoModelForCausalLM.from_config(config)
     lora_config = {

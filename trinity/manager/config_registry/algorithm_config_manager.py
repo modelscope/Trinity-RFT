@@ -1,26 +1,23 @@
 import streamlit as st
 
-from trinity.algorithm.advantage_fn import (
-    ADVANTAGE_FN,
-    GRPOAdvantageFn,
-    OPMDAdvantageFn,
-    PPOAdvantageFn,
-)
-from trinity.algorithm.algorithm import ALGORITHM_TYPE, GRPOAlgorithm
-from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import (
-    ENTROPY_LOSS_FN,
-    EntropyLossFn,
-)
-from trinity.algorithm.kl_fn.kl_fn import KL_FN, KLFn
-from trinity.algorithm.policy_loss_fn import (
-    POLICY_LOSS_FN,
-    DPOLossFn,
-    MIXPolicyLossFn,
-    OPMDPolicyLossFn,
-    PPOPolicyLossFn,
-    SFTLossFn,
-)
-from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY, MixSampleStrategy
+from trinity.algorithm import ALGORITHM_TYPE
+from trinity.algorithm.advantage_fn import ADVANTAGE_FN
+from trinity.algorithm.advantage_fn.grpo_advantage import GRPOAdvantageFn
+from trinity.algorithm.advantage_fn.opmd_advantage import OPMDAdvantageFn
+from trinity.algorithm.advantage_fn.ppo_advantage import PPOAdvantageFn
+from trinity.algorithm.algorithm import GRPOAlgorithm
+from trinity.algorithm.entropy_loss_fn import ENTROPY_LOSS_FN
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import EntropyLossFn
+from trinity.algorithm.kl_fn import KL_FN
+from trinity.algorithm.kl_fn.kl_fn import KLFn
+from trinity.algorithm.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.policy_loss_fn.dpo_loss import DPOLossFn
+from trinity.algorithm.policy_loss_fn.mix_policy_loss import MIXPolicyLossFn
+from trinity.algorithm.policy_loss_fn.opmd_policy_loss import OPMDPolicyLossFn
+from trinity.algorithm.policy_loss_fn.ppo_policy_loss import PPOPolicyLossFn
+from trinity.algorithm.policy_loss_fn.sft_loss import SFTLossFn
+from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY
+from trinity.algorithm.sample_strategy.mix_sample_strategy import MixSampleStrategy
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
 from trinity.utils.registry import Registry

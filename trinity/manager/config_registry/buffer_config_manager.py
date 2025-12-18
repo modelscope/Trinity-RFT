@@ -3,10 +3,10 @@ import json
 import pandas as pd
 import streamlit as st
 
-from trinity.buffer.storage.queue import PRIORITY_FUNC
+from trinity.buffer.storage import PRIORITY_FUNC
 from trinity.common.constants import PromptType, StorageType
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
-from trinity.common.workflows.workflow import WORKFLOWS
+from trinity.common.rewards import REWARD_FUNCTIONS
+from trinity.common.workflows import WORKFLOWS
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 
 

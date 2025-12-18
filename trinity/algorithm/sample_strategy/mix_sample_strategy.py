@@ -4,10 +4,7 @@ from typing import Dict, List, Tuple
 
 import torch
 
-from trinity.algorithm.sample_strategy.sample_strategy import (
-    SAMPLE_STRATEGY,
-    SampleStrategy,
-)
+from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.algorithm.sample_strategy.utils import representative_sample
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import BufferConfig
@@ -15,7 +12,6 @@ from trinity.common.experience import CustomField, Experiences
 from trinity.utils.timer import Timer
 
 
-@SAMPLE_STRATEGY.register_module("mix")
 class MixSampleStrategy(SampleStrategy):
     """The default sample strategy."""
 

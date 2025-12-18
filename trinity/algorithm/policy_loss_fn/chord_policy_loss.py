@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple
 
 import torch
 
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import PolicyLossFn
 from trinity.algorithm.policy_loss_fn.ppo_policy_loss import PPOPolicyLossFn
 from trinity.algorithm.policy_loss_fn.sft_loss import SFTLossFn
 from trinity.algorithm.utils import aggregate_loss
@@ -31,7 +31,6 @@ def mu_schedule_function(
     return decayed_mu
 
 
-@POLICY_LOSS_FN.register_module("sft_is")
 class SFTISLossFn(PolicyLossFn):
     """
     SFT loss with importance sampling
@@ -68,7 +67,6 @@ def phi_function(token_prob):
     return token_prob * (1 - token_prob)
 
 
-@POLICY_LOSS_FN.register_module("sft_phi")
 class SFTPhiLossFn(PolicyLossFn):
     """
     SFT loss with transformed phi function
@@ -107,7 +105,6 @@ class SFTPhiLossFn(PolicyLossFn):
         }
 
 
-@POLICY_LOSS_FN.register_module("mix_chord")
 class MIXCHORDPolicyLossFn(PolicyLossFn):
     """Implements a mixed policy loss combining GRPO and SFT losses.
 

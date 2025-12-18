@@ -41,7 +41,6 @@ $$
 在 `trinity/algorithm/algorithm.py` 中，我们引入一个新的算法类型 `MIX`。
 
 ```python
-@ALGORITHM_TYPE.register_module("mix")
 class MIXAlgorithm(AlgorithmType):
     """MIX algorithm."""
 
@@ -150,7 +149,6 @@ class MixSampleStrategy(SampleStrategy):
 我们在 `trinity/algorithm/policy_loss_fn/mix_policy_loss.py` 中定义一个 `MixPolicyLoss` 类，它分别计算关于普通 experience 和专家 experience 的两个 losses 之和。
 
 ```python
-@POLICY_LOSS_FN.register_module("mix")
 class MIXPolicyLossFn(PolicyLossFn):
     def __init__(
         self,

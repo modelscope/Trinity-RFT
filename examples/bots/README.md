@@ -33,10 +33,29 @@ Also refer to the [Data Preparation Guide](https://github.com/LLM360/Reasoning36
 
 Remember to modify the model/data path in `bots.yaml` and `random.yaml` accordingly.
 
+##### (Optional) Customize Reference Evaluation Results
+
+Modify `ref_eval_collect.yaml` to set the reference model you want to evaluate, e.g., Qwen2.5-1.5B-Instruct.
+
+Launch evaluation by executing:
+```bash
+BOTS_REF_EVAL_LOG_FILE="path/to/save/eval/logs" trinity run --config examples/bots/ref_eval_collect.yaml --plugin-dir examples/bots/workflow
+```
+
+The evaluation logs will be saved at the specified location. Then integrate the evaluation results as a new column into the original dataset:
+
+```bash
+python examples/bots/ref_eval_collect.py \
+--data-path <your/path/to/original/dataset> \
+--ref-eval-path <your/path/to/bots_ref_eval_log.jsonl> \
+--ref-eval-key <column name, e.g., qwen2.5_1.5b_pass_rate>
+```
+Remember to update `task_selector.feature_keys` in `bots.yaml`.
+
 ##### Step 3: Training
 Launch training by executing:
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
+trinity run --config examples/bots/bots.yaml
 ```
 The improvement over random selection baseline can be stably obtained 🤖🤖🤖.
 

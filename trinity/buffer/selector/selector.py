@@ -9,9 +9,6 @@ from trinity.buffer.selector.difficulty_estimator import InterpolationBetaPREsti
 from trinity.common.config import TaskSelectorConfig
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
-
-SELECTORS = Registry("selectors")
 
 
 @Experimental
@@ -78,7 +75,6 @@ class BaseSelector:
         raise NotImplementedError
 
 
-@SELECTORS.register_module("sequential")
 class SequentialSelector(BaseSelector):
     """
     Selects data sequentially in fixed order across epochs.
@@ -112,7 +108,6 @@ class SequentialSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 
 
-@SELECTORS.register_module("shuffle")
 class ShuffleSelector(BaseSelector):
     """
     Shuffles dataset once per epoch and iterates through it sequentially.
@@ -169,7 +164,6 @@ class ShuffleSelector(BaseSelector):
         self.orders = self._get_orders()
 
 
-@SELECTORS.register_module("random")
 class RandomSelector(BaseSelector):
     """
     Uniformly samples batches randomly with replacement *per batch*.
@@ -207,7 +201,6 @@ class RandomSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 
 
-@SELECTORS.register_module("offline_easy2hard")
 class OfflineEasy2HardSelector(BaseSelector):
     """
     Selects samples in an 'easy-to-hard' curriculum based on pre-defined difficulty features.
@@ -292,7 +285,6 @@ class OfflineEasy2HardSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 
 
-@SELECTORS.register_module("difficulty_based")
 class DifficultyBasedSelector(BaseSelector):
     """
     Adaptive difficulty-based selector using probabilistic modeling of sample difficulty.

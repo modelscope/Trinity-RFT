@@ -176,28 +176,16 @@ class ExampleWorkflow(Workflow):
 
 #### Registering Your Workflow
 
-Register your workflow using the `WORKFLOWS.register_module` decorator.
+Register your workflow using the `default_mapping` in `trinity/common/workflows/__init__.py`.
 Ensure the name does not conflict with existing workflows.
 
 ```python
-# import some packages
-from trinity.common.workflows.workflow import WORKFLOWS
-
-@WORKFLOWS.register_module("example_workflow")
-class ExampleWorkflow(Workflow):
-    pass
-```
-
-For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in `trinity/common/workflows` folder, e.g., `trinity/common/workflows/example_workflow.py`. And add the following line to `trinity/common/workflows/__init__.py`:
-
-```python
-# existing import lines
-from trinity.common.workflows.example_workflow import ExampleWorkflow
-
-__all__ = [
-    # existing __all__ lines
-    "ExampleWorkflow",
-]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+        "example_workflow": "trinity.common.workflows.workflow.ExampleWorkflow",
+    },
+)
 ```
 
 #### Performance Optimization
@@ -212,7 +200,6 @@ The `can_reset` is a class property that indicates whether the workflow supports
 The `reset` method accepts a `Task` parameter and resets the workflow's internal state based on the new task.
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_reset: bool = True
 
@@ -234,7 +221,6 @@ The `can_repeat` is a class property that indicates whether the workflow support
 The `set_repeat_times` method accepts two parameters: `repeat_times` specifies the number of times to execute within the `run` method, and `run_id_base` is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_repeat: bool = True
     # some code
@@ -275,7 +261,6 @@ class ExampleWorkflow(Workflow):
 #### Full Code Example
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
     can_reset: bool = True
     can_repeat: bool = True
@@ -359,7 +344,6 @@ trinity run --config <your_yaml_file>
 The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can set `is_async` to `True`, then implement the `run_async` method. In this case, you no longer need to implement the `run` method, and the initialization parameter `auxiliary_models` will also change to `List[openai.AsyncOpenAI]`, while other methods and properties remain changed.
 
 ```python
-@WORKFLOWS.register_module("example_workflow_async")
 class ExampleWorkflowAsync(Workflow):
 
     is_async: bool = True
@@ -386,7 +370,6 @@ explorer:
 ```
 
 ```python
-@WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
 
     def __init__(self, task: Task, model: ModelWrapper, auxiliary_models: List):

@@ -30,10 +30,30 @@ BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。
 请参考LLM360提供的[数据准备指南](https://github.com/LLM360/Reasoning360?tab=readme-ov-file#data-preparation)和[技术报告](https://www.arxiv.org/pdf/2506.14965)。
 请修改`bots.yaml`和`random.yaml`中相应的模型/数据路径。
 
+
+##### （可选）客制参考评估结果
+
+修改 `ref_eval_collect.yaml` 以设置你想要评估的参考模型，例如Qwen2.5-1.5B-Instruct。
+
+执行以下命令启动评估：
+```bash
+BOTS_REF_EVAL_LOG_FILE="path/to/save/eval/logs" trinity run --config examples/bots/ref_eval_collect.yaml --plugin-dir examples/bots/workflow
+```
+
+评估日志会保存在指定的路径下。接下来将评估结果作为新列聚合到原数据集：
+
+```bash
+python examples/bots/ref_eval_collect.py \
+--data-path <your/path/to/original/dataset> \
+--ref-eval-path <your/path/to/bots_ref_eval_log.jsonl> \
+--ref-eval-key <column name, e.g., qwen2.5_1.5b_pass_rate>
+```
+记得修改`bots.yaml`中的`task_selector.feature_keys`字段。
+
 ##### 第三步：训练
 执行以下命令启动训练：
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
+trinity run --config examples/bots/bots.yaml
 ```
 相比随机选择基线的提升可以被稳定地观察到🤖🤖🤖.
 

@@ -4,19 +4,17 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, List, Optional, Type, Union
-
-import openai
+from typing import TYPE_CHECKING, Any, List, Optional, Type, Union
 
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
-from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
 
-WORKFLOWS = Registry("workflows")
+if TYPE_CHECKING:
+    import openai
+
+    from trinity.common.models.model import ModelWrapper
 
 
 @dataclass
@@ -250,7 +248,6 @@ class BaseSimpleWorkflow(Workflow):
         return messages
 
 
-@WORKFLOWS.register_module("simple_workflow")
 class SimpleWorkflow(BaseSimpleWorkflow):
     """A workflow for simple single-round task."""
 
@@ -282,7 +279,6 @@ class SimpleWorkflow(BaseSimpleWorkflow):
         return responses
 
 
-@WORKFLOWS.register_module("async_simple_workflow")
 class AsyncSimpleWorkflow(BaseSimpleWorkflow):
     is_async: bool = True
 
@@ -311,7 +307,6 @@ class AsyncSimpleWorkflow(BaseSimpleWorkflow):
         return responses
 
 
-@WORKFLOWS.register_module("math_workflow")
 class MathWorkflow(SimpleWorkflow):
     """A workflow for math tasks as introduced in DeepSeek-R1."""
 
@@ -330,6 +325,8 @@ class MathWorkflow(SimpleWorkflow):
         )
 
     def reset(self, task: Task):
+        from trinity.common.rewards.math_reward import MathRewardFn
+
         if task.reward_fn is None:
             task.reward_fn = MathRewardFn
         if task.reward_fn == MathRewardFn and task.format_args.system_prompt is None:
@@ -341,6 +338,5 @@ class MathWorkflow(SimpleWorkflow):
         super().reset(task)
 
 
-@WORKFLOWS.register_module("async_math_workflow")
 class AsyncMathWorkflow(AsyncSimpleWorkflow, MathWorkflow):
     pass

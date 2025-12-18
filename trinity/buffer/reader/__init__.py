@@ -1,6 +1,12 @@
-from trinity.buffer.reader.file_reader import FileReader
-from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.buffer.reader.reader import READER
-from trinity.buffer.reader.sql_reader import SQLReader
+from trinity.utils.registry import Registry
 
-__all__ = ["READER", "FileReader", "QueueReader", "SQLReader"]
+READER = Registry(
+    "reader",
+    default_mapping={
+        "file": "trinity.buffer.reader.file_reader.FileReader",
+        "queue": "trinity.buffer.reader.queue_reader.QueueReader",
+        "sql": "trinity.buffer.reader.sql_reader.SQLReader",
+    },
+)
+
+__all__ = ["READER"]

@@ -21,7 +21,7 @@ from tests.tools import (
     get_template_config,
     get_unittest_dataset_config,
 )
-from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.algorithm import ALGORITHM_TYPE
 from trinity.cli.launcher import both, explore, train
 from trinity.common.config import Config, ExperienceBufferConfig
 from trinity.common.constants import StorageType, SyncMethod, SyncStyle

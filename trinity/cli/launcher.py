@@ -249,6 +249,7 @@ def debug(
         os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
     load_plugins()
     config = load_config(config_path)
+    config.mode = "explore"
     config.check_and_update()
     sys.path.insert(0, os.getcwd())
     config.ray_namespace = DEBUG_NAMESPACE

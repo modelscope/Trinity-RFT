@@ -11,7 +11,7 @@ from collections import Counter
 from typing import List
 
 from trinity.common.experience import Experience
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 # Adapted from https://github.com/NVlabs/Tool-N1
 qwen_tool_prompts = """# Tool
@@ -207,7 +207,6 @@ def compute_toolcall_reward(
         return float(res[0])
 
 
-@WORKFLOWS.register_module("toolcall_workflow")
 class ToolCallWorkflow(SimpleWorkflow):
     """
     A workflow for toolcall tasks.

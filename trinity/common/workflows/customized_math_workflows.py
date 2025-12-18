@@ -5,10 +5,9 @@ from typing import List
 
 from trinity.common.experience import Experience
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 
-@WORKFLOWS.register_module("math_boxed_workflow")
 class MathBoxedWorkflow(SimpleWorkflow):
     """A workflow for math tasks that give answers in boxed format."""
 
@@ -93,7 +92,6 @@ class MathBoxedWorkflow(SimpleWorkflow):
         return responses
 
 
-@WORKFLOWS.register_module("async_math_boxed_workflow")
 class AsyncMathBoxedWorkflow(MathBoxedWorkflow):
     is_async: bool = True
 

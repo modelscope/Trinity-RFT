@@ -9,10 +9,9 @@ from trinity.common.rewards.eval_utils import (
     validate_think_pattern,
 )
 from trinity.common.rewards.format_reward import FormatReward
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 
 
-@REWARD_FUNCTIONS.register_module("math_reward")
 class MathRewardFn(RewardFn):
     """A reward function that rewards for math task."""
 
@@ -40,7 +39,6 @@ class MathRewardFn(RewardFn):
         return {**accuracy_score, **format_score}
 
 
-@REWARD_FUNCTIONS.register_module("math_boxed_reward")
 class MathBoxedRewardFn(RewardFn):
     """A reward function that rewards for math task."""
 

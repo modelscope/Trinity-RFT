@@ -6,8 +6,7 @@ import datasets
 from datasets import Dataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.buffer.reader.reader import READER
-from trinity.buffer.schema.formatter import FORMATTER
+from trinity.buffer.schema import FORMATTER
 from trinity.common.config import StorageConfig
 
 
@@ -93,7 +92,6 @@ class BaseFileReader(BufferReader):
             raise StopAsyncIteration from e
 
 
-@READER.register_module("file")
 class FileReader(BaseFileReader):
     """Provide a unified interface for Experience and Task file readers."""
 

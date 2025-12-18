@@ -1,18 +1,18 @@
-from trinity.buffer.operators.data_juicer_operator import DataJuicerOperator
-from trinity.buffer.operators.experience_operator import (
-    EXPERIENCE_OPERATORS,
-    ExperienceOperator,
+from trinity.buffer.operators.experience_operator import ExperienceOperator
+from trinity.utils.registry import Registry
+
+EXPERIENCE_OPERATORS: Registry = Registry(
+    "experience_operators",
+    default_mapping={
+        "reward_filter": "trinity.buffer.operators.filters.reward_filter.RewardFilter",
+        "reward_std_filter": "trinity.buffer.operators.filters.reward_filter.RewardSTDFilter",
+        "reward_shaping_mapper": "trinity.buffer.operators.mappers.reward_shaping_mapper.RewardShapingMapper",
+        "pass_rate_calculator": "trinity.buffer.operators.mappers.pass_rate_calculator.PassRateCalculator",
+        "data_juicer": "trinity.buffer.operators.data_juicer_operator.DataJuicerOperator",
+    },
 )
-from trinity.buffer.operators.filters.reward_filter import RewardFilter, RewardSTDFilter
-from trinity.buffer.operators.mappers.pass_rate_calculator import PassRateCalculator
-from trinity.buffer.operators.mappers.reward_shaping_mapper import RewardShapingMapper
 
 __all__ = [
     "ExperienceOperator",
     "EXPERIENCE_OPERATORS",
-    "RewardFilter",
-    "RewardSTDFilter",
-    "RewardShapingMapper",
-    "PassRateCalculator",
-    "DataJuicerOperator",
 ]

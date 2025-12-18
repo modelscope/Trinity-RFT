@@ -8,10 +8,9 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 
-@WORKFLOWS.register_module("math_ruler_workflow")
 class MathRULERWorkflow(SimpleWorkflow):
     """A workflow for math with RULER reward function.
 
@@ -158,7 +157,6 @@ Conclude your response with a list of scores, in the following format: [score fo
             return False, [0.0 for _ in range(num_responses)]
 
 
-@WORKFLOWS.register_module("async_math_ruler_workflow")
 class AsyncMathRULERWorkflow(MathRULERWorkflow):
     is_async: bool = True
 

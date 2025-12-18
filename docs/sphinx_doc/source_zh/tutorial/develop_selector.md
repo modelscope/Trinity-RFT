@@ -58,7 +58,6 @@
 该选择器聚焦于模型预测表现最接近目标值的样本（例如 90% 成功率），从而挑选出“难度适中”的任务。
 
 ```python
-@SELECTORS.register_module("difficulty_based")
 class DifficultyBasedSelector(BaseSelector):
     def __init__(self, data_source, config: TaskSelectorConfig) -> None:
         super().__init__(data_source, config)
@@ -123,8 +122,15 @@ class DifficultyBasedSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 ```
 
-> 🔁 定义完类后，请使用 `@SELECTORS.register_module("your_name")` 注册，以便在配置文件中通过名称引用。
-
+> 🔁 定义完类后，请在 `trinity/buffer/selector/__init__.py` 中的 `default_mapping` 中注册，以便在配置文件中通过名称引用。
+```python
+SELECTORS = Registry(
+    "selectors",
+    default_mapping={
+        "difficulty_based": "trinity.buffer.selector.selector.DifficultyBasedSelector",
+    },
+)
+```
 
 
 ### ✅ 步骤 2：实现反馈操作器（Feedback Operator）
@@ -150,7 +156,6 @@ class DifficultyBasedSelector(BaseSelector):
 #### 示例：通过率计算器（Pass Rate Calculator）
 
 ```python
-@EXPERIENCE_OPERATORS.register_module("pass_rate_calculator")
 class PassRateCalculator(ExperienceOperator):
     def __init__(self, **kwargs):
         pass
@@ -192,7 +197,7 @@ class PassRateCalculator(ExperienceOperator):
 data_processor:
   experience_pipeline:
     operators:
-      - name: pass_rate_calculator  # 必须与 @register_module 名称一致
+      - name: pass_rate_calculator
 ```
 
 #### 为任务集配置你的选择器
@@ -205,7 +210,7 @@ buffer:
         storage_type: file
         path: ./path/to/tasks
         task_selector:
-          selector_type: difficulty_based   # 必须与 @register_module 名称匹配
+          selector_type: difficulty_based
           feature_keys: ["correct", "uncertainty"]
           kwargs:
             m: 16

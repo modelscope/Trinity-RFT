@@ -13,8 +13,7 @@ from trinity.common.config import ExperienceBufferConfig
 from trinity.common.constants import StorageType, SyncStyle
 from trinity.common.experience import EID, Experience
 from trinity.common.models.model import InferenceModel, ModelWrapper
-from trinity.common.workflows import Task
-from trinity.common.workflows.workflow import WORKFLOWS, Workflow
+from trinity.common.workflows import WORKFLOWS, Task, Workflow
 from trinity.explorer.scheduler import Scheduler
 
 

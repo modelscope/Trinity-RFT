@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: math-train
       storage_type: file
-      path: '<DATA_ROOT>/LLM360/guru-RL-92k/train/math__combined_54.4k.parquet'
+      path: 'your/data/path/containing/math__combined_54.4k.parquet' # you need to set it manually
       split: 'train'
       format:
         prompt_key: 'prompt'
@@ -32,13 +32,13 @@ buffer:
     eval_tasksets:
     - name: math-eval
       storage_type: file
-      path: '<DATA_ROOT>/LLM360/guru-RL-92k/online_eval/math__math_500.parquet'
+      path: 'your/data/path/containing/math__math_500.parquet' # you need to set it manually
       format:
         prompt_key: 'prompt'
         response_key: 'reward_model.ground_truth'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'bots_math_boxed_workflow'
+    default_workflow_type: 'examples.bots.workflow.bots_math_boxed_workflow.BOTSMathBoxedWorkflow'
   trainer_input:
     experience_buffer:
       name: exp_buffer

@@ -22,10 +22,9 @@ from trinity.common.workflows.envs.frozen_lake.utils import (
     generate_random_map,
     get_goal_position,
 )
-from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
+from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
 
 
-@WORKFLOWS.register_module("frozen_lake_workflow")
 class FrozenLakeWorkflow(MultiTurnWorkflow):
     """
     FrozenLake environment for multi-step workflows.

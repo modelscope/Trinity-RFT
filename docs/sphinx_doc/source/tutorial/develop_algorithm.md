@@ -47,9 +47,8 @@ For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorith
 Here's an implementation example for the OPMD algorithm's advantage function:
 
 ```python
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
+from trinity.algorithm.advantage_fn import GroupAdvantage
 
-@ADVANTAGE_FN.register_module("opmd")
 class OPMDGroupAdvantage(GroupAdvantage):
     """OPMD Group Advantage computation"""
 
@@ -90,7 +89,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
         return {"opmd_baseline": "mean", "tau": 1.0}
 ```
 
-After implementation, you need to register this module through {class}`trinity.algorithm.ADVANTAGE_FN`. Once registered, the module can be configured in the configuration file using the registered name.
+After implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/__init__.py`. Once registered, the module can be configured in the configuration file using the registered name.
 
 
 #### Step 1.2: Implement `PolicyLossFn`
@@ -100,13 +99,12 @@ Developers need to implement the {class}`trinity.algorithm.PolicyLossFn` interfa
 - `__call__`: Calculates the loss based on input parameters. Unlike `AdvantageFn`, the input parameters here are all `torch.Tensor`. This interface automatically scans the parameter list of the `__call__` method and converts it to the corresponding fields in the experience data. Therefore, please write all tensor names needed for loss calculation directly in the parameter list, rather than selecting parameters from `kwargs`.
 - `default_args`: Returns default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
 
-Similarly, after implementation, you need to register this module through {class}`trinity.algorithm.POLICY_LOSS_FN`.
+Similarly, after implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/policy_loss_fn/__init__.py`.
 
 Here's an implementation example for the OPMD algorithm's Policy Loss Fn. Since OPMD's Policy Loss only requires logprob, action_mask, and advantages, only these three items are specified in the parameter list of the `__call__` method:
 
 
 ```python
-@POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(self, tau: float = 1.0) -> None:
         self.tau = tau
@@ -134,7 +132,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
 
 The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.
 
-To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in {class}`trinity.algorithm.ALGORITHM_TYPE`, enabling one-click configuration.
+To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in `trinity/algorithm/__init__.py`, enabling one-click configuration.
 
 The `AlgorithmType` class includes the following attributes and methods:
 
@@ -145,14 +143,13 @@ The `AlgorithmType` class includes the following attributes and methods:
 - `schema`: The format of experience data corresponding to the algorithm
 - `default_config`: Gets the default configuration of the algorithm, which will override attributes with the same name in `ALGORITHM_TYPE`
 
-Similarly, after implementation, you need to register this module through `ALGORITHM_TYPE`.
+Similarly, after implementation, you need to register this module in the `default_mapping` of `trinity/algorithm/__init__.py`.
 
 Below is the implementation for the OPMD algorithm.
 Since the OPMD algorithm doesn't need to use the Critic model, `use_critic` is set to `False`.
 The dictionary returned by the `default_config` method indicates that OPMD will use the `opmd` type `AdvantageFn` and `PolicyLossFn` implemented in Step 1, will not apply KL Penalty on rewards, but will add a `k2` type KL loss when calculating the final loss.
 
 ```python
-@ALGORITHM_TYPE.register_module("opmd")
 class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 

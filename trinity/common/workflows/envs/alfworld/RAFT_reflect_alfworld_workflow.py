@@ -18,10 +18,9 @@ from trinity.common.workflows.envs.alfworld.RAFT_utils import (
     save_task_data,
     validate_trajectory_format,
 )
-from trinity.common.workflows.workflow import WORKFLOWS, Task
+from trinity.common.workflows.workflow import Task
 
 
-@WORKFLOWS.register_module("RAFT_reflect_alfworld_workflow")
 class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
     """
     RAFT workflow for alfworld using trajectory context.

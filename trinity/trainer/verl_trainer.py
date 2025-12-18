@@ -30,8 +30,7 @@ from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 from verl.utils.metric import reduce_metrics
 
-from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
-from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN, SAMPLE_STRATEGY
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import SaveStrategy

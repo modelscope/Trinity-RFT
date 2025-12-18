@@ -8,10 +8,9 @@ from typing import List, Optional
 import openai
 
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 
 
-@WORKFLOWS.register_module("agentscope_v1_react_search_workflow")
 class AgentScopeV1ReactSearchWorkflow(Workflow):
     """
     This workflow serves as an example of how to use the agentscope framework within the trinity workflow.

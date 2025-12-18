@@ -42,12 +42,8 @@ from verl.utils.torch_functional import broadcast_dict_tensor
 from verl.workers.megatron_workers import MegatronPPOActor as OldMegatronPPOActor
 from verl.workers.megatron_workers import logger
 
-from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import (
-    ENTROPY_LOSS_FN,
-    DummyEntropyLossFn,
-)
-from trinity.algorithm.kl_fn.kl_fn import KL_FN
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm import ENTROPY_LOSS_FN, KL_FN, POLICY_LOSS_FN
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import DummyEntropyLossFn
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import AlgorithmConfig
 

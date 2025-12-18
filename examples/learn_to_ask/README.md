@@ -109,7 +109,7 @@ explorer:
 
 Then, launch training:
 ```bash
-trinity run --config examples/learn_to_ask/train.yaml --plugin-dir examples/learn_to_ask/workflow
+trinity run --config examples/learn_to_ask/train.yaml
 ```
 ---
 

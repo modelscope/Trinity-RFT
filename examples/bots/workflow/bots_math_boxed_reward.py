@@ -1,10 +1,10 @@
 from typing import Optional
 
+from examples.bots.workflow.bots_reward import compute_score_bots
 from trinity.common.rewards.eval_utils import validate_think_pattern
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 
 
-@REWARD_FUNCTIONS.register_module("bots_math_boxed_reward")
 class BOTSMathBoxedRewardFn(RewardFn):
     """A reward function that rewards for math task for BOTS."""
 
@@ -22,8 +22,6 @@ class BOTSMathBoxedRewardFn(RewardFn):
         format_score_coef: Optional[float] = 0.1,
         **kwargs,
     ) -> dict[str, float]:
-        from trinity.plugins.bots_reward import compute_score_bots
-
         accuracy_score = compute_score_bots(response, truth)
 
         format_score = 0.0

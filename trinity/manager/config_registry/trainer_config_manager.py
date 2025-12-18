@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.algorithm import ALGORITHM_TYPE
 from trinity.manager.config_registry.buffer_config_manager import (
     get_train_batch_size_per_gpu,
 )

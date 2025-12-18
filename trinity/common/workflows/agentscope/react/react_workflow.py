@@ -9,12 +9,11 @@ import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 
 from .templates import TEMPLATE_MAP
 
 
-@WORKFLOWS.register_module("as_react_workflow")
 class AgentScopeReActWorkflow(Workflow):
     is_async: bool = True
 

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
+from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
 
 SPARSE_REWARD = False
 
@@ -177,7 +177,6 @@ def validate_action(action, available_actions):
     )
 
 
-@WORKFLOWS.register_module("webshop_workflow")
 class WebShopWorkflow(MultiTurnWorkflow):
     """A workflow for webshop task."""
 

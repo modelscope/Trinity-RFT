@@ -37,7 +37,9 @@ def init_llm(model_path):
 
 
 def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, rollout_repeat=3):
-    from trinity.plugins.prompt_learn2ask import rollout_prompt_med as rollout_prompt
+    from examples.learn_to_ask.workflow.prompt_learn2ask import (
+        rollout_prompt_med as rollout_prompt,
+    )
 
     with open(input_file_path, "r") as lines:
         sample_list = [json.loads(line.strip()) for line in lines]
@@ -68,7 +70,9 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
 
 
 def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_path):
-    from trinity.plugins.prompt_learn2ask import reward_prompt_med as grader_prompt
+    from examples.learn_to_ask.workflow.prompt_learn2ask import (
+        reward_prompt_med as grader_prompt,
+    )
 
     print(f"input_file_path: {input_file_path}")
     print(f"output_file_path: {output_file_path}")

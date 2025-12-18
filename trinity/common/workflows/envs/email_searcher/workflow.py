@@ -11,7 +11,7 @@ from trinity.common.workflows.envs.email_searcher.utils import (
     QueryModel,
     judge_correctness,
 )
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 
 SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords.
 Always describe what you see and plan your next steps clearly. When taking actions, explain what you're doing and why. When the answer to the task is found, call `generate_response` to finish the process. Only call `generate_response` when answer is found. You should not respond any next steps in `generate_response`. Complete all steps and then call `generate_response`.
@@ -21,7 +21,6 @@ Today's date is {query_date}
 """
 
 
-@WORKFLOWS.register_module("email_search_workflow")
 class EmailSearchWorkflow(Workflow):
     """
     Multi-turn Email Search workflow (ReAct-style tool use).

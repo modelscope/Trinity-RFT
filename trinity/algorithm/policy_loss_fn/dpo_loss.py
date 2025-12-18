@@ -5,11 +5,10 @@ from typing import Dict, Tuple
 import torch
 import torch.nn.functional as F
 
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import PolicyLossFn
 from trinity.algorithm.utils import masked_sum
 
 
-@POLICY_LOSS_FN.register_module("dpo")
 class DPOLossFn(PolicyLossFn):
     def __init__(
         self,

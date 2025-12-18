@@ -278,6 +278,9 @@ class DebugWorkflowRunner(WorkflowRunner):
 
             with VizTracer(output_file=self.output_profiling_file):
                 status, exps = await self.run_task(task, 1, 0)
+        if not status.ok and len(exps) == 0:
+            exps = self.model_wrapper.extract_experience_from_history()
+            self.logger.info(f"Debugging failed, extracting {len(exps)} experiences from history.")
         await self.sqlite_writer.write_async(exps)
         if status.ok:
             print(f"Task {task.task_id} completed successfully with metrics:\n{status.metrics}")
