@@ -18,16 +18,12 @@ from tests.tools import get_model_path, get_template_config, get_unittest_datase
 from trinity.common.experience import EID, Experience
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards import RMGalleryFn
-from trinity.common.workflows import (
-    WORKFLOWS,
-    MathBoxedWorkflow,
-    MathEvalWorkflow,
-    MathRMWorkflow,
-    MathWorkflow,
-    Workflow,
-)
-from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
+from trinity.common.rewards.reward_fn import RMGalleryFn
+from trinity.common.workflows import WORKFLOWS, Workflow
+from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow
+from trinity.common.workflows.eval_workflow import MathEvalWorkflow
+from trinity.common.workflows.math_rm_workflow import MathRMWorkflow
+from trinity.common.workflows.workflow import MathWorkflow, MultiTurnWorkflow, Task
 from trinity.explorer.workflow_runner import WorkflowRunner
 
 
@@ -553,7 +549,6 @@ class TestWorkflowStateRecording(unittest.IsolatedAsyncioTestCase):
 
 
 class TestAgentScopeWorkflowAdapter(unittest.IsolatedAsyncioTestCase):
-    @unittest.skip("Waiting for agentscope>=0.1.6")
     async def test_adapter(self):
         try:
             from agentscope.model import TrinityChatModel

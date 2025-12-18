@@ -1,15 +1,11 @@
 from typing import Dict, List, Optional, Tuple
 
-from trinity.buffer.operators.experience_operator import (
-    EXPERIENCE_OPERATORS,
-    ExperienceOperator,
-)
+from trinity.buffer.operators.experience_operator import ExperienceOperator
 from trinity.common.config import DataJuicerServiceConfig
 from trinity.common.experience import Experience
 from trinity.service.data_juicer.client import DataJuicerClient
 
 
-@EXPERIENCE_OPERATORS.register_module("data_juicer")
 class DataJuicerOperator(ExperienceOperator):
     def __init__(
         self,

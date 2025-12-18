@@ -4,11 +4,10 @@ from typing import Dict, Tuple
 
 import torch
 
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import PolicyLossFn
 from trinity.algorithm.utils import aggregate_loss
 
 
-@POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(
         self, backend: str = "verl", tau: float = 1.0, loss_agg_mode: str = "token-mean"

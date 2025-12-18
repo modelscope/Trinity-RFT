@@ -2,17 +2,15 @@
 
 import asyncio
 import os
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
 import ray
 import torch
-import vllm
 from packaging.version import parse as parse_version
 from PIL import Image
 from transformers import AutoProcessor
-from vllm.lora.request import LoRARequest
-from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import InferenceModelConfig
 from trinity.common.experience import Experience
@@ -22,7 +20,7 @@ from trinity.common.models.mm_utils import (
 )
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import get_action_mask_method
-from trinity.common.models.vllm_patch.api_patch import get_vllm_version
+from trinity.common.models.vllm_patch import get_vllm_version
 from trinity.utils.log import get_logger
 
 
@@ -38,20 +36,25 @@ class vLLMRolloutModel(InferenceModel):
         self,
         config: InferenceModelConfig,
     ) -> None:
+        import vllm
+        from vllm.sampling_params import RequestOutputKind
+
         self.logger = get_logger(__name__)
+        self.vllm_version = get_vllm_version()
         self.config = config
         self.use_v1 = config.use_v1
         if config.tensor_parallel_size != 1:
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_RAY_BUNDLE_INDICES"] = config.bundle_indices
-        if not vllm.envs.is_set("VLLM_USE_V1"):
+        if self.vllm_version <= parse_version("0.11.0") and not vllm.envs.is_set("VLLM_USE_V1"):
             self.logger.info(f"Using vLLM v{int(config.use_v1)} engine")
             os.environ["VLLM_USE_V1"] = str(int(config.use_v1))
         if config.use_v1:
+            os.environ["VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE"] = "shm"
             os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.use_v1))
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
-        if get_vllm_version() >= parse_version("0.11.0"):
+        if self.vllm_version >= parse_version("0.11.0"):
             os.environ["VLLM_ALLREDUCE_USE_SYMM_MEM"] = "0"
         if not config.enforce_eager:
             # To avoid torch compile conflicts when multiple model are started simultaneously.
@@ -81,11 +84,22 @@ class vLLMRolloutModel(InferenceModel):
         max_model_len = config.max_model_len
         self.enable_lora = config.enable_lora
         self.default_lora_path = config.lora_kwargs.pop("default_lora_path", None)
-        rope_kwargs = {
-            key: getattr(config, key)
-            for key in ["rope_scaling", "rope_theta"]
-            if getattr(config, key) is not None
-        }
+        if self.vllm_version >= parse_version("0.12.0"):
+            rope_params = defaultdict(dict)
+            if config.rope_scaling is not None:
+                rope_params["rope_parameters"] = config.rope_scaling
+            if config.rope_theta is not None:
+                rope_params["rope_parameters"]["rope_theta"] = config.rope_theta
+            if len(rope_params) > 0:
+                rope_kwargs = {"hf_overrides": rope_params}
+            else:
+                rope_kwargs = {}
+        else:
+            rope_kwargs = {
+                key: getattr(config, key)
+                for key in ["rope_scaling", "rope_theta"]
+                if getattr(config, key) is not None
+            }
         engine_args = vllm.AsyncEngineArgs(
             model=config.model_path,
             enforce_eager=config.enforce_eager,
@@ -99,7 +113,6 @@ class vLLMRolloutModel(InferenceModel):
             trust_remote_code=True,
             task="generate",
             gpu_memory_utilization=config.gpu_memory_utilization,
-            enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
             override_generation_config={  # TODO: find a way to unittest this
                 "temperature": config.temperature,
@@ -114,12 +127,13 @@ class vLLMRolloutModel(InferenceModel):
             **rope_kwargs,
             **config.lora_kwargs,
         )
-        if get_vllm_version() > parse_version("0.10.0"):
+        if self.vllm_version > parse_version("0.10.0"):
             engine_args.enable_log_requests = config.enable_log_requests
         else:
             engine_args.disable_log_requests = not config.enable_log_requests
-        if get_vllm_version() >= parse_version("0.11.0"):
+        if self.vllm_version >= parse_version("0.11.0"):
             engine_args.reasoning_parser = config.reasoning_parser
+
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = None
         self.tokenizer = None
@@ -157,9 +171,7 @@ class vLLMRolloutModel(InferenceModel):
             await self.run_api_server()
             self._prepared = True
 
-    async def chat(
-        self, messages: List[Dict], lora_request: LoRARequest = None, **kwargs
-    ) -> Sequence[Experience]:
+    async def chat(self, messages: List[Dict], lora_request=None, **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
         Args:
@@ -190,9 +202,7 @@ class vLLMRolloutModel(InferenceModel):
             )
         return await self.generate(prompt=prompt, lora_request=lora_request, **kwargs)
 
-    async def generate(
-        self, prompt: str, lora_request: LoRARequest = None, **kwargs
-    ) -> Sequence[Experience]:
+    async def generate(self, prompt: str, lora_request=None, **kwargs) -> Sequence[Experience]:
         """Generate a response from the provided prompt in async.
 
         Args:
@@ -361,7 +371,7 @@ class vLLMRolloutModel(InferenceModel):
     async def logprobs(  # type: ignore [override]
         self,
         token_ids: List[int],
-        lora_request: LoRARequest = None,
+        lora_request=None,
         temperature: Optional[float] = None,
     ) -> torch.Tensor:
         """Calculate the logprobs of the given tokens in async. Please slice the result carefully
@@ -392,9 +402,7 @@ class vLLMRolloutModel(InferenceModel):
             dtype=torch.float32,
         )
 
-    async def _generate_internal(
-        self, prompt: Any, lora_request: LoRARequest = None, **kwargs
-    ) -> Any:
+    async def _generate_internal(self, prompt: Any, lora_request=None, **kwargs) -> Any:
         # Send the request to the LLM engine.
         self.request_id += 1
         stream = self.async_llm.generate(
@@ -561,23 +569,42 @@ class vLLMRolloutModel(InferenceModel):
             self.logger.info("OpenAI API server is already running. Skipping...")
             return True  # already running
 
-        from trinity.common.models.vllm_patch.api_patch import (
-            run_api_server_in_ray_actor,
-        )
-
         api_server_host, api_server_port = self.get_available_address()
-        self.api_server = asyncio.create_task(
-            run_api_server_in_ray_actor(
-                self.async_llm,
-                api_server_host,
-                api_server_port,
-                self.config.model_path,  # type: ignore [arg-type]
-                self.config.enable_auto_tool_choice,
-                self.config.tool_call_parser,
-                self.config.reasoning_parser,
-                self.config.enable_log_requests,
+        if self.vllm_version <= parse_version("0.11.0"):
+            from trinity.common.models.vllm_patch.api_patch import (
+                run_api_server_in_ray_actor,
             )
-        )
+
+            self.api_server = asyncio.create_task(
+                run_api_server_in_ray_actor(
+                    self.async_llm,
+                    api_server_host,
+                    api_server_port,
+                    self.config.model_path,  # type: ignore [arg-type]
+                    self.config.enable_auto_tool_choice,
+                    self.config.tool_call_parser,
+                    self.config.reasoning_parser,
+                    self.config.enable_log_requests,
+                )
+            )
+        else:
+            from trinity.common.models.vllm_patch.api_patch_v12 import (
+                run_api_server_in_ray_actor_v12,
+            )
+
+            self.api_server = asyncio.create_task(
+                run_api_server_in_ray_actor_v12(
+                    self.async_llm,
+                    api_server_host,
+                    api_server_port,
+                    self.config.model_path,  # type: ignore [arg-type]
+                    logger=self.logger,
+                    enable_auto_tool_choice=self.config.enable_auto_tool_choice,
+                    tool_call_parser=self.config.tool_call_parser,
+                    reasoning_parser=self.config.reasoning_parser,
+                    enable_log_requests=self.config.enable_log_requests,
+                )
+            )
         self.api_server_host = api_server_host
         self.api_server_port = api_server_port
         return True
@@ -604,7 +631,9 @@ class vLLMRolloutModel(InferenceModel):
     def get_model_path(self) -> str:
         return self.config.model_path  # type: ignore [return-value]
 
-    def get_lora_request(self, lora_path: Optional[str] = None) -> LoRARequest:
+    def get_lora_request(self, lora_path: Optional[str] = None) -> Any:
+        from vllm.lora.request import LoRARequest
+
         assert self.config.lora_modules is not None
         lora_request = LoRARequest(**self.config.lora_modules[0])
         if lora_path is not None:

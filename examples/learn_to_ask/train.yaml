@@ -41,7 +41,7 @@ buffer:
         train_mode: "Ra+Rs"
         fusion_mode: "default"
     eval_tasksets: [ ]
-    default_workflow_type: learn2ask_workflow
+    default_workflow_type: examples.learn_to_ask.workflow.workflow_learn2ask.Learn2AskWorkflow
   trainer_input:
     experience_buffer:
       name: experience_buffer

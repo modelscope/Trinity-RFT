@@ -55,7 +55,7 @@ Remember to update `task_selector.feature_keys` in `bots.yaml`.
 ##### Step 3: Training
 Launch training by executing:
 ```bash
-trinity run --config examples/bots/bots.yaml --plugin-dir examples/bots/workflow
+trinity run --config examples/bots/bots.yaml
 ```
 The improvement over random selection baseline can be stably obtained 🤖🤖🤖.
 

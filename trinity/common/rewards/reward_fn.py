@@ -5,9 +5,6 @@ from typing import Any, Dict, List
 
 from trinity.common.experience import Experience
 from trinity.common.rewards.utils import to_rm_gallery_messages
-from trinity.utils.registry import Registry
-
-REWARD_FUNCTIONS = Registry("reward_functions")
 
 
 class RewardFn(ABC):
@@ -22,7 +19,6 @@ class RewardFn(ABC):
         pass
 
 
-@REWARD_FUNCTIONS.register_module("rm_gallery_reward")
 class RMGalleryFn(RewardFn):
     """Reward Function from RMGallery.
     https://github.com/modelscope/RM-Gallery

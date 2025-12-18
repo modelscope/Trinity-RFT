@@ -60,7 +60,6 @@ To create a new selector, inherit from `BaseSelector` and implement the followin
 This selector focuses on samples whose predicted performance is closest to a target (e.g., 90% success rate), effectively choosing "just right" difficulty tasks.
 
 ```python
-@SELECTORS.register_module("difficulty_based")
 class DifficultyBasedSelector(BaseSelector):
     def __init__(self, data_source, config: TaskSelectorConfig) -> None:
         super().__init__(data_source, config)
@@ -125,7 +124,15 @@ class DifficultyBasedSelector(BaseSelector):
         self.current_index = state_dict.get("current_index", 0)
 ```
 
-> 🔁 After defining your class, use `@SELECTORS.register_module("your_name")` so it can be referenced by name in configs.
+> 🔁 After defining your class, remember to register it in the `default_mapping` of `trinity/buffer/selector/__init__.py` so it can be referenced by name in configs.
+```python
+SELECTORS = Registry(
+    "selectors",
+    default_mapping={
+        "difficulty_based": "trinity.buffer.selector.selector.DifficultyBasedSelector",
+    },
+)
+```
 
 
 
@@ -152,7 +159,6 @@ The operator must output a metric under the key `trinity.common.constants.SELECT
 #### Example: Pass Rate Calculator
 
 ```python
-@EXPERIENCE_OPERATORS.register_module("pass_rate_calculator")
 class PassRateCalculator(ExperienceOperator):
     def __init__(self, **kwargs):
         pass
@@ -194,7 +200,7 @@ After implementing your selector and operator, register them in the config file.
 data_processor:
   experience_pipeline:
     operators:
-      - name: pass_rate_calculator  # Must match @register_module name
+      - name: pass_rate_calculator
 ```
 
 #### Configure the Taskset with Your Selector
@@ -207,7 +213,7 @@ buffer:
         storage_type: file
         path: ./path/to/tasks
         task_selector:
-          selector_type: difficulty_based   # Matches @register_module name
+          selector_type: difficulty_based
           feature_keys: ["correct", "uncertainty"]
           kwargs:
             m: 16

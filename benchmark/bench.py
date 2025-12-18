@@ -9,7 +9,7 @@ import torch
 import torch.distributed as dist
 import yaml
 
-from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.algorithm import ALGORITHM_TYPE
 from trinity.common.constants import MODEL_PATH_ENV_VAR, SyncStyle
 from trinity.utils.dlc_utils import get_dlc_env_vars
 

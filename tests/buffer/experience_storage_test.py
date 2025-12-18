@@ -108,6 +108,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
                     prompt_length=i,
                     reward=float(i),
                     logprobs=torch.tensor([0.1]),
+                    info={"model_version": 0},
                 )
                 for i in range(1, self.put_batch_size + 1)
             ]

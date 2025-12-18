@@ -19,10 +19,9 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.qwen25_eval import verify_math_answer
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.common.workflows.workflow import Task, Workflow
 
 
-@WORKFLOWS.register_module("on_policy_distill_workflow")
 class OnPolicyDistillWorkflow(Workflow):
     """On-policy distillation workflow.
 
@@ -149,14 +148,12 @@ class OnPolicyDistillWorkflow(Workflow):
         return responses
 
 
-@WORKFLOWS.register_module("async_on_policy_distill_workflow")
 class AsyncOnPolicyDistillWorkflow(OnPolicyDistillWorkflow):
     """Alias for OnPolicyDistillWorkflow (already async)."""
 
     pass
 
 
-@WORKFLOWS.register_module("on_policy_distill_math_workflow")
 class OnPolicyDistillMathWorkflow(OnPolicyDistillWorkflow):
     """On-policy distillation workflow with Qwen2.5-Math style format.
 
@@ -196,7 +193,6 @@ class OnPolicyDistillMathWorkflow(OnPolicyDistillWorkflow):
         return 0.0
 
 
-@WORKFLOWS.register_module("async_on_policy_distill_math_workflow")
 class AsyncOnPolicyDistillMathWorkflow(OnPolicyDistillMathWorkflow):
     """Alias for OnPolicyDistillMathWorkflow (already async)."""
 

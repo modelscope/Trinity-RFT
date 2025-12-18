@@ -4,12 +4,11 @@ from typing import Dict, Optional, Tuple
 
 import torch
 
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import PolicyLossFn
 from trinity.algorithm.policy_loss_fn.ppo_policy_loss import PPOPolicyLossFn
 from trinity.algorithm.policy_loss_fn.sft_loss import SFTLossFn
 
 
-@POLICY_LOSS_FN.register_module("mix")
 class MIXPolicyLossFn(PolicyLossFn):
     """Implements a mixed policy loss combining GRPO and SFT losses.
 

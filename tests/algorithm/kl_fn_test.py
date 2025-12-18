@@ -5,7 +5,7 @@ import unittest
 
 import torch
 
-from trinity.algorithm.kl_fn.kl_fn import KL_FN
+from trinity.algorithm.kl_fn import KL_FN
 
 
 class KLFnTest(unittest.TestCase):

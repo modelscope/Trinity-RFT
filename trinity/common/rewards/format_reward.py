@@ -3,10 +3,9 @@
 import re
 from typing import Optional
 
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 
 
-@REWARD_FUNCTIONS.register_module("format_reward")
 class FormatReward(RewardFn):
     """A reward function that checks if the reasoning process is enclosed within <think> and </think> tags, while the final answer is enclosed within <answer> and </answer> tags.
     Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py

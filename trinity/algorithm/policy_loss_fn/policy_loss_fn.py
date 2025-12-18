@@ -5,9 +5,6 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.key_mapper import ALL_MAPPERS
-from trinity.utils.registry import Registry
-
-POLICY_LOSS_FN = Registry("policy_loss_fn")
 
 
 class PolicyLossFnMeta(ABCMeta):

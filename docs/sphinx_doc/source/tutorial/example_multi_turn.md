@@ -126,28 +126,14 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         return self.generate_env_inference_samples(env, rollout_n)
 ```
 
-Also, remember to register your workflow:
+Also, remember to register your workflow in the `default_mapping` of `trinity/common/workflows/__init__.py`.
 ```python
-@WORKFLOWS.register_module("alfworld_workflow")
-class AlfworldWorkflow(MultiTurnWorkflow):
-    """A workflow for alfworld task."""
-    ...
-```
-
-and include it in the init file `trinity/common/workflows/__init__.py`
-
-```diff
- # -*- coding: utf-8 -*-
- """Workflow module"""
- from trinity.common.workflows.workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from trinity.common.workflows.envs.alfworld.alfworld_workflow import AlfworldWorkflow
-
- __all__ = [
-     "WORKFLOWS",
-     "SimpleWorkflow",
-     "MathWorkflow",
-+    "AlfworldWorkflow",
- ]
+WORKFLOWS = Registry(
+    "workflows",
+    default_mapping={
+        "alfworld_workflow": "trinity.common.workflows.envs.alfworld.alfworld_workflow.AlfworldWorkflow",
+    },
+)
 ```
 
 Then you are all set! It should be pretty simple😄, and the training processes in both environments converge.

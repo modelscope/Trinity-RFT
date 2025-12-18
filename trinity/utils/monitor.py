@@ -22,7 +22,14 @@ from trinity.common.config import Config
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
-MONITOR = Registry("monitor")
+MONITOR = Registry(
+    "monitor",
+    default_mapping={
+        "tensorboard": "trinity.utils.monitor.TensorboardMonitor",
+        "wandb": "trinity.utils.monitor.WandbMonitor",
+        "mlflow": "trinity.utils.monitor.MlflowMonitor",
+    },
+)
 
 
 def gather_metrics(
@@ -98,7 +105,6 @@ class Monitor(ABC):
         return {}
 
 
-@MONITOR.register_module("tensorboard")
 class TensorboardMonitor(Monitor):
     def __init__(
         self, project: str, group: str, name: str, role: str, config: Config = None
@@ -121,7 +127,6 @@ class TensorboardMonitor(Monitor):
         self.logger.close()
 
 
-@MONITOR.register_module("wandb")
 class WandbMonitor(Monitor):
     """Monitor with Weights & Biases.
 
@@ -172,7 +177,6 @@ class WandbMonitor(Monitor):
         }
 
 
-@MONITOR.register_module("mlflow")
 class MlflowMonitor(Monitor):
     """Monitor with MLflow.
 

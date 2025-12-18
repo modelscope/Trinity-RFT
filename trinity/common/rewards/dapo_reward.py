@@ -5,10 +5,9 @@ from typing import Optional
 import torch
 
 from trinity.common.rewards.naive_dapo_score import compute_score
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 
 
-@REWARD_FUNCTIONS.register_module("math_dapo_reward")
 class MathDAPORewardFn(RewardFn):
     """A reward function that follows the definition in DAPO for math task."""
 

@@ -9,11 +9,8 @@ from trinity.common.constants import PromptType
 from trinity.common.experience import Experience
 from trinity.common.models.utils import get_action_mask_method
 from trinity.common.rewards import REWARD_FUNCTIONS
-from trinity.common.workflows.workflow import WORKFLOWS, Task
+from trinity.common.workflows import WORKFLOWS, Task
 from trinity.utils.log import get_logger
-from trinity.utils.registry import Registry
-
-FORMATTER = Registry("formatter")
 
 
 class ExperienceFormatter(ABC):
@@ -22,7 +19,6 @@ class ExperienceFormatter(ABC):
         """Format a raw sample dict into an experience."""
 
 
-@FORMATTER.register_module("task")
 class TaskFormatter:
     """Formatter for task data.
 
@@ -69,7 +65,6 @@ class TaskFormatter:
         )
 
 
-@FORMATTER.register_module("sft")
 class SFTFormatter(ExperienceFormatter):
     """Formatter for SFT data, supporting both message list and plaintext formats.
 
@@ -288,7 +283,6 @@ class SFTFormatter(ExperienceFormatter):
         return self._messages_to_experience(messages, tools, mm_data)
 
 
-@FORMATTER.register_module("dpo")
 class DPOFormatter(ExperienceFormatter):
     """Formatter for DPO plaintext data.
 

@@ -7,13 +7,15 @@ from trinity.utils.log import get_logger
 class Registry(object):
     """A class for registry."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, default_mapping: dict = {}):
         """
         Args:
             name (`str`): The name of the registry.
+            default_mapping (`dict`): Default mapping from module names to module paths (strings).
         """
         self._name = name
         self._modules = {}
+        self._default_mapping = default_mapping
         self.logger = get_logger()
 
     @property
@@ -49,8 +51,19 @@ class Registry(object):
         """
         module = self._modules.get(module_key, None)
         if module is None:
-            # try to dynamic import
-            if isinstance(module_key, str) and "." in module_key:
+            # try to get from default mapping
+            if module_key in self._default_mapping:
+                module_path, class_name = self._default_mapping[module_key].rsplit(".", 1)
+                try:
+                    module = self._dynamic_import(module_path, class_name)
+                except Exception:
+                    self.logger.error(
+                        f"Failed to dynamically import {class_name} from {module_path}:\n"
+                        + traceback.format_exc()
+                    )
+                    raise ImportError(f"Cannot dynamically import {class_name} from {module_path}")
+            # try to get from string path
+            elif isinstance(module_key, str) and "." in module_key:
                 module_path, class_name = module_key.rsplit(".", 1)
                 try:
                     module = self._dynamic_import(module_path, class_name)
@@ -61,6 +74,11 @@ class Registry(object):
                     )
                     raise ImportError(f"Cannot dynamically import {class_name} from {module_path}")
                 self._register_module(module_name=module_key, module_cls=module)
+            elif module_key is None:
+                self.logger.info("Empty module key, return None")
+                return None
+            else:
+                raise ValueError(f"Invalid module key: {module_key}")
         return module
 
     def _register_module(self, module_name=None, module_cls=None, force=False):

@@ -1,7 +1,7 @@
 from typing import Optional
 
+from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 
 
 @REWARD_FUNCTIONS.register_module("math_boxed_reward_naive_dapo")

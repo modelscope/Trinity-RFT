@@ -11,10 +11,9 @@ from typing import Dict, Tuple
 
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN, AdvantageFn
+from trinity.algorithm.advantage_fn.advantage_fn import AdvantageFn
 
 
-@ADVANTAGE_FN.register_module("on_policy_distill")
 class OnPolicyDistillAdvantage(AdvantageFn):
     """Advantage function for on-policy distillation.
 

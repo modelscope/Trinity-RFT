@@ -8,18 +8,13 @@ from typing import Dict, List, Optional, Tuple
 import torch
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn.advantage_fn import (
-    ADVANTAGE_FN,
-    AdvantageFn,
-    GroupAdvantage,
-)
+from trinity.algorithm.advantage_fn.advantage_fn import AdvantageFn, GroupAdvantage
 from trinity.common.experience import Experience, group_by
 from trinity.utils.annotations import Deprecated
 from trinity.utils.monitor import gather_metrics
 
 
 @Deprecated
-@ADVANTAGE_FN.register_module("grpo_verl")
 class GRPOAdvantageFn(AdvantageFn):
     """GRPO advantage computation"""
 
@@ -91,7 +86,6 @@ class GRPOAdvantageFn(AdvantageFn):
         }
 
 
-@ADVANTAGE_FN.register_module("grpo")
 class GRPOGroupedAdvantage(GroupAdvantage):
     """An advantage class that calculates GRPO advantages."""
 

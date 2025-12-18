@@ -7,10 +7,9 @@ import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 
-@WORKFLOWS.register_module("rubric_judge_workflow")
 class RubricJudgeWorkflow(SimpleWorkflow):
     """A workflow using LLM-as-a-judge and rubrics to get the reward.
 

@@ -15,6 +15,8 @@ app = FastAPI()
 async def chat_completions(request: Request):
     # Currently, we do not support streaming chat completions
     body = await request.json()
+    if "return_token_ids" not in body:
+        body["return_token_ids"] = True
     url = await request.app.state.service.allocate_model()
     try:
         async with httpx.AsyncClient(timeout=request.app.state.inference_timeout) as client:

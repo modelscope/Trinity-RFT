@@ -46,7 +46,7 @@ buffer:
         prompt_len: ${model.max_prompt_tokens}
         max_model_len: ${model.max_model_len}
     eval_tasksets: []
-    default_workflow_type: synthetic_exp_workflow
+    default_workflow_type: scripts.context_length_test.workflow.synthetic_exp_workflow.SyntheticExpWorkflow
     default_reward_fn_type: math_reward
   trainer_input:
     experience_buffer:

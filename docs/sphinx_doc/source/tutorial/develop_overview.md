@@ -17,13 +17,23 @@ The table below lists the main functions of each extension interface, its target
 Trinity-RFT provides a modular development approach, allowing you to flexibly add custom modules without modifying the framework code.
 You can place your module code in the `trinity/plugins` directory. Trinity-RFT will automatically load all Python files in that directory at runtime and register the custom modules within them.
 Trinity-RFT also supports specifying other directories at runtime by setting the `--plugin-dir` option, for example: `trinity run --config <config_file> --plugin-dir <your_plugin_dir>`.
+Alternatively, you can use the relative path to the custom module in the YAML configuration file, for example: `default_workflow_type: 'examples.agentscope_frozenlake.workflow.FrozenLakeWorkflow'`.
 ```
 
 For modules you plan to contribute to Trinity-RFT, please follow these steps:
 
 1. Implement your code in the appropriate directory, such as `trinity/common/workflows` for `Workflow`, `trinity/algorithm` for `Algorithm`, and `trinity/buffer/operators` for `Operator`.
 
-2. Register your module in the corresponding `__init__.py` file of the directory.
+2. Register your module in the corresponding mapping dictionary in the `__init__.py` file of the directory.
+   For example, if you want to register a new workflow class `ExampleWorkflow`, you need to modify the `default_mapping` dictionary of `WORKFLOWS` in the `trinity/common/workflows/__init__.py` file:
+   ```python
+   WORKFLOWS: Registry = Registry(
+       "workflows",
+       default_mapping={
+           "example_workflow": "trinity.common.workflows.workflow.ExampleWorkflow",
+       },
+   )
+   ```
 
 3. Add tests for your module in the `tests` directory, following the naming conventions and structure of existing tests.
 

@@ -47,8 +47,8 @@ class Explorer:
         )
         explorer_state = self.state.load_explorer()
         self.explore_step_num = explorer_state.get("latest_iteration", 0)
-        self.last_sync_step = self.explore_step_num if self.explore_step_num > 0 else -1
-        self.last_monitored_step = self.explore_step_num if self.explore_step_num > 0 else -1
+        self.last_sync_step = self.explore_step_num
+        self.last_monitored_step = self.explore_step_num
         self.synchronizer = Synchronizer.get_actor(config)
         self.config = config
         self.models, self.auxiliary_models = create_inference_models(config)
@@ -328,9 +328,12 @@ class Explorer:
 
     async def save_checkpoint(self, sync_weight: bool = False) -> None:
         if self.scheduler:
-            await self._finish_steps(
-                self.last_monitored_step + 1, self.explore_step_num, self.model_version
-            )
+            if self.explore_step_num == 0:
+                await self._finish_eval_step(step=0)
+            else:
+                await self._finish_steps(
+                    self.last_monitored_step + 1, self.explore_step_num, self.model_version
+                )
             self.last_monitored_step = self.explore_step_num
 
         if sync_weight:

@@ -6,7 +6,7 @@ import unittest
 import torch
 from verl import DataProto
 
-from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.policy_loss_fn import POLICY_LOSS_FN
 
 
 class VerlPolicyLossTest(unittest.TestCase):
