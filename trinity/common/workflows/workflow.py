@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import TYPE_CHECKING, Any, List, Optional, Type, Union
+from typing import TYPE_CHECKING, List, Optional, Type, Union
 
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
@@ -13,7 +13,9 @@ from trinity.utils.log import get_logger
 
 if TYPE_CHECKING:
     import openai
+
     from trinity.common.models.model import ModelWrapper
+
 
 @dataclass
 class Task(dict):
