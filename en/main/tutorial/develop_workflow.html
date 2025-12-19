@@ -659,6 +659,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html">trinity.algorithm.advantage_fn.asymre_advantage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html">trinity.algorithm.advantage_fn.grpo_advantage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html">trinity.algorithm.advantage_fn.multi_step_grpo_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.on_policy_distill_advantage.html">trinity.algorithm.advantage_fn.on_policy_distill_advantage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.opmd_advantage.html">trinity.algorithm.advantage_fn.opmd_advantage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html">trinity.algorithm.advantage_fn.ppo_advantage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.rec_advantage.html">trinity.algorithm.advantage_fn.rec_advantage module</a></li>
@@ -681,6 +682,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.cispo_policy_loss.html">trinity.algorithm.policy_loss_fn.cispo_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html">trinity.algorithm.policy_loss_fn.dpo_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.gspo_policy_loss.html">trinity.algorithm.policy_loss_fn.gspo_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.importance_sampling_policy_loss.html">trinity.algorithm.policy_loss_fn.importance_sampling_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html">trinity.algorithm.policy_loss_fn.mix_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.opmd_policy_loss.html">trinity.algorithm.policy_loss_fn.opmd_policy_loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.policy_loss_fn.html">trinity.algorithm.policy_loss_fn.policy_loss_fn module</a></li>
@@ -753,6 +755,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html">trinity.common.workflows.math_trainable_ruler_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.on_policy_distill_workflow.html">trinity.common.workflows.on_policy_distill_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.rubric_judge_workflow.html">trinity.common.workflows.rubric_judge_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
@@ -1097,11 +1100,12 @@ To handle differences in <code class="docutils literal notranslate"><span class=
         <span class="o">*</span><span class="p">,</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
-        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ModelWrapper</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">auxiliary_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span> <span class="o">=</span> <span class="n">auxiliary_models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># OpenAI clients auto-derived from ModelWrapper</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
@@ -1114,7 +1118,7 @@ To handle differences in <code class="docutils literal notranslate"><span class=
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>(<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>): A single data item from the task dataset.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>(<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>): The model being trained, which provides an interface similar to OpenAI, capable of receiving a list of conversation messages and returning content generated by the LLM (including reply text <code class="docutils literal notranslate"><span class="pre">response_text</span></code>, full sequence token ids <code class="docutils literal notranslate"><span class="pre">tokens</span></code>, prompt part token length <code class="docutils literal notranslate"><span class="pre">prompt_length</span></code>, and a list of output token logprobs <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>(<code class="docutils literal notranslate"><span class="pre">List[openai.OpenAI]</span></code>):A list of auxiliary models not involved in training. All are provided via OpenAI-compatible APIs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>(<code class="docutils literal notranslate"><span class="pre">List[ModelWrapper]</span></code>): A list of auxiliary model wrappers. You can access OpenAI clients via <code class="docutils literal notranslate"><span class="pre">self.auxiliary_models</span></code> (auto-derived based on workflow’s <code class="docutils literal notranslate"><span class="pre">is_async</span></code>).</p></li>
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -1420,10 +1424,10 @@ For this case, you can implement the <code class="docutils literal notranslate">
         <span class="o">*</span><span class="p">,</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
-        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ModelWrapper</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">judge_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Use the first auxiliary model as the judge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">judge_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># OpenAI client auto-derived from ModelWrapper</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_something</span><span class="p">()</span>

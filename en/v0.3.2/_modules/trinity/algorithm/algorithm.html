@@ -1512,6 +1512,44 @@ document.write(`
         <span class="p">}</span></div>
 </div>
 
+
+
+<div class="viewcode-block" id="OnPolicyDistillAlgorithm">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.OnPolicyDistillAlgorithm">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OnPolicyDistillAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;On-Policy Distillation Algorithm.</span>
+
+<span class="sd">    Reference: Tinker library.</span>
+
+<span class="sd">    Workflow stores teacher_logprobs in experience.info[&quot;teacher_logprobs&quot;].</span>
+<span class="sd">    Trainer&#39;s advantage_fn computes: advantages = teacher_logprobs - student_logprobs</span>
+<span class="sd">    Trainer uses:</span>
+<span class="sd">        importance_sampling loss if no clipping is needed</span>
+<span class="sd">        ppo loss if clipping is needed, for better stability</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># advantage_fn computes from teacher_logprobs</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
+
+<div class="viewcode-block" id="OnPolicyDistillAlgorithm.default_config">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.OnPolicyDistillAlgorithm.default_config">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;on_policy_distill&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn_args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;kl_coef&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;ppo&quot;</span><span class="p">,</span>  <span class="c1"># or importance_sampling if no clipping is needed</span>
+            <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
 </pre></div>
 
                 </article>

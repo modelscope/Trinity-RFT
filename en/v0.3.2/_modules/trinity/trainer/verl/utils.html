@@ -987,6 +987,8 @@ document.write(`
         <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;advantages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">advantages</span>
     <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span>
+    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">teacher_logprobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;teacher_log_probs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">teacher_logprobs</span>
 
     <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">multi_modal_inputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;unique_ids&quot;</span><span class="p">])</span>

@@ -11,6 +11,7 @@ Submodules
    trinity.algorithm.policy_loss_fn.cispo_policy_loss
    trinity.algorithm.policy_loss_fn.dpo_loss
    trinity.algorithm.policy_loss_fn.gspo_policy_loss
+   trinity.algorithm.policy_loss_fn.importance_sampling_policy_loss
    trinity.algorithm.policy_loss_fn.mix_policy_loss
    trinity.algorithm.policy_loss_fn.opmd_policy_loss
    trinity.algorithm.policy_loss_fn.policy_loss_fn
