@@ -22,7 +22,7 @@ Download the model checkpoint and modify your config file, then run:
 trinity run examples/opd_gsm8k/opd_gsm8k.yaml
 ```
 
-Then you are all set! It should be pretty simple😄, and the training should converge very quick(Much quicker then RL).
+Then you are all set! It should be pretty simple😄, and the training should converge very quick.
 
 
 
