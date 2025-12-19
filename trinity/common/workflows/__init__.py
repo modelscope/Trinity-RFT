@@ -46,9 +46,7 @@ WORKFLOWS: Registry = Registry(
         "async_simple_mm_workflow": "trinity.common.workflows.simple_mm_workflow.AsyncSimpleMMWorkflow",
         # on-policy distillation workflows
         "on_policy_distill_workflow": "trinity.common.workflows.on_policy_distill_workflow.OnPolicyDistillWorkflow",
-        "async_on_policy_distill_workflow": "trinity.common.workflows.on_policy_distill_workflow.AsyncOnPolicyDistillWorkflow",
         "on_policy_distill_math_workflow": "trinity.common.workflows.on_policy_distill_workflow.OnPolicyDistillMathWorkflow",
-        "async_on_policy_distill_math_workflow": "trinity.common.workflows.on_policy_distill_workflow.AsyncOnPolicyDistillMathWorkflow",
     },
 )
 

@@ -144,12 +144,6 @@ class OnPolicyDistillWorkflow(Workflow):
         return responses
 
 
-class AsyncOnPolicyDistillWorkflow(OnPolicyDistillWorkflow):
-    """Alias for OnPolicyDistillWorkflow (already async)."""
-
-    pass
-
-
 class OnPolicyDistillMathWorkflow(OnPolicyDistillWorkflow):
     """On-policy distillation workflow with Qwen2.5-Math style format.
 
@@ -187,9 +181,3 @@ class OnPolicyDistillMathWorkflow(OnPolicyDistillWorkflow):
             response.metrics["accuracy"] = accuracy
             return float(accuracy)
         return 0.0
-
-
-class AsyncOnPolicyDistillMathWorkflow(OnPolicyDistillMathWorkflow):
-    """Alias for OnPolicyDistillMathWorkflow (already async)."""
-
-    pass
