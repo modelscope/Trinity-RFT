@@ -36,7 +36,7 @@ TOKENIZER_MODEL_PATH = "YOUR MODEL TOKENIZER PATH"
 MAX_TOKEN_LENGTH = 8196
 SFT_SAMPLE_SIZE = 5000
 RL_SAMPLE_SIZE = 20000
-SYSTEM_PROMPT = """You are a helpful assistant that solves MATH problems. You should first thinks about the reasoning process in mind and then provides the user with the answer. You should present your reasoning process using the format: <think>\n ...your reasoning process here... </think>\n first. You should always include your final answer in \\boxed{} as closed-form results."""
+SYSTEM_PROMPT = """You are a helpful assistant that solves MATH problems. You should first think about the reasoning process in mind and then provides the user with the answer. You should present your reasoning process using the format: <think>\n ...your reasoning process here... </think>\n first. You should always include your final answer in \\boxed{} as closed-form results."""
 
 
 def can_convert_to_int(answer):

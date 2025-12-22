@@ -36,7 +36,7 @@ buffer:
       format:
         prompt_key: question
         response_key: ground_truth
-        system_prompt: "You are a helpful assistant. To answer a query from the user, please first thinks through the question step-by-step inside <think>...</think>, then provides the final response to user."
+        system_prompt: "You are a helpful assistant. To answer a query from the user, please first think through the question step-by-step inside <think>...</think>, then provides the final response to user."
         reply_prefix: "<think>"
       rollout_args:
         temperature: 1.0

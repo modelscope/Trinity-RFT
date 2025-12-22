@@ -197,7 +197,7 @@ def prepare_configs(args, rank, current_time):
         )
         eval_taskset_config = config["buffer"]["explorer_input"]["eval_tasksets"]
         if len(eval_taskset_config) > 0:
-            # TODO: support seperately set path for eval taskset
+            # TODO: support separately set path for eval taskset
             for eval_taskset_config in eval_taskset_config:
                 eval_taskset_config["path"] = taskset_config["path"]
         if args.lr:

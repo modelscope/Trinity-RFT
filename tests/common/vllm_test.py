@@ -470,7 +470,7 @@ Reach goal: +1.0
 
 You will be provided the current observation, please decide on the next Action.
 You should show your thought process and then input the final action in ``` ```.
-You should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```.
+You should only output the NEXT ACTION at each iteration in the ``` ```. For example, if you want to move up, you should output ```Up```.
 You should plan ahead and need to achieve it in minimum number of steps.
 You should be aware that frozen tiles can be slippery, but the chance is small and you should not overthink it.
 
