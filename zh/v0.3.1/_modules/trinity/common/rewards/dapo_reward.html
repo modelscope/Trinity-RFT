@@ -982,14 +982,14 @@ document.write(`
         <span class="p">),</span> <span class="s2">&quot;max_response_length must be greater than cache_length&quot;</span>
 
         <span class="n">response_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_token</span><span class="p">)</span>
-        <span class="n">excepted_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span>
+        <span class="n">expected_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span>
 
-        <span class="k">if</span> <span class="n">response_len</span> <span class="o">&lt;</span> <span class="n">excepted_len</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response_len</span> <span class="o">&lt;</span> <span class="n">expected_len</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
         <span class="k">elif</span> <span class="n">response_len</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span><span class="p">:</span>
             <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">excepted_len</span> <span class="o">-</span> <span class="n">response_len</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span></div>
+            <span class="k">return</span> <span class="p">(</span><span class="n">expected_len</span> <span class="o">-</span> <span class="n">response_len</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span></div>
 </div>
 
 </pre></div>
