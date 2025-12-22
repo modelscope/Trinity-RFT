@@ -96,7 +96,7 @@ DO NOT try to interact with the user at anytime. Finish the task and buy the ite
 """
 
 WebShop_SYSTEM_PROMPT = """
-You are an agent interacting with a virtual text-based web shopping environment to test out your ability. Your job is to find and follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruction provided.
+You are an agent interacting with a virtual text-based web shopping environment to test out your ability. Your job is to follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruction provided.
 
 ## Action Format:
 You should give both the action_name and action_arg like the format `action_name[action_arg]`. You can execute two types of actions, search and click.
