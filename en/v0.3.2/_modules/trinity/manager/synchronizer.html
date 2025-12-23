@@ -1239,6 +1239,19 @@ document.write(`
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
 
 
+<div class="viewcode-block" id="Synchronizer.get_latest_model_version">
+<a class="viewcode-back" href="../../../build_api/trinity.manager.synchronizer.html#trinity.manager.Synchronizer.get_latest_model_version">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_latest_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the latest model version available in the synchronizer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The current model version.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ready_condition</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
+
+
 <div class="viewcode-block" id="Synchronizer.ready_to_nccl_sync">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.synchronizer.html#trinity.manager.Synchronizer.ready_to_nccl_sync">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">ready_to_nccl_sync</span><span class="p">(</span>

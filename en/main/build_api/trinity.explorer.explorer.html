@@ -43,8 +43,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'build_api/trinity.explorer.explorer';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="trinity.explorer.explorer_client module" href="trinity.explorer.explorer_client.html" />
-    <link rel="prev" title="trinity.explorer.api.service module" href="trinity.explorer.api.service.html" />
+    <link rel="next" title="trinity.explorer.scheduler module" href="trinity.explorer.scheduler.html" />
+    <link rel="prev" title="trinity.explorer.proxy.service module" href="trinity.explorer.proxy.service.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -262,13 +262,14 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.proxy.html">trinity.explorer.proxy package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.app.html">trinity.explorer.proxy.app module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.client.html">trinity.explorer.proxy.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.recorder.html">trinity.explorer.proxy.recorder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.service.html">trinity.explorer.proxy.service module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">trinity.explorer.explorer module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -619,6 +620,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.__init__"><code class="docutils literal notranslate"><span class="pre">Explorer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_weight_sync_group()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.setup_model_level_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_model_level_weight_sync_group()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.prepare"><code class="docutils literal notranslate"><span class="pre">Explorer.prepare()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.get_weight"><code class="docutils literal notranslate"><span class="pre">Explorer.get_weight()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.explore"><code class="docutils literal notranslate"><span class="pre">Explorer.explore()</span></code></a></li>
@@ -663,6 +665,12 @@ document.write(`
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.setup_weight_sync_group">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_weight_sync_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dict_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.setup_weight_sync_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.setup_weight_sync_group" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.setup_model_level_weight_sync_group">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_model_level_weight_sync_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.setup_model_level_weight_sync_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.setup_model_level_weight_sync_group" title="Link to this definition">#</a></dt>
+<dd><p>Setup process group for each model, only used in serve mode.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.prepare">
@@ -794,20 +802,20 @@ Agent applications can be deployed separately and interact with the explorer via
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="trinity.explorer.api.service.html"
+       href="trinity.explorer.proxy.service.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">trinity.explorer.api.service module</p>
+        <p class="prev-next-title">trinity.explorer.proxy.service module</p>
       </div>
     </a>
     <a class="right-next"
-       href="trinity.explorer.explorer_client.html"
+       href="trinity.explorer.scheduler.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">trinity.explorer.explorer_client module</p>
+        <p class="prev-next-title">trinity.explorer.scheduler module</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -830,6 +838,7 @@ Agent applications can be deployed separately and interact with the explorer via
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.__init__"><code class="docutils literal notranslate"><span class="pre">Explorer.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_weight_sync_group()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.setup_model_level_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_model_level_weight_sync_group()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.prepare"><code class="docutils literal notranslate"><span class="pre">Explorer.prepare()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.get_weight"><code class="docutils literal notranslate"><span class="pre">Explorer.get_weight()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.explorer.Explorer.explore"><code class="docutils literal notranslate"><span class="pre">Explorer.explore()</span></code></a></li>

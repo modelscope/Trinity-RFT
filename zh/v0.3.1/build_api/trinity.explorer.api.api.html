@@ -578,9 +578,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -596,19 +594,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> 目录 </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.chat_completions"><code class="docutils literal notranslate"><span class="pre">chat_completions()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.show_available_models"><code class="docutils literal notranslate"><span class="pre">show_available_models()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.health"><code class="docutils literal notranslate"><span class="pre">health()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.metrics"><code class="docutils literal notranslate"><span class="pre">metrics()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.serve_http"><code class="docutils literal notranslate"><span class="pre">serve_http()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.run_app"><code class="docutils literal notranslate"><span class="pre">run_app()</span></code></a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -618,40 +603,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-trinity.explorer.api.api">
-<span id="trinity-explorer-api-api-module"></span><h1>trinity.explorer.api.api module<a class="headerlink" href="#module-trinity.explorer.api.api" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.chat_completions">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">chat_completions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#chat_completions"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.chat_completions" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.show_available_models">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">show_available_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#show_available_models"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.show_available_models" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.health">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">health</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#health"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.health" title="Link to this definition">#</a></dt>
-<dd><p>Health check.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.metrics">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#metrics"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.metrics" title="Link to this definition">#</a></dt>
-<dd><p>Get the metrics of the service.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.serve_http">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">serve_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#serve_http"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.serve_http" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.explorer.api.api.run_app">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.api.api.</span></span><span class="sig-name descname"><span class="pre">run_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listen_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FastAPI</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/api/api.html#run_app"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.api.api.run_app" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
+  <section id="trinity-explorer-api-api-module">
+<h1>trinity.explorer.api.api module<a class="headerlink" href="#trinity-explorer-api-api-module" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -689,26 +642,6 @@ document.write(`
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> 目录
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.chat_completions"><code class="docutils literal notranslate"><span class="pre">chat_completions()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.show_available_models"><code class="docutils literal notranslate"><span class="pre">show_available_models()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.health"><code class="docutils literal notranslate"><span class="pre">health()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.metrics"><code class="docutils literal notranslate"><span class="pre">metrics()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.serve_http"><code class="docutils literal notranslate"><span class="pre">serve_http()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.api.api.run_app"><code class="docutils literal notranslate"><span class="pre">run_app()</span></code></a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

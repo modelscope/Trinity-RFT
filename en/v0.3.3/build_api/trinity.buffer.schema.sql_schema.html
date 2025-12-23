@@ -616,12 +616,13 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel"><code class="docutils literal notranslate"><span class="pre">ExperienceModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.id</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.prompt"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.prompt</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.response"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.response</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.message_list"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.message_list</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.reward</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.timestamp"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.timestamp</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.task_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.task_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.run_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.run_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.msg_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.msg_id</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.model_version"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.model_version</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.experience_bytes"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.experience_bytes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.reward</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.consumed"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.consumed</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.to_experience"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.from_experience"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.from_experience()</span></code></a></li>
@@ -692,23 +693,23 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.prompt">
-<span class="sig-name descname"><span class="pre">prompt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Text(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.prompt" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">DateTime(),</span> <span class="pre">table=None,</span> <span class="pre">server_default=DefaultClause(&lt;sqlalchemy.sql.functions.now</span> <span class="pre">at</span> <span class="pre">0x7f04d87b2e90;</span> <span class="pre">now&gt;,</span> <span class="pre">for_update=False))</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.timestamp" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.response">
-<span class="sig-name descname"><span class="pre">response</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Text(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.response" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.task_id">
+<span class="sig-name descname"><span class="pre">task_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(length=64),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.task_id" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.message_list">
-<span class="sig-name descname"><span class="pre">message_list</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">JSON(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.message_list" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.run_id">
+<span class="sig-name descname"><span class="pre">run_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.run_id" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.reward">
-<span class="sig-name descname"><span class="pre">reward</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Float(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.msg_id">
+<span class="sig-name descname"><span class="pre">msg_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(length=64),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.msg_id" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -719,6 +720,11 @@ document.write(`
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.experience_bytes">
 <span class="sig-name descname"><span class="pre">experience_bytes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.experience_bytes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.reward">
+<span class="sig-name descname"><span class="pre">reward</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Float(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -815,7 +821,7 @@ document.write(`
 
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.init_engine">
-<span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">init_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#init_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.init_engine" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">init_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#init_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.init_engine" title="Link to this definition">#</a></dt>
 <dd><p>Get the sqlalchemy engine.</p>
 </dd></dl>
 
@@ -874,12 +880,13 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel"><code class="docutils literal notranslate"><span class="pre">ExperienceModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.id</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.prompt"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.prompt</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.response"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.response</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.message_list"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.message_list</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.reward</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.timestamp"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.timestamp</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.task_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.task_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.run_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.run_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.msg_id"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.msg_id</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.model_version"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.model_version</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.experience_bytes"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.experience_bytes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.reward</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.consumed"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.consumed</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.to_experience"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.schema.sql_schema.ExperienceModel.from_experience"><code class="docutils literal notranslate"><span class="pre">ExperienceModel.from_experience()</span></code></a></li>

@@ -929,7 +929,7 @@ document.write(`
 <div class="viewcode-block" id="retry_session">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.utils.html#trinity.buffer.utils.retry_session">[文档]</a>
 <span class="nd">@contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">retry_session</span><span class="p">(</span><span class="n">session_maker</span><span class="p">,</span> <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retry_session</span><span class="p">(</span><span class="n">session_maker</span><span class="p">,</span> <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Context manager for retrying session.&quot;&quot;&quot;</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retry_times</span><span class="p">):</span>

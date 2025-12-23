@@ -628,13 +628,14 @@ window.addEventListener("load", load);
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.proxy.html">trinity.explorer.proxy package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.proxy.app.html">trinity.explorer.proxy.app module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.proxy.client.html">trinity.explorer.proxy.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.proxy.recorder.html">trinity.explorer.proxy.recorder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.proxy.service.html">trinity.explorer.proxy.service module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -1052,11 +1053,11 @@ document.write(`
             <span class="n">distributed_executor_backend</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;uni&quot;</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;ray&quot;</span><span class="p">),</span>
             <span class="n">max_model_len</span><span class="o">=</span><span class="n">max_model_len</span><span class="p">,</span>
             <span class="n">enable_prefix_caching</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_prefix_caching</span><span class="p">,</span>
+            <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span>
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
-            <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
             <span class="n">override_generation_config</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># TODO: find a way to unittest this</span>
                 <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
                 <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
@@ -1492,6 +1493,7 @@ document.write(`
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">add_lora</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
             <span class="k">return</span> <span class="n">model_version</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">reset_prefix_cache</span><span class="p">()</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>

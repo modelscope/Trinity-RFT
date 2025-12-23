@@ -262,13 +262,14 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.proxy.html">trinity.explorer.proxy package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.app.html">trinity.explorer.proxy.app module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.client.html">trinity.explorer.proxy.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.recorder.html">trinity.explorer.proxy.recorder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.proxy.service.html">trinity.explorer.proxy.service module</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -650,6 +651,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_state_dict_meta"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_state_dict_meta()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Synchronizer.setup_weight_sync_group()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.wait_new_model_state_dict"><code class="docutils literal notranslate"><span class="pre">Synchronizer.wait_new_model_state_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_latest_model_version"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_latest_model_version()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.ready_to_nccl_sync"><code class="docutils literal notranslate"><span class="pre">Synchronizer.ready_to_nccl_sync()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_actor"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_actor()</span></code></a></li>
 </ul>
@@ -912,6 +914,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.get_state_dict_meta"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_state_dict_meta()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Synchronizer.setup_weight_sync_group()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.wait_new_model_state_dict"><code class="docutils literal notranslate"><span class="pre">Synchronizer.wait_new_model_state_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.get_latest_model_version"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_latest_model_version()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.ready_to_nccl_sync"><code class="docutils literal notranslate"><span class="pre">Synchronizer.ready_to_nccl_sync()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.synchronizer.html#trinity.manager.synchronizer.Synchronizer.get_actor"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_actor()</span></code></a></li>
 </ul>
@@ -1147,6 +1150,17 @@ the trainer and one or more explorers in a distributed training setup.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Synchronizer.get_latest_model_version">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_latest_model_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.get_latest_model_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.get_latest_model_version" title="Link to this definition">#</a></dt>
+<dd><p>Get the latest model version available in the synchronizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The current model version.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.manager.Synchronizer.ready_to_nccl_sync">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ready_to_nccl_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.ready_to_nccl_sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.ready_to_nccl_sync" title="Link to this definition">#</a></dt>
 <dd><p>Prepare for NCCL-based synchronization between modules.</p>
@@ -1265,6 +1279,7 @@ the trainer and one or more explorers in a distributed training setup.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_state_dict_meta"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_state_dict_meta()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Synchronizer.setup_weight_sync_group()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.wait_new_model_state_dict"><code class="docutils literal notranslate"><span class="pre">Synchronizer.wait_new_model_state_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_latest_model_version"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_latest_model_version()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.ready_to_nccl_sync"><code class="docutils literal notranslate"><span class="pre">Synchronizer.ready_to_nccl_sync()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.Synchronizer.get_actor"><code class="docutils literal notranslate"><span class="pre">Synchronizer.get_actor()</span></code></a></li>
 </ul>

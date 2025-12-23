@@ -954,7 +954,6 @@ document.write(`
     <span class="n">SyncStyle</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_inference_models</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_checkpoint_dir_with_step_num</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.explorer.scheduler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scheduler</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.state_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
@@ -1027,7 +1026,6 @@ document.write(`
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">setup_weight_sync_group</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">master_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">master_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">state_dict_meta</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
-        <span class="c1"># In checkpoint mode, we use explorer to store the model weights which has no rank</span>
         <span class="n">base_offset</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nccl_sync</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="n">world_size</span> <span class="o">=</span> <span class="p">(</span>
             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">+</span> <span class="n">base_offset</span>
@@ -1052,6 +1050,33 @@ document.write(`
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
         <span class="p">]</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">refs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Explorer.setup_model_level_weight_sync_group">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.explorer.html#trinity.explorer.Explorer.setup_model_level_weight_sync_group">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">setup_model_level_weight_sync_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup process group for each model, only used in serve mode.&quot;&quot;&quot;</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">world_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span> <span class="o">=</span> <span class="k">await</span> <span class="n">model</span><span class="o">.</span><span class="n">get_available_address</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Initialize process group for model weight synchronization, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;master_address=</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">, master_port=</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;world_size=</span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">init_process_group</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                    <span class="n">master_address</span><span class="o">=</span><span class="n">master_address</span><span class="p">,</span>
+                    <span class="n">master_port</span><span class="o">=</span><span class="n">master_port</span><span class="p">,</span>
+                    <span class="n">rank_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
+                    <span class="n">group_name</span><span class="o">=</span><span class="n">ROLLOUT_WEIGHT_SYNC_GROUP_NAME</span><span class="p">,</span>
+                    <span class="n">explorer_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">refs</span><span class="p">)</span></div>
 
 
@@ -1113,8 +1138,14 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;All models are ready.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nccl_sync</span><span class="p">:</span>
-                <span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_available_address</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
-                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_weight_sync_group</span><span class="p">(</span><span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;serve&quot;</span><span class="p">:</span>
+                    <span class="c1"># In serving mode, each engine will setup its own process group</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_model_level_weight_sync_group</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span>
+                        <span class="mi">0</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">get_available_address</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_weight_sync_group</span><span class="p">(</span><span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;serve&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">Scheduler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">)</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -1181,9 +1212,11 @@ document.write(`
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="n">sync_weight</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_explorer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
                 <span class="n">RunningStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">,</span>
-                <span class="n">old_status</span><span class="o">=</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_successful</span>
-                <span class="k">else</span> <span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span><span class="p">,</span>
+                <span class="n">old_status</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_successful</span>
+                    <span class="k">else</span> <span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span>
+                <span class="p">),</span>
             <span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -1441,32 +1474,26 @@ document.write(`
 <span class="sd">                messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello!&quot;}]</span>
 <span class="sd">            )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.explorer.api.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExplorerService</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.explorer.proxy.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExplorerService</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">ExplorerService</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">listen_address</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">listen_address</span><span class="p">,</span>
-            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">api_port</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">proxy_port</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">serve</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">ray</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">get_node_ip_address</span><span class="p">()</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Explorer API Server is started on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">server_url</span><span class="si">}</span><span class="s2"> and listening to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">listen_address</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="s2">&quot;======================================================</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Starting Trinity Service on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">server_url</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;======================================================&quot;</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">save_explorer_server_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_url</span><span class="p">)</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">service_status_check_interval</span><span class="p">)</span>
-            <span class="c1"># process experiences generated in the last interval</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">get_all_experiences</span><span class="p">()</span>
-            <span class="n">metrics</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
-            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">collect_metrics</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">)</span>
             <span class="c1"># get the latest checkpoint</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">step_num</span> <span class="o">=</span> <span class="n">get_checkpoint_dir_with_step_num</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">False</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">set_latest_model_version</span><span class="p">(</span><span class="n">step_num</span><span class="p">)</span></div>
+            <span class="n">model_version</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">get_latest_model_version</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">set_latest_model_version</span><span class="p">(</span><span class="n">model_version</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Explorer.get_actor">

@@ -616,6 +616,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.__init__"><code class="docutils literal notranslate"><span class="pre">Explorer.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_weight_sync_group()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.setup_model_level_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_model_level_weight_sync_group()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.prepare"><code class="docutils literal notranslate"><span class="pre">Explorer.prepare()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.get_weight"><code class="docutils literal notranslate"><span class="pre">Explorer.get_weight()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.explore"><code class="docutils literal notranslate"><span class="pre">Explorer.explore()</span></code></a></li>
@@ -653,22 +654,11 @@ document.write(`
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.explorer.api.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.chat_completions"><code class="docutils literal notranslate"><span class="pre">chat_completions()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.show_available_models"><code class="docutils literal notranslate"><span class="pre">show_available_models()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.health"><code class="docutils literal notranslate"><span class="pre">health()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.metrics"><code class="docutils literal notranslate"><span class="pre">metrics()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.serve_http"><code class="docutils literal notranslate"><span class="pre">serve_http()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html#trinity.explorer.api.api.run_app"><code class="docutils literal notranslate"><span class="pre">run_app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html#trinity.explorer.api.service.ExplorerService"><code class="docutils literal notranslate"><span class="pre">ExplorerService</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="trinity.explorer.api.html#module-trinity.explorer.api">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.explorer.api.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -682,6 +672,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.__init__"><code class="docutils literal notranslate"><span class="pre">Explorer.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_weight_sync_group()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.setup_model_level_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_model_level_weight_sync_group()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.prepare"><code class="docutils literal notranslate"><span class="pre">Explorer.prepare()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.get_weight"><code class="docutils literal notranslate"><span class="pre">Explorer.get_weight()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.explore"><code class="docutils literal notranslate"><span class="pre">Explorer.explore()</span></code></a></li>
@@ -700,18 +691,7 @@ document.write(`
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient"><code class="docutils literal notranslate"><span class="pre">ExplorerClient</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.__init__"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.init_session"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.init_session()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.get_openai_client"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.get_openai_client()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.get_openai_async_client"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.get_openai_async_client()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.feedback"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.feedback()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html#trinity.explorer.explorer_client.ExplorerClient.feedback_async"><code class="docutils literal notranslate"><span class="pre">ExplorerClient.feedback_async()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper"><code class="docutils literal notranslate"><span class="pre">TaskWrapper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.task"><code class="docutils literal notranslate"><span class="pre">TaskWrapper.task</span></code></a></li>
@@ -793,6 +773,12 @@ document.write(`
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.setup_weight_sync_group">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_weight_sync_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dict_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.setup_weight_sync_group"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.setup_weight_sync_group" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.Explorer.setup_model_level_weight_sync_group">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setup_model_level_weight_sync_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.setup_model_level_weight_sync_group"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.setup_model_level_weight_sync_group" title="Link to this definition">#</a></dt>
+<dd><p>Setup process group for each model, only used in serve mode.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.prepare">
@@ -964,6 +950,7 @@ Agent applications can be deployed separately and interact with the explorer via
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.__init__"><code class="docutils literal notranslate"><span class="pre">Explorer.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.setup_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_weight_sync_group()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.setup_model_level_weight_sync_group"><code class="docutils literal notranslate"><span class="pre">Explorer.setup_model_level_weight_sync_group()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.prepare"><code class="docutils literal notranslate"><span class="pre">Explorer.prepare()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.get_weight"><code class="docutils literal notranslate"><span class="pre">Explorer.get_weight()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.Explorer.explore"><code class="docutils literal notranslate"><span class="pre">Explorer.explore()</span></code></a></li>

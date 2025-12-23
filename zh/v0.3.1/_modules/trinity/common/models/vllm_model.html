@@ -1035,11 +1035,11 @@ document.write(`
             <span class="n">distributed_executor_backend</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;uni&quot;</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;ray&quot;</span><span class="p">),</span>
             <span class="n">max_model_len</span><span class="o">=</span><span class="n">max_model_len</span><span class="p">,</span>
             <span class="n">enable_prefix_caching</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_prefix_caching</span><span class="p">,</span>
+            <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span>
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
-            <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
             <span class="n">override_generation_config</span><span class="o">=</span><span class="p">{</span>  <span class="c1"># TODO: find a way to unittest this</span>
                 <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
                 <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
@@ -1475,6 +1475,7 @@ document.write(`
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">add_lora</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
             <span class="k">return</span> <span class="n">model_version</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">reset_prefix_cache</span><span class="p">()</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
