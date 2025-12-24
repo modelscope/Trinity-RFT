@@ -327,7 +327,10 @@ class SwanlabMonitor(Monitor):
             tbl = swanlab.echarts.Table()
             tbl.add(headers, rows)
             swanlab.log({table_name: tbl}, step=step)
-        except Exception:
+        except Exception as e:
+            self.console_logger.warning(
+                f"Failed to log table '{table_name}' as echarts, falling back to CSV. Error: {e}"
+            )
             # Fallback: log as CSV string if echarts table is unavailable
             csv_str = experiences_table.to_csv(index=False)
             swanlab.log({table_name: csv_str}, step=step)
