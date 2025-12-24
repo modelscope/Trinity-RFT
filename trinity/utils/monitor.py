@@ -308,7 +308,7 @@ class SwanlabMonitor(Monitor):
             "mode": monitor_args.get("mode") or "cloud",
             "settings": monitor_args.get("settings"),
             "id": monitor_args.get("id"),
-            "config": config.flatten(),
+            "config": config.flatten() if config is not None else None,
             "resume": monitor_args.get("resume"),
             "reinit": monitor_args.get("reinit"),
         }
