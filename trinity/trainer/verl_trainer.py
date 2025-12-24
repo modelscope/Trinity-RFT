@@ -30,7 +30,7 @@ from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 from verl.utils.metric import reduce_metrics
 
-from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN, SAMPLE_STRATEGY
+from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import SaveStrategy
@@ -261,11 +261,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.kl_fn = KL_FN.get(self.algorithm_config.kl_penalty_fn)(
                 **self.algorithm_config.kl_penalty_fn_args
             )
-        self.sample_strategy = SAMPLE_STRATEGY.get(global_config.algorithm.sample_strategy)(
-            buffer_config=global_config.buffer,
-            trainer_type=global_config.trainer.trainer_type,
-            **global_config.algorithm.sample_strategy_args,
-        )
         super().__init__(
             config,
             tokenizer,
@@ -379,7 +374,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def train_step_num(self) -> int:
         return self.global_steps
 
-    def prepare(self):
+    async def prepare(self):
         self.actor_rollout_wg.setup_weight_sync_group()
         self.actor_rollout_wg.set_algorithm(self.algorithm_config)
 
@@ -411,8 +406,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
-    def train_step(self, batch: Experiences) -> Dict:  # noqa C901
-        batch = to_data_proto(batch, self.logger)
+    async def train_step(self, batch_exps: Experiences) -> Dict:  # noqa C901
+        batch = to_data_proto(batch_exps, self.logger)
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1

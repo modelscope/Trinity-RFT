@@ -1,0 +1,318 @@
+import os
+from typing import Dict
+
+import ray
+import tinker
+import torch
+from tinker import types
+from verl.utils.debug import marked_timer
+from verl.utils.py_functional import append_to_dict
+
+from trinity.algorithm import ALGORITHM_TYPE
+from trinity.algorithm.advantage_fn import ADVANTAGE_FN
+from trinity.algorithm.entropy_loss_fn import ENTROPY_LOSS_FN
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import DummyEntropyLossFn
+from trinity.algorithm.kl_fn import KL_FN
+from trinity.algorithm.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.utils import prefix_metrics
+from trinity.common.config import Config
+from trinity.common.experience import Experiences
+from trinity.manager.synchronizer import Synchronizer
+from trinity.trainer.tinker.utils import (
+    compute_data_metrics,
+    compute_throughout_metrics,
+    compute_timing_metrics,
+    to_tinker_input,
+)
+from trinity.trainer.trainer import TrainEngineWrapper
+from trinity.utils.log import get_logger
+
+
+class TinkerTrainerWrapper(TrainEngineWrapper):
+    def __init__(self, config: Config):
+        self.config = config
+        self.logger = get_logger("tinker_trainer")
+        self._init_algorithm()
+        self.synchronizer = Synchronizer.get_actor(namespace=self.config.synchronizer.ray_namespace)
+
+    def _init_algorithm(self):
+        self.algorithm = ALGORITHM_TYPE.get(self.config.algorithm.algorithm_type)
+        algorithm_config = self.config.algorithm
+        if self.algorithm.compute_advantage_in_trainer:
+            self.advantage_fn = ADVANTAGE_FN.get(algorithm_config.advantage_fn)(
+                **algorithm_config.advantage_fn_args
+            )
+            self.kl_fn = KL_FN.get(algorithm_config.kl_penalty_fn)(
+                **algorithm_config.kl_penalty_fn_args
+            )
+        self.loss_agg_mode = algorithm_config.loss_agg_mode
+        self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
+            backend="tinker", **algorithm_config.policy_loss_fn_args
+        )
+        self.kl_loss_fn = KL_FN.get(algorithm_config.kl_loss_fn)(**algorithm_config.kl_loss_fn_args)
+        self.entropy_loss_fn = ENTROPY_LOSS_FN.get(algorithm_config.entropy_loss_fn)(
+            **algorithm_config.entropy_loss_fn_args
+        )
+
+        # EXPERIMENTAL: apply loss scale fix
+        self.do_fix_actor_microbatch_loss_scale = (
+            self.config.trainer.fix_actor_microbatch_loss_scale
+            and (self.loss_agg_mode == "token-mean")
+        )
+
+        self.adam_params = types.AdamParams(
+            learning_rate=algorithm_config.optimizer.lr,
+            beta1=algorithm_config.optimizer.betas[0],
+            beta2=algorithm_config.optimizer.betas[1],
+            # eps is currently not in config
+            weight_decay=algorithm_config.optimizer.weight_decay,
+            grad_clip_norm=self.config.trainer.grad_clip,
+        )
+
+    async def prepare(self):
+        self.service_client = tinker.ServiceClient()
+
+        name_prefix_list = [self.config.project, self.config.group, self.config.name]
+        self.tinker_checkpoint_name_prefix = "-".join(
+            [prefix for prefix in name_prefix_list if prefix]
+        )
+        self.default_local_dir = self.config.checkpoint_job_dir
+
+        self.local_latest_checkpointed_iteration = os.path.join(
+            self.config.checkpoint_job_dir, "latest_checkpointed_iteration.txt"
+        )
+        self.local_latest_state_dict_iteration = os.path.join(
+            self.config.checkpoint_job_dir, "latest_state_dict_iteration.txt"
+        )
+
+        if os.path.exists(self.local_latest_checkpointed_iteration):
+            with open(self.local_latest_checkpointed_iteration, "r") as f:
+                self._train_step_num = self.latest_remote_checkpoint_step = int(f.read().strip())
+            checkpoint_file_path = os.path.join(
+                self.default_local_dir,
+                f"global_step_{self.train_step_num}",
+                "remote_checkpoint_path.txt",
+            )
+            with open(checkpoint_file_path, "r") as f:
+                self.latest_remote_checkpoint_path = f.read().strip()
+            self.actor_client = (
+                await self.service_client.create_training_client_from_state_with_optimizer_async(
+                    path=self.latest_remote_checkpoint_path,
+                )
+            )
+        else:
+            self.actor_client = await self.service_client.create_lora_training_client_async(
+                base_model=self.config.model.tinker.base_model,
+                rank=self.config.model.tinker.rank,
+                seed=self.config.model.tinker.seed,
+                train_mlp=self.config.model.tinker.train_mlp,
+                train_attn=self.config.model.tinker.train_attn,
+                train_unembed=self.config.model.tinker.train_unembed,
+            )
+            self.latest_remote_checkpoint_step = 0
+            self.latest_remote_checkpoint_path = None
+            self._train_step_num = 0
+
+        if os.path.exists(self.local_latest_state_dict_iteration):
+            with open(self.local_latest_state_dict_iteration, "r") as f:
+                self.latest_remote_sampler_step = int(f.read().strip())
+            sampler_file_path = os.path.join(
+                self.default_local_dir,
+                f"global_step_{self.latest_remote_sampler_step}",
+                "remote_sampler_path.txt",
+            )
+            with open(sampler_file_path, "r"):
+                self.latest_remote_sampler_path = f.read().strip()
+        else:
+            self.latest_remote_sampler_step = 0
+            self.latest_remote_sampler_path = None
+
+        self.ref_client = await self.service_client.create_sampling_client_async(
+            base_model=self.config.model.tinker.base_model,
+        )
+
+    @property
+    def train_step_num(self) -> int:
+        """Get the current training step number."""
+        return self._train_step_num
+
+    def _loss_func(
+        self, batch: list[types.Datum], logprobs: list[torch.Tensor]
+    ) -> tuple[torch.Tensor, dict[str, float]]:
+        total_loss = 0.0
+        metrics = {}
+        assert len(self.model_inputs_list) == len(
+            logprobs
+        ), "len(self.model_inputs_list) must equal to len(logprobs)"
+        for model_inputs, logprob in zip(self.model_inputs_list, logprobs):
+            micro_batch_metrics = {}
+            response_mask = model_inputs["action_mask"]
+            logprob = logprob[-response_mask.shape[0] :]
+
+            pg_loss, pg_loss_metrics = self.policy_loss_fn(logprob=logprob, **model_inputs)
+            prefix_metrics(
+                src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics
+            )
+
+            if self.entropy_loss_fn != DummyEntropyLossFn:
+                entropy = -(logprob * logprob.exp()).sum(-1)
+            else:
+                entropy = None
+            # compute entropy loss from entropy
+            entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
+                entropy=entropy,
+                **model_inputs,
+                loss_agg_mode=self.loss_agg_mode,
+            )
+            prefix_metrics(
+                src_metrics=entropy_loss_metrics,
+                prefix="actor",
+                dst_metrics=micro_batch_metrics,
+            )
+
+            # compute kl loss
+            kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
+                logprob=logprob,
+                ref_logprob=model_inputs["ref_logprob"],
+                response_mask=response_mask,
+                loss_agg_mode=self.loss_agg_mode,
+                old_logprob=model_inputs["old_logprob"],
+            )
+            prefix_metrics(
+                src_metrics=kl_loss_metrics,
+                prefix="actor",
+                dst_metrics=micro_batch_metrics,
+            )
+
+            # compute policy loss
+            policy_loss = pg_loss - entropy_loss + kl_loss
+            loss_scale = 1.0
+            if not self.do_fix_actor_microbatch_loss_scale:
+                loss_scale /= len(logprobs)
+            loss = policy_loss * loss_scale
+            total_loss = total_loss + loss
+            micro_batch_metrics["actor/final_loss"] = loss.detach().item()
+            append_to_dict(metrics, micro_batch_metrics)
+        avg_metrics = {k: sum(v) / len(v) for k, v in metrics.items()}
+        return total_loss, avg_metrics
+
+    async def train_step(self, batch_exps: Experiences) -> Dict:
+        """Training one step.
+
+        Args:
+            batch (Experiences): A batch of experiences to train.
+
+        Returns:
+            Dict: Metrics of the training step.
+        """
+        batch, batch_input_tokens, model_inputs_list = to_tinker_input(batch_exps, self.logger)
+        self.model_inputs_list = model_inputs_list
+        timing_raw = {}
+        metrics = {}
+        self._train_step_num += 1
+
+        with marked_timer("step", timing_raw):
+            if self.algorithm.use_reference:  # ref_logprob may not be used
+                import asyncio
+
+                ref_logprobs = await asyncio.gather(
+                    *[
+                        self.ref_client.compute_logprobs_async(input_tokens)
+                        for input_tokens in batch_input_tokens
+                    ]
+                )
+                for model_inputs, ref_logprob in zip(model_inputs_list, ref_logprobs):
+                    response_length = model_inputs["action_mask"].shape[0]
+                    model_inputs["ref_logprob"] = torch.tensor(ref_logprob[-response_length:])
+
+            if self.algorithm.compute_advantage_in_trainer:
+                # TODO: following is verl format, which is not compatible with tinker
+                with marked_timer("adv", timing_raw):
+                    # compute kl penalty
+                    batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
+                    metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
+                    # compute advantages, executed on the driver process
+                    batch, _ = self.advantage_fn(batch)
+            else:
+                # skip token_level_scores for sft/dpo
+                for model_inputs in model_inputs_list:
+                    if "token_level_scores" in model_inputs:
+                        assert "token_level_rewards" not in model_inputs
+                        model_inputs["token_level_rewards"] = model_inputs["token_level_scores"]
+
+            # update actor
+            with marked_timer("update_actor", timing_raw):
+                fwdbwd_future = await self.actor_client.forward_backward_custom_async(
+                    batch, self._loss_func
+                )
+                optim_future = await self.actor_client.optim_step_async(self.adam_params)
+                fwdbwd_result = await fwdbwd_future
+                optim_result = await optim_future
+                metrics.update(fwdbwd_result.metrics)
+                if optim_result.metrics:
+                    metrics.update(optim_result.metrics)
+
+        # collect metrics
+        metrics.update(compute_data_metrics(batch=self.model_inputs_list))
+        timing_metrics = compute_timing_metrics(batch=self.model_inputs_list, timing_raw=timing_raw)
+        metrics.update({k.replace("timing_s/", "time/"): v for k, v in timing_metrics.items()})
+        metrics.update(
+            compute_throughout_metrics(batch=self.model_inputs_list, timing_raw=timing_raw)
+        )
+
+        return metrics
+
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
+        """Save the checkpoint."""
+        if self.train_step_num == self.latest_remote_checkpoint_step:
+            return
+        self.latest_remote_checkpoint_step = self.train_step_num
+        checkpoint_name = f"{self.tinker_checkpoint_name_prefix}-state-{self.train_step_num}"
+        self.latest_remote_checkpoint_path = (
+            self.actor_client.save_state(checkpoint_name).result().path
+        )
+        local_path = os.path.join(
+            self.default_local_dir,
+            f"global_step_{self.train_step_num}",
+        )
+        os.makedirs(local_path, exist_ok=True)
+        remote_path_file = os.path.join(local_path, "remote_checkpoint_path.txt")
+        with open(remote_path_file, "w") as f:
+            f.write(self.latest_remote_checkpoint_path)
+
+        with open(self.local_latest_checkpointed_iteration, "w") as f:
+            f.write(str(self.train_step_num))
+
+    def sync_weight(self) -> None:
+        """Sync the model weight."""
+        raise NotImplementedError("Tinker trainer does not support NCCL sync")
+
+    def upload_state_dict(self) -> None:
+        """Upload the state dict to Synchronizer."""
+        self.save_state_dict()
+        ray.get(
+            self.synchronizer.set_model_state_dict.remote(
+                self.latest_remote_sampler_path, self.train_step_num
+            )
+        )
+
+    def save_state_dict(self) -> None:
+        """Only save the model state dict for Synchronizer."""
+        if self.train_step_num == self.latest_remote_sampler_step:
+            return
+        self.latest_remote_sampler_step = self.train_step_num
+        checkpoint_name = f"{self.tinker_checkpoint_name_prefix}-sampler-{self.train_step_num}"
+        self.latest_remote_sampler_path = (
+            self.actor_client.save_weights_for_sampler(checkpoint_name).result().path
+        )
+        local_path = os.path.join(
+            self.default_local_dir,
+            f"global_step_{self.train_step_num}",
+        )
+        os.makedirs(local_path, exist_ok=True)
+        remote_path_file = os.path.join(local_path, "remote_sampler_path.txt")
+        with open(remote_path_file, "w") as f:
+            f.write(self.latest_remote_sampler_path)
+
+        with open(self.local_latest_state_dict_iteration, "w") as f:
+            f.write(str(self.train_step_num))

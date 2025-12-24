@@ -67,7 +67,7 @@ class Trainer:
 
     async def prepare(self) -> None:
         """Prepare the trainer."""
-        self.engine.prepare()
+        await self.engine.prepare()
         self.last_trainer_sync_step = self.train_step_num
         await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
 
@@ -119,7 +119,7 @@ class Trainer:
         self.logger.info(f"Training at step {self.train_step_num + 1} started.")
         metrics = {}
         with Timer(metrics, "time/train_step"):
-            train_metrics = self.engine.train_step(exps)
+            train_metrics = await self.engine.train_step(exps)
         self.logger.info(f"Training at step {self.train_step_num} finished.")
         metrics.update(train_metrics)
         return metrics
@@ -229,7 +229,7 @@ class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""
 
     @abstractmethod
-    def prepare(self) -> None:
+    async def prepare(self) -> None:
         """Do some preparation before training started."""
 
     @property
@@ -238,11 +238,11 @@ class TrainEngineWrapper(ABC):
         """Get the current training step number."""
 
     @abstractmethod
-    def train_step(self, batch: Experiences) -> Dict:
+    async def train_step(self, batch_exps: Experiences) -> Dict:
         """Training one step.
 
         Args:
-            batch (Experiences): A batch of experiences to train.
+            batch_exps (Experiences): A batch of experiences to train.
 
         Returns:
             Dict: Metrics of the training step.
@@ -271,5 +271,9 @@ def get_trainer_wrapper(config: Config) -> TrainEngineWrapper:
         from trinity.trainer.verl_trainer import VerlPPOTrainerWrapper
 
         return VerlPPOTrainerWrapper(config)
+    elif config.trainer.trainer_type == "tinker":
+        from trinity.trainer.tinker_trainer import TinkerTrainerWrapper
+
+        return TinkerTrainerWrapper(config)
     else:
         raise NotImplementedError

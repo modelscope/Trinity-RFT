@@ -51,6 +51,7 @@ class Explorer:
         self.last_monitored_step = self.explore_step_num if self.explore_step_num > 0 else -1
         self.synchronizer = Synchronizer.get_actor(config)
         self.config = config
+        self.model_type = config.explorer.rollout_model.engine_type
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
         self.taskset = (
@@ -173,7 +174,7 @@ class Explorer:
             await asyncio.gather(*run_api_ref)
             self.logger.info("All models are ready.")
 
-            if not self.use_nccl_sync:
+            if not self.use_nccl_sync and self.model_type != "tinker":
                 master_address, master_port = await self.models[0].get_available_address.remote()
                 await self.setup_weight_sync_group(master_address, master_port)
             if self.config.mode != "serve":
