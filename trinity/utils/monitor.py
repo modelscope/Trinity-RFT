@@ -346,8 +346,8 @@ class SwanlabMonitor(Monitor):
             else:
                 # Fallback to global finish
                 swanlab.finish()
-        except Exception:
-            pass
+        except Exception as e:
+            self.console_logger.warning(f"Failed to close SwanlabMonitor: {e}")
 
     @classmethod
     def default_args(cls) -> Dict:
