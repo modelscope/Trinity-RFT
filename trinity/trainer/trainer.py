@@ -59,7 +59,7 @@ class Trainer:
             sample_strategy_state = trainer_state.get("sample_strategy_state", {})
         self.sample_strategy.load_state_dict(sample_strategy_state)
         self.save_interval = config.trainer.save_interval
-        self.last_sync_step = self.train_step_num
+        self.last_sync_step = 0
         self.last_sync_time = None
         self.total_steps = config.trainer.total_steps or float("inf")
         self.save_hf_checkpoint = config.trainer.save_hf_checkpoint

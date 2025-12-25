@@ -90,7 +90,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
                 self._train_step_num = self.latest_remote_checkpoint_step = int(f.read().strip())
             checkpoint_file_path = os.path.join(
                 self.default_local_dir,
-                f"global_step_{self.train_step_num}",
+                f"global_step_{self._train_step_num}",
                 "remote_checkpoint_path.txt",
             )
             with open(checkpoint_file_path, "r") as f:
