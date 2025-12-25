@@ -943,6 +943,12 @@ document.write(`
     <span class="kn">import</span><span class="w"> </span><span class="nn">mlflow</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">mlflow</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">swanlab</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">swanlab</span> <span class="o">=</span> <span class="kc">None</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
@@ -955,6 +961,7 @@ document.write(`
         <span class="s2">&quot;tensorboard&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.TensorboardMonitor&quot;</span><span class="p">,</span>
         <span class="s2">&quot;wandb&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.WandbMonitor&quot;</span><span class="p">,</span>
         <span class="s2">&quot;mlflow&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.MlflowMonitor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;swanlab&quot;</span><span class="p">:</span> <span class="s2">&quot;trinity.utils.monitor.SwanlabMonitor&quot;</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
 
@@ -1232,6 +1239,141 @@ document.write(`
             <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SwanlabMonitor">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SwanlabMonitor</span><span class="p">(</span><span class="n">Monitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor with SwanLab.</span>
+
+<span class="sd">    This monitor integrates with SwanLab (https://swanlab.cn/) to track experiments.</span>
+
+<span class="sd">    Supported monitor_args in config.monitor.monitor_args:</span>
+<span class="sd">                - api_key (Optional[str]): API key for swanlab.login(). If omitted, will read from env</span>
+<span class="sd">                    (SWANLAB_API_KEY, SWANLAB_APIKEY, SWANLAB_KEY, SWANLAB_TOKEN) or assume prior CLI login.</span>
+<span class="sd">        - workspace (Optional[str]): Organization/username workspace.</span>
+<span class="sd">        - mode (Optional[str]): &quot;cloud&quot; | &quot;local&quot; | &quot;offline&quot; | &quot;disabled&quot;.</span>
+<span class="sd">        - logdir (Optional[str]): Local log directory when in local/offline modes.</span>
+<span class="sd">        - experiment_name (Optional[str]): Explicit experiment name. Defaults to &quot;{name}_{role}&quot;.</span>
+<span class="sd">        - description (Optional[str]): Experiment description.</span>
+<span class="sd">        - tags (Optional[List[str]]): Tags to attach. Role and group are appended automatically.</span>
+<span class="sd">        - id (Optional[str]): Resume target run id (21 chars) when using resume modes.</span>
+<span class="sd">        - resume (Optional[Literal[&#39;must&#39;,&#39;allow&#39;,&#39;never&#39;]|bool]): Resume policy.</span>
+<span class="sd">        - reinit (Optional[bool]): Whether to re-init on repeated init() calls.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SwanlabMonitor.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">swanlab</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;swanlab is not installed. Please install it to use SwanlabMonitor.&quot;</span>
+
+        <span class="n">monitor_args</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_args</span> <span class="ow">or</span> <span class="p">{})</span>
+            <span class="k">if</span> <span class="n">config</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;monitor&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Optional API login via code if provided; otherwise try environment, then rely on prior `swanlab login`.</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SWANLAB_API_KEY&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">swanlab</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># Best-effort login; continue to init which may still work if already logged in</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Swanlab API key not found in environment variable SWANLAB_API_KEY.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Compose tags (ensure list and include role/group markers)</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="ow">and</span> <span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">and</span> <span class="n">group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+            <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="c1"># Determine experiment name</span>
+        <span class="n">exp_name</span> <span class="o">=</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;experiment_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="n">exp_name</span>
+
+        <span class="c1"># Prepare init kwargs, passing only non-None values to respect library defaults</span>
+        <span class="n">init_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="n">project</span><span class="p">,</span>
+            <span class="s2">&quot;workspace&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;experiment_name&quot;</span><span class="p">:</span> <span class="n">exp_name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">tags</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;logdir&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logdir&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;cloud&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;settings&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;settings&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;config&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resume&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;reinit&quot;</span><span class="p">:</span> <span class="n">monitor_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reinit&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="c1"># Strip None values to avoid overriding swanlab defaults</span>
+        <span class="n">init_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">init_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">swanlab</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="o">**</span><span class="n">init_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SwanlabMonitor.log_table">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor.log_table">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiences_table</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="c1"># Convert pandas DataFrame to SwanLab ECharts Table</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">experiences_table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="c1"># Ensure rows are native Python types</span>
+        <span class="n">rows</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="n">experiences_table</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tbl</span> <span class="o">=</span> <span class="n">swanlab</span><span class="o">.</span><span class="n">echarts</span><span class="o">.</span><span class="n">Table</span><span class="p">()</span>
+            <span class="n">tbl</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">headers</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+            <span class="n">swanlab</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="n">table_name</span><span class="p">:</span> <span class="n">tbl</span><span class="p">},</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to log table &#39;</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2">&#39; as echarts, falling back to CSV. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># Fallback: log as CSV string if echarts table is unavailable</span>
+            <span class="n">csv_str</span> <span class="o">=</span> <span class="n">experiences_table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">swanlab</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="n">table_name</span><span class="p">:</span> <span class="n">csv_str</span><span class="p">},</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SwanlabMonitor.log">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor.log">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">commit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log metrics.&quot;&quot;&quot;</span>
+        <span class="c1"># SwanLab doesn&#39;t use commit flag; keep signature for compatibility</span>
+        <span class="n">swanlab</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SwanlabMonitor.close">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Prefer run.finish() if available</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;logger&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="s2">&quot;finish&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Fallback to global finish</span>
+                <span class="n">swanlab</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to close SwanlabMonitor: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SwanlabMonitor.default_args">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.SwanlabMonitor.default_args">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return default arguments for the monitor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
 </div>
 
 </pre></div>
