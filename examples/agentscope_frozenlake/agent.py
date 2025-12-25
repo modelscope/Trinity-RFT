@@ -41,7 +41,7 @@ class FrozenLakeAgent:
         )
         if self.current_step > 0 and self.last_action is not None:
             if self.last_observation == observation:
-                prompt += "\nYour last response is invalid. Your position didn't change at all. You may need to recheck your thinking process, action outputted, and the format of response. Remember, you should only output the NEXT ACTION at each interation in the ``` ```. For example, if you want to move up, you should output ```Up```."
+                prompt += "\nYour last response is invalid. Your position didn't change at all. You may need to recheck your thinking process, action outputted, and the format of response. Remember, you should only output the NEXT ACTION at each iteration in the ``` ```. For example, if you want to move up, you should output ```Up```."
 
         if self.max_steps is not None and self.max_steps - self.current_step > 0:
             prompt += (

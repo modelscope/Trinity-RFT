@@ -8,7 +8,6 @@ import shutil
 from datetime import datetime
 
 import httpx
-import openai
 import ray
 
 from tests.tools import (
@@ -26,6 +25,7 @@ from trinity.cli.launcher import explore, run_stage
 from trinity.common.config import ExperienceBufferConfig, InferenceModelConfig
 from trinity.common.constants import StorageType
 from trinity.explorer.explorer import Explorer
+from trinity.explorer.proxy.client import TrinityClient
 from trinity.manager.state_manager import StateManager
 
 
@@ -157,8 +157,9 @@ def run_serve(config):
     run_stage(config)
 
 
-def run_agent(base_url, model_path: str):
-    client = openai.Client(base_url=base_url, api_key="testkey")
+def run_agent(proxy_url, model_path: str):
+    proxy_client = TrinityClient(proxy_url=proxy_url)
+    openai_client = proxy_client.get_openai_client()
     contents = [
         "Hello, how are you?",
         "What is the capital of China?",
@@ -171,10 +172,11 @@ def run_agent(base_url, model_path: str):
         "What is the best way to learn programming?",
         "Describe the process of photosynthesis.",
     ]
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model=model_path,
         messages=[{"role": "user", "content": random.choice(contents)}],
     )
+    proxy_client.feedback(reward=2.0, msg_ids=[response.id])
     return response.choices[0].message.content
 
 
@@ -190,7 +192,7 @@ class ServeTest(RayUnittestBaseAysnc):
         self.config.explorer.rollout_model.engine_num = 4
         self.config.explorer.rollout_model.enable_openai_api = True
         self.config.checkpoint_root_dir = get_checkpoint_path()
-        self.config.explorer.api_port = 8010
+        self.config.explorer.proxy_port = 8010
         self.config.explorer.service_status_check_interval = 30
         self.config.buffer.trainer_input.experience_buffer = ExperienceBufferConfig(
             name="experience_buffer",
@@ -236,7 +238,7 @@ class ServeTest(RayUnittestBaseAysnc):
         apps = []
         for i in range(task_num):
             app_process = multiprocessing.Process(
-                target=run_agent, args=(server_url + "/v1", self.config.model.model_path)
+                target=run_agent, args=(server_url, self.config.model.model_path)
             )
             apps.append(app_process)
             app_process.start()
@@ -246,22 +248,20 @@ class ServeTest(RayUnittestBaseAysnc):
             self.assertFalse(app.is_alive())
 
         finish_step = None
-
+        proxy_client = TrinityClient(proxy_url=server_url)
         for i in range(20):
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{server_url}/metrics")
-                self.assertEqual(response.status_code, 200)
-                metrics = response.json()
-                metrics_keys = list(metrics.keys())
-                self.assertIn("explore_step_num", metrics_keys)
-                self.assertIn("rollout/total_experience_count", metrics_keys)
-                self.assertIn("rollout/model_0/total_request_count", metrics_keys)
-                self.assertIn("rollout/model_3/model_version", metrics_keys)
-                if not finish_step and metrics["rollout/total_experience_count"] == task_num:
-                    finish_step = metrics["explore_step_num"]
-                if finish_step and metrics["explore_step_num"] >= finish_step + 1:
-                    # wait for one more step to ensure all data are written to buffer
-                    break
+            metrics = await proxy_client.get_metrics_async()
+            metrics_keys = list(metrics.keys())
+            self.assertIn("explore_step_num", metrics_keys)
+            self.assertIn("rollout/total_experience_count", metrics_keys)
+            self.assertIn("rollout/model_0/total_request_count", metrics_keys)
+            self.assertIn("rollout/model_3/model_version", metrics_keys)
+            if not finish_step and metrics["rollout/total_experience_count"] == task_num:
+                finish_step = metrics["explore_step_num"]
+                await proxy_client.commit_async()
+            if finish_step and metrics["explore_step_num"] >= finish_step + 1:
+                # wait for one more step to ensure all data are written to buffer
+                break
             await asyncio.sleep(3)
 
         serve_process.terminate()
@@ -275,6 +275,9 @@ class ServeTest(RayUnittestBaseAysnc):
         exps = await buffer_reader.read_async(batch_size=10)
         for exp in exps:
             self.assertTrue(len(exp.tokens) > 0)
+            self.assertTrue(len(exp.logprobs) > 0)
+            self.assertTrue(exp.prompt_length > 0)
+            self.assertTrue(exp.reward == 2.0)
         self.assertEqual(len(exps), task_num)
 
     def tearDown(self):

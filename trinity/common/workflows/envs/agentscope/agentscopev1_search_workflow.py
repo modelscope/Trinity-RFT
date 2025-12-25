@@ -5,8 +5,6 @@ import os
 import re
 from typing import List, Optional
 
-import openai
-
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import Task, Workflow
 
@@ -24,7 +22,7 @@ class AgentScopeV1ReactSearchWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):  # get openai client from model
         super().__init__(
             task=task,

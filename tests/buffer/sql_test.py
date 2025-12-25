@@ -2,12 +2,17 @@ import os
 
 import ray
 import torch
+from parameterized import parameterized
 
 from tests.tools import RayUnittestBaseAysnc
 from trinity.buffer import get_buffer_reader
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import ExperienceBufferConfig, TasksetConfig
+from trinity.common.config import (
+    ExperienceBufferConfig,
+    ReplayBufferConfig,
+    TasksetConfig,
+)
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 
@@ -15,7 +20,13 @@ db_path = os.path.join(os.path.dirname(__file__), "test.db")
 
 
 class TestSQLBuffer(RayUnittestBaseAysnc):
-    async def test_sql_exp_buffer_read_write(self) -> None:
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    async def test_sql_exp_buffer_read_write(self, enable_replay: bool) -> None:
         total_num = 8
         put_batch_size = 2
         read_batch_size = 4
@@ -25,7 +36,10 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
             path=f"sqlite:///{db_path}",
             storage_type=StorageType.SQL.value,
             batch_size=read_batch_size,
+            max_read_timeout=3,
         )
+        if enable_replay:
+            config.replay_buffer = ReplayBufferConfig(enable=True)
         sql_writer = SQLWriter(config.to_storage_config())
         sql_reader = SQLReader(config.to_storage_config())
         exps = [
@@ -34,6 +48,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
                 prompt_length=i,
                 reward=float(i),
                 logprobs=torch.tensor([0.1]),
+                info={"model_version": i},
             )
             for i in range(1, put_batch_size + 1)
         ]
@@ -52,12 +67,22 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
                     reward=float(i),
                     logprobs=torch.tensor([0.1]),
                     action_mask=torch.tensor([j % 2 for j in range(i + 1)]),
+                    info={"model_version": i + put_batch_size},
                 )
                 for i in range(1, put_batch_size * 2 + 1)
             ]
         )
         exps = sql_reader.read(batch_size=put_batch_size * 2)
         self.assertEqual(len(exps), put_batch_size * 2)
+        for exp in exps:
+            self.assertTrue(exp.info["model_version"] > put_batch_size)
+        if enable_replay:
+            # support replay, so we can read all again
+            exps = sql_reader.read(batch_size=(put_batch_size * 2 + total_num))
+            self.assertEqual(len(exps), (put_batch_size * 2 + total_num))
+            # if read more than available, will wait until timeout
+            with self.assertRaises(StopIteration):
+                exps = sql_reader.read(batch_size=(put_batch_size * 3 + total_num))
         db_wrapper = ray.get_actor("sql-test_buffer")
         self.assertIsNotNone(db_wrapper)
         self.assertEqual(await sql_writer.release(), 0)

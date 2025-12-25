@@ -5,8 +5,6 @@ This workflow is a demonstration of how to integrate the AgentScope framework wi
 
 from typing import Dict, List, Optional, Union
 
-import openai
-
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import Task, Workflow
@@ -22,7 +20,7 @@ class AgentScopeReActWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,

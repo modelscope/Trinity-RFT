@@ -133,6 +133,9 @@ class Experience:
     # for multi-modal data
     multi_modal_inputs: Optional[Dict[str, Tensor]] = None  # Multi-modal inputs for verl trainer
 
+    # for on-policy distillation
+    teacher_logprobs: Optional[Tensor] = None  # [resp_length]
+
     def __init__(  # noqa: C901
         self,
         *,
@@ -157,6 +160,7 @@ class Experience:
         chosen_messages=None,
         rejected_messages=None,
         multi_modal_inputs=None,
+        teacher_logprobs=None,
     ):
         if action_mask is not None:
             experience_type = "multi_turn"
@@ -229,6 +233,11 @@ class Experience:
                 else:
                     self.multi_modal_inputs[key] = value
 
+        # Handle teacher_logprobs
+        if isinstance(teacher_logprobs, list):
+            teacher_logprobs = torch.tensor(teacher_logprobs, dtype=torch.float32)
+        self.teacher_logprobs = teacher_logprobs
+
         if not isinstance(self.tokens, Tensor):
             self.tokens = torch.tensor(self.tokens)
         if self.logprobs is not None and not isinstance(self.logprobs, Tensor):
@@ -239,6 +248,8 @@ class Experience:
             self.chosen = torch.tensor(self.chosen)
         if self.rejected is not None and not isinstance(self.rejected, Tensor):
             self.rejected = torch.tensor(self.rejected)
+        if self.teacher_logprobs is not None and not isinstance(self.teacher_logprobs, Tensor):
+            self.teacher_logprobs = torch.tensor(self.teacher_logprobs, dtype=torch.float32)
 
     def serialize(self) -> bytes:
         """Serialize the experience to bytes."""
@@ -341,6 +352,14 @@ class Experience:
         else:
             multi_modal_inputs = None
 
+        # gather teacher_logprobs
+        if all(exp.teacher_logprobs is not None for exp in experiences):
+            teacher_logprobs = gather_response_attrs(
+                experiences, "teacher_logprobs", max_response_length
+            )
+        else:
+            teacher_logprobs = None
+
         exps = Experiences(
             eids=eids,
             tokens=tokens,
@@ -353,6 +372,7 @@ class Experience:
             prompt_length=max_prompt_length,
             logprobs=logprobs,
             multi_modal_inputs=multi_modal_inputs,
+            teacher_logprobs=teacher_logprobs,
         )
         if custom_fields is not None:
             for custom_field in custom_fields:
@@ -442,6 +462,7 @@ class Experiences:
     custom_fields: List[str] = field(
         default_factory=list
     )  # Custom fields to include in the gathered experiences
+    teacher_logprobs: Optional[Tensor] = None  # [batch_size, response_length]
 
     @property
     def batch_size(self) -> int:

@@ -58,6 +58,8 @@ def to_data_proto(experiences: Experiences, logger: Logger) -> DataProto:  # noq
         batch_dict["advantages"] = experiences.advantages
     if experiences.returns is not None:
         batch_dict["returns"] = experiences.returns
+    if experiences.teacher_logprobs is not None:
+        batch_dict["teacher_log_probs"] = experiences.teacher_logprobs
 
     if experiences.multi_modal_inputs is not None:
         batch_size = len(batch_dict["unique_ids"])

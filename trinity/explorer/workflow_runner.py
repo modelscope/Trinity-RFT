@@ -72,8 +72,6 @@ class WorkflowRunner:
             )
             for model in self.auxiliary_models
         ]
-        self.auxiliary_model_clients = []
-        self.auxiliary_model_async_clients = []
         self.workflow_instance: Workflow = None
         self.runner_id = runner_id
         self.runner_state = {
@@ -89,11 +87,6 @@ class WorkflowRunner:
             self.model_wrapper.prepare(),
             *(aux_model.prepare() for aux_model in self.auxiliary_model_wrappers),
         )
-        for model in self.auxiliary_model_wrappers:
-            api_client = model.get_openai_client()
-            async_api_client = model.get_openai_async_client()
-            self.auxiliary_model_clients.append(api_client)
-            self.auxiliary_model_async_clients.append(async_api_client)
 
     def is_alive(self):
         return True
@@ -106,13 +99,10 @@ class WorkflowRunner:
             or not self.workflow_instance.__class__ == task.workflow
             or not self.workflow_instance.resettable
         ):
+            # Pass ModelWrapper directly; Workflow.__init__ will get OpenAI clients automatically
             self.workflow_instance = task.to_workflow(
                 self.model_wrapper,
-                (
-                    self.auxiliary_model_async_clients
-                    if task.workflow.is_async
-                    else self.auxiliary_model_clients
-                ),
+                self.auxiliary_model_wrappers,
             )
         else:
             self.workflow_instance.reset(task)

@@ -10,7 +10,7 @@ from parameterized import parameterized
 from tests.tools import RayUnittestBaseAysnc
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import ExperienceBufferConfig
+from trinity.common.config import ExperienceBufferConfig, ReplayBufferConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import EID, Experience
 
@@ -95,6 +95,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
             max_read_timeout=3,
             path=f"sqlite:///{DB_PATH}",
             batch_size=self.train_batch_size,
+            replay_buffer=ReplayBufferConfig(enable=True),
         )
         config = config.to_storage_config()
         writer = SQLWriter(config)
@@ -108,6 +109,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
                     prompt_length=i,
                     reward=float(i),
                     logprobs=torch.tensor([0.1]),
+                    info={"model_version": 0},
                 )
                 for i in range(1, self.put_batch_size + 1)
             ]
@@ -117,7 +119,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
             exps = reader.read()
             self.assertEqual(len(exps), self.train_batch_size)
             for exp in exps:
-                self.assertEqual(exp.eid.task, cnt)
+                self.assertEqual(exp.eid.task, str(cnt))
                 cnt -= 1
 
         # experience buffer support experience reuse
@@ -126,7 +128,7 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
             exps = reader.read()
             self.assertEqual(len(exps), self.train_batch_size)
             for exp in exps:
-                self.assertEqual(exp.eid.task, cnt)
+                self.assertEqual(exp.eid.task, str(cnt))
                 cnt -= 1
         self.assertEqual(await writer.release(), 0)
 

@@ -80,7 +80,7 @@ class FormatConfig:
 class GenerationConfig:
     temperature: Optional[float] = None  # 1.0
     top_p: Optional[float] = None  # 1.0
-    top_k: Optional[int] = None  # -1
+    top_k: int = -1  # -1 means disabled
     logprobs: Optional[int] = None  # 0  # vLLM return `logprobs + 1` elements
     max_tokens: Optional[int] = None  # if None, use model.max_response_tokens
     # repeat each task for `n` times
@@ -498,7 +498,7 @@ class InferenceModelConfig:
     tensor_parallel_size: int = 1
     use_v1: bool = True
     enforce_eager: bool = False
-    enable_prefix_caching: bool = False
+    enable_prefix_caching: bool = True
     enable_chunked_prefill: bool = True
     gpu_memory_utilization: float = 0.9
     dtype: str = "bfloat16"
@@ -684,14 +684,17 @@ class ExplorerConfig:
     # for benchmark
     bench_on_latest_checkpoint: bool = False  # only benchmark the latest checkpoint
 
-    # for serve mode
-    api_port: int = 8010
+    # for serve mode proxy
+    proxy_port: int = 8010
     # listen on all interfaces by default
     listen_address: str = "0.0.0.0"
     # check the running status of the server every 60 seconds
     service_status_check_interval: int = 60
     # keep at least 1 model in running status
     min_running_model_num: int = 1
+    # db url for proxy history recorder, if not set, use proxy_history.db in buffer cache dir
+    db_url: Optional[str] = None
+
     # Experimental feature
     over_rollout: OverRolloutConfig = field(default_factory=OverRolloutConfig)
     dynamic_timeout: DynamicTimeoutConfig = field(default_factory=DynamicTimeoutConfig)
@@ -703,7 +706,7 @@ class ExplorerConfig:
 class TrainerConfig:
     name: str = TRAINER_NAME
     trainer_type: str = "verl"
-    trainer_strategy: str = "fsdp"
+    trainer_strategy: str = "fsdp"  # "fsdp", "fsdp2" or "megatron"
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
     total_steps: Optional[
@@ -1472,7 +1475,7 @@ class Config:
         # check buffer
         self._check_buffer()
         # check and update trainer
-        if self.mode in ["train", "both", "bench"]:
+        if self.mode in ["train", "both", "bench"] or self.trainer.trainer_strategy == "megatron":
             if self.trainer.trainer_type == "verl":
                 if self.trainer.trainer_config:
                     from trinity.common.verl_config import veRLConfig

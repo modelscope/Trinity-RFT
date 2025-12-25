@@ -15,13 +15,13 @@ You are in the middle of a room. Looking quickly around you, you see a cabinet 4
 Your task is to: put some spraybottle on toilet.
 
 Response:
-<think>To solve the task, I need to find and take a sparybottle, then put it on toilet. First I need to find a spraybottle. A spraybottle is more likely to appear in cabinet (1-4), countertop (1), toilet (1), sinkbasin (1-2), garbagecan (1). I can check one by one, starting with cabinet 1.</think><action>go to cabinet 1</action>
+<think>To solve the task, I need to find and take a spraybottle, then put it on toilet. First I need to find a spraybottle. A spraybottle is more likely to appear in cabinet (1-4), countertop (1), toilet (1), sinkbasin (1-2), garbagecan (1). I can check one by one, starting with cabinet 1.</think><action>go to cabinet 1</action>
 
 Observation:
 On the cabinet 1, you see a cloth 1, a soapbar 1, a soapbottle 1.
 
 Response:
-<think>The sparybottle is not here, I should go to cabinet2 to check one by one</think><action>go to cabinet 2</action>
+<think>The spraybottle is not here, I should go to cabinet2 to check one by one</think><action>go to cabinet 2</action>
 
 Observation:
 The cabinet 2 is closed.
@@ -49,7 +49,7 @@ Response:
 """
 
 AlfWORLD_SYSTEM_PROMPT = """
-You are an agent interacting with a virtual test-based environments.
+You are an agent interacting with a virtual text-based environment.
 
 ## Notes:
 At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the <think> </think> tag and wrap your action with the <action> </action> tag.

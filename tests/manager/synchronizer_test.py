@@ -80,32 +80,23 @@ def explorer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
 
 def run_trainer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
-    try:
-        trainer_monkey_patch(config, max_steps, intervals)
-        train(config)
-    finally:
-        ray.shutdown(_exiting_interpreter=True)
+    trainer_monkey_patch(config, max_steps, intervals)
+    train(config)
 
 
 def run_explorer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
-    try:
-        explorer_monkey_patch(config, max_steps, intervals)
-        explore(config)
-    finally:
-        ray.shutdown(_exiting_interpreter=True)
+    explorer_monkey_patch(config, max_steps, intervals)
+    explore(config)
 
 
 def run_both(
     config: Config, max_steps: int, trainer_intervals: List[int], explorer_intervals: List[int]
 ) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
-    try:
-        trainer_monkey_patch(config, max_steps, trainer_intervals)
-        explorer_monkey_patch(config, max_steps, explorer_intervals)
-        both(config)
-    finally:
-        ray.shutdown(_exiting_interpreter=True)
+    trainer_monkey_patch(config, max_steps, trainer_intervals)
+    explorer_monkey_patch(config, max_steps, explorer_intervals)
+    both(config)
 
 
 class BaseTestSynchronizer(unittest.TestCase):
@@ -115,6 +106,7 @@ class BaseTestSynchronizer(unittest.TestCase):
 
     def tearDown(self):
         checkpoint_path = get_checkpoint_path()
+        ray.shutdown(_exiting_interpreter=True)
         shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
 
 

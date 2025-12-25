@@ -2,7 +2,17 @@
 
 from typing import Dict, Optional, Tuple
 
-from sqlalchemy import JSON, Column, Float, Integer, LargeBinary, Text, create_engine
+from sqlalchemy import (
+    JSON,
+    Column,
+    DateTime,
+    Float,
+    Integer,
+    LargeBinary,
+    String,
+    create_engine,
+    func,
+)
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.pool import NullPool
@@ -32,19 +42,25 @@ class ExperienceModel(Base):  # type: ignore
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    # for single turn
-    prompt = Column(Text, nullable=True)
-    response = Column(Text, nullable=True)
-    # for multi turn
-    message_list = Column(JSON, nullable=True)
-    reward = Column(Float, nullable=True)
+    timestamp = Column(DateTime, server_default=func.now())
+    task_id = Column(String(64), nullable=True, index=True)  # associated task id
+    run_id = Column(Integer, nullable=True, index=True)  # associated run id
+    msg_id = Column(String(64), nullable=True, index=True)  # associated message id
     # serialized experience object
+    model_version = Column(Integer, nullable=True, index=True)
     experience_bytes = Column(LargeBinary, nullable=True)
+    reward = Column(Float, nullable=True)
     consumed = Column(Integer, default=0, index=True)
 
     def to_experience(self) -> Experience:
         """Load the experience from the database."""
-        return Experience.deserialize(self.experience_bytes)
+        exp = Experience.deserialize(self.experience_bytes)
+        exp.eid.task = self.task_id
+        exp.eid.run = self.run_id
+        exp.eid.suffix = self.msg_id
+        exp.reward = self.reward
+        exp.info["model_version"] = self.model_version
+        return exp
 
     @classmethod
     def from_experience(cls, experience: Experience):
@@ -52,9 +68,10 @@ class ExperienceModel(Base):  # type: ignore
         return cls(
             experience_bytes=experience.serialize(),
             reward=experience.reward,
-            prompt=experience.prompt_text,
-            response=experience.response_text,
-            message_list=experience.messages,
+            task_id=str(experience.eid.task),
+            run_id=experience.eid.run,
+            msg_id=str(experience.eid.suffix),
+            model_version=experience.info["model_version"],
         )
 
 
@@ -104,7 +121,7 @@ class DPODataModel(Base):  # type: ignore
         )
 
 
-def init_engine(db_url: str, table_name, schema_type: Optional[str]) -> Tuple:
+def init_engine(db_url: str, table_name: str, schema_type: Optional[str]) -> Tuple:
     """Get the sqlalchemy engine."""
     logger = get_logger(__name__)
     engine = create_engine(db_url, poolclass=NullPool)
@@ -125,6 +142,7 @@ def init_engine(db_url: str, table_name, schema_type: Optional[str]) -> Tuple:
 
     try:
         Base.metadata.create_all(engine, checkfirst=True)
+        logger.info(f"Created table {table_name} for schema type {schema_type}.")
     except OperationalError:
         logger.warning(f"Failed to create table {table_name}, assuming it already exists.")
 

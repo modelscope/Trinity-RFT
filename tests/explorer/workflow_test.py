@@ -48,9 +48,10 @@ class DummyWorkflow(Workflow):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
         self.repeat_times = task.rollout_args.n
-        if auxiliary_models is not None:
-            for model in auxiliary_models:
-                assert isinstance(model, openai.OpenAI)
+        # Check self.auxiliary_models (OpenAI clients derived from ModelWrapper)
+        if self.auxiliary_models is not None:
+            for m in self.auxiliary_models:
+                assert isinstance(m, openai.OpenAI)
 
     def reset(self, task: Task):
         self.obj = task.raw_task
@@ -92,9 +93,10 @@ class DummyAsyncWorkflow(Workflow):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
         self.repeat_times = task.rollout_args.n
-        if auxiliary_models is not None:
-            for model in auxiliary_models:
-                assert isinstance(model, openai.AsyncOpenAI)
+        # Check self.auxiliary_models (AsyncOpenAI clients derived from ModelWrapper)
+        if self.auxiliary_models is not None:
+            for m in self.auxiliary_models:
+                assert isinstance(m, openai.AsyncOpenAI)
 
     def reset(self, task: Task):
         self.obj = task.raw_task
@@ -553,7 +555,7 @@ class TestAgentScopeWorkflowAdapter(unittest.IsolatedAsyncioTestCase):
         try:
             from agentscope.model import TrinityChatModel
         except ImportError:
-            self.skipTest("agentscope >= 0.1.6 is not installed")
+            self.skipTest("agentscope >= 1.0.9 is not installed")
 
         async def as_workflow_func(task, model) -> float:
             self.assertIsInstance(task, dict)

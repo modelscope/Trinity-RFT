@@ -253,6 +253,7 @@ class TestExperienceConversion(unittest.TestCase):
             reward=reward,
             prompt_length=prompt_length,
             logprobs=logprobs,
+            info={"model_version": 0},
         )
 
         model = ExperienceModel.from_experience(experience)

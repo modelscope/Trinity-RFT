@@ -385,7 +385,7 @@ class ModelWrapper:
             raise ValueError(
                 "API server is not enabled for this model. Load metrics is unavailable."
             )
-        with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as client:
             response = await client.get(f"{self.api_address}/load")
             data = response.json()
             return data["server_load"]

@@ -308,6 +308,16 @@ class Synchronizer:
                 )
             return self.model_version
 
+    async def get_latest_model_version(self) -> int:
+        """
+        Get the latest model version available in the synchronizer.
+
+        Returns:
+            The current model version.
+        """
+        async with self._ready_condition:
+            return self.model_version
+
     async def ready_to_nccl_sync(
         self, module: str, trainer_step: Optional[int] = None
     ) -> Union[int, None]:

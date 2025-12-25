@@ -38,8 +38,6 @@ explorer:
   rollout_model:
     engine_num: 2
     tensor_parallel_size: 1
-    enable_prefix_caching: false
-    enforce_eager: true
     dtype: bfloat16
     seed: 42
 trainer:

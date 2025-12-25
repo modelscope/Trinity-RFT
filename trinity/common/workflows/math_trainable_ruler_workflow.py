@@ -5,7 +5,6 @@ from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 import numpy as np
-import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -27,7 +26,7 @@ class MathTrainableRULERWorkflow(SimpleWorkflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,
@@ -145,7 +144,7 @@ class MathTrainableRULERWorkflow(SimpleWorkflow):
 
         question_prompt = (
             f"Question: {self.task_desc}\n\n"
-            f"""Solution format requirement: first thinks about the reasoning process in the mind and then provides the final answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
+            f"""Solution format requirement: first think about the reasoning process in the mind and then provides the final answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
 <think> reasoning process here </think>
 <answer> answer here </answer>."""
         )

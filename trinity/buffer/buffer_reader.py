@@ -7,11 +7,11 @@ class BufferReader(ABC):
     """Interface of the buffer reader."""
 
     @abstractmethod
-    def read(self, batch_size: Optional[int] = None) -> List:
+    def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         """Read from buffer."""
 
     @abstractmethod
-    async def read_async(self, batch_size: Optional[int] = None) -> List:
+    async def read_async(self, batch_size: Optional[int] = None, **kwargs) -> List:
         """Read from buffer asynchronously."""
 
     def __len__(self) -> int:

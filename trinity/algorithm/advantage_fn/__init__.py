@@ -17,6 +17,7 @@ ADVANTAGE_FN: Registry = Registry(
         "asymre": "trinity.algorithm.advantage_fn.asymre_advantage.ASYMREGroupAdvantage",
         "asymre_verl": "trinity.algorithm.advantage_fn.asymre_advantage.ASYMREAdvantageFn",
         "rec": "trinity.algorithm.advantage_fn.rec_advantage.RECGroupedAdvantage",
+        "on_policy_distill": "trinity.algorithm.advantage_fn.on_policy_distill_advantage.OnPolicyDistillAdvantage",
     },
 )
 

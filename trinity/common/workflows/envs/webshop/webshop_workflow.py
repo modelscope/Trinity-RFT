@@ -71,7 +71,7 @@ Response:
 
 
 WebShop_SYSTEM_PROMPT_WITH_EXAMPLE = f"""
-You are an agent interacting with a virtual text-based web shopping environment to test out your ability. Your job is to find follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruct provided.
+You are an agent interacting with a virtual text-based web shopping environment to test out your ability. Your job is to follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruct provided.
 
 ## Action Format:
 You should give both the action_name and action_arg like the format `action_name[action_arg]`. You can execute two types of actions, search and click.
@@ -92,11 +92,11 @@ Here is an example:
 At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the <think> </think> tag and wrap your action with the <action> </action> tag.
 You should ALWAYS take one action each step.
 You should finish the task and buy the item within 15 steps.
-DONOT try to interact with the user at anytime. Finish the task and buy the item by yourself.
+DO NOT try to interact with the user at anytime. Finish the task and buy the item by yourself.
 """
 
 WebShop_SYSTEM_PROMPT = """
-You are an agent interacting with a virtual text-baed web shopping environments to testout your ability. Your job is to find follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruct provided.
+You are an agent interacting with a virtual text-based web shopping environment to test out your ability. Your job is to follow the Instruction provided and mimic the steps to buy the item that are closest to the Instruction provided.
 
 ## Action Format:
 You should give both the action_name and action_arg like the format `action_name[action_arg]`. You can execute two types of actions, search and click.
@@ -111,7 +111,7 @@ Below are some examples of action formats.
 At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the <think> </think> tag and wrap your action with the <action> </action> tag.
 You should ALWAYS take one action each step.
 You should finish the task and buy the item within 15 steps.
-DONOT try to interact with the user at anytime. Finish the task and buy the item by yourself.
+DO NOT try to interact with the user at anytime. Finish the task and buy the item by yourself.
 """
 
 
@@ -163,7 +163,7 @@ def validate_action(action, available_actions):
         else:
             return (
                 False,
-                "Can not perfrom search action without search bar. Please click the Back to Search button first.",
+                "Can not perform search action without search bar. Please click the Back to Search button first.",
             )
     elif action_name == "click":
         if action_arg not in available_actions["clickables"]:

@@ -7,8 +7,6 @@ import re
 import time
 from typing import List, Optional
 
-import openai
-
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import SimpleWorkflow, Task
@@ -36,7 +34,7 @@ class Learn2AskWorkflow(SimpleWorkflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         self.train_mode = task.workflow_args.get("train_mode", "Ra+Rs")
         self.fusion_mode = task.workflow_args.get("fusion_mode", "default")

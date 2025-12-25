@@ -1,5 +1,5 @@
 """
-This file contaims the naive dapo reward function for math tasks.
+This file contains the naive dapo reward function for math tasks.
 Adapted from https://github.com/LLM360/Reasoning360/blob/main/verl/utils/reward_score/naive_dapo.py
 """
 

@@ -4,8 +4,6 @@
 from dataclasses import asdict
 from typing import List, Optional
 
-import openai
-
 from trinity.common.config import GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -27,7 +25,7 @@ class MathEvalWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(
             task=task,

@@ -76,6 +76,23 @@ class DefaultSampleStrategy(SampleStrategy):
             self.exp_buffer.load_state_dict(state_dict)
 
 
+class StalenessControlSampleStrategy(DefaultSampleStrategy):
+    def __init__(self, buffer_config: BufferConfig, **kwargs):
+        super().__init__(buffer_config)
+        self.max_staleness = kwargs.get("max_staleness", float("inf"))
+
+    async def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
+        min_model_version = max(step - self.max_staleness, 0)
+        metrics = {}
+        with Timer(metrics, "time/read_experience"):
+            exp_list = await self.exp_buffer.read_async(min_model_version=min_model_version)
+            repr_samples = representative_sample(exp_list)
+        self.set_model_version_metric(exp_list, metrics)
+        with Timer(metrics, "time/gather_experience"):
+            exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
+        return exps, metrics, repr_samples
+
+
 @Deprecated
 class WarmupSampleStrategy(DefaultSampleStrategy):
     """The warmup sample strategy.

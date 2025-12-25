@@ -19,10 +19,10 @@ class QueueReader(BufferReader):
         self.read_batch_size = config.batch_size
         self.queue = QueueStorage.get_wrapper(config)
 
-    def read(self, batch_size: Optional[int] = None) -> List:
+    def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         try:
             batch_size = batch_size or self.read_batch_size
-            exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout))
+            exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout, **kwargs))
             if len(exps) != batch_size:
                 raise TimeoutError(
                     f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
@@ -31,9 +31,9 @@ class QueueReader(BufferReader):
             raise StopIteration()
         return exps
 
-    async def read_async(self, batch_size: Optional[int] = None) -> List:
+    async def read_async(self, batch_size: Optional[int] = None, **kwargs) -> List:
         batch_size = batch_size or self.read_batch_size
-        exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout)
+        exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout, **kwargs)
         if len(exps) != batch_size:
             raise TimeoutError(
                 f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."

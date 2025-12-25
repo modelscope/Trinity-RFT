@@ -85,7 +85,7 @@ class _HFBatchReader:
 
 
 class BaseFileReader(BufferReader):
-    async def read_async(self, batch_size: Optional[int] = None):
+    async def read_async(self, batch_size: Optional[int] = None, **kwargs):
         try:
             return self.read(batch_size)
         except StopIteration as e:
@@ -101,7 +101,7 @@ class FileReader(BaseFileReader):
         else:
             self.reader = TaskFileReader(config)
 
-    def read(self, batch_size: Optional[int] = None) -> List:
+    def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         return self.reader.read(batch_size)
 
     def read_with_indices(self, indices: List[int]) -> List:
@@ -140,7 +140,7 @@ class ExperienceFileReader(BaseFileReader):
             enable_progress_bar=config.enable_progress_bar,
         )
 
-    def read(self, batch_size: Optional[int] = None) -> List:
+    def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         samples, _ = self.dataset.read_batch(batch_size or self.read_batch_size)
         exp_list = []
         for sample in samples:
@@ -187,7 +187,7 @@ class TaskFileReader(BaseFileReader):
             tasks.append(task)
         return tasks
 
-    def read(self, batch_size: Optional[int] = None) -> List:
+    def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         batch_size = batch_size or self.read_batch_size
         samples, indices = self.dataset.read_batch(batch_size)
         return self._get_tasks(samples, indices)

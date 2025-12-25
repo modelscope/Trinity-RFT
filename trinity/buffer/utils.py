@@ -5,7 +5,7 @@ from trinity.utils.log import get_logger
 
 
 @contextmanager
-def retry_session(session_maker, max_retry_times: int, max_retry_interval: float):
+def retry_session(session_maker, max_retry_times: int = 2, max_retry_interval: float = 1.0):
     """A Context manager for retrying session."""
     logger = get_logger(__name__)
     for attempt in range(max_retry_times):

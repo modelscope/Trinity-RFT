@@ -92,11 +92,12 @@ class Workflow(ABC):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,  # 主要用于 LLM-as-a-judge 场景，这里可以忽略
+        auxiliary_models: Optional[List[ModelWrapper]] = None,  # 主要用于 LLM-as-a-judge 场景, 也可以用作distillation的techer
     ):
         self.task = task
         self.model = model
-        self.auxiliary_models = auxiliary_models
+        self.auxiliary_model_wrappers = auxiliary_models
+        self.auxiliary_models = ...  # 从 ModelWrapper 自动派生的 OpenAI client
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -109,7 +110,7 @@ class Workflow(ABC):
 
 - `task`({class}`trinity.common.workflows.Task`)：数据集中的单个任务。
 - `model`({class}`trinity.common.models.model.ModelWrapper`)：正在训练的模型，提供类似于 OpenAI 的接口，能够接收对话消息列表并返回 LLM 生成的内容（包括回复文本 `response_text`、完整序列 token id `tokens`、prompt 部分 token 长度 `prompt_length`，以及输出 token 对数概率列表 `logprobs`）。
-- `auxiliary_models`(`List[openai.OpenAI]`)：未参与训练的辅助模型列表。所有模型均通过兼容 OpenAI 的 API 提供，主要用于 LLM-as-a-judge 场景。
+- `auxiliary_models`(`List[ModelWrapper]`)：辅助模型的 ModelWrapper 列表。可通过 `self.auxiliary_models` 访问 OpenAI client（根据 workflow 的 `is_async` 自动派生）。
 
 以下是一个仅使用 `raw_task` 和 `rollout_args` 初始化简单工作流的示例。在更复杂的情况下，你可以使用 `format_args` 进行进一步自定义。
 
@@ -437,10 +438,10 @@ class MyWorkflow(Workflow):
         *,
         task: Task,
         model: ModelWrapper,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+        auxiliary_models: Optional[List[ModelWrapper]] = None,
     ):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
-        self.judge_model = self.auxiliary_models[0]  # 使用第一个辅助模型作为评判者
+        self.judge_model = self.auxiliary_models[0]  # 从 ModelWrapper 自动派生的 OpenAI client
 
     def run(self) -> List[Experience]:
         response = self.do_something()

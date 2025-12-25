@@ -459,3 +459,35 @@ class MultiStepGRPOAlgorithm(AlgorithmType):
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
         }
+
+
+class OnPolicyDistillAlgorithm(AlgorithmType):
+    """On-Policy Distillation Algorithm.
+
+    Reference: Tinker library.
+
+    Workflow stores teacher_logprobs in experience.info["teacher_logprobs"].
+    Trainer's advantage_fn computes: advantages = teacher_logprobs - student_logprobs
+    Trainer uses:
+        importance_sampling loss if no clipping is needed
+        ppo loss if clipping is needed, for better stability
+    """
+
+    use_critic: bool = False
+    use_reference: bool = False
+    compute_advantage_in_trainer: bool = True  # advantage_fn computes from teacher_logprobs
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 8,
+            "advantage_fn": "on_policy_distill",
+            "advantage_fn_args": {"kl_coef": 1.0},
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",  # or importance_sampling if no clipping is needed
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }
