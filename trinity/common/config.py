@@ -1318,7 +1318,7 @@ class Config:
             for args in model_args:
                 set_if_none(aux_model, args, getattr(self.model, args))
 
-        if self.rollout_model.engine_type == "tinker":
+        if self.explorer.rollout_model.engine_type == "tinker":
             set_if_none(
                 self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model
             )
