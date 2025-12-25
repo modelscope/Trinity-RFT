@@ -39,7 +39,8 @@ def get_dlc_env_vars() -> dict:
 
 def is_running() -> bool:
     """Check if ray cluster is running."""
-    return ray.is_initialized()
+    ret = subprocess.run("ray status", shell=True, capture_output=True)
+    return ret.returncode == 0
 
 
 def wait_for_ray_setup() -> None:
