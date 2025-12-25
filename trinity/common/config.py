@@ -1305,7 +1305,6 @@ class Config:
         rope_args = ["rope_scaling", "rope_theta"]
         model_args = rollout_args + length_args + rope_args
         set_if_none(self.explorer.rollout_model, "model_path", self.model.model_path)
-        set_if_none(self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model)
         for args in model_args:
             set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
         if (
@@ -1318,6 +1317,34 @@ class Config:
                 raise ValueError("auxiliary model's model_path is required.")
             for args in model_args:
                 set_if_none(aux_model, args, getattr(self.model, args))
+
+        if self.rollout_model.engine_type == "tinker":
+            set_if_none(
+                self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model
+            )
+        else:
+            # check gpu number
+            rollout_gpu_num = (
+                self.explorer.rollout_model.tensor_parallel_size
+                * self.explorer.rollout_model.engine_num
+                + sum(
+                    (
+                        model.tensor_parallel_size * model.engine_num
+                        for model in self.explorer.auxiliary_models
+                    )
+                )
+            )
+            assert self.cluster.node_num is not None
+            assert self.cluster.gpu_per_node is not None
+            total_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node
+            if self.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
+                raise ValueError(
+                    f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
+                )
+            elif self.mode == "both" and rollout_gpu_num >= total_gpu_num:
+                raise ValueError(
+                    f"Not enough GPUs for trainer in 'both' mode. Explorer requires {rollout_gpu_num} GPUs, but total available GPUs are {total_gpu_num}."
+                )
 
         if self.explorer.over_rollout.ratio > 0.0:
             if not (0.0 <= self.explorer.over_rollout.ratio < 1.0):
