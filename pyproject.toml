@@ -76,6 +76,9 @@ megatron = [
     "transformer_engine[pytorch]==2.8.0",
     "mbridge>=0.13.0",
 ]
+tinker = [
+    "tinker",  # tinker requires python>=3.11
+]
 
 doc = [
     "sphinx",

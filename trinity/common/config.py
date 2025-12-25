@@ -1197,7 +1197,7 @@ class Config:
             item.model_name for item in service_client.get_server_capabilities().supported_models
         }
         if model.tinker.base_model not in supported_models:
-            print(supported_models)
+            logger.error(f"Supported models: {supported_models}")
             raise ValueError(f"{model.tinker.base_model} is not supported by tinker!")
         if model.tinker.base_model != model.model_path:
             logger.warning(
