@@ -39,7 +39,11 @@ def get_dlc_env_vars() -> dict:
 
 def is_running() -> bool:
     """Check if ray cluster is running."""
-    ret = subprocess.run("ray status", shell=True, capture_output=True)
+    python_dir = os.path.dirname(sys.executable)
+    ray_path = os.path.join(python_dir, "ray")
+    if not os.path.exists(ray_path):
+        ray_path = "ray"
+    ret = subprocess.run([ray_path, "status"], capture_output=True)
     return ret.returncode == 0
 
 

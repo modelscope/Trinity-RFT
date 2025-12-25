@@ -5,6 +5,9 @@ import unittest
 class TestSwanlabMonitor(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._original_env = {
+            "SWANLAB_API_KEY": os.environ.get("SWANLAB_API_KEY"),
+        }
         os.environ["SWANLAB_API_KEY"] = "xxxxxxxxxxxxxxxxxxxxx"
 
     @classmethod
@@ -31,7 +34,3 @@ class TestSwanlabMonitor(unittest.TestCase):
         # Log a minimal metric to verify basic flow
         mon.log({"smoke/metric": 1.0}, step=1)
         mon.close()
-
-
-if __name__ == "__main__":
-    unittest.main()

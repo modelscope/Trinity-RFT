@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.3.3"
+version = "0.4.0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -73,6 +73,8 @@ dev = [
 ]
 megatron = [
     "megatron-core[mlm]==0.13.1",
+    # if you found "undefined symbol" error in transformer engine
+    # reinstall it with --no-build-isolation and `--no-cache-dir` flag
     "transformer_engine[pytorch]==2.8.0",
     "mbridge>=0.13.0",
 ]

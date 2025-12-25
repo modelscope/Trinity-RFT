@@ -182,7 +182,7 @@ cd Trinity-RFT
 #### 使用 Conda
 
 ```bash
-conda create -n trinity python=3.10
+conda create -n trinity python=3.12
 conda activate trinity
 
 pip install -e ".[dev]"

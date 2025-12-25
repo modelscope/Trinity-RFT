@@ -34,7 +34,10 @@ jobs:
         MAX_RETRIES=20
         RETRY_INTERVAL=5
         for i in $(seq 1 $MAX_RETRIES); do
-          docker compose exec trinity-node-1 ray status && docker compose exec trinity-node-2 ray status && break
+          if docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && ray status" \
+            && docker compose exec trinity-node-2 bash -c "source /opt/venv/bin/activate && ray status"; then
+            break
+          fi
           echo "Waiting for ray cluster to be ready... ($i/$MAX_RETRIES)"
           sleep $RETRY_INTERVAL
           if [ "$i" -eq "$MAX_RETRIES" ]; then
@@ -76,12 +79,12 @@ jobs:
         TYPE="${{ steps.test_type.outputs.type }}"
         if [ "$TYPE" = "all" ]; then
           echo "tests_run=true" >> $GITHUB_ENV
-          docker compose exec trinity-node-1 pytest tests -v -s --ctrf report.json
+          docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest tests -v -s --ctrf report.json"
         elif [ "$TYPE" = "diff" ]; then
           if [ -s ../../../test_dirs.txt ]; then
             echo "tests_run=true" >> $GITHUB_ENV
             TEST_DIRS=$(cat ../../../test_dirs.txt | xargs)
-            docker compose exec trinity-node-1 pytest $TEST_DIRS -v -s --ctrf report.json
+            docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest $TEST_DIRS -v -s --ctrf report.json"
           else
             echo "No changed modules detected, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV
@@ -90,7 +93,7 @@ jobs:
           MODULE="${{ steps.test_type.outputs.module }}"
           if [ -n "$MODULE" ]; then
             echo "tests_run=true" >> $GITHUB_ENV
-            docker compose exec trinity-node-1 pytest tests/$MODULE -v -s --ctrf report.json
+            docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest tests/$MODULE -v -s --ctrf report.json"
           else
             echo "No module specified, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV

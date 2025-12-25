@@ -447,7 +447,7 @@ class vLLMRolloutModel(InferenceModel):
             if len(token_ids) > self.config.max_model_len - 1:
                 truncate_status = "response_truncated"
                 self.logger.warning(
-                    f"Warning: {len(token_ids) = } exceeds the length limit {self.config.max_model_len-1 = }"
+                    f"Warning: {len(token_ids)=} exceeds the length limit {(self.config.max_model_len - 1)=}"
                 )
                 token_ids = token_ids[: self.config.max_model_len - 1]
                 action_mask = action_mask[: self.config.max_model_len - 1]

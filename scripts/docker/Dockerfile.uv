@@ -39,8 +39,9 @@ RUN . /opt/venv/bin/activate && \
 
 # Install flash_attn and Megatron
 RUN . /opt/venv/bin/activate && \
-    uv pip install flash_attn==2.8.1 --no-cache-dir && \
+    uv pip install flash_attn==2.8.1 --no-build-isolation && \
     uv pip install -e .[megatron] && \
+    uv pip install --reinstall transformer_engine[pytorch]==2.8.0 --no-build-isolation --no-cache-dir && \
     NVCC_APPEND_FLAGS="--threads 4" APEX_PARALLEL_BUILD=8 \
     uv pip install -v --no-build-isolation \
     --config-settings="--build-option=--cpp_ext" \

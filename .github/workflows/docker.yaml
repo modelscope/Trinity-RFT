@@ -21,7 +21,7 @@ env:
 jobs:
   build-and-push-image:
     runs-on: self-hosted
-    timeout-minutes: 240  # wait up to 4 hours
+    timeout-minutes: 480  # wait up to 8 hours
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
       contents: read
@@ -61,8 +61,8 @@ jobs:
         with:
           context: trinity-${{ github.run_id }}
           push: true
-          file: trinity-${{ github.run_id }}/scripts/docker/Dockerfile
-          shm-size: 64g
+          file: trinity-${{ github.run_id }}/scripts/docker/Dockerfile.uv
+          shm-size: 128g
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
