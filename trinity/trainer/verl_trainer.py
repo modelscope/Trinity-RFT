@@ -7,7 +7,7 @@ import asyncio
 import os
 import sys
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import ray
 import torch
@@ -34,7 +34,7 @@ from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import SaveStrategy
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
 from trinity.utils.log import get_logger
@@ -187,6 +187,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         global_config: Config,
     ):
         self.logger = get_logger(__name__, in_ray_actor=True)
+        self.pad_token_id = global_config.buffer.pad_token_id
         train_config = global_config.trainer
         config = OmegaConf.structured(train_config.trainer_config)
         # download the checkpoint from hdfs
@@ -406,8 +407,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
-    async def train_step(self, batch_exps: Experiences) -> Dict:  # noqa C901
-        batch = to_data_proto(batch_exps, self.logger)
+    async def train_step(self, batch_exps: List[Experience]) -> Dict:  # noqa C901
+        batch = to_data_proto(batch_exps, self.pad_token_id, self.logger)  # type: ignore
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1

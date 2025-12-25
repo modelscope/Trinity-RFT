@@ -4,7 +4,7 @@ from typing import Any, List, Tuple, Union
 import torch
 from tinker import types
 
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience, split_dpo_experience_to_single_turn
 
 
 def pad_to_length(
@@ -23,60 +23,61 @@ def pad_to_length(
 
 
 def to_tinker_input(
-    experiences: Experiences, logger: Logger
+    experiences: List[Experience], logger: Logger
 ) -> Tuple[List[types.Datum], List[types.ModelInput], List[dict]]:
-    cumsum = torch.cumsum(experiences.attention_masks, dim=-1)
-    eos_mask_idx = cumsum.argmax(dim=-1)
-    prompt_length = experiences.prompt_length
+    assert len(experiences) > 0, "No experiences provided."
+    if experiences[0].experience_type == "dpo":
+        experiences = split_dpo_experience_to_single_turn(experiences)
+
     batch = []
     batch_input_tokens = []
     model_inputs_list = []
-    for i in range(len(experiences.tokens)):
-        tokens = experiences.tokens[i]
-        attention_mask = experiences.attention_masks[i]
-        response_mask = attention_mask[prompt_length:]
-        input_tokens = tokens[attention_mask].long()
-        exp_seq_length = sum(attention_mask)
-        exp_response_length = sum(response_mask)
+    for exp in experiences:
+        tokens = exp.tokens
+        input_tokens = tokens.long()
+        prompt_length = exp.prompt_length
+        total_length = len(tokens)  # type: ignore
+        response_length = total_length - prompt_length
         loss_fn_inputs = {
-            "weights": pad_to_length(
-                experiences.action_masks[i][response_mask].float(), exp_seq_length - 1  # type: ignore
+            "weights": torch.concat(
+                [
+                    torch.zeros(prompt_length - 1, dtype=torch.float32),
+                    exp.action_mask.float(),
+                ]
             ),
             "target_tokens": input_tokens.tolist()[1:],
         }
         model_inputs = {
-            "total_length": exp_seq_length,
-            "action_mask": experiences.action_masks[i][response_mask],  # type: ignore
+            "total_length": total_length,
+            "action_mask": exp.action_mask,
         }
-        if experiences.rewards is not None or experiences.token_level_rewards is not None:
-            assert experiences.logprobs is not None
-            if experiences.token_level_rewards is not None:
-                if experiences.rewards is not None:
+        if exp.reward is not None or exp.token_level_reward is not None:
+            assert exp.logprobs is not None
+            if exp.token_level_reward is not None:
+                if exp.reward is not None:
                     logger.warning(
-                        "Both experiences.rewards and experiences.token_level_rewards are provided. "
-                        "Using experiences.token_level_rewards."
+                        "Both exp.rewards and exp.token_level_rewards are provided. "
+                        "Using exp.token_level_rewards."
                     )
-                token_level_rewards = experiences.token_level_rewards[i][response_mask]
+                token_level_reward = exp.token_level_reward
             else:
-                token_level_rewards = torch.zeros(
-                    exp_response_length, dtype=experiences.rewards.dtype
-                )
-                token_level_rewards[eos_mask_idx[i] - prompt_length] = experiences.rewards[i]
+                token_level_reward = torch.zeros(response_length, dtype=torch.float32)
+                token_level_reward[-1] = exp.reward
             model_inputs.update(
                 {
-                    "token_level_scores": token_level_rewards,
-                    "old_logprob": experiences.logprobs[i][response_mask],  # type: ignore
+                    "token_level_scores": token_level_reward,
+                    "old_logprob": exp.logprobs,
                 }
             )
-        if experiences.advantages is not None:
-            model_inputs["advantages"] = experiences.advantages[i][response_mask]
-        if experiences.returns is not None:
-            model_inputs["returns"] = experiences.returns[i][response_mask]
+        for attr in ["advantages", "returns", "teacher_logprobs"]:
+            if getattr(exp, attr, None) is not None:
+                model_inputs[attr] = getattr(exp, attr)
         # TODO: if tinker support multi-modal input, we can add it here
-        if experiences.custom_fields:
-            for field in experiences.custom_fields:
-                if hasattr(experiences, field):
-                    model_inputs[field] = getattr(experiences, field)
+        for custom_field in exp.custom_fields:
+            model_inputs[custom_field.destination_field] = torch.tensor(
+                exp.info[custom_field.source_field],
+                dtype=custom_field.data_type,
+            )
 
         batch.append(
             types.Datum(

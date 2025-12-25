@@ -17,7 +17,7 @@ from trinity.algorithm import SAMPLE_STRATEGY
 from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod, SyncStyle
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience
 from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
@@ -108,7 +108,7 @@ class Trainer:
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
-    async def train_step(self, exps: Experiences) -> Dict:
+    async def train_step(self, exps: List[Experience]) -> Dict:
         """Train one step.
 
         Returns:
@@ -123,16 +123,16 @@ class Trainer:
         metrics.update(train_metrics)
         return metrics
 
-    async def _sample_data(self) -> Tuple[Experiences, Dict, List[Dict]]:
+    async def _sample_data(self) -> Tuple[List[Experience], Dict, List[Dict]]:
         """Sample a batch of experiences.
 
         Returns:
-            Experiences: A batch of experiences.
+            List[Experience]: A batch of experiences.
             Dict: Metrics of the sampling step.
             List[Dict]: A list of representative samples for logging.
         """
         batch, metrics, repr_samples = await self.sample_strategy.sample(self.train_step_num + 1)
-        metrics["sample/task_count"] = len(set(eid.tid for eid in batch.eids))
+        metrics["sample/task_count"] = len(set(exp.eid.tid for exp in batch))
         return batch, metrics, repr_samples
 
     async def need_sync(self) -> bool:
@@ -239,11 +239,11 @@ class TrainEngineWrapper(ABC):
         """Get the current training step number."""
 
     @abstractmethod
-    async def train_step(self, batch_exps: Experiences) -> Dict:
+    async def train_step(self, batch_exps: List[Experience]) -> Dict:
         """Training one step.
 
         Args:
-            batch_exps (Experiences): A batch of experiences to train.
+            batch_exps (List[Experience]): A batch of experiences to train.
 
         Returns:
             Dict: Metrics of the training step.

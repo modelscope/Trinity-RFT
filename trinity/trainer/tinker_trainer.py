@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, List
 
 import ray
 import tinker
@@ -16,7 +16,7 @@ from trinity.algorithm.kl_fn import KL_FN
 from trinity.algorithm.policy_loss_fn import POLICY_LOSS_FN
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience
 from trinity.manager.synchronizer import Synchronizer
 from trinity.trainer.tinker.utils import (
     compute_data_metrics,
@@ -196,11 +196,11 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
         avg_metrics = {k: sum(v) / len(v) for k, v in metrics.items()}
         return total_loss, avg_metrics
 
-    async def train_step(self, batch_exps: Experiences) -> Dict:
+    async def train_step(self, batch_exps: List[Experience]) -> Dict:
         """Training one step.
 
         Args:
-            batch (Experiences): A batch of experiences to train.
+            batch (List[Experience]): A batch of experiences to train.
 
         Returns:
             Dict: Metrics of the training step.
