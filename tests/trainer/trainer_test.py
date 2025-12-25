@@ -1325,7 +1325,7 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
 
 
 class TestTinkerTrainer(BaseTrainerCase):
-    # @unittest.skip("Require tinker API key")
+    @unittest.skip("Require tinker API key")
     def test_trainer(self):
         """Test GSM8K on tinker."""
         # test both mode

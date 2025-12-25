@@ -45,6 +45,10 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             self.kl_fn = KL_FN.get(algorithm_config.kl_penalty_fn)(
                 **algorithm_config.kl_penalty_fn_args
             )
+            # TODO
+            raise NotImplementedError(
+                "`compute_advantage_in_trainer` is not implemented yet in tinker"
+            )
         self.loss_agg_mode = algorithm_config.loss_agg_mode
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
             backend="tinker", **algorithm_config.policy_loss_fn_args
@@ -227,12 +231,9 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
 
             if self.algorithm.compute_advantage_in_trainer:
                 # TODO: following is verl format, which is not compatible with tinker
-                with marked_timer("adv", timing_raw):
-                    # compute kl penalty
-                    batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
-                    metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
-                    # compute advantages, executed on the driver process
-                    batch, _ = self.advantage_fn(batch)
+                raise NotImplementedError(
+                    "`compute_advantage_in_trainer` is not implemented yet in tinker"
+                )
             else:
                 # skip token_level_scores for sft/dpo
                 for model_inputs in model_inputs_list:

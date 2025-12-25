@@ -58,7 +58,9 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
     async def _verify_model_version(self, step, expected_versions):
         batch, metrics, _ = await self.sample_strategy.sample(step=step)
         self.assertEqual(
-            batch.rewards.tolist(), expected_versions, f"Model versions mismatch at step {step}"
+            [exp.reward for exp in batch],
+            expected_versions,
+            f"Model versions mismatch at step {step}",
         )
         self.assertEqual(
             metrics["sample/model_version/min"],
