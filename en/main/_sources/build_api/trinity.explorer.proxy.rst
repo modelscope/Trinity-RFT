@@ -17,5 +17,5 @@ Module contents
 
 .. automodule:: trinity.explorer.proxy
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

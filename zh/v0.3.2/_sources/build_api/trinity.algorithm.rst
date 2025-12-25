@@ -28,5 +28,5 @@ Module contents
 
 .. automodule:: trinity.algorithm
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

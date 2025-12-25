@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: trinity.common.workflows.agentscope.react
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

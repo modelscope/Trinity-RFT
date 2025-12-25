@@ -25,5 +25,5 @@ Module contents
 
 .. automodule:: trinity.explorer
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

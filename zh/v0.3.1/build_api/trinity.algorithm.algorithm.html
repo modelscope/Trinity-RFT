@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.algorithm.algorithm module &#8212; Trinity-RFT 0.3.3 文档</title>
+    <title>trinity.algorithm.algorithm module &#8212; Trinity-RFT 0.4.0 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=cfbd4ef8"></script>
+    <script src="../_static/documentation_options.js?v=0a12e38e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -803,13 +803,13 @@ document.write(`
 <p>Algorithm classes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.ConstantMeta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">ConstantMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ConstantMeta"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ConstantMeta" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">ConstantMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ConstantMeta"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ConstantMeta" title="Link to this definition">#</a></dt>
 <dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AlgorithmType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">AlgorithmType</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">AlgorithmType</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType" title="Link to this definition">#</a></dt>
 <dd><p>基类：<code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AlgorithmType.use_critic">
@@ -838,24 +838,24 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AlgorithmType.default_config">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AlgorithmType.name">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.name"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.name" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.name"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.name" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AlgorithmType.check_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.check_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.check_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.check_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AlgorithmType.check_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.SFTAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">SFTAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SFTAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SFTAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">SFTAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SFTAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SFTAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>SFT Algorithm.</p>
 <dl class="py attribute">
@@ -885,14 +885,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.SFTAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SFTAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SFTAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SFTAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SFTAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.PPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">PPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#PPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.PPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">PPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#PPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.PPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>PPO Algorithm.</p>
 <dl class="py attribute">
@@ -922,14 +922,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.PPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#PPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.PPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#PPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.PPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.GRPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">GRPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GRPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GRPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">GRPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GRPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GRPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>GRPO algorithm.</p>
 <dl class="py attribute">
@@ -959,14 +959,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.GRPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GRPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GRPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GRPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GRPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">ReinforcePlusPlusAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ReinforcePlusPlusAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">ReinforcePlusPlusAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ReinforcePlusPlusAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>Reinforce++ algorithm.</p>
 <dl class="py attribute">
@@ -996,14 +996,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ReinforcePlusPlusAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#ReinforcePlusPlusAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.ReinforcePlusPlusAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RLOOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RLOOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RLOOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RLOOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RLOOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RLOOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RLOOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>RLOO algorithm.</p>
 <dl class="py attribute">
@@ -1033,14 +1033,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RLOOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RLOOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RLOOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RLOOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RLOOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.OPMDAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">OPMDAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OPMDAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OPMDAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">OPMDAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OPMDAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OPMDAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>OPMD algorithm.</p>
 <dl class="py attribute">
@@ -1070,14 +1070,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.OPMDAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OPMDAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OPMDAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OPMDAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OPMDAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AsymREAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">AsymREAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AsymREAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AsymREAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">AsymREAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AsymREAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AsymREAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>AsymRE algorithm.</p>
 <dl class="py attribute">
@@ -1107,14 +1107,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.AsymREAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AsymREAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AsymREAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AsymREAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.AsymREAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.DPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">DPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">DPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>DPO algorithm.</p>
 <dl class="py attribute">
@@ -1144,19 +1144,19 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.DPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.DPOAlgorithm.check_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm.check_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm.check_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#DPOAlgorithm.check_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.DPOAlgorithm.check_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.TOPRAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">TOPRAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#TOPRAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.TOPRAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">TOPRAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#TOPRAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.TOPRAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>TOPR algorithm. See <a class="reference external" href="https://arxiv.org/pdf/2503.14286v1">https://arxiv.org/pdf/2503.14286v1</a></p>
 <dl class="py attribute">
@@ -1186,14 +1186,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.TOPRAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#TOPRAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.TOPRAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#TOPRAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.TOPRAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.CISPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">CISPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#CISPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.CISPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">CISPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#CISPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.CISPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>CISPO algorithm. See <a class="reference external" href="https://arxiv.org/abs/2506.13585">https://arxiv.org/abs/2506.13585</a></p>
 <dl class="py attribute">
@@ -1223,14 +1223,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.CISPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#CISPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.CISPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#CISPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.CISPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.GSPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">GSPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GSPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GSPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">GSPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GSPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GSPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>GSPO algorithm. See <a class="reference external" href="https://arxiv.org/pdf/2507.18071">https://arxiv.org/pdf/2507.18071</a></p>
 <dl class="py attribute">
@@ -1260,14 +1260,14 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.GSPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GSPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GSPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#GSPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.GSPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">SAPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">SAPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>SAPO (Soft Adaptive Policy Optimization) algorithm.</p>
 <p>SAPO uses a smooth, temperature-controlled soft gate instead of hard clipping
@@ -1299,14 +1299,14 @@ to stabilize training while maintaining effective learning.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.SAPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#SAPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.SAPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MIXAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MIXAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MIXAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>MIX algorithm.</p>
 <dl class="py attribute">
@@ -1341,14 +1341,14 @@ to stabilize training while maintaining effective learning.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MIXAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MIXCHORDAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MIXCHORDAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXCHORDAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXCHORDAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MIXCHORDAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXCHORDAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXCHORDAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>MIX algorithm.</p>
 <dl class="py attribute">
@@ -1383,14 +1383,14 @@ to stabilize training while maintaining effective learning.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MIXCHORDAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXCHORDAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXCHORDAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MIXCHORDAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MIXCHORDAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RAFTAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RAFTAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>RAFT Algorithm.
 This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
@@ -1422,14 +1422,14 @@ but is designed to work with <cite>experience</cite> schema from rollouts.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.sPPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">sPPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#sPPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.sPPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">sPPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#sPPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.sPPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>sPPO Algorithm.</p>
 <dl class="py attribute">
@@ -1459,14 +1459,14 @@ but is designed to work with <cite>experience</cite> schema from rollouts.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.sPPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#sPPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.sPPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#sPPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.sPPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RECAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RECAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RECAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RECAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RECAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RECAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RECAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>REC Algorithm.</p>
 <dl class="py attribute">
@@ -1496,14 +1496,14 @@ but is designed to work with <cite>experience</cite> schema from rollouts.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.RECAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RECAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RECAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RECAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RECAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MultiStepGRPOAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MultiStepGRPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MultiStepGRPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">MultiStepGRPOAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MultiStepGRPOAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>Multi-Step GRPO Algorithm.</p>
 <dl class="py attribute">
@@ -1533,14 +1533,14 @@ but is designed to work with <cite>experience</cite> schema from rollouts.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MultiStepGRPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#MultiStepGRPOAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.OnPolicyDistillAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">OnPolicyDistillAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OnPolicyDistillAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OnPolicyDistillAlgorithm" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">OnPolicyDistillAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OnPolicyDistillAlgorithm"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OnPolicyDistillAlgorithm" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
 <p>On-Policy Distillation Algorithm.</p>
 <p>Reference: Tinker library.</p>
@@ -1578,7 +1578,7 @@ ppo loss if clipping is needed, for better stability</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.algorithm.OnPolicyDistillAlgorithm.default_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OnPolicyDistillAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OnPolicyDistillAlgorithm.default_config" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#OnPolicyDistillAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.OnPolicyDistillAlgorithm.default_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

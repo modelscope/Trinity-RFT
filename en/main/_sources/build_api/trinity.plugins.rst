@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: trinity.plugins
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -14,5 +14,5 @@ Module contents
 
 .. automodule:: trinity.algorithm.kl_fn
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

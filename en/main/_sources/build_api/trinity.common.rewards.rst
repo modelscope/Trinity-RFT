@@ -26,5 +26,5 @@ Module contents
 
 .. automodule:: trinity.common.rewards
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -15,5 +15,5 @@ Module contents
 
 .. automodule:: trinity.buffer.operators.mappers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

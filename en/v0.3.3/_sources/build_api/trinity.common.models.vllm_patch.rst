@@ -15,5 +15,5 @@ Module contents
 
 .. automodule:: trinity.common.models.vllm_patch
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

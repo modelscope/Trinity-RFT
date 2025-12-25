@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.algorithm.sample_strategy.mix_sample_strategy module &#8212; Trinity-RFT 0.3.3 文档</title>
+    <title>trinity.algorithm.sample_strategy.mix_sample_strategy module &#8212; Trinity-RFT 0.4.0 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=cfbd4ef8"></script>
+    <script src="../_static/documentation_options.js?v=0a12e38e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -633,7 +633,7 @@ document.write(`
 <span id="trinity-algorithm-sample-strategy-mix-sample-strategy-module"></span><h1>trinity.algorithm.sample_strategy.mix_sample_strategy module<a class="headerlink" href="#module-trinity.algorithm.sample_strategy.mix_sample_strategy" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.sample_strategy.mix_sample_strategy.</span></span><span class="sig-name descname"><span class="pre">MixSampleStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.sample_strategy.mix_sample_strategy.</span></span><span class="sig-name descname"><span class="pre">MixSampleStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy" title="trinity.algorithm.sample_strategy.sample_strategy.SampleStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a></p>
 <p>The default sample strategy.</p>
 <dl class="py method">
@@ -643,7 +643,7 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.sample">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy.sample"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.sample" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy.sample"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.sample" title="Link to this definition">#</a></dt>
 <dd><p>Sample data from buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">参数<span class="colon">:</span></dt>
@@ -662,7 +662,7 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.default_args">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.default_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/mix_sample_strategy.html#MixSampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.default_args" title="Link to this definition">#</a></dt>
 <dd><p>Get the default arguments of the sample strategy.</p>
 </dd></dl>
 

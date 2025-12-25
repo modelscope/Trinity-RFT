@@ -27,5 +27,5 @@ Module contents
 
 .. automodule:: trinity.algorithm.policy_loss_fn
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

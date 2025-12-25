@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.buffer.operators.filters.reward_filter module &#8212; Trinity-RFT 0.3.3 documentation</title>
+    <title>trinity.buffer.operators.filters.reward_filter module &#8212; Trinity-RFT 0.4.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=94d292f4"></script>
+    <script src="../_static/documentation_options.js?v=183391d5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -631,7 +631,7 @@ document.write(`
 <span id="trinity-buffer-operators-filters-reward-filter-module"></span><h1>trinity.buffer.operators.filters.reward_filter module<a class="headerlink" href="#module-trinity.buffer.operators.filters.reward_filter" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.operators.filters.reward_filter.RewardFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.operators.filters.reward_filter.</span></span><span class="sig-name descname"><span class="pre">RewardFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/operators/filters/reward_filter.html#RewardFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.operators.filters.reward_filter.RewardFilter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.operators.filters.reward_filter.</span></span><span class="sig-name descname"><span class="pre">RewardFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/operators/filters/reward_filter.html#RewardFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.operators.filters.reward_filter.RewardFilter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="trinity.buffer.operators.experience_operator.html#trinity.buffer.operators.experience_operator.ExperienceOperator" title="trinity.buffer.operators.experience_operator.ExperienceOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceOperator</span></code></a></p>
 <p>Filter experiences based on the reward value.</p>
 <p>Note: This filter assumes that the reward is already calculated and stored in the Experience object.</p>
@@ -650,7 +650,7 @@ document.write(`
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.operators.filters.reward_filter.RewardSTDFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.operators.filters.reward_filter.</span></span><span class="sig-name descname"><span class="pre">RewardSTDFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/operators/filters/reward_filter.html#RewardSTDFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.operators.filters.reward_filter.RewardSTDFilter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.operators.filters.reward_filter.</span></span><span class="sig-name descname"><span class="pre">RewardSTDFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/operators/filters/reward_filter.html#RewardSTDFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.operators.filters.reward_filter.RewardSTDFilter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="trinity.buffer.operators.experience_operator.html#trinity.buffer.operators.experience_operator.ExperienceOperator" title="trinity.buffer.operators.experience_operator.ExperienceOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceOperator</span></code></a></p>
 <p>Filter experiences based on the standard deviation of rewards within each group.</p>
 <p>Note: This filter assumes that the reward is already calculated and stored in the Experience object.</p>

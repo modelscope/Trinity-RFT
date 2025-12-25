@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: trinity.algorithm.sample_strategy
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

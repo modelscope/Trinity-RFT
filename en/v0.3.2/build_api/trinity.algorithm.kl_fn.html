@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.algorithm.kl_fn package &#8212; Trinity-RFT 0.3.3 documentation</title>
+    <title>trinity.algorithm.kl_fn package &#8212; Trinity-RFT 0.4.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=94d292f4"></script>
+    <script src="../_static/documentation_options.js?v=183391d5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -610,11 +610,11 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.algorithm.kl_fn">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.__init__"><code class="docutils literal notranslate"><span class="pre">KLFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.apply_kl_penalty_to_reward"><code class="docutils literal notranslate"><span class="pre">KLFn.apply_kl_penalty_to_reward()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.default_args"><code class="docutils literal notranslate"><span class="pre">KLFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -685,7 +685,7 @@ document.write(`
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.algorithm.kl_fn" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.kl_fn.</span></span><span class="sig-name descname"><span class="pre">KLFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.kl_fn.</span></span><span class="sig-name descname"><span class="pre">KLFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>KL penalty and loss.</p>
 <dl class="py method">
@@ -694,15 +694,24 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.update_kl_coef">
-<span class="sig-name descname"><span class="pre">update_kl_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.update_kl_coef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef" title="Link to this definition">#</a></dt>
-<dd><p>Update kl coefficient.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.apply_kl_penalty_to_reward">
 <span class="sig-name descname"><span class="pre">apply_kl_penalty_to_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.apply_kl_penalty_to_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.apply_kl_penalty_to_reward" title="Link to this definition">#</a></dt>
 <dd><p>Apply KL penalty to reward. Only support DataProto input for now.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.calculate_kl">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
+<dd><p>Compute KL divergence between logprob and ref_logprob.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
+<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
+<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -723,24 +732,15 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.calculate_kl">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
-<dd><p>Compute KL divergence between logprob and ref_logprob.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
-<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
-<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
-</ul>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.default_args">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.default_args" title="Link to this definition">#</a></dt>
+<dd><p>Get the default initialization arguments.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.default_args">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.default_args" title="Link to this definition">#</a></dt>
-<dd><p>Get the default initialization arguments.</p>
+<dt class="sig sig-object py" id="trinity.algorithm.kl_fn.KLFn.update_kl_coef">
+<span class="sig-name descname"><span class="pre">update_kl_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.update_kl_coef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef" title="Link to this definition">#</a></dt>
+<dd><p>Update kl coefficient.</p>
 </dd></dl>
 
 </dd></dl>
@@ -797,11 +797,11 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.algorithm.kl_fn">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.__init__"><code class="docutils literal notranslate"><span class="pre">KLFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.apply_kl_penalty_to_reward"><code class="docutils literal notranslate"><span class="pre">KLFn.apply_kl_penalty_to_reward()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.default_args"><code class="docutils literal notranslate"><span class="pre">KLFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -18,5 +18,5 @@ Module contents
 
 .. automodule:: trinity.common.models
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.buffer.schema.formatter module &#8212; Trinity-RFT 0.3.3 documentation</title>
+    <title>trinity.buffer.schema.formatter module &#8212; Trinity-RFT 0.4.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=94d292f4"></script>
+    <script src="../_static/documentation_options.js?v=183391d5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -644,11 +644,11 @@ document.write(`
 <span id="trinity-buffer-schema-formatter-module"></span><h1>trinity.buffer.schema.formatter module<a class="headerlink" href="#module-trinity.buffer.schema.formatter" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.schema.formatter.ExperienceFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">ExperienceFormatter</span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#ExperienceFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.ExperienceFormatter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">ExperienceFormatter</span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#ExperienceFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.ExperienceFormatter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.schema.formatter.ExperienceFormatter.format">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#ExperienceFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.ExperienceFormatter.format" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#ExperienceFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.ExperienceFormatter.format" title="Link to this definition">#</a></dt>
 <dd><p>Format a raw sample dict into an experience.</p>
 </dd></dl>
 
@@ -656,7 +656,7 @@ document.write(`
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.schema.formatter.TaskFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">TaskFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#TaskFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.TaskFormatter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">TaskFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#TaskFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.TaskFormatter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Formatter for task data.</p>
 <p>Example Input:</p>
@@ -681,7 +681,7 @@ document.write(`
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.schema.formatter.SFTFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">SFTFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.FormatConfig" title="trinity.common.config.FormatConfig"><span class="pre">FormatConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#SFTFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.SFTFormatter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">SFTFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.FormatConfig" title="trinity.common.config.FormatConfig"><span class="pre">FormatConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#SFTFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.SFTFormatter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.formatter.ExperienceFormatter" title="trinity.buffer.schema.formatter.ExperienceFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceFormatter</span></code></a></p>
 <p>Formatter for SFT data, supporting both message list and plaintext formats.</p>
 <p>Uses format_config.prompt_type to distinguish between ‘messages’ and ‘plaintext’.</p>
@@ -747,7 +747,7 @@ document.write(`
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.buffer.schema.formatter.DPOFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">DPOFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.FormatConfig" title="trinity.common.config.FormatConfig"><span class="pre">FormatConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#DPOFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.DPOFormatter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.formatter.</span></span><span class="sig-name descname"><span class="pre">DPOFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenizer_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.FormatConfig" title="trinity.common.config.FormatConfig"><span class="pre">FormatConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/formatter.html#DPOFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.formatter.DPOFormatter" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.formatter.ExperienceFormatter" title="trinity.buffer.schema.formatter.ExperienceFormatter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceFormatter</span></code></a></p>
 <p>Formatter for DPO plaintext data.</p>
 <p>Example Input for PLAINTEXT:</p>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.algorithm package &#8212; Trinity-RFT 0.3.3 documentation</title>
+    <title>trinity.algorithm package &#8212; Trinity-RFT 0.4.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=94d292f4"></script>
+    <script src="../_static/documentation_options.js?v=183391d5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.3 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.3 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -610,19 +610,19 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.algorithm">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType"><code class="docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.check_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.check_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.default_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.default_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.name"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.name()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.use_critic"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.use_critic</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.use_reference"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.use_reference</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.compute_advantage_in_trainer"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.compute_advantage_in_trainer</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.can_balance_batch"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.can_balance_batch</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.schema"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.schema</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.default_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.default_config()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.name"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.name()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.check_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.check_config()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.compute_in_trainer()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.PolicyLossFn"><code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a><ul class="nav section-nav flex-column">
@@ -633,11 +633,11 @@ document.write(`
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.__init__"><code class="docutils literal notranslate"><span class="pre">KLFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.apply_kl_penalty_to_reward"><code class="docutils literal notranslate"><span class="pre">KLFn.apply_kl_penalty_to_reward()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.default_args"><code class="docutils literal notranslate"><span class="pre">KLFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.EntropyLossFn"><code class="docutils literal notranslate"><span class="pre">EntropyLossFn</span></code></a><ul class="nav section-nav flex-column">
@@ -646,11 +646,11 @@ document.write(`
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy"><code class="docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.load_state_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -726,15 +726,15 @@ document.write(`
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#module-trinity.algorithm.advantage_fn">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.compute_in_trainer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.group_experiences()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.calculate_group_advantage()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.process()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.compute_in_trainer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.process()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -779,11 +779,11 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.kl_fn.html#module-trinity.algorithm.kl_fn">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.__init__"><code class="docutils literal notranslate"><span class="pre">KLFn.__init__()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.apply_kl_penalty_to_reward"><code class="docutils literal notranslate"><span class="pre">KLFn.apply_kl_penalty_to_reward()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.default_args"><code class="docutils literal notranslate"><span class="pre">KLFn.default_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -880,11 +880,11 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#module-trinity.algorithm.sample_strategy">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy"><code class="docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.__init__()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.load_state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1112,8 +1112,23 @@ document.write(`
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.algorithm" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AlgorithmType</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AlgorithmType</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.check_config">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.check_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.check_config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.default_config">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.default_config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.name">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.use_critic">
 <span class="sig-name descname"><span class="pre">use_critic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#trinity.algorithm.AlgorithmType.use_critic" title="Link to this definition">#</a></dt>
@@ -1139,30 +1154,21 @@ document.write(`
 <span class="sig-name descname"><span class="pre">schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#trinity.algorithm.AlgorithmType.schema" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.default_config">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.default_config" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.name">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.name" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AlgorithmType.check_config">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#AlgorithmType.check_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AlgorithmType.check_config" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.AdvantageFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AdvantageFn</span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AdvantageFn</span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AdvantageFn.compute_in_trainer">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn.compute_in_trainer" title="Link to this definition">#</a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.AdvantageFn.default_args">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn.default_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn.default_args" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The default init arguments for the advantage function.</p>
@@ -1173,17 +1179,11 @@ document.write(`
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AdvantageFn.compute_in_trainer">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn.compute_in_trainer" title="Link to this definition">#</a></dt>
-<dd><p>Whether the advantage should be computed in the trainer loop.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.PolicyLossFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">PolicyLossFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/policy_loss_fn.html#PolicyLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.PolicyLossFn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">PolicyLossFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/policy_loss_fn.html#PolicyLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.PolicyLossFn" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Abstract base class for policy loss functions.</p>
 <p>This class provides the interface for implementing different policy gradient loss functions
@@ -1201,7 +1201,7 @@ while handling parameter name mapping between different training frameworks.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.PolicyLossFn.default_args">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/policy_loss_fn.html#PolicyLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.PolicyLossFn.default_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/policy_loss_fn.html#PolicyLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.PolicyLossFn.default_args" title="Link to this definition">#</a></dt>
 <dd><p>Get default initialization arguments for this loss function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1215,7 +1215,7 @@ while handling parameter name mapping between different training frameworks.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="trinity.algorithm.PolicyLossFn.select_keys">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.PolicyLossFn.select_keys" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.PolicyLossFn.select_keys" title="Link to this definition">#</a></dt>
 <dd><p>Returns parameter keys mapped to the specific training framework’s naming convention.</p>
 </dd></dl>
 
@@ -1223,7 +1223,7 @@ while handling parameter name mapping between different training frameworks.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.KLFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">KLFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">KLFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adaptive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>KL penalty and loss.</p>
 <dl class="py method">
@@ -1232,15 +1232,24 @@ while handling parameter name mapping between different training frameworks.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.KLFn.update_kl_coef">
-<span class="sig-name descname"><span class="pre">update_kl_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.update_kl_coef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.update_kl_coef" title="Link to this definition">#</a></dt>
-<dd><p>Update kl coefficient.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.KLFn.apply_kl_penalty_to_reward">
 <span class="sig-name descname"><span class="pre">apply_kl_penalty_to_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.apply_kl_penalty_to_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.apply_kl_penalty_to_reward" title="Link to this definition">#</a></dt>
 <dd><p>Apply KL penalty to reward. Only support DataProto input for now.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.KLFn.calculate_kl">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
+<dd><p>Compute KL divergence between logprob and ref_logprob.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
+<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
+<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1261,36 +1270,27 @@ while handling parameter name mapping between different training frameworks.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.KLFn.calculate_kl">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_kl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_logprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.calculate_kl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.calculate_kl" title="Link to this definition">#</a></dt>
-<dd><p>Compute KL divergence between logprob and ref_logprob.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>logprob</strong> – Log probabilities from current policy</p></li>
-<li><p><strong>ref_logprob</strong> – Log probabilities from reference policy</p></li>
-<li><p><strong>old_logprob</strong> – Log probabilities from old policy (for importance sampling)</p></li>
-</ul>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="trinity.algorithm.KLFn.default_args">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.default_args" title="Link to this definition">#</a></dt>
+<dd><p>Get the default initialization arguments.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.KLFn.default_args">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.default_args" title="Link to this definition">#</a></dt>
-<dd><p>Get the default initialization arguments.</p>
+<dt class="sig sig-object py" id="trinity.algorithm.KLFn.update_kl_coef">
+<span class="sig-name descname"><span class="pre">update_kl_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_kl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/kl_fn/kl_fn.html#KLFn.update_kl_coef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.KLFn.update_kl_coef" title="Link to this definition">#</a></dt>
+<dd><p>Update kl coefficient.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.EntropyLossFn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">EntropyLossFn</span></span><a class="reference internal" href="../_modules/trinity/algorithm/entropy_loss_fn/entropy_loss_fn.html#EntropyLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.EntropyLossFn" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">EntropyLossFn</span></span><a class="reference internal" href="../_modules/trinity/algorithm/entropy_loss_fn/entropy_loss_fn.html#EntropyLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.EntropyLossFn" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Entropy loss function.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.EntropyLossFn.default_args">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/entropy_loss_fn/entropy_loss_fn.html#EntropyLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.EntropyLossFn.default_args" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/entropy_loss_fn/entropy_loss_fn.html#EntropyLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.EntropyLossFn.default_args" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The default arguments for the entropy loss function.</p>
@@ -1305,7 +1305,7 @@ while handling parameter name mapping between different training frameworks.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">SampleStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">SampleStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.__init__">
@@ -1313,13 +1313,20 @@ while handling parameter name mapping between different training frameworks.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.set_model_version_metric">
-<span class="sig-name descname"><span class="pre">set_model_version_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.set_model_version_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.set_model_version_metric" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.default_args">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.default_args" title="Link to this definition">#</a></dt>
+<dd><p>Get the default arguments of the sample strategy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.load_state_dict">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.load_state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Load the state dict of the sample strategy.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.sample">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.sample" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.sample" title="Link to this definition">#</a></dt>
 <dd><p>Sample data from buffer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1337,21 +1344,14 @@ while handling parameter name mapping between different training frameworks.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.default_args">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.default_args" title="Link to this definition">#</a></dt>
-<dd><p>Get the default arguments of the sample strategy.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.set_model_version_metric">
+<span class="sig-name descname"><span class="pre">set_model_version_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.set_model_version_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.set_model_version_metric" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.state_dict">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.state_dict" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.state_dict" title="Link to this definition">#</a></dt>
 <dd><p>Get the state dict of the sample strategy.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.load_state_dict">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.load_state_dict" title="Link to this definition">#</a></dt>
-<dd><p>Load the state dict of the sample strategy.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1408,19 +1408,19 @@ while handling parameter name mapping between different training frameworks.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.algorithm">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType"><code class="docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.check_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.check_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.default_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.default_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.name"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.name()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.use_critic"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.use_critic</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.use_reference"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.use_reference</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.compute_advantage_in_trainer"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.compute_advantage_in_trainer</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.can_balance_batch"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.can_balance_batch</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.schema"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.schema</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.default_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.default_config()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.name"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.name()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AlgorithmType.check_config"><code class="docutils literal notranslate"><span class="pre">AlgorithmType.check_config()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.compute_in_trainer()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.PolicyLossFn"><code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a><ul class="nav section-nav flex-column">
@@ -1431,11 +1431,11 @@ while handling parameter name mapping between different training frameworks.</p>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.__init__"><code class="docutils literal notranslate"><span class="pre">KLFn.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.apply_kl_penalty_to_reward"><code class="docutils literal notranslate"><span class="pre">KLFn.apply_kl_penalty_to_reward()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.calculate_kl_loss"><code class="docutils literal notranslate"><span class="pre">KLFn.calculate_kl_loss()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.default_args"><code class="docutils literal notranslate"><span class="pre">KLFn.default_args()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.KLFn.update_kl_coef"><code class="docutils literal notranslate"><span class="pre">KLFn.update_kl_coef()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.EntropyLossFn"><code class="docutils literal notranslate"><span class="pre">EntropyLossFn</span></code></a><ul class="nav section-nav flex-column">
@@ -1444,11 +1444,11 @@ while handling parameter name mapping between different training frameworks.</p>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy"><code class="docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.__init__()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.load_state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.load_state_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.set_model_version_metric"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.set_model_version_metric()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.SampleStrategy.state_dict"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.state_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>

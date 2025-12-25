@@ -15,5 +15,5 @@ Module contents
 
 .. automodule:: trinity.buffer.pipelines
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

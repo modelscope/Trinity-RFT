@@ -30,5 +30,5 @@ Module contents
 
 .. automodule:: trinity.buffer
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

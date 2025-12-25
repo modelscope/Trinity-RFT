@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: trinity.buffer.writer
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

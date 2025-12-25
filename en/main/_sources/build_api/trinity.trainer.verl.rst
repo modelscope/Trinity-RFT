@@ -20,5 +20,5 @@ Module contents
 
 .. automodule:: trinity.trainer.verl
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

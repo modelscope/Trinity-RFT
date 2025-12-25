@@ -25,5 +25,5 @@ Module contents
 
 .. automodule:: trinity.algorithm.advantage_fn
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: trinity.service.data_juicer.server
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
