@@ -1328,7 +1328,7 @@ class Config:
             assert self.cluster.node_num is not None
             assert self.cluster.gpu_per_node is not None
             total_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node
-            if self.mode in ["explore", "bench"] and rollout_gpu_num > total_gpu_num:
+            if self.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
                 raise ValueError(
                     f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
                 )
