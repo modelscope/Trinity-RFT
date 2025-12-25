@@ -51,7 +51,7 @@ class TinkerModel(InferenceModel):
             sampling_params=sampling_params,
             num_samples=kwargs.get("n", 1),
             include_prompt_logprobs=kwargs.get("include_prompt_logprobs", False),
-            # topk_prompt_logprobs=self.config.logprobs,
+            topk_prompt_logprobs=kwargs.get("topk_prompt_logprobs", self.config.logprobs),
         )
 
     async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
@@ -178,7 +178,7 @@ class TinkerModel(InferenceModel):
         """Prepare the model before inference."""
         self.service_client = tinker.ServiceClient()
         self.model = await self.service_client.create_sampling_client_async(
-            base_model=self.config.model_path,
+            base_model=self.config.tinker_base_model,
         )
 
     async def sync_model(self, model_version: int) -> int:

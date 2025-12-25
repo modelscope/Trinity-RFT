@@ -491,6 +491,7 @@ class ModelConfig:
 class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
     model_path: Optional[str] = None
+    tinker_base_model: Optional[str] = None
 
     engine_type: str = "vllm"
     engine_num: int = 1
@@ -1200,6 +1201,15 @@ class Config:
                 f"The local tokenizer will use {model.model_path}, while tinker will use {model.tinker.base_model}"
             )
 
+        if (
+            self.algorithm.entropy_loss_fn != "none"
+            and self.algorithm.entropy_loss_fn_args.get("entropy_coef", 0.0) != 0.0
+        ):
+            logger.warning(
+                "The entropy in Tinker trainer is an estimated value; "
+                "it is recommended to set `entropy_coef` to 0."
+            )
+
         if self.explorer.rollout_model.engine_type != "tinker":
             self.explorer.rollout_model.engine_type = "tinker"
             logger.warning("Rollout model engine type is set to `tinker`.")
@@ -1291,12 +1301,8 @@ class Config:
         ]
         rope_args = ["rope_scaling", "rope_theta"]
         model_args = rollout_args + length_args + rope_args
-        model_path = (
-            self.model.tinker.base_model
-            if self.explorer.rollout_model.engine_type == "tinker"
-            else self.model.model_path
-        )
-        set_if_none(self.explorer.rollout_model, "model_path", model_path)
+        set_if_none(self.explorer.rollout_model, "model_path", self.model.model_path)
+        set_if_none(self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model)
         for args in model_args:
             set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
         if (

@@ -155,7 +155,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             )
 
             if self.entropy_loss_fn != DummyEntropyLossFn:
-                entropy = -(logprob * logprob.exp()).sum(-1)
+                entropy = -(logprob * logprob.exp())
             else:
                 entropy = None
             # compute entropy loss from entropy

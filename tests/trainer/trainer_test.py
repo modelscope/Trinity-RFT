@@ -1134,3 +1134,38 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
     def tearDown(self):
         # remove dir only when the test passed
         shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+class TestTinkerTrainer(BaseTrainerCase):
+    @unittest.skip("Require tinker API key")
+    def test_trainer(self):
+        """Test GSM8K on tinker."""
+        # test both mode
+        self.config.algorithm.algorithm_type = "grpo"
+        self.config.algorithm.repeat_times = 4
+        self.config.algorithm.advantage_fn = "grpo"
+        self.config.algorithm.advantage_fn_args = {
+            "epsilon": 1e-6,
+        }
+        self.config.buffer.total_epochs = 1
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.model.tinker.enable = True
+        self.config.model.tinker.base_model = "Qwen/Qwen3-4B-Instruct-2507"
+        self.config.check_and_update()
+        both(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        pipeline_metrics = parser.metric_list("experience_pipeline")
+        self.assertTrue(len(pipeline_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+        response_metrics = parser.metric_list("response_length")
+        self.assertTrue(len(response_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)

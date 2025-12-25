@@ -39,7 +39,6 @@ class Trainer:
             path=config.checkpoint_job_dir, trainer_name=config.trainer.name, config=config
         )
         trainer_state = self.state.load_trainer()
-        self.last_trainer_sync_step = 0
         self.monitor = MONITOR.get(config.monitor.monitor_type)(
             project=config.project,
             group=self.config.group,
@@ -60,7 +59,7 @@ class Trainer:
             sample_strategy_state = trainer_state.get("sample_strategy_state", {})
         self.sample_strategy.load_state_dict(sample_strategy_state)
         self.save_interval = config.trainer.save_interval
-        self.last_sync_step = None
+        self.last_sync_step = self.train_step_num
         self.last_sync_time = None
         self.total_steps = config.trainer.total_steps or float("inf")
         self.save_hf_checkpoint = config.trainer.save_hf_checkpoint
@@ -68,7 +67,7 @@ class Trainer:
     async def prepare(self) -> None:
         """Prepare the trainer."""
         await self.engine.prepare()
-        self.last_trainer_sync_step = self.train_step_num
+        self.last_sync_step = self.train_step_num
         await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
 
     async def train(self) -> str:
@@ -145,14 +144,17 @@ class Trainer:
             )
         else:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
-                delta = self.train_step_num - self.last_trainer_sync_step
+                delta = self.train_step_num - self.last_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     await self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC)
             explorer_status_counts = await self.synchronizer.get_explorer_status_counts.remote()
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
                 return explorer_status_counts[RunningStatus.WAITING_SYNC] > 0
             else:  # memory & checkpoint
-                return explorer_status_counts[RunningStatus.REQUIRE_SYNC] > 0
+                return (
+                    self.last_sync_step != self.train_step_num
+                    and explorer_status_counts[RunningStatus.REQUIRE_SYNC] > 0
+                )
 
     def need_save(self) -> bool:
         """Whether to save the checkpoint."""
@@ -173,7 +175,6 @@ class Trainer:
                     self.logger.error("Trainer sync_weights failed.")
                 else:
                     self.engine.sync_weight()
-                    self.last_trainer_sync_step = self.train_step_num
             elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
                 self.engine.save_state_dict()
             elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:

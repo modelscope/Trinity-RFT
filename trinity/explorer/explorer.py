@@ -128,7 +128,10 @@ class Explorer:
 
     async def _pull_latest_weights(self):
         self.logger.info("Start to pull latest model weights.")
-        new_version = await self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
+        new_version = await self.synchronizer.wait_new_model_state_dict.remote(
+            current_version=self.model_version,
+            no_wait=(self.config.synchronizer.sync_style != SyncStyle.FIXED),
+        )
         if new_version > self.model_version:
             if self.model_version != -1:
                 self.logger.info(f"New model weights version: {new_version}")
