@@ -34,6 +34,7 @@ MONITOR = Registry(
         "tensorboard": "trinity.utils.monitor.TensorboardMonitor",
         "wandb": "trinity.utils.monitor.WandbMonitor",
         "mlflow": "trinity.utils.monitor.MlflowMonitor",
+        "swanlab": "trinity.utils.monitor.SwanlabMonitor",
     },
 )
 
@@ -240,7 +241,6 @@ class MlflowMonitor(Monitor):
         }
 
 
-@MONITOR.register_module("swanlab")
 class SwanlabMonitor(Monitor):
     """Monitor with SwanLab.
 

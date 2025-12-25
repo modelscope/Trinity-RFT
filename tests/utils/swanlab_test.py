@@ -5,11 +5,7 @@ import unittest
 class TestSwanlabMonitor(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Ensure an env-based key path is exercised (uses dummy if not provided)
-        cls.env_keys = ["SWANLAB_API_KEY", "SWANLAB_APIKEY", "SWANLAB_KEY", "SWANLAB_TOKEN"]
-        cls._original_env = {k: os.environ.get(k) for k in cls.env_keys}
-        if not any(os.getenv(k) for k in cls.env_keys):
-            os.environ["SWANLAB_API_KEY"] = "dummy_key_for_smoke_test"
+        os.environ["SWANLAB_API_KEY"] = "xxxxxxxxxxxxxxxxxxxxx"
 
     @classmethod
     def tearDownClass(cls):
