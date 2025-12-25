@@ -20,6 +20,7 @@ class TestSwanlabMonitor(unittest.TestCase):
             else:
                 os.environ[k] = v
 
+    @unittest.skip("Requires swanlab package and network access")
     def test_swanlab_monitor_smoke(self):
         from trinity.utils.monitor import SwanlabMonitor
 
