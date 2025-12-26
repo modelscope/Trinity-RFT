@@ -627,6 +627,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.chat_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.chat_mm()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.generate_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.generate_mm()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.logprobs()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sample"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.convert_messages_to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.shutdown()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sync_model()</span></code></a></li>
@@ -763,6 +764,30 @@ it does not exceed <cite>max_model_len - 1</cite>.</p></li>
 </dd>
 <dt class="field-even">返回<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tensor of logprobs (seq_length - 1).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.sample">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_prompt_logprobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topk_prompt_logprobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lora_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.sample"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sample" title="Link to this definition">#</a></dt>
+<dd><p>Tinker compatible sampling interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prompt</strong> (<em>ModelInput</em>) -- The input prompt.</p></li>
+<li><p><strong>num_samples</strong> (<em>int</em>) -- The number of samples to generate.</p></li>
+<li><p><strong>sampling_params</strong> (<em>SamplingParams</em>) -- The sampling parameters.</p></li>
+<li><p><strong>include_prompt_logprobs</strong> (<em>bool</em>) -- Whether to include prompt logprobs.</p></li>
+<li><p><strong>topk_prompt_logprobs</strong> (<em>int</em>) -- The top-k prompt logprobs to include.</p></li>
+<li><p><strong>lora_request</strong> (<em>LoRARequest</em><em>, </em><em>optional</em>) -- The LoRA request. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sample response.</p>
+</dd>
+<dt class="field-odd">返回类型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SampleResponse</p>
 </dd>
 </dl>
 </dd></dl>
@@ -915,6 +940,7 @@ and they won't be able to be tracked by Ray anymore.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.chat_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.chat_mm()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.generate_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.generate_mm()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.logprobs()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sample"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sample()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.convert_messages_to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.shutdown()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sync_model()</span></code></a></li>

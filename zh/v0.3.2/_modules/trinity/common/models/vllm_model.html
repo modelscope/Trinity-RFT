@@ -932,7 +932,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
@@ -1351,6 +1351,95 @@ document.write(`
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
             <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprob</span> <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">prompt_logprobs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.sample">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sample">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">sampling_params</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">include_prompt_logprobs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">topk_prompt_logprobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">lora_request</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Tinker compatible sampling interface.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prompt (ModelInput): The input prompt.</span>
+<span class="sd">            num_samples (int): The number of samples to generate.</span>
+<span class="sd">            sampling_params (SamplingParams): The sampling parameters.</span>
+<span class="sd">            include_prompt_logprobs (bool): Whether to include prompt logprobs.</span>
+<span class="sd">            topk_prompt_logprobs (int): The top-k prompt logprobs to include.</span>
+<span class="sd">            lora_request (LoRARequest, optional): The LoRA request. Defaults to None.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            SampleResponse: The sample response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">tinker.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampledSequence</span><span class="p">,</span> <span class="n">SampleResponse</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">max_tokens</span>
+            <span class="k">if</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">max_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">,</span>
+            <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">seed</span> <span class="k">if</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+            <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">top_k</span><span class="p">,</span>
+            <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
+            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">num_samples</span><span class="p">,</span>
+            <span class="s2">&quot;prompt_logprobs&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">topk_prompt_logprobs</span> <span class="k">if</span> <span class="n">include_prompt_logprobs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="c1"># in vLLM, 0 means only return the chosen token&#39;s logprob</span>
+            <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_params</span><span class="o">.</span><span class="n">stop</span>
+        <span class="n">req_output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="o">.</span><span class="n">to_ints</span><span class="p">()},</span>
+            <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">params</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">sequences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># vLLM&#39;s prompt_logprobs output does not include a value for the first token.</span>
+        <span class="c1"># Initialize with [None] to align with the prompt tokens.</span>
+        <span class="n">topk_prompt_logprobs_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="n">prompt_logprobs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+
+        <span class="c1"># collect prompt logprobs</span>
+        <span class="k">if</span> <span class="n">include_prompt_logprobs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">req_output</span><span class="o">.</span><span class="n">prompt_logprobs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">prompt_logprobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">logprob</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">topk_prompt_logprobs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># collect top-k prompt logprobs</span>
+                    <span class="c1"># logprob_dict: {token_id: Logprob(logprob, rank, ...), ...}</span>
+                    <span class="n">logprob_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                    <span class="c1"># sort by Logprob.rank</span>
+                    <span class="n">logprob_items_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">logprob_items</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+                    <span class="c1"># pick topk</span>
+                    <span class="n">topk</span> <span class="o">=</span> <span class="n">logprob_items_sorted</span><span class="p">[:</span><span class="n">topk_prompt_logprobs</span><span class="p">]</span>
+                    <span class="c1"># record as (token_id, logprob)</span>
+                    <span class="n">topk_prompt_logprobs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">[(</span><span class="n">token_id</span><span class="p">,</span> <span class="n">logprob</span><span class="o">.</span><span class="n">logprob</span><span class="p">)</span> <span class="k">for</span> <span class="n">token_id</span><span class="p">,</span> <span class="n">logprob</span> <span class="ow">in</span> <span class="n">topk</span><span class="p">]</span>
+                    <span class="p">)</span>
+        <span class="c1"># collect response sequences</span>
+        <span class="k">for</span> <span class="n">seq_output</span> <span class="ow">in</span> <span class="n">req_output</span><span class="o">.</span><span class="n">outputs</span><span class="p">:</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">SampledSequence</span><span class="p">(</span>
+                <span class="n">stop_reason</span><span class="o">=</span><span class="s2">&quot;length&quot;</span> <span class="k">if</span> <span class="n">seq_output</span><span class="o">.</span><span class="n">finish_reason</span> <span class="o">==</span> <span class="s2">&quot;length&quot;</span> <span class="k">else</span> <span class="s2">&quot;stop&quot;</span><span class="p">,</span>
+                <span class="n">tokens</span><span class="o">=</span><span class="n">seq_output</span><span class="o">.</span><span class="n">token_ids</span><span class="p">,</span>
+                <span class="n">logprobs</span><span class="o">=</span><span class="p">[</span>
+                    <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">logprob</span>
+                    <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">seq_output</span><span class="o">.</span><span class="n">logprobs</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">sequences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SampleResponse</span><span class="p">(</span>
+            <span class="n">sequences</span><span class="o">=</span><span class="n">sequences</span><span class="p">,</span>
+            <span class="n">prompt_logprobs</span><span class="o">=</span><span class="n">prompt_logprobs</span> <span class="k">if</span> <span class="n">include_prompt_logprobs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">topk_prompt_logprobs</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">topk_prompt_logprobs_list</span>
+                <span class="k">if</span> <span class="n">include_prompt_logprobs</span> <span class="ow">and</span> <span class="n">topk_prompt_logprobs</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
         <span class="p">)</span></div>
 
 
