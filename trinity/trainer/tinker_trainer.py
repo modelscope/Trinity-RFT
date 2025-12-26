@@ -5,8 +5,6 @@ import ray
 import tinker
 import torch
 from tinker import types
-from verl.utils.debug import marked_timer
-from verl.utils.py_functional import append_to_dict
 
 from trinity.algorithm import ALGORITHM_TYPE
 from trinity.algorithm.advantage_fn import ADVANTAGE_FN
@@ -26,6 +24,7 @@ from trinity.trainer.tinker.utils import (
 )
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.utils.log import get_logger
+from trinity.utils.timer import Timer
 
 
 class TinkerTrainerWrapper(TrainEngineWrapper):
@@ -196,7 +195,13 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             loss = policy_loss * loss_scale
             total_loss = total_loss + loss
             micro_batch_metrics["actor/final_loss"] = loss.detach().item()
-            append_to_dict(metrics, micro_batch_metrics)
+
+            # update metrics
+            for key, val in micro_batch_metrics.items():
+                if key not in metrics:
+                    metrics[key] = []
+                metrics[key].append(val)
+
         avg_metrics = {k: sum(v) / len(v) for k, v in metrics.items()}
         return total_loss, avg_metrics
 
@@ -215,7 +220,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
         metrics = {}
         self._train_step_num += 1
 
-        with marked_timer("step", timing_raw):
+        with Timer(timing_raw, "step"):
             if self.algorithm.use_reference:  # ref_logprob may not be used
                 import asyncio
 
@@ -242,7 +247,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
                         model_inputs["token_level_rewards"] = model_inputs["token_level_scores"]
 
             # update actor
-            with marked_timer("update_actor", timing_raw):
+            with Timer(timing_raw, "update_actor"):
                 fwdbwd_future = await self.actor_client.forward_backward_custom_async(
                     batch, self._loss_func
                 )

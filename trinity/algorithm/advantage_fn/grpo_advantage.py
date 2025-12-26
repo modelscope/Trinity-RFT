@@ -3,10 +3,12 @@
 
 import copy
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import torch
-from verl import DataProto
+
+if TYPE_CHECKING:
+    from verl import DataProto
 
 from trinity.algorithm.advantage_fn.advantage_fn import AdvantageFn, GroupAdvantage
 from trinity.common.experience import Experience, group_by
@@ -26,9 +28,9 @@ class GRPOAdvantageFn(AdvantageFn):
 
     def __call__(
         self,
-        exps: DataProto,
+        exps: "DataProto",
         **kwargs,
-    ) -> Tuple[DataProto, Dict]:
+    ) -> Tuple["DataProto", Dict]:
         """
         Compute advantage for GRPO, operating only on Outcome reward
         (with only one scalar reward for each response).

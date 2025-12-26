@@ -176,9 +176,9 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
 
     try:
-        from trinity.trainer.verl.utils import get_latest_hf_checkpoint_path
-
         if config.stages:
+            from trinity.trainer.verl.utils import get_latest_hf_checkpoint_path
+
             state_manager = StateManager(
                 path=os.path.join(config.checkpoint_root_dir, config.project, config.name)
             )

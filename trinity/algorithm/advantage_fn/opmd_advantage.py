@@ -1,10 +1,12 @@
 """OPMD advantage computation"""
 
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 import torch
-from verl import DataProto
+
+if TYPE_CHECKING:
+    from verl import DataProto
 
 from trinity.algorithm.advantage_fn.advantage_fn import AdvantageFn, GroupAdvantage
 from trinity.common.experience import Experience, group_by
@@ -25,9 +27,9 @@ class OPMDAdvantageFn(AdvantageFn):
 
     def __call__(
         self,
-        exps: DataProto,
+        exps: "DataProto",
         **kwargs,
-    ) -> Tuple[DataProto, Dict]:
+    ) -> Tuple["DataProto", Dict]:
         """Modified from compute_grpo_outcome_advantage
 
         Compute advantage for OPMD, operating only on Outcome reward

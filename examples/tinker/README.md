@@ -50,13 +50,14 @@ trinity run --config tinker.yaml  # Replace with your actual config file path
 ### Important Limitations of the Tinker Backend
 
 1. **Entropy loss** is not consistent compared to veRL backends.
-2. **Algorithms requiring `compute_advantage_in_trainer=true` are NOT supported**, including:
+2. **Algorithms requiring `compute_advantage_in_trainer=true` are NOT supported currently**, including:
     - PPO (`algorithm.algorithm_type=ppo`)
     - Reinforce++ (`algorithm.algorithm_type=reinforceplusplus`)
     - RLOO (`algorithm.algorithm_type=rloo`)
     - On-policy distillation (`algorithm.algorithm_type=on_policy_distill`)
 
-    Algorithms like `algorithm.algorithm_type=grpo` are supported.
+    Algorithms like `algorithm.algorithm_type=grpo` are supported. We will add support for these algorithms in the future.
+3. **Multiple stages training** is not supported currently, we will add support for this in the future.
 
 > 💡 A complete example configuration file is available at [`tinker.yaml`](tinker.yaml).
 

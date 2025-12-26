@@ -190,6 +190,9 @@ cd Trinity-RFT
 conda create -n trinity python=3.12
 conda activate trinity
 
+pip install -e ".[verl]"
+# 如果没有GPU，需要使用Tinker则改为
+# pip install -e ".[tinker]"
 pip install -e ".[dev]"
 pip install -e ".[flash_attn]"
 # 如果安装 flash-attn 时遇到问题，可尝试：
@@ -202,6 +205,9 @@ pip install -e ".[flash_attn]"
 python3.10 -m venv .venv
 source .venv/bin/activate
 
+pip install -e ".[verl]"
+# 如果没有GPU，需要使用Tinker则改为
+# pip install -e ".[tinker]"
 pip install -e ".[dev]"
 pip install -e ".[flash_attn]"
 # 如果安装 flash-attn 时遇到问题，可尝试：

@@ -18,6 +18,7 @@ class QueueReader(BufferReader):
         self.timeout = config.max_read_timeout
         self.read_batch_size = config.batch_size
         self.queue = QueueStorage.get_wrapper(config)
+        ray.get(self.queue.acquire.remote())
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         try:
@@ -47,3 +48,6 @@ class QueueReader(BufferReader):
     def load_state_dict(self, state_dict):
         # Queue Not supporting state dict yet
         return None
+
+    def __del__(self):
+        ray.get(self.queue.release.remote())
