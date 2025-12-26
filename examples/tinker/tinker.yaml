@@ -52,7 +52,6 @@ explorer:
   auxiliary_models: []
   eval_interval: 1000
 trainer:
-  trainer_type: verl
   save_interval: 100
   enable_preview: true
   grad_clip: 1.0
@@ -62,7 +61,7 @@ monitor:
 synchronizer:
   sync_method: memory
   sync_style: fixed
-  sync_interval: 2
+  sync_interval: 1
   sync_timeout: 1200
 log:
   level: INFO

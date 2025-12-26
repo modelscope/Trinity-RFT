@@ -188,7 +188,7 @@ model:
 - `min_response_tokens`: Minimum number of tokens allowed in generated responses. Only for `chat` and `generate` methods in `InferenceModel`. Default is `1`. It must be less than `max_response_tokens`.
 - `enable_prompt_truncation`: Whether to truncate the prompt. Default is `true`. If set to `true`, the prompt will be truncated to `max_prompt_tokens` tokens; if set to `false`, the prompt will not be truncated and there is a risk that the prompt length plus response length exceeds `max_model_len`. This function does not work with openai api mode.
 - `repetition_penalty`: Repetition penalty factor. Default is `1.0`.
-- `lora_configs`: Optional LoRA configuration. If not specified, defaults to `null`. Currently, only one LoRA configuration is supported.
+- `lora_configs`: Optional LoRA configuration. If not specified, defaults to `null`. Currently, only one LoRA configuration is supported, and this configuration will not be applied if `tinker` is enabled.
   - `name`: Name of the LoRA. Default is `None`.
   - `path`: Path to the LoRA. Default is `None`.
   - `base_model_name`: Name of the base model for LoRA. If not specified, defaults to `None`.

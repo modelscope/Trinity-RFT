@@ -178,7 +178,7 @@ model:
     train_unembed: true
 ```
 
-- `model_path`: 被训练模型的路径。
+- `model_path`: 被训练模型的路径。如果启用了`tinker`，则该路径为本地 tokenizer 的路径。
 - `critic_model_path`: 可选的独立 critic 模型路径。若为空，则默认为 `model_path`。
 - `custom_chat_template`: 可选的自定义 chat template 字符串格式。若未指定，系统会使用 tokenizer 的默认 chat template。
 - `chat_template_path`: 可选的 chat template 文件路径，类型通常为 jinja2；若设置，则覆盖 `custom_chat_template`。若未指定，系统会使用 tokenizer 的默认 chat template。
@@ -188,7 +188,7 @@ model:
 - `min_response_tokens`: 模型生成的回复中允许的最小 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `enable_prompt_truncation`: 是否截断 prompt。默认为 `true`。若设置为 `true`，则 prompt 将被截断为 `max_prompt_tokens` 个 token；若设置为 `false`，则 prompt 不会被截断，存在 prompt 和 response 长度之和超过 `max_model_len` 的风险。在 OpenAI API 模式下不生效。
 - `repetition_penalty`：重复惩罚因子。默认值为 `1.0`。
-- `lora_configs`：可选的 LoRA 配置。若未指定，则默认为 `null`。目前仅支持一个 LoRA 配置。
+- `lora_configs`：可选的 LoRA 配置。若未指定，则默认为 `null`。目前仅支持一个 LoRA 配置，并且如果启用了`tinker`，则不会使用此LoRA配置。
   - `name`：LoRA 的名称。默认为 `None`。
   - `path`：LoRA 的路径。默认为 `None`。
   - `base_model_name`：LoRA 所基于的基础模型名称。若未指定，则默认为 `None`。
