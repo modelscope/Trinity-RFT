@@ -47,6 +47,10 @@ class InferenceModel(ABC):
         pass
 
     @abstractmethod
+    async def sync_model(self, model_version: int) -> int:
+        """Sync the model with the latest model_version."""
+
+    @abstractmethod
     def get_model_version(self) -> int:
         """Get the checkpoint version."""
 
@@ -105,7 +109,9 @@ class ModelWrapper:
             enable_history (bool): Whether to enable history recording. Default to False.
             enable_thinking (Optional[bool]): Whether to enable thinking mode. Default to None. Only used for Qwen3 series models.
         """
-        assert engine_type.startswith("vllm"), "Only vLLM model is supported for now."
+        assert (
+            engine_type.startswith("vllm") or engine_type == "tinker"
+        ), "Only vLLM and tinker model is supported for now."
         self.model = model
         self.api_address: str = None
         self.openai_client: openai.OpenAI = None
@@ -205,13 +211,13 @@ class ModelWrapper:
     def chat(self, messages: List[dict], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of messages."""
         lora_request = self.get_lora_request()
-        return ray.get(self.model.chat.remote(messages, lora_request, **kwargs))
+        return ray.get(self.model.chat.remote(messages, lora_request=lora_request, **kwargs))
 
     @_history_recorder
     async def chat_async(self, messages: List[dict], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of messages in async."""
         lora_request = await self.get_lora_request_async()
-        return await self.model.chat.remote(messages, lora_request, **kwargs)
+        return await self.model.chat.remote(messages, lora_request=lora_request, **kwargs)
 
     @_history_recorder
     def chat_mm(

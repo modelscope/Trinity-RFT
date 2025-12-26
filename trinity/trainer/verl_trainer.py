@@ -7,7 +7,7 @@ import asyncio
 import os
 import sys
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import ray
 import torch
@@ -30,11 +30,11 @@ from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 from verl.utils.metric import reduce_metrics
 
-from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN, SAMPLE_STRATEGY
+from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import SaveStrategy
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
 from trinity.utils.log import get_logger
@@ -187,6 +187,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         global_config: Config,
     ):
         self.logger = get_logger(__name__, in_ray_actor=True)
+        self.pad_token_id = global_config.buffer.pad_token_id
         train_config = global_config.trainer
         config = OmegaConf.structured(train_config.trainer_config)
         # download the checkpoint from hdfs
@@ -261,11 +262,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.kl_fn = KL_FN.get(self.algorithm_config.kl_penalty_fn)(
                 **self.algorithm_config.kl_penalty_fn_args
             )
-        self.sample_strategy = SAMPLE_STRATEGY.get(global_config.algorithm.sample_strategy)(
-            buffer_config=global_config.buffer,
-            trainer_type=global_config.trainer.trainer_type,
-            **global_config.algorithm.sample_strategy_args,
-        )
         super().__init__(
             config,
             tokenizer,
@@ -379,7 +375,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def train_step_num(self) -> int:
         return self.global_steps
 
-    def prepare(self):
+    async def prepare(self):
         self.actor_rollout_wg.setup_weight_sync_group()
         self.actor_rollout_wg.set_algorithm(self.algorithm_config)
 
@@ -411,8 +407,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
-    def train_step(self, batch: Experiences) -> Dict:  # noqa C901
-        batch = to_data_proto(batch, self.logger)
+    async def train_step(self, batch_exps: List[Experience]) -> Dict:  # noqa C901
+        batch = to_data_proto(batch_exps, self.pad_token_id, self.logger)  # type: ignore
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1
@@ -476,7 +472,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 metrics.update(actor_output_metrics)
 
         # collect metrics
-        metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+        metrics.update(compute_data_metrics(batch=batch))
         timing_metrics = compute_timing_metrics(batch=batch, timing_raw=timing_raw)
         metrics.update({k.replace("timing_s/", "time/"): v for k, v in timing_metrics.items()})
         n_gpus = self.resource_pool_manager.get_n_gpus()

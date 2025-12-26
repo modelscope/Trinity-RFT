@@ -2,6 +2,7 @@
 
 import os
 from logging import Logger
+from typing import List
 
 import numpy as np
 import torch
@@ -10,75 +11,98 @@ from verl.trainer.ppo.metric_utils import _compute_response_info
 from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 
 from trinity.common.config import Config
-from trinity.common.experience import Experiences
+from trinity.common.experience import (
+    Experience,
+    gather_action_masks,
+    gather_attention_masks,
+    gather_response_attrs,
+    gather_token_ids,
+    split_dpo_experience_to_single_turn,
+)
 
 
-def to_data_proto(experiences: Experiences, logger: Logger) -> DataProto:  # noqa: C901
-    """Convert Experiences to verl DataProto."""
-    attention_mask = experiences.attention_masks
+def to_data_proto(
+    experiences: List[Experience], pad_token_id: int, logger: Logger
+) -> DataProto:  # noqa: C901
+    """Convert List[Experience] to verl DataProto."""
+    assert len(experiences) > 0, "No experiences provided."
+    if experiences[0].experience_type == "dpo":
+        experiences = split_dpo_experience_to_single_turn(experiences)
+    max_prompt_length = max([exp.prompt_length for exp in experiences])
+    max_response_length = max([len(exp.tokens) - exp.prompt_length for exp in experiences])  # type: ignore
+
+    attention_mask = gather_attention_masks(
+        experiences, max_prompt_length, max_response_length
+    ).long()
     cumsum = torch.cumsum(attention_mask, dim=-1)
     position_ids = torch.clip(cumsum - 1, 0, None).long()
+    tokens = gather_token_ids(
+        experiences, max_prompt_length, max_response_length, pad_token_id
+    ).long()
     batch_dict = {
-        "uid": np.array([eid.tid for eid in experiences.eids]),
-        "unique_ids": np.array([eid.uid for eid in experiences.eids]),
+        "uid": np.array([exp.eid.tid for exp in experiences]),
+        "unique_ids": np.array([exp.eid.uid for exp in experiences]),
         "position_ids": position_ids,
-        "input_ids": experiences.tokens.long(),
-        "responses": experiences.tokens[:, experiences.prompt_length :].long(),
-        "attention_mask": attention_mask.long(),
-        "response_mask": (
-            experiences.action_masks.long()
-            if hasattr(experiences, "action_masks") and experiences.action_masks is not None
-            else attention_mask[:, experiences.prompt_length :].long()
-        ),
+        "input_ids": tokens,
+        "responses": tokens[:, max_prompt_length:],
+        "attention_mask": attention_mask,
+        "response_mask": gather_action_masks(experiences, max_response_length),
     }
 
-    if experiences.rewards is not None or experiences.token_level_rewards is not None:
-        assert experiences.logprobs is not None
-        if experiences.token_level_rewards is not None:
-            if experiences.rewards is not None:
+    have_reward = all(exp.reward is not None for exp in experiences)
+    have_token_level_reward = all(exp.token_level_reward is not None for exp in experiences)
+    if have_reward or have_token_level_reward:
+        assert all(exp.logprobs is not None for exp in experiences), "No logprobs provided."
+        if have_token_level_reward:
+            if have_reward:
                 logger.warning(
                     "Both experiences.rewards and experiences.token_level_rewards are provided. "
                     "Using experiences.token_level_rewards."
                 )
-            token_level_rewards = experiences.token_level_rewards
+            token_level_rewards = gather_response_attrs(
+                experiences, "token_level_reward", max_response_length
+            )
         else:
-            token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
+            token_level_rewards = torch.zeros(attention_mask.shape, dtype=torch.float32)
             eos_mask_idx = cumsum.argmax(dim=-1)
-            token_level_rewards[
-                torch.arange(experiences.batch_size), eos_mask_idx
-            ] = experiences.rewards
-            token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
+            token_level_rewards[torch.arange(len(experiences)), eos_mask_idx] = torch.tensor(
+                [exp.reward for exp in experiences]
+            )
+            token_level_rewards = token_level_rewards[:, max_prompt_length:]
         batch_dict.update(
             {
                 "token_level_scores": token_level_rewards,
-                "old_log_probs": experiences.logprobs,  # type: ignore
+                "old_log_probs": gather_response_attrs(
+                    experiences, "logprobs", max_response_length
+                ),
             }
         )
-    if experiences.advantages is not None:
-        batch_dict["advantages"] = experiences.advantages
-    if experiences.returns is not None:
-        batch_dict["returns"] = experiences.returns
-    if experiences.teacher_logprobs is not None:
-        batch_dict["teacher_log_probs"] = experiences.teacher_logprobs
 
-    if experiences.multi_modal_inputs is not None:
-        batch_size = len(batch_dict["unique_ids"])
+    for attr in ["advantages", "returns", "teacher_logprobs"]:
+        if all(getattr(exp, attr, None) is not None for exp in experiences):
+            batch_dict[attr] = gather_response_attrs(experiences, attr, max_response_length)
+
+    if all(exp.multi_modal_inputs is not None for exp in experiences):
+        keys = experiences[0].multi_modal_inputs.keys()
         batch_dict["multi_modal_inputs"] = np.array(
-            [
-                {k: v[i] for k, v in experiences.multi_modal_inputs.items()}
-                for i in range(batch_size)
-            ],
+            [{key: exp.multi_modal_inputs[key] for key in keys} for exp in experiences],  # type: ignore
             dtype=object,
         )
 
-    if experiences.custom_fields:
-        for field in experiences.custom_fields:
-            if hasattr(experiences, field):
-                batch_dict[field] = getattr(experiences, field)
+    custom_fields_set = set(tuple(exp.custom_fields) for exp in experiences)
+    if len(custom_fields_set) == 1:
+        custom_fields = list(custom_fields_set)[0]
+        for custom_field in custom_fields:
+            batch_dict[custom_field.destination_field] = torch.tensor(
+                [exp.info[custom_field.source_field] for exp in experiences],
+                dtype=custom_field.data_type,
+            )
+    else:
+        raise ValueError("Custom fields are not consistent across experiences.")
     return DataProto.from_single_dict(batch_dict)
 
 
-def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
+def compute_data_metrics(batch: DataProto) -> dict:
     """
     Computes various metrics from a batch of data for PPO training.
     Modified from verl.trainer.ppo.metric_utils.compute_data_metrics
@@ -89,7 +113,6 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
 
     Args:
         batch: A DataProto object containing batch data with token-level scores, rewards, advantages, etc.
-        use_critic: Whether to include critic-specific metrics. Defaults to True.
 
     Returns:
         A dictionary of metrics including:
@@ -97,8 +120,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
             - critic/rewards/mean, max, min: Statistics about sequence rewards
             - critic/advantages/mean, max, min: Statistics about advantages
             - critic/returns/mean, max, min: Statistics about returns
-            - critic/values/mean, max, min: Statistics about critic values (if use_critic=True)
-            - critic/vf_explained_var: Explained variance of the value function (if use_critic=True)
+            - critic/values/mean, max, min: Statistics about critic values
+            - critic/vf_explained_var: Explained variance of the value function
             - response_length/mean, max, min, clip_ratio: Statistics about response lengths
             - prompt_length/mean, max, min, clip_ratio: Statistics about prompt lengths
     """

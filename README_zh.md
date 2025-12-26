@@ -41,6 +41,7 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 ## 🚀 新闻
 
+* [2025-12] Trinity-RFT 已支持 [tinker](https://thinkingmachines.ai/tinker/) 训练后端，可在**无 GPU 的设备**上进行模型训练。
 * [2025-12] Trinity-RFT 助力淘宝闪购医药健康业务，让 AI 智能体能够理解模糊症状、主动询问后续问题，并提供精准推荐（[新闻](https://tech.china.com.cn/sx/20251201/411376.shtml)）。
 * [2025-11] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 发布：修复若干 Bug。
 * [2025-11] 推出 [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask)：利用离线专家数据，训练具备主动问询能力的对话智能体（[论文](https://arxiv.org/pdf/2510.25441)）.
@@ -79,6 +80,10 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 > [!NOTE]
 > 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
+>
+> 没有 GPU？没问题！你仍然可以尝试以下方案：
+> 1. 按照安装步骤操作（可跳过 GPU 专用的软件包，例如 `flash-attn`）
+> 2. 运行 **[Tinker 训练示例](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker)**，该示例专为仅使用 CPU 的系统设计。
 
 
 

@@ -42,6 +42,7 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
 ## 🚀 News
 
+* [2025-12] Trinity-RFT has supported [tinker](https://thinkingmachines.ai/tinker/) training backend, which enables model training on devices **without GPUs**.
 * [2025-12] Trinity-RFT powers the medical and health business of "Taobao Shangou", enabling the AI agent to understand vague symptoms, proactively ask follow-up questions, and provide precise recommendations ([News](https://tech.china.com.cn/sx/20251201/411376.shtml)).
 * [2025-11] [[Release Notes](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3)] Trinity-RFT v0.3.3 released: bug fixes.
 * [2025-11] Introducing [Learn-to-Ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask): a framework for training proactive dialogue agents from offline expert data  ([paper](https://arxiv.org/pdf/2510.25441)).
@@ -154,6 +155,10 @@ We list some algorithms supported by Trinity-RFT in the following table. For mor
 
 > [!NOTE]
 > This project is currently under active development. Comments and suggestions are welcome!
+>
+> **No GPU? No problem!** You can still try it out:
+> 1. Follow the installation steps (feel free to skip GPU-specific packages like `flash-attn`)
+> 2. Run the **[Tinker training example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker)**, which is specifically designed to work on CPU-only systems.
 
 
 ### Step 1: installation

@@ -79,7 +79,16 @@ class Synchronizer:
             pass
 
     async def _find_latest_state_dict(self) -> None:
-        assert self.config.trainer.trainer_type == "verl"
+        if self.config.trainer.trainer_type == "verl":
+            await self._find_verl_latest_state_dict()
+        elif self.config.trainer.trainer_type == "tinker":
+            await self._find_tinker_latest_state_dict()
+        else:
+            self.logger.warning(
+                "Synchronizer does not support this trainer type. Please use `verl` or `tinker`."
+            )
+
+    async def _find_verl_latest_state_dict(self) -> None:
         default_local_dir = self.config.checkpoint_job_dir
         local_latest_state_dict_iteration = os.path.join(
             default_local_dir, "latest_state_dict_iteration.txt"
@@ -110,6 +119,33 @@ class Synchronizer:
                         f"Synchronizer has loaded model state dict from checkpoint {latest_model_version}."
                     )
                     await self.set_model_state_dict(model_state_dict, latest_model_version)
+            await asyncio.sleep(1)
+
+    async def _find_tinker_latest_state_dict(self) -> None:
+        default_local_dir = self.config.checkpoint_job_dir
+        local_latest_state_dict_iteration = os.path.join(
+            default_local_dir, "latest_state_dict_iteration.txt"
+        )
+        while True:
+            if os.path.exists(local_latest_state_dict_iteration):
+                try:
+                    with open(local_latest_state_dict_iteration, "r") as f:
+                        latest_model_version = int(f.read().strip())
+                except (IOError, ValueError) as e:
+                    self.logger.warning(f"Failed to read or parse state dict iteration file: {e}")
+                    continue
+                if latest_model_version > self.model_version:
+                    self.logger.info(
+                        f"Synchronizer has found a new remote tinker sampler path at step {latest_model_version}."
+                    )
+                    remote_path_file = os.path.join(
+                        default_local_dir,
+                        f"global_step_{latest_model_version}",
+                        "remote_sampler_path.txt",
+                    )
+                    with open(remote_path_file, "r") as f:
+                        remote_sampler_path = f.read().strip()
+                    await self.set_model_state_dict(remote_sampler_path, latest_model_version)
             await asyncio.sleep(1)
 
     async def set_trainer_status(self, status: RunningStatus):
@@ -192,7 +228,7 @@ class Synchronizer:
         return checkpoint_step_num
 
     async def set_model_state_dict(
-        self, model_state_dict: Union[dict, None, Tuple[str, str]], trainer_step: int
+        self, model_state_dict: Union[dict, None, str, Tuple[str, str]], trainer_step: int
     ):
         """
         Set the new model state and update the version.

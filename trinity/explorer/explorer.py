@@ -50,6 +50,7 @@ class Explorer:
         self.last_monitored_step = self.explore_step_num
         self.synchronizer = Synchronizer.get_actor(config)
         self.config = config
+        self.model_type = config.explorer.rollout_model.engine_type
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
         self.taskset = (
@@ -149,7 +150,10 @@ class Explorer:
 
     async def _pull_latest_weights(self):
         self.logger.info("Start to pull latest model weights.")
-        new_version = await self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
+        new_version = await self.synchronizer.wait_new_model_state_dict.remote(
+            current_version=self.model_version,
+            no_wait=(self.config.synchronizer.sync_style != SyncStyle.FIXED),
+        )
         if new_version > self.model_version:
             if self.model_version != -1:
                 self.logger.info(f"New model weights version: {new_version}")
@@ -195,7 +199,7 @@ class Explorer:
             await asyncio.gather(*run_api_ref)
             self.logger.info("All models are ready.")
 
-            if not self.use_nccl_sync:
+            if not self.use_nccl_sync and self.model_type != "tinker":
                 if self.config.mode == "serve":
                     # In serving mode, each engine will setup its own process group
                     await self.setup_model_level_weight_sync_group()

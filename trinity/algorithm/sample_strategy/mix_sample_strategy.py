@@ -8,7 +8,7 @@ from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.algorithm.sample_strategy.utils import representative_sample
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import BufferConfig
-from trinity.common.experience import CustomField, Experiences
+from trinity.common.experience import CustomField, Experience
 from trinity.utils.timer import Timer
 
 
@@ -53,7 +53,7 @@ class MixSampleStrategy(SampleStrategy):
             expert_buffer_config,
         )
 
-    async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int) -> Tuple[List[Experience], Dict, List]:
         metrics = {}
         with Timer(metrics, "time/read_experience"):
             usual_exp_list = await self.usual_exp_buffer.read_async()
@@ -82,24 +82,21 @@ class MixSampleStrategy(SampleStrategy):
             repr_samples = representative_sample(exp_list)
 
         self.set_model_version_metric(exp_list, metrics)
-        with Timer(metrics, "time/gather_experience"):
-            exps = Experiences.gather_experiences(
-                experiences=exp_list,
-                pad_token_id=self.pad_token_id,  # type: ignore [arg-type]
-                custom_fields=[
-                    CustomField(
-                        source_field="is_expert",
-                        destination_field="expert_mask",
-                        data_type=torch.bool,
-                    ),
-                    CustomField(
-                        source_field="step",
-                        destination_field="step",
-                        data_type=torch.int32,
-                    ),
-                ],
-            )  # type: ignore
-        return exps, metrics, repr_samples
+        custom_fields = [
+            CustomField(
+                source_field="is_expert",
+                destination_field="expert_mask",
+                data_type=torch.bool,
+            ),
+            CustomField(
+                source_field="step",
+                destination_field="step",
+                data_type=torch.int32,
+            ),
+        ]
+        for exp in exp_list:
+            exp.custom_fields = custom_fields
+        return exp_list, metrics, repr_samples
 
     @classmethod
     def default_args(cls) -> Dict:

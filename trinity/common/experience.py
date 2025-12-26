@@ -136,6 +136,8 @@ class Experience:
     # for on-policy distillation
     teacher_logprobs: Optional[Tensor] = None  # [resp_length]
 
+    custom_fields: List[CustomField] = field(default_factory=list)
+
     def __init__(  # noqa: C901
         self,
         *,
@@ -161,6 +163,7 @@ class Experience:
         rejected_messages=None,
         multi_modal_inputs=None,
         teacher_logprobs=None,
+        custom_fields=None,
     ):
         if action_mask is not None:
             experience_type = "multi_turn"
@@ -250,6 +253,7 @@ class Experience:
             self.rejected = torch.tensor(self.rejected)
         if self.teacher_logprobs is not None and not isinstance(self.teacher_logprobs, Tensor):
             self.teacher_logprobs = torch.tensor(self.teacher_logprobs, dtype=torch.float32)
+        self.custom_fields = custom_fields or []
 
     def serialize(self) -> bytes:
         """Serialize the experience to bytes."""

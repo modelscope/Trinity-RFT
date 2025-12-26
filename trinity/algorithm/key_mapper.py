@@ -26,4 +26,5 @@ ALL_MAPPERS = {
             "advantages": "advantages",
         }
     ),
+    "tinker": KeyMapper({}),
 }

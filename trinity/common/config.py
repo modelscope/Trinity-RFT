@@ -429,6 +429,17 @@ class DataProcessorConfig:
 
 
 @dataclass
+class TinkerConfig:
+    enable: bool = False
+    base_model: Optional[str] = None
+    rank: int = 32  # lora rank
+    seed: Optional[int] = None
+    train_mlp: bool = True
+    train_attn: bool = True
+    train_unembed: bool = True
+
+
+@dataclass
 class ModelConfig:
     # source model path
     model_path: str = ""
@@ -472,11 +483,15 @@ class ModelConfig:
     rope_scaling: Optional[dict] = None
     rope_theta: Optional[float] = None
 
+    # tinker config
+    tinker: TinkerConfig = field(default_factory=TinkerConfig)
+
 
 @dataclass
 class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
     model_path: Optional[str] = None
+    tinker_base_model: Optional[str] = None
 
     engine_type: str = "vllm"
     engine_num: int = 1
@@ -1149,6 +1164,9 @@ class Config:
         if not model.critic_model_path:
             model.critic_model_path = model.model_path
 
+        if model.tinker.enable:
+            self._check_tinker()
+
         # check template
         if model.chat_template_path is not None and model.custom_chat_template is None:
             try:
@@ -1160,7 +1178,57 @@ class Config:
                 )
 
         # check max_model_len, max_prompt_tokens, max_response_tokens
+        self._check_model_len()
 
+    def _check_tinker(self) -> None:
+        model = self.model
+        from trinity.algorithm import ALGORITHM_TYPE
+
+        algorithm = ALGORITHM_TYPE.get(self.algorithm.algorithm_type)
+        if algorithm.use_critic:
+            raise ValueError("Critic model is not supported when using tinker!")
+
+        set_if_none(model.tinker, "base_model", model.model_path)
+
+        import tinker
+
+        service_client = tinker.ServiceClient()
+        supported_models = {
+            item.model_name for item in service_client.get_server_capabilities().supported_models
+        }
+        if model.tinker.base_model not in supported_models:
+            logger.error(f"Supported models: {supported_models}")
+            raise ValueError(f"{model.tinker.base_model} is not supported by tinker!")
+        if model.tinker.base_model != model.model_path:
+            logger.warning(
+                f"The local tokenizer will use {model.model_path}, while tinker will use {model.tinker.base_model}"
+            )
+
+        if (
+            self.algorithm.entropy_loss_fn != "none"
+            and self.algorithm.entropy_loss_fn_args.get("entropy_coef", 0.0) != 0.0
+        ):
+            logger.warning(
+                "The entropy in Tinker trainer is an estimated value; "
+                "it is recommended to set `entropy_coef` to 0."
+            )
+
+        if self.explorer.rollout_model.engine_type != "tinker":
+            self.explorer.rollout_model.engine_type = "tinker"
+            logger.warning("Rollout model engine type is set to `tinker`.")
+
+        if self.trainer.trainer_type != "tinker":
+            self.trainer.trainer_type = "tinker"
+            logger.warning("Trainer type is set to `tinker`.")
+
+        if self.synchronizer.sync_method == SyncMethod.NCCL:
+            self.synchronizer.sync_method = SyncMethod.CHECKPOINT
+            logger.warning(
+                "Tinker do not support NCCL, `synchronizer.sync_method` is set to `checkpoint`."
+            )
+
+    def _check_model_len(self) -> None:
+        model = self.model
         # if all three are set, check if they are valid
         if (
             model.max_model_len is not None
@@ -1224,6 +1292,107 @@ class Config:
             logger.warning(
                 "`enable_prompt_truncation` is set to False; please make sure the prompt is not too long and `max_model_len` is large enough, otherwise prompt length + response length may exceed `max_model_len`!"
             )
+
+    def _check_explorer(self) -> None:
+        rollout_args = ["temperature", "top_p", "top_k", "logprobs", "repetition_penalty"]
+        length_args = [
+            "max_model_len",
+            "max_prompt_tokens",
+            "max_response_tokens",
+            "min_response_tokens",
+            "enable_prompt_truncation",
+        ]
+        rope_args = ["rope_scaling", "rope_theta"]
+        model_args = rollout_args + length_args + rope_args
+        set_if_none(self.explorer.rollout_model, "model_path", self.model.model_path)
+        for args in model_args:
+            set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
+        if (
+            self.explorer.rollout_model.chat_template is None
+            and self.model.custom_chat_template is not None
+        ):
+            self.explorer.rollout_model.chat_template = self.model.custom_chat_template
+        for aux_model in self.explorer.auxiliary_models:
+            if not aux_model.model_path:
+                raise ValueError("auxiliary model's model_path is required.")
+            for args in model_args:
+                set_if_none(aux_model, args, getattr(self.model, args))
+
+        if self.explorer.rollout_model.engine_type == "tinker":
+            set_if_none(
+                self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model
+            )
+        else:
+            # check gpu number
+            rollout_gpu_num = (
+                self.explorer.rollout_model.tensor_parallel_size
+                * self.explorer.rollout_model.engine_num
+                + sum(
+                    (
+                        model.tensor_parallel_size * model.engine_num
+                        for model in self.explorer.auxiliary_models
+                    )
+                )
+            )
+            assert self.cluster.node_num is not None
+            assert self.cluster.gpu_per_node is not None
+            total_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node
+            if self.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
+                raise ValueError(
+                    f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
+                )
+            elif self.mode == "both" and rollout_gpu_num >= total_gpu_num:
+                raise ValueError(
+                    f"Not enough GPUs for trainer in 'both' mode. Explorer requires {rollout_gpu_num} GPUs, but total available GPUs are {total_gpu_num}."
+                )
+
+        if self.explorer.over_rollout.ratio > 0.0:
+            if not (0.0 <= self.explorer.over_rollout.ratio < 1.0):
+                raise ValueError("over_rollout_ratio should be in [0.0, 1.0)")
+            if self.synchronizer.sync_style == SyncStyle.FIXED:
+                raise ValueError(
+                    "over_rollout_ratio is not compatible with fixed sync_style, please set "
+                    "`synchronizer.sync_style` to `dynamic_by_explorer` or `dynamic_by_trainer`."
+                )
+
+        # for lora configs
+        if not self.model.tinker.enable and self.model.lora_configs is not None:
+            self.explorer.rollout_model.enable_lora = True
+            if len(self.model.lora_configs) > 1:
+                raise ValueError("Only one lora adapter is supported for now.")
+            if self.model.lora_configs[0].path is None:
+                logger.info("Creating dummy lora, since no lora_path is provided.")
+                lora_path = create_dummy_lora(
+                    model_path=self.model.model_path,
+                    checkpoint_job_dir=self.checkpoint_job_dir,
+                    lora_rank=self.model.lora_configs[0].lora_rank,
+                    lora_alpha=self.model.lora_configs[0].lora_alpha,
+                    target_modules=self.model.lora_configs[0].target_modules,
+                )
+                self.model.lora_configs[0].path = lora_path
+            self.explorer.rollout_model.lora_modules = [
+                {
+                    "lora_int_id": i + 1,
+                    "lora_name": cfg.name,
+                    "lora_path": cfg.path,
+                    "base_model_name": cfg.base_model_name,
+                }
+                for i, cfg in enumerate(self.model.lora_configs)
+            ]
+            self.explorer.rollout_model.lora_kwargs = {
+                "max_loras": len(self.model.lora_configs),
+                "max_lora_rank": max(
+                    (
+                        model_config.lora_rank
+                        for model_config in self.model.lora_configs
+                        if model_config.lora_rank > 0
+                    ),
+                    default=0,
+                ),
+                "default_lora_path": os.path.join(
+                    self.checkpoint_job_dir, "global_step_0", "actor", "lora_adapter"
+                ),  # will be poped later
+            }
 
     def __iter__(self):
         """Iterate over configs with each stage applied in order.
@@ -1291,99 +1460,7 @@ class Config:
 
         # check explorer
         if self.explorer is not None:
-            rollout_args = ["temperature", "top_p", "top_k", "logprobs", "repetition_penalty"]
-            length_args = [
-                "max_model_len",
-                "max_prompt_tokens",
-                "max_response_tokens",
-                "min_response_tokens",
-                "enable_prompt_truncation",
-            ]
-            rope_args = ["rope_scaling", "rope_theta"]
-            model_args = rollout_args + length_args + rope_args
-            for args in ["model_path"] + model_args:
-                set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
-            if (
-                self.explorer.rollout_model.chat_template is None
-                and self.model.custom_chat_template is not None
-            ):
-                self.explorer.rollout_model.chat_template = self.model.custom_chat_template
-            for aux_model in self.explorer.auxiliary_models:
-                if not aux_model.model_path:
-                    raise ValueError("auxiliary model's model_path is required.")
-                for args in model_args:
-                    set_if_none(aux_model, args, getattr(self.model, args))
-
-            # check gpu number
-            rollout_gpu_num = (
-                self.explorer.rollout_model.tensor_parallel_size
-                * self.explorer.rollout_model.engine_num
-                + sum(
-                    (
-                        model.tensor_parallel_size * model.engine_num
-                        for model in self.explorer.auxiliary_models
-                    )
-                )
-            )
-            assert self.cluster.node_num is not None
-            assert self.cluster.gpu_per_node is not None
-            total_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node
-            if self.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
-                raise ValueError(
-                    f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
-                )
-            elif self.mode == "both" and rollout_gpu_num >= total_gpu_num:
-                raise ValueError(
-                    f"Not enough GPUs for trainer in 'both' mode. Explorer requires {rollout_gpu_num} GPUs, but total available GPUs are {total_gpu_num}."
-                )
-
-            if self.explorer.over_rollout.ratio > 0.0:
-                if not (0.0 <= self.explorer.over_rollout.ratio < 1.0):
-                    raise ValueError("over_rollout_ratio should be in [0.0, 1.0)")
-                if self.synchronizer.sync_style == SyncStyle.FIXED:
-                    raise ValueError(
-                        "over_rollout_ratio is not compatible with fixed sync_style, please set "
-                        "`synchronizer.sync_style` to `dynamic_by_explorer` or `dynamic_by_trainer`."
-                    )
-
-            # for lora configs
-            if self.model.lora_configs is not None:
-                self.explorer.rollout_model.enable_lora = True
-                if len(self.model.lora_configs) > 1:
-                    raise ValueError("Only one lora adapter is supported for now.")
-                if self.model.lora_configs[0].path is None:
-                    logger.info("Creating dummy lora, since no lora_path is provided.")
-                    lora_path = create_dummy_lora(
-                        model_path=self.model.model_path,
-                        checkpoint_job_dir=self.checkpoint_job_dir,
-                        lora_rank=self.model.lora_configs[0].lora_rank,
-                        lora_alpha=self.model.lora_configs[0].lora_alpha,
-                        target_modules=self.model.lora_configs[0].target_modules,
-                    )
-                    self.model.lora_configs[0].path = lora_path
-                self.explorer.rollout_model.lora_modules = [
-                    {
-                        "lora_int_id": i + 1,
-                        "lora_name": cfg.name,
-                        "lora_path": cfg.path,
-                        "base_model_name": cfg.base_model_name,
-                    }
-                    for i, cfg in enumerate(self.model.lora_configs)
-                ]
-                self.explorer.rollout_model.lora_kwargs = {
-                    "max_loras": len(self.model.lora_configs),
-                    "max_lora_rank": max(
-                        (
-                            model_config.lora_rank
-                            for model_config in self.model.lora_configs
-                            if model_config.lora_rank > 0
-                        ),
-                        default=0,
-                    ),
-                    "default_lora_path": os.path.join(
-                        self.checkpoint_job_dir, "global_step_0", "actor", "lora_adapter"
-                    ),  # will be poped later
-                }
+            self._check_explorer()
 
         # check synchronizer
         self.synchronizer.ray_namespace = self.ray_namespace
@@ -1391,14 +1468,17 @@ class Config:
             self.explorer.rollout_model.engine_num
             * self.explorer.rollout_model.tensor_parallel_size
         )
-        if (
-            self.mode in ["train", "explore", "bench", "serve"]
-            and self.synchronizer.sync_method == SyncMethod.NCCL
-        ):
-            self.synchronizer.sync_method = SyncMethod.CHECKPOINT
-            logger.warning(
-                f"`{self.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
-            )
+        if self.synchronizer.sync_method == SyncMethod.NCCL:
+            if self.mode in ["train", "explore", "bench", "serve"]:
+                self.synchronizer.sync_method = SyncMethod.CHECKPOINT
+                logger.warning(
+                    f"`{self.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                )
+            if self.model.lora_configs is not None:
+                self.synchronizer.sync_method = SyncMethod.CHECKPOINT
+                logger.warning(
+                    "LoRA is not supported with NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                )
 
         self._check_interval()
 
@@ -1450,9 +1530,11 @@ class Config:
                         f"Invalid trainer.save_hf_checkpoint: {self.trainer.save_hf_checkpoint}, "
                         "must be one of 'last', 'always', or 'never'."
                     )
+                self.trainer.trainer_config.synchronize_config(self)
+            elif self.trainer.trainer_type == "tinker":
+                self.trainer.trainer_config = None
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-            self.trainer.trainer_config.synchronize_config(self)
 
         # check service
         if self.service.data_juicer is not None:

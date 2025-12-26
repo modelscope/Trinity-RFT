@@ -17,7 +17,7 @@ from trinity.algorithm import SAMPLE_STRATEGY
 from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod, SyncStyle
-from trinity.common.experience import Experiences
+from trinity.common.experience import Experience
 from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
@@ -39,7 +39,6 @@ class Trainer:
             path=config.checkpoint_job_dir, trainer_name=config.trainer.name, config=config
         )
         trainer_state = self.state.load_trainer()
-        self.last_trainer_sync_step = 0
         self.monitor = MONITOR.get(config.monitor.monitor_type)(
             project=config.project,
             group=self.config.group,
@@ -60,15 +59,15 @@ class Trainer:
             sample_strategy_state = trainer_state.get("sample_strategy_state", {})
         self.sample_strategy.load_state_dict(sample_strategy_state)
         self.save_interval = config.trainer.save_interval
-        self.last_sync_step = None
+        self.last_sync_step = 0
         self.last_sync_time = None
         self.total_steps = config.trainer.total_steps or float("inf")
         self.save_hf_checkpoint = config.trainer.save_hf_checkpoint
 
     async def prepare(self) -> None:
         """Prepare the trainer."""
-        self.engine.prepare()
-        self.last_trainer_sync_step = self.train_step_num
+        await self.engine.prepare()
+        self.last_sync_step = self.train_step_num
         await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
 
     async def train(self) -> str:
@@ -109,7 +108,7 @@ class Trainer:
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
-    async def train_step(self, exps: Experiences) -> Dict:
+    async def train_step(self, exps: List[Experience]) -> Dict:
         """Train one step.
 
         Returns:
@@ -119,21 +118,21 @@ class Trainer:
         self.logger.info(f"Training at step {self.train_step_num + 1} started.")
         metrics = {}
         with Timer(metrics, "time/train_step"):
-            train_metrics = self.engine.train_step(exps)
+            train_metrics = await self.engine.train_step(exps)
         self.logger.info(f"Training at step {self.train_step_num} finished.")
         metrics.update(train_metrics)
         return metrics
 
-    async def _sample_data(self) -> Tuple[Experiences, Dict, List[Dict]]:
+    async def _sample_data(self) -> Tuple[List[Experience], Dict, List[Dict]]:
         """Sample a batch of experiences.
 
         Returns:
-            Experiences: A batch of experiences.
+            List[Experience]: A batch of experiences.
             Dict: Metrics of the sampling step.
             List[Dict]: A list of representative samples for logging.
         """
         batch, metrics, repr_samples = await self.sample_strategy.sample(self.train_step_num + 1)
-        metrics["sample/task_count"] = len(set(eid.tid for eid in batch.eids))
+        metrics["sample/task_count"] = len(set(exp.eid.tid for exp in batch))
         return batch, metrics, repr_samples
 
     async def need_sync(self) -> bool:
@@ -145,14 +144,17 @@ class Trainer:
             )
         else:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
-                delta = self.train_step_num - self.last_trainer_sync_step
+                delta = self.train_step_num - self.last_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     await self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC)
             explorer_status_counts = await self.synchronizer.get_explorer_status_counts.remote()
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
                 return explorer_status_counts[RunningStatus.WAITING_SYNC] > 0
             else:  # memory & checkpoint
-                return explorer_status_counts[RunningStatus.REQUIRE_SYNC] > 0
+                return (
+                    self.last_sync_step != self.train_step_num
+                    and explorer_status_counts[RunningStatus.REQUIRE_SYNC] > 0
+                )
 
     def need_save(self) -> bool:
         """Whether to save the checkpoint."""
@@ -173,7 +175,6 @@ class Trainer:
                     self.logger.error("Trainer sync_weights failed.")
                 else:
                     self.engine.sync_weight()
-                    self.last_trainer_sync_step = self.train_step_num
             elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
                 self.engine.save_state_dict()
             elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
@@ -229,7 +230,7 @@ class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""
 
     @abstractmethod
-    def prepare(self) -> None:
+    async def prepare(self) -> None:
         """Do some preparation before training started."""
 
     @property
@@ -238,11 +239,11 @@ class TrainEngineWrapper(ABC):
         """Get the current training step number."""
 
     @abstractmethod
-    def train_step(self, batch: Experiences) -> Dict:
+    async def train_step(self, batch_exps: List[Experience]) -> Dict:
         """Training one step.
 
         Args:
-            batch (Experiences): A batch of experiences to train.
+            batch_exps (List[Experience]): A batch of experiences to train.
 
         Returns:
             Dict: Metrics of the training step.
@@ -271,5 +272,9 @@ def get_trainer_wrapper(config: Config) -> TrainEngineWrapper:
         from trinity.trainer.verl_trainer import VerlPPOTrainerWrapper
 
         return VerlPPOTrainerWrapper(config)
+    elif config.trainer.trainer_type == "tinker":
+        from trinity.trainer.tinker_trainer import TinkerTrainerWrapper
+
+        return TinkerTrainerWrapper(config)
     else:
         raise NotImplementedError

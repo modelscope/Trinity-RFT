@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 from trinity.algorithm.sample_strategy.utils import representative_sample
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import BufferConfig
-from trinity.common.experience import Experience, Experiences
+from trinity.common.experience import Experience
 from trinity.utils.annotations import Deprecated
 from trinity.utils.monitor import gather_metrics
 from trinity.utils.timer import Timer
@@ -12,7 +12,7 @@ from trinity.utils.timer import Timer
 
 class SampleStrategy(ABC):
     def __init__(self, buffer_config: BufferConfig, **kwargs) -> None:
-        self.pad_token_id = buffer_config.pad_token_id
+        pass
 
     def set_model_version_metric(self, exp_list: List[Experience], metrics: Dict):
         metric_list = [
@@ -23,14 +23,14 @@ class SampleStrategy(ABC):
         metrics.update(gather_metrics(metric_list, "sample"))
 
     @abstractmethod
-    async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int) -> Tuple[List[Experience], Dict, List]:
         """Sample data from buffer.
 
         Args:
             step (`int`): The step number of current step.
 
         Returns:
-            `Experiences`: The sampled Experiences data.
+            `List[Experience]`: The sampled List[Experience] data.
             `Dict`: Metrics for logging.
             `List`: Representative data for logging.
         """
@@ -54,15 +54,13 @@ class DefaultSampleStrategy(SampleStrategy):
         super().__init__(buffer_config)
         self.exp_buffer = get_buffer_reader(buffer_config.trainer_input.experience_buffer)  # type: ignore[arg-type]
 
-    async def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int, **kwargs) -> Tuple[List[Experience], Dict, List]:
         metrics = {}
         with Timer(metrics, "time/read_experience"):
             exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
         self.set_model_version_metric(exp_list, metrics)
-        with Timer(metrics, "time/gather_experience"):
-            exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
-        return exps, metrics, repr_samples
+        return exp_list, metrics, repr_samples
 
     @classmethod
     def default_args(cls) -> dict:
@@ -81,16 +79,14 @@ class StalenessControlSampleStrategy(DefaultSampleStrategy):
         super().__init__(buffer_config)
         self.max_staleness = kwargs.get("max_staleness", float("inf"))
 
-    async def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int, **kwargs) -> Tuple[List[Experience], Dict, List]:
         min_model_version = max(step - self.max_staleness, 0)
         metrics = {}
         with Timer(metrics, "time/read_experience"):
             exp_list = await self.exp_buffer.read_async(min_model_version=min_model_version)
             repr_samples = representative_sample(exp_list)
         self.set_model_version_metric(exp_list, metrics)
-        with Timer(metrics, "time/gather_experience"):
-            exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
-        return exps, metrics, repr_samples
+        return exp_list, metrics, repr_samples
 
 
 @Deprecated

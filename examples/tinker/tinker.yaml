@@ -1,0 +1,67 @@
+mode: both
+project: Trinity-RFT-gsm8k
+name: tinker-Qwen3-4B
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 8
+  sample_strategy: default
+  kl_loss_fn_args:
+    kl_coef: 0.0
+  optimizer:
+    lr: 1.0e-05
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
+data_processor: {}
+model:
+  model_path: Qwen/Qwen3-4B-Instruct-2507
+  max_prompt_tokens: 1024
+  max_response_tokens: 2048
+  tinker:
+    enable: true
+    base_model: Qwen/Qwen3-4B-Instruct-2507
+buffer:
+  batch_size: 96
+  total_epochs: 1
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: openai/gsm8k
+      split: train
+      subset_name: main
+      format:
+        prompt_key: question
+        response_key: answer
+      rollout_args:
+        temperature: 1.0
+        logprobs: 0
+    eval_tasksets: []
+    default_workflow_type: math_workflow
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      replay_buffer:
+        enable: false
+explorer:
+  runner_per_model: 8
+  rollout_model:
+    engine_num: 4
+    seed: 42
+  auxiliary_models: []
+  eval_interval: 1000
+trainer:
+  save_interval: 100
+  enable_preview: true
+  grad_clip: 1.0
+  max_token_len_per_gpu: 16384
+monitor:
+  monitor_type: tensorboard
+synchronizer:
+  sync_method: memory
+  sync_style: fixed
+  sync_interval: 1
+  sync_timeout: 1200
+log:
+  level: INFO

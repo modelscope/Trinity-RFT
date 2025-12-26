@@ -45,15 +45,44 @@ def create_inference_models(
     from ray.util.placement_group import placement_group, placement_group_table
     from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 
-    from trinity.common.models.vllm_model import vLLMRolloutModel
-
     logger = get_logger(__name__)
     engine_num = config.explorer.rollout_model.engine_num
     tensor_parallel_size = config.explorer.rollout_model.tensor_parallel_size
 
     rollout_engines = []
     if config.explorer.rollout_model.engine_type.startswith("vllm"):
+        from trinity.common.models.vllm_model import vLLMRolloutModel
+
         engine_cls = vLLMRolloutModel
+    elif config.explorer.rollout_model.engine_type == "tinker":
+        from trinity.common.models.tinker_model import TinkerModel
+
+        engine_cls = TinkerModel
+        namespace = ray.get_runtime_context().namespace
+        rollout_engines = [
+            ray.remote(engine_cls)
+            .options(
+                name=f"{config.explorer.name}_rollout_model_{i}",
+                namespace=namespace,
+            )
+            .remote(
+                config=config.explorer.rollout_model,
+            )
+            for i in range(engine_num)
+        ]
+        auxiliary_engines = [
+            ray.remote(engine_cls)
+            .options(
+                name=f"{config.explorer.name}_auxiliary_model_{i}_{j}",
+                namespace=namespace,
+            )
+            .remote(
+                config=config.explorer.auxiliary_models[i],
+            )
+            for i, model_config in enumerate(config.explorer.auxiliary_models)
+            for j in range(model_config.engine_num)
+        ]
+        return rollout_engines, auxiliary_engines
     else:
         raise ValueError(f"Unknown engine type: {config.explorer.rollout_model.engine_type}")
 
@@ -124,7 +153,7 @@ def create_inference_models(
             model_config.engine_type = "vllm"
             model_config.bundle_indices = ",".join([str(bid) for bid in bundles_for_engine])
             engines.append(
-                ray.remote(vLLMRolloutModel)
+                ray.remote(engine_cls)
                 .options(
                     name=f"{config.explorer.name}_auxiliary_model_{i}_{j}",
                     num_cpus=0,
