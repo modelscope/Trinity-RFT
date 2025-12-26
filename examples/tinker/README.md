@@ -1,6 +1,7 @@
 # Trinity with Tinker Backend
 
-This example demonstrates how to use Trinity with the [Tinker](https://thinkingmachines.ai/tinker/) backend, which enables model training on devices without GPUs.
+> [!NOTE]
+> This example demonstrates how to use Trinity with the [Tinker](https://thinkingmachines.ai/tinker/) backend, which enables model training on devices **without GPUs**.
 
 ## Setup Instructions
 
@@ -28,7 +29,7 @@ model:
 
 ### 3. Configuration Parameters Explained
 
-- **`tinker`**: Tinker-specific configuration section. **Important**: When Tinker is enabled, any LoRA configuration settings will be ignored.
+- **`tinker`**: Tinker-specific configuration section. **Important**: When Tinker is enabled, any LoRA configuration settings (`model.lora_configs`) will be ignored.
   - **`enable`**: Whether to activate the Tinker backend. Default: `false`
   - **`base_model`**: Path to the base model for Tinker. If not specified (`null`), it defaults to the `model_path` defined elsewhere in your config
   - **`rank`**: The LoRA rank that controls the size of the adaptation matrices. Default: `32`
@@ -50,10 +51,12 @@ trinity run --config tinker.yaml  # Replace with your actual config file path
 
 1. **Entropy loss** is not consistent compared to veRL backends.
 2. **Algorithms requiring `compute_advantage_in_trainer=true` are NOT supported**, including:
-   - `PPOAlgorithm`
-   - `ReinforcePlusPlusAlgorithm`
-   - `RLOOAlgorithm`
-   - `OnPolicyDistillAlgorithm`
+    - PPO (`algorithm.algorithm_type=ppo`)
+    - Reinforce++ (`algorithm.algorithm_type=reinforceplusplus`)
+    - RLOO (`algorithm.algorithm_type=rloo`)
+    - On-policy distillation (`algorithm.algorithm_type=on_policy_distill`)
+
+    Algorithms like `algorithm.algorithm_type=grpo` are supported.
 
 > 💡 A complete example configuration file is available at [`tinker.yaml`](tinker.yaml).
 
@@ -197,10 +200,6 @@ buffer:
       storage_type: queue
       replay_buffer:
         enable: false
-        priority_fn: linear_decay
-        reuse_cooldown_time: null
-        priority_fn_args:
-          decay: 2.0
 explorer:
   runner_per_model: 16
   rollout_model:
@@ -240,8 +239,6 @@ synchronizer:
 
 ### Observations
 
-Since **Llama-3.2-3B** is a base (non-instruct-tuned) model, it has limited ability to follow formatting instructions. Additionally, we trained for only **one epoch**. As a result, both backends achieved final rewards just slightly above **0.1**.
-
-However, the training curves clearly show an **upward trend in reward**, indicating successful learning. The results are visualized below:
+Since Llama-3.2-3B is a base (non-instruct-tuned) model, it has limited ability to follow formatting instructions. Additionally, we trained for only **one epoch**. As a result, both backends achieved final rewards just slightly above 0.1. Nonetheless, the training curves show a clear upward trend in reward, indicating successful learning. The results are visualized below:
 
 ![Training Rewards on GSM8K](../../docs/sphinx_doc/assets/tinker-gsm8k.png)

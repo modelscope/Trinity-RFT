@@ -125,7 +125,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
                 f"global_step_{self.latest_remote_sampler_step}",
                 "remote_sampler_path.txt",
             )
-            with open(sampler_file_path, "r"):
+            with open(sampler_file_path, "r") as f:
                 self.latest_remote_sampler_path = f.read().strip()
         else:
             self.latest_remote_sampler_step = 0

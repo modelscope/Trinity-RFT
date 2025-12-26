@@ -195,10 +195,9 @@ class TinkerModel(InferenceModel):
 
     def get_api_server_url(self) -> Optional[str]:
         """Get the API server URL if available."""
-        # TODO
+        # TODO: tinker will support openai api later
         return None
 
     def get_model_path(self) -> Optional[str]:
         """Get the model path"""
-        # TODO
-        return None
+        return self.config.model_path  # type: ignore [return-value]
