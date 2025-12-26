@@ -83,9 +83,12 @@ class Synchronizer:
             await self._find_verl_latest_state_dict()
         elif self.config.trainer.trainer_type == "tinker":
             await self._find_tinker_latest_state_dict()
+        else:
+            self.logger.warning(
+                "Synchronizer does not support this trainer type. Please use `verl` or `tinker`."
+            )
 
     async def _find_verl_latest_state_dict(self) -> None:
-        assert self.config.trainer.trainer_type == "verl"
         default_local_dir = self.config.checkpoint_job_dir
         local_latest_state_dict_iteration = os.path.join(
             default_local_dir, "latest_state_dict_iteration.txt"
@@ -119,7 +122,6 @@ class Synchronizer:
             await asyncio.sleep(1)
 
     async def _find_tinker_latest_state_dict(self) -> None:
-        assert self.config.trainer.trainer_type == "tinker"
         default_local_dir = self.config.checkpoint_job_dir
         local_latest_state_dict_iteration = os.path.join(
             default_local_dir, "latest_state_dict_iteration.txt"

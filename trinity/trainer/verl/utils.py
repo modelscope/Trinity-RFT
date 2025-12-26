@@ -102,7 +102,7 @@ def to_data_proto(
     return DataProto.from_single_dict(batch_dict)
 
 
-def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
+def compute_data_metrics(batch: DataProto) -> dict:
     """
     Computes various metrics from a batch of data for PPO training.
     Modified from verl.trainer.ppo.metric_utils.compute_data_metrics
@@ -113,7 +113,6 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
 
     Args:
         batch: A DataProto object containing batch data with token-level scores, rewards, advantages, etc.
-        use_critic: Whether to include critic-specific metrics. Defaults to True.
 
     Returns:
         A dictionary of metrics including:
@@ -121,8 +120,8 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
             - critic/rewards/mean, max, min: Statistics about sequence rewards
             - critic/advantages/mean, max, min: Statistics about advantages
             - critic/returns/mean, max, min: Statistics about returns
-            - critic/values/mean, max, min: Statistics about critic values (if use_critic=True)
-            - critic/vf_explained_var: Explained variance of the value function (if use_critic=True)
+            - critic/values/mean, max, min: Statistics about critic values
+            - critic/vf_explained_var: Explained variance of the value function
             - response_length/mean, max, min, clip_ratio: Statistics about response lengths
             - prompt_length/mean, max, min, clip_ratio: Statistics about prompt lengths
     """

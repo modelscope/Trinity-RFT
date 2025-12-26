@@ -472,7 +472,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 metrics.update(actor_output_metrics)
 
         # collect metrics
-        metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+        metrics.update(compute_data_metrics(batch=batch))
         timing_metrics = compute_timing_metrics(batch=batch, timing_raw=timing_raw)
         metrics.update({k.replace("timing_s/", "time/"): v for k, v in timing_metrics.items()})
         n_gpus = self.resource_pool_manager.get_n_gpus()

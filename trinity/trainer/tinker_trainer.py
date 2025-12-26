@@ -277,8 +277,8 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             f"global_step_{self.train_step_num}",
         )
         os.makedirs(local_path, exist_ok=True)
-        remote_path_file = os.path.join(local_path, "remote_checkpoint_path.txt")
-        with open(remote_path_file, "w") as f:
+        remote_checkpoint_path = os.path.join(local_path, "remote_checkpoint_path.txt")
+        with open(remote_checkpoint_path, "w") as f:
             f.write(self.latest_remote_checkpoint_path)
 
         with open(self.local_latest_checkpointed_iteration, "w") as f:
@@ -311,8 +311,8 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             f"global_step_{self.train_step_num}",
         )
         os.makedirs(local_path, exist_ok=True)
-        remote_path_file = os.path.join(local_path, "remote_sampler_path.txt")
-        with open(remote_path_file, "w") as f:
+        remote_sampler_path = os.path.join(local_path, "remote_sampler_path.txt")
+        with open(remote_sampler_path, "w") as f:
             f.write(self.latest_remote_sampler_path)
 
         with open(self.local_latest_state_dict_iteration, "w") as f:

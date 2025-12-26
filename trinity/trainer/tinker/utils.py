@@ -1,25 +1,10 @@
 from logging import Logger
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Tuple
 
 import torch
 from tinker import types
 
 from trinity.common.experience import Experience, split_dpo_experience_to_single_turn
-
-
-def pad_to_length(
-    tensor: torch.tensor, length: int, pad_value: Union[int, float] = 0
-) -> torch.tensor:
-    pad_value = torch.tensor(pad_value, dtype=tensor.dtype)
-    assert len(tensor) <= length, f"Tensor length {len(tensor)} is longer than length {length}."
-    if len(tensor) == length:
-        return tensor
-    return torch.concat(
-        [
-            torch.full((length - len(tensor),), pad_value),
-            tensor,
-        ]
-    )
 
 
 def to_tinker_input(

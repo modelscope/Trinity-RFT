@@ -1530,12 +1530,11 @@ class Config:
                         f"Invalid trainer.save_hf_checkpoint: {self.trainer.save_hf_checkpoint}, "
                         "must be one of 'last', 'always', or 'never'."
                     )
+                self.trainer.trainer_config.synchronize_config(self)
             elif self.trainer.trainer_type == "tinker":
                 self.trainer.trainer_config = None
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-            if self.trainer.trainer_config:
-                self.trainer.trainer_config.synchronize_config(self)
 
         # check service
         if self.service.data_juicer is not None:
