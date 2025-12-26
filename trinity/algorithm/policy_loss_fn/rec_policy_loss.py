@@ -6,7 +6,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import PolicyLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import aggregate_loss, masked_mean
 
 
 class RECPolicyLossFn(PolicyLossFn):
@@ -41,6 +41,7 @@ class RECPolicyLossFn(PolicyLossFn):
         assert self.clip_mode in [
             "none",
             "one-side",
+            "gspo-one-side",
             "two-side",
             "ring",
         ], f"Invalid clip_mode: {self.clip_mode}"
@@ -48,6 +49,7 @@ class RECPolicyLossFn(PolicyLossFn):
         assert self.weight in [
             "none",
             "importance_sampling",
+            "gspo_importance_sampling",
             "advantage",
         ], f"Invalid weight: {self.weight}"
 
@@ -71,8 +73,8 @@ class RECPolicyLossFn(PolicyLossFn):
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         """Calculate REC loss."""
-        # token-wise
-        ratio = torch.exp(logprob - old_logprob).detach()
+
+        ratio = torch.exp(logprob - old_logprob).detach()  # token-wise prob ratio
 
         # clipping
         if self.clip_mode == "two-side":
@@ -81,6 +83,16 @@ class RECPolicyLossFn(PolicyLossFn):
             is_in_range = (ratio <= (1 + self.epsilon_high)) * (advantages >= 0) + (
                 advantages <= 0
             ) * (ratio >= (1 - self.epsilon_low))
+        elif self.clip_mode == "gspo-one-side":
+            mean_log_prob_diff = masked_mean(
+                logprob - old_logprob, action_mask, axis=-1
+            ).detach()  # [batch_size]
+            normalized_seq_ratio = torch.exp(mean_log_prob_diff).unsqueeze(-1)  # [batch_size, 1]
+            is_in_range = (normalized_seq_ratio <= (1 + self.epsilon_high)) * (advantages >= 0) + (
+                normalized_seq_ratio >= (1 - self.epsilon_low)
+            ) * (
+                advantages <= 0
+            )  # [batch_size, seq_len]
         elif self.clip_mode == "ring":
             is_in_range = (
                 (ratio >= (1 - self.epsilon_low)) * (ratio <= (1 + self.epsilon_high))
@@ -93,6 +105,8 @@ class RECPolicyLossFn(PolicyLossFn):
 
         if self.weight == "importance_sampling":
             advantages = advantages * ratio  # importance sampling
+        elif self.weight == "gspo_importance_sampling":
+            advantages = advantages * normalized_seq_ratio
         elif self.weight == "advantage":
             weight = torch.exp(advantages / self.temp)
             advantages = advantages * weight  # advantage weighting  (unnormalized version)
@@ -107,7 +121,15 @@ class RECPolicyLossFn(PolicyLossFn):
             regularizer_losses = self.regularizer_coef * (logprob - old_logprob).square()
             pg_losses = pg_losses + regularizer_losses
 
-        pg_loss = masked_mean(pg_losses, action_mask)
+        if self.clip_mode == "gspo-one-side":
+            # [EXPERIMENTAL] specialized for gspo-style rec variant for now
+            pg_loss = aggregate_loss(
+                values=pg_losses,
+                mask=action_mask,
+                loss_agg_mode="seq-mean-token-mean",
+            )
+        else:
+            pg_loss = masked_mean(pg_losses, action_mask)
 
         pg_clipfrac = masked_mean(is_clipped_mask.float(), action_mask)
         metrics = {

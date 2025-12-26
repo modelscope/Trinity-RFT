@@ -16,16 +16,15 @@ algorithm:
     epsilon_high: 0.2
     clip_mode: "one-side"
     weight: "none"
-    temp: 1.0
-    regularizer: "none"
-    regularizer_coef: 0.0
   advantage_fn_args:
     std_normalize: false
+  kl_loss_fn_args:
+    kl_coef: 0.0
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_steps: 100
+  total_steps: 160
   batch_size: 96
   explorer_input:
     taskset:

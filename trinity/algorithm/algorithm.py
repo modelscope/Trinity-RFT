@@ -434,8 +434,8 @@ class RECAlgorithm(AlgorithmType):
             "policy_loss_fn": "rec",
             "advantage_fn": "rec",
             "kl_penalty_fn": "none",
-            "kl_loss_fn": "none",
-            "entropy_loss_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
         }
 
 
