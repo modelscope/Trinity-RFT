@@ -984,13 +984,6 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
         trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))
         trainer_process.start()
 
-        await asyncio.sleep(5)
-        serve_config = deepcopy(config)
-        serve_config.mode = "serve"
-        serve_config.check_and_update()
-        serve_process = multiprocessing.Process(target=run_serve, args=(serve_config,))
-        serve_process.start()
-
         ray.init(ignore_reinit_error=True)
         while True:
             try:
@@ -999,6 +992,11 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
             except ValueError:
                 print("waiting for trainer to start.")
                 await asyncio.sleep(5)
+        serve_config = deepcopy(config)
+        serve_config.mode = "serve"
+        serve_config.check_and_update()
+        serve_process = multiprocessing.Process(target=run_serve, args=(serve_config,))
+        serve_process.start()
 
         state_manager = StateManager(
             path=serve_config.checkpoint_job_dir,

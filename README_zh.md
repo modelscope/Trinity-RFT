@@ -80,10 +80,6 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 > [!NOTE]
 > 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
->
-> 没有 GPU？没问题！你仍然可以尝试以下方案：
-> 1. 按照安装步骤操作（可跳过 GPU 专用的软件包，例如 `flash-attn`）
-> 2. 运行 **[Tinker 训练示例](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker)**，该示例专为仅使用 CPU 的系统设计。
 
 
 
