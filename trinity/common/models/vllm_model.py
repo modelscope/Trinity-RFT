@@ -3,7 +3,7 @@
 import asyncio
 import os
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import ray
@@ -400,6 +400,92 @@ class vLLMRolloutModel(InferenceModel):
         return torch.tensor(
             [list(logprob_dict.values())[0].logprob for logprob_dict in output.prompt_logprobs[1:]],
             dtype=torch.float32,
+        )
+
+    async def sample(
+        self,
+        prompt: Any,
+        num_samples: int,
+        sampling_params: Any,
+        include_prompt_logprobs: bool = False,
+        topk_prompt_logprobs: int = 0,
+        lora_request: Optional[Any] = None,
+    ) -> Any:
+        """Tinker compatible sampling interface.
+
+        Args:
+            prompt (ModelInput): The input prompt.
+            num_samples (int): The number of samples to generate.
+            sampling_params (SamplingParams): The sampling parameters.
+            include_prompt_logprobs (bool): Whether to include prompt logprobs.
+            topk_prompt_logprobs (int): The top-k prompt logprobs to include.
+            lora_request (LoRARequest, optional): The LoRA request. Defaults to None.
+        Returns:
+            SampleResponse: The sample response.
+        """
+        from tinker.types import SampledSequence, SampleResponse
+
+        params = {
+            "max_tokens": sampling_params.max_tokens
+            if sampling_params.max_tokens is not None
+            else self.config.max_response_tokens,
+            "seed": sampling_params.seed if sampling_params.seed is not None else self.config.seed,
+            "top_k": sampling_params.top_k,
+            "top_p": sampling_params.top_p,
+            "temperature": sampling_params.temperature,
+            "n": num_samples,
+            "prompt_logprobs": (topk_prompt_logprobs if include_prompt_logprobs else None),
+            # in vLLM, 0 means only return the chosen token's logprob
+            "logprobs": 0,
+        }
+        if sampling_params.stop is not None:
+            params["stop"] = sampling_params.stop
+        req_output = await self._generate_internal(
+            prompt={"prompt_token_ids": prompt.to_ints()},
+            lora_request=lora_request,
+            **params,
+        )
+        sequences = []
+        # vLLM's prompt_logprobs output does not include a value for the first token.
+        # Initialize with [None] to align with the prompt tokens.
+        topk_prompt_logprobs_list: List[Optional[List[Tuple[int, float]]]] = [None]
+        prompt_logprobs: List[Optional[float]] = [None]
+
+        # collect prompt logprobs
+        if include_prompt_logprobs:
+            for logprob_dict in req_output.prompt_logprobs[1:]:
+                prompt_logprobs.append(next(iter(logprob_dict.values())).logprob)
+                if topk_prompt_logprobs > 0:
+                    # collect top-k prompt logprobs
+                    # logprob_dict: {token_id: Logprob(logprob, rank, ...), ...}
+                    logprob_items = list(logprob_dict.items())
+                    # sort by Logprob.rank
+                    logprob_items_sorted = sorted(logprob_items, key=lambda x: x[1].rank)
+                    # pick topk
+                    topk = logprob_items_sorted[:topk_prompt_logprobs]
+                    # record as (token_id, logprob)
+                    topk_prompt_logprobs_list.append(
+                        [(token_id, logprob.logprob) for token_id, logprob in topk]
+                    )
+        # collect response sequences
+        for seq_output in req_output.outputs:
+            seq = SampledSequence(
+                stop_reason="length" if seq_output.finish_reason == "length" else "stop",
+                tokens=seq_output.token_ids,
+                logprobs=[
+                    next(iter(logprob_dict.values())).logprob
+                    for logprob_dict in seq_output.logprobs
+                ],
+            )
+            sequences.append(seq)
+        return SampleResponse(
+            sequences=sequences,
+            prompt_logprobs=prompt_logprobs if include_prompt_logprobs else None,
+            topk_prompt_logprobs=(
+                topk_prompt_logprobs_list
+                if include_prompt_logprobs and topk_prompt_logprobs > 0
+                else None
+            ),
         )
 
     async def _generate_internal(self, prompt: Any, lora_request=None, **kwargs) -> Any:

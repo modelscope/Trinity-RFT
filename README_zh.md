@@ -159,6 +159,10 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 > [!NOTE]
 > 本项目正处于活跃开发阶段。欢迎提出意见和建议！
+>
+> **没有 GPU？没问题！** 您仍然可以尝试使用：
+> 1. 按照安装步骤进行操作（可跳过 `flash-attn` 等 GPU 专用的软件包）
+> 2. 运行 **[Tinker 训练示例](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker)**，该示例专为仅使用 CPU 的系统设计。
 
 
 ### 第一步：安装
@@ -190,13 +194,14 @@ cd Trinity-RFT
 conda create -n trinity python=3.12
 conda activate trinity
 
-pip install -e ".[verl]"
-# 如果没有GPU，需要使用Tinker则改为
+# 如果没有GPU，可以跳过下面的两行命令，改为使用Tinker：
 # pip install -e ".[tinker]"
-pip install -e ".[dev]"
+pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # 用于调试和开发
 ```
 
 #### 使用 venv
@@ -205,13 +210,14 @@ pip install -e ".[flash_attn]"
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-pip install -e ".[verl]"
-# 如果没有GPU，需要使用Tinker则改为
+# 如果没有GPU，可以跳过下面的两行命令，改为使用Tinker：
 # pip install -e ".[tinker]"
-pip install -e ".[dev]"
+pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # 用于调试和开发
 ```
 
 #### 使用 `uv`

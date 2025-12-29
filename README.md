@@ -191,13 +191,14 @@ Choose one of the following options:
 conda create -n trinity python=3.12
 conda activate trinity
 
-pip install -e ".[verl]"
-# If you have no GPU, use Tinker instead.
+# If you have no GPU, skip following two commands and use Tinker instead.
 # pip install -e ".[tinker]"
-pip install -e ".[dev]"
+pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
-# if you encounter issues when installing flash-attn, try:
+# If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
 ###### Using venv
@@ -206,13 +207,14 @@ pip install -e ".[flash_attn]"
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-pip install -e ".[verl]"
-# If you have no GPU, use Tinker instead.
+# If you have no GPU, skip following two commands and use Tinker instead.
 # pip install -e ".[tinker]"
-pip install -e ".[dev]"
+pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
-# if you encounter issues when installing flash-attn, try:
+# If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
 ###### Using `uv`
