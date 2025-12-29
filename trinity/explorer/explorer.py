@@ -448,6 +448,9 @@ class Explorer:
             self.scheduler = None
         if self.experience_pipeline:
             await self.experience_pipeline.close.remote()
+            # reserve `experience_pipeline.output` for trainer
+            # TODO: refactor the lifecycle of buffer actor
+            self._old_experience_pipeline = self.experience_pipeline
             self.experience_pipeline = None
         if self.monitor:
             self.monitor.close()

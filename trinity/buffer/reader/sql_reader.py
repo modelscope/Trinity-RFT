@@ -17,7 +17,6 @@ class SQLReader(BufferReader):
         assert config.storage_type == StorageType.SQL.value
         self.wrap_in_ray = config.wrap_in_ray
         self.storage = SQLStorage.get_wrapper(config)
-        ray.get(self.storage.acquire.remote())
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         if self.wrap_in_ray:
@@ -41,6 +40,3 @@ class SQLReader(BufferReader):
     def load_state_dict(self, state_dict):
         # SQL Not supporting state dict yet
         return None
-
-    def __del__(self):
-        ray.get(self.storage.release.remote())
