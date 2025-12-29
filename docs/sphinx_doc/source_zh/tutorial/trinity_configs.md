@@ -170,7 +170,6 @@ model:
   rope_theta: null
   tinker:
     enable: false
-    base_model: null
     rank: 32
     seed: null
     train_mlp: true
@@ -200,7 +199,6 @@ model:
 - `rope_theta`：可选的 RoPE theta 值。若未指定，则默认为 `null`。
 - `tinker`：可选的 Tinker 配置。注意：若启用 Tinker，则 LoRA 配置将被忽略。
   - `enable`：是否启用 Tinker。默认为 `false`。
-  - `base_model`：Tinker 所使用的基础模型路径。若未指定，则默认为 `model_path`。
   - `rank`：控制适配矩阵大小的 LoRA 秩（rank）。默认为 `32`。
   - `seed`：Tinker 使用的随机种子。若未指定，则默认为 `null`。
   - `train_mlp`：是否训练 MLP 层。默认为 `true`。

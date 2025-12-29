@@ -105,7 +105,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             )
         else:
             self.actor_client = await self.service_client.create_lora_training_client_async(
-                base_model=self.config.model.tinker.base_model,
+                base_model=self.config.model.model_path,
                 rank=self.config.model.tinker.rank,
                 seed=self.config.model.tinker.seed,
                 train_mlp=self.config.model.tinker.train_mlp,
@@ -131,7 +131,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             self.latest_remote_sampler_path = None
 
         self.ref_client = await self.service_client.create_sampling_client_async(
-            base_model=self.config.model.tinker.base_model,
+            base_model=self.config.model.model_path,
         )
 
     @property

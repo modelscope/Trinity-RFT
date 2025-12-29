@@ -431,7 +431,6 @@ class DataProcessorConfig:
 @dataclass
 class TinkerConfig:
     enable: bool = False
-    base_model: Optional[str] = None
     rank: int = 32  # lora rank
     seed: Optional[int] = None
     train_mlp: bool = True
@@ -491,7 +490,6 @@ class ModelConfig:
 class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
     model_path: Optional[str] = None
-    tinker_base_model: Optional[str] = None
 
     engine_type: str = "vllm"
     engine_num: int = 1
@@ -1188,21 +1186,15 @@ class Config:
         if algorithm.use_critic:
             raise ValueError("Critic model is not supported when using tinker!")
 
-        set_if_none(model.tinker, "base_model", model.model_path)
-
         import tinker
 
         service_client = tinker.ServiceClient()
         supported_models = {
             item.model_name for item in service_client.get_server_capabilities().supported_models
         }
-        if model.tinker.base_model not in supported_models:
+        if model.model_path not in supported_models:
             logger.error(f"Supported models: {supported_models}")
-            raise ValueError(f"{model.tinker.base_model} is not supported by tinker!")
-        if model.tinker.base_model != model.model_path:
-            logger.warning(
-                f"The local tokenizer will use {model.model_path}, while tinker will use {model.tinker.base_model}"
-            )
+            raise ValueError(f"{model.model_path} is not supported by tinker!")
 
         if (
             self.algorithm.entropy_loss_fn != "none"
@@ -1318,11 +1310,7 @@ class Config:
             for args in model_args:
                 set_if_none(aux_model, args, getattr(self.model, args))
 
-        if self.explorer.rollout_model.engine_type == "tinker":
-            set_if_none(
-                self.explorer.rollout_model, "tinker_base_model", self.model.tinker.base_model
-            )
-        else:
+        if self.explorer.rollout_model.engine_type != "tinker":
             # check gpu number
             rollout_gpu_num = (
                 self.explorer.rollout_model.tensor_parallel_size

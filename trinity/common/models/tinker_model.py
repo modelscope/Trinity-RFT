@@ -3,7 +3,6 @@ from typing import List, Optional, Sequence
 import ray
 import tinker
 import torch
-import transformers
 from tinker import types
 from torch import Tensor
 
@@ -34,7 +33,10 @@ class TinkerModel(InferenceModel):
 
     async def _initialize_tokenizer(self) -> None:
         """Initialize the tokenizer."""
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.config.model_path)
+        trainer_client = await self.service_client.create_lora_training_client_async(
+            base_model=self.config.model_path
+        )
+        self.tokenizer = trainer_client.get_tokenizer()
 
     async def _generate_internal(self, prompt: dict, **kwargs) -> types.SampleResponse:
         assert self.model is not None
@@ -178,7 +180,7 @@ class TinkerModel(InferenceModel):
         """Prepare the model before inference."""
         self.service_client = tinker.ServiceClient()
         self.model = await self.service_client.create_sampling_client_async(
-            base_model=self.config.tinker_base_model,
+            base_model=self.config.model_path,
         )
 
     async def sync_model(self, model_version: int) -> int:

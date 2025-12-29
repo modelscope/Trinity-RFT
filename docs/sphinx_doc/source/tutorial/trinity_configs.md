@@ -170,7 +170,6 @@ model:
   rope_theta: null
   tinker:
     enable: false
-    base_model: null
     rank: 32
     seed: null
     train_mlp: true
@@ -200,7 +199,6 @@ model:
 - `rope_theta`: Optional RoPE theta value. If not specified, defaults to `null`.
 - `tinker`: Optional Tinker configuration. Note: LoRA configuration will be ignored if Tinker is enabled.
   - `enable`: Whether to enable Tinker. Default is `false`.
-  - `base_model`: Path to the base model for Tinker. If not specified, defaults to `model_path`.
   - `rank`: LoRA rank controlling the size of adaptation matrices. Default is `32`.
   - `seed`: Random seed for Tinker. If not specified, defaults to `null`.
   - `train_mlp`: Whether to train the MLP layer. Default is `true`.
