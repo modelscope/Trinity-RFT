@@ -964,8 +964,8 @@ document.write(`
             <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrinityChatModel</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
-                <span class="s2">&quot;This workflow requires agentscope &gt;= 0.1.6, please install &quot;</span>
-                <span class="s2">&quot;it via `pip install agentscope&gt;=0.1.6`&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;This workflow requires agentscope &gt;= 1.0.7, please install &quot;</span>
+                <span class="s2">&quot;it via `pip install agentscope&gt;=1.0.7`&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1020,6 +1020,123 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow asynchronously and return experiences.&quot;&quot;&quot;</span>
         <span class="n">reward</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_model</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_experiences</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AgentScopeWorkflowAdapterV1">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapterV1">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeWorkflowAdapterV1</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A more general adapter to wrap agentscope trainable workflow and judge functions into a Trinity Workflow.&quot;&quot;&quot;</span>
+
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AgentScopeWorkflowAdapterV1.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapterV1.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ModelWrapper</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the adapter with the task and model.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrinityChatModel</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;This workflow requires agentscope &gt;= 1.0.11, please install &quot;</span>
+                <span class="s2">&quot;it via `pip install agentscope&gt;=1.0.11`&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_func</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workflow_func&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">judge_func</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;judge_func&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The &#39;workflow_func&#39; is not provided.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chat_model</span><span class="p">:</span> <span class="n">TrinityChatModel</span> <span class="o">=</span> <span class="n">TrinityChatModel</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">(),</span>
+            <span class="n">generate_kwargs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">top_p</span><span class="p">,</span>
+                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">max_tokens</span> <span class="ow">or</span> <span class="mi">4096</span><span class="p">,</span>
+                <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;top_logprobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">TrinityChatModel</span><span class="p">(</span>
+                <span class="n">openai_async_client</span><span class="o">=</span><span class="n">aux_model</span><span class="p">,</span>
+                <span class="c1"># TODO: customize generate_kwargs for auxiliary models if needed</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">aux_model</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="AgentScopeWorkflowAdapterV1.construct_experiences">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapterV1.construct_experiences">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">construct_experiences</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct experiences from the agent&#39;s interaction history.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            reward (float): The reward value to assign to each experience.</span>
+<span class="sd">            metrics (Dict): A dictionary of metrics to be attached to the last experience.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List: A list of Experience objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="c1"># only attach metrics to the last experience</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">exps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="k">return</span> <span class="n">exps</span></div>
+
+
+<div class="viewcode-block" id="AgentScopeWorkflowAdapterV1.run_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.agentscope_workflow.html#trinity.common.workflows.agentscope_workflow.AgentScopeWorkflowAdapterV1.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow asynchronously and return experiences.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.tuner</span><span class="w"> </span><span class="kn">import</span> <span class="n">JudgeOutput</span><span class="p">,</span> <span class="n">WorkflowOutput</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Fail to import agentscope tuner related types. Please ensure agentscope&gt;=1.0.11 is installed.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">workflow_output</span><span class="p">:</span> <span class="n">WorkflowOutput</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_func</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span>
+        <span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">workflow_output</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">judge_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">workflow_output</span><span class="o">.</span><span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;Workflow must provide response for judging.&quot;</span>
+            <span class="n">judge_output</span><span class="p">:</span> <span class="n">JudgeOutput</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">judge_func</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="p">,</span> <span class="n">workflow_output</span><span class="o">.</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span>
+            <span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="n">judge_output</span><span class="o">.</span><span class="n">reward</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">judge_output</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">workflow_output</span><span class="o">.</span><span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;Either workflow or judge must provide reward.&quot;</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="n">workflow_output</span><span class="o">.</span><span class="n">reward</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_experiences</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
