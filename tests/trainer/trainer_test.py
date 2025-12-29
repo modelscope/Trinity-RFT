@@ -980,6 +980,7 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
         trainer_config = deepcopy(config)
         trainer_config.mode = "train"
         trainer_config.check_and_update()
+        trainer_config.trainer.max_actor_ckpt_to_keep = 10
 
         trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))
         trainer_process.start()

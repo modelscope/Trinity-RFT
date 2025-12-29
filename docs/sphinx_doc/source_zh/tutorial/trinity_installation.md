@@ -3,11 +3,18 @@
 
 安装 Trinity-RFT 有三种方式：源码安装（推荐）、通过 PyPI 安装，或使用 Docker。
 
-在安装前，请确保您的系统满足以下要求：
+**开始之前**，请检查您的系统配置：
 
-- **Python**：3.10 至 3.12（包含）
-- **CUDA**：大于等于 12.8
-- **GPU**：至少 2 块 GPU
+### 如果您拥有 GPU 并希望使用它们：
+请确保您的系统满足以下要求：
+- **Python**：3.10 – 3.12
+- **CUDA**：12.8 或更高版本
+- **GPU**：至少 2 块可用
+
+### 如果您没有 GPU（或不希望使用 GPU）：
+您可以改用 `tinker` 选项，该选项仅需满足：
+- **Python**：3.11 – 3.12
+- **GPU**：无需
 
 ---
 
@@ -32,10 +39,15 @@ cd Trinity-RFT
 conda create -n trinity python=3.12
 conda activate trinity
 
-pip install -e ".[dev]"
-pip install -e ".[flash_attn]"
+pip install -e ".[vllm,flash_attn]"
+
+# 如果没有GPU，可以注释上一行的命令，改为使用Tinker：
+# pip install -e ".[tinker]"
+
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # 用于调试和开发
 ```
 
 #### 使用 venv
@@ -44,10 +56,15 @@ pip install -e ".[flash_attn]"
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-pip install -e ".[dev]"
-pip install -e ".[flash_attn]"
+pip install -e ".[vllm,flash_attn]"
+
+# 如果没有GPU，可以注释上一行的命令，改为使用Tinker：
+# pip install -e ".[tinker]"
+
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # 用于调试和开发
 ```
 
 #### 使用 `uv`
@@ -55,7 +72,10 @@ pip install -e ".[flash_attn]"
 [`uv`](https://github.com/astral-sh/uv) 是现代的 Python 包管理工具。
 
 ```bash
-uv sync --extra dev --extra flash_attn
+uv sync --extra vllm --extra dev --extra flash_attn
+
+# 如果没有GPU，可以改为使用Tinker：
+# uv sync --extra tinker --extra dev
 ```
 
 ---
