@@ -28,7 +28,7 @@ COPY . .
 
 # Install Trinity-RFT with Megatron
 RUN pip install --upgrade pip \
-    && pip install -e .[mm,dev] \
+    && pip install -e .[verl,mm,dev] \
     && pip install flash_attn==2.8.1 --no-build-isolation \
     && pip install -e .[megatron] \
     && NVCC_APPEND_FLAGS="--threads 4" APEX_PARALLEL_BUILD=8 pip install -v \

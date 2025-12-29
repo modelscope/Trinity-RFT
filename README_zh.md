@@ -190,10 +190,12 @@ cd Trinity-RFT
 conda create -n trinity python=3.12
 conda activate trinity
 
-# 如果没有GPU，可以跳过下面的两行命令，改为使用Tinker：
-# pip install -e ".[tinker]"
 pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
+
+# 如果没有GPU，可以注释上两行的命令，改为使用Tinker：
+# pip install -e ".[tinker]"
+
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
 
@@ -206,10 +208,12 @@ pip install -e ".[dev]"  # 用于调试和开发
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-# 如果没有GPU，可以跳过下面的两行命令，改为使用Tinker：
-# pip install -e ".[tinker]"
 pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
+
+# 如果没有GPU，可以注释上两行的命令，改为使用Tinker：
+# pip install -e ".[tinker]"
+
 # 如果安装 flash-attn 时遇到问题，可尝试：
 # pip install flash-attn==2.8.1 --no-build-isolation
 
@@ -221,7 +225,7 @@ pip install -e ".[dev]"  # 用于调试和开发
 [`uv`](https://github.com/astral-sh/uv) 是现代的 Python 包管理工具。
 
 ```bash
-uv sync --extra dev --extra flash_attn
+uv sync --extra verl --extra dev --extra flash_attn
 ```
 
 ## 通过 PyPI 安装

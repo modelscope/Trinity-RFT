@@ -191,10 +191,12 @@ Choose one of the following options:
 conda create -n trinity python=3.12
 conda activate trinity
 
-# If you have no GPU, skip following two commands and use Tinker instead.
-# pip install -e ".[tinker]"
 pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
+
+# If you have no GPU, comment out the two lines above and uncomment this instead:
+# pip install -e ".[tinker]"
+
 # If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
 
@@ -207,10 +209,12 @@ pip install -e ".[dev]"  # for development like linting and debugging
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-# If you have no GPU, skip following two commands and use Tinker instead.
-# pip install -e ".[tinker]"
 pip install -e ".[verl]"
 pip install -e ".[flash_attn]"
+
+# If you have no GPU, comment out the two lines above and uncomment this instead:
+# pip install -e ".[tinker]"
+
 # If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
 
@@ -222,7 +226,7 @@ pip install -e ".[dev]"  # for development like linting and debugging
 [`uv`](https://github.com/astral-sh/uv) is a modern Python package installer.
 
 ```bash
-uv sync --extra dev --extra flash_attn
+uv sync --extra verl --extra dev --extra flash_attn
 ```
 
 

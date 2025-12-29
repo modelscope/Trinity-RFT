@@ -27,7 +27,7 @@ RUN chmod 1777 /tmp && apt update && apt install -y \
 # copy the Trinity-RFT dir into the workspace
 COPY . .
 
-RUN pip install --upgrade pip && pip install -e .[mm,dev] && pip install flash_attn==2.8.1 --no-build-isolation
+RUN pip install --upgrade pip && pip install -e .[verl,mm,dev] && pip install flash_attn==2.8.1 --no-build-isolation
 
 # Set Env variables
 
