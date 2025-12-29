@@ -937,7 +937,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aggregate_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
 
 
 <div class="viewcode-block" id="RECPolicyLossFn">
@@ -976,6 +976,7 @@ document.write(`
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="s2">&quot;one-side&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gspo-one-side&quot;</span><span class="p">,</span>
             <span class="s2">&quot;two-side&quot;</span><span class="p">,</span>
             <span class="s2">&quot;ring&quot;</span><span class="p">,</span>
         <span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;Invalid clip_mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -983,6 +984,7 @@ document.write(`
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="s2">&quot;importance_sampling&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gspo_importance_sampling&quot;</span><span class="p">,</span>
             <span class="s2">&quot;advantage&quot;</span><span class="p">,</span>
         <span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;Invalid weight: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -1007,8 +1009,8 @@ document.write(`
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate REC loss.&quot;&quot;&quot;</span>
-        <span class="c1"># token-wise</span>
-        <span class="n">ratio</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logprob</span> <span class="o">-</span> <span class="n">old_logprob</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+        <span class="n">ratio</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logprob</span> <span class="o">-</span> <span class="n">old_logprob</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>  <span class="c1"># token-wise prob ratio</span>
 
         <span class="c1"># clipping</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span> <span class="o">==</span> <span class="s2">&quot;two-side&quot;</span><span class="p">:</span>
@@ -1017,6 +1019,16 @@ document.write(`
             <span class="n">is_in_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_high</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">advantages</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="n">advantages</span> <span class="o">&lt;=</span> <span class="mi">0</span>
             <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_low</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span> <span class="o">==</span> <span class="s2">&quot;gspo-one-side&quot;</span><span class="p">:</span>
+            <span class="n">mean_log_prob_diff</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span>
+                <span class="n">logprob</span> <span class="o">-</span> <span class="n">old_logprob</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>  <span class="c1"># [batch_size]</span>
+            <span class="n">normalized_seq_ratio</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">mean_log_prob_diff</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [batch_size, 1]</span>
+            <span class="n">is_in_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">normalized_seq_ratio</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_high</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">advantages</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">normalized_seq_ratio</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_low</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">advantages</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+            <span class="p">)</span>  <span class="c1"># [batch_size, seq_len]</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span> <span class="o">==</span> <span class="s2">&quot;ring&quot;</span><span class="p">:</span>
             <span class="n">is_in_range</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">ratio</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_low</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_high</span><span class="p">))</span>
@@ -1029,6 +1041,8 @@ document.write(`
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">==</span> <span class="s2">&quot;importance_sampling&quot;</span><span class="p">:</span>
             <span class="n">advantages</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">ratio</span>  <span class="c1"># importance sampling</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">==</span> <span class="s2">&quot;gspo_importance_sampling&quot;</span><span class="p">:</span>
+            <span class="n">advantages</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">normalized_seq_ratio</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">==</span> <span class="s2">&quot;advantage&quot;</span><span class="p">:</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">advantages</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="p">)</span>
             <span class="n">advantages</span> <span class="o">=</span> <span class="n">advantages</span> <span class="o">*</span> <span class="n">weight</span>  <span class="c1"># advantage weighting  (unnormalized version)</span>
@@ -1043,7 +1057,15 @@ document.write(`
             <span class="n">regularizer_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizer_coef</span> <span class="o">*</span> <span class="p">(</span><span class="n">logprob</span> <span class="o">-</span> <span class="n">old_logprob</span><span class="p">)</span><span class="o">.</span><span class="n">square</span><span class="p">()</span>
             <span class="n">pg_losses</span> <span class="o">=</span> <span class="n">pg_losses</span> <span class="o">+</span> <span class="n">regularizer_losses</span>
 
-        <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_mode</span> <span class="o">==</span> <span class="s2">&quot;gspo-one-side&quot;</span><span class="p">:</span>
+            <span class="c1"># [EXPERIMENTAL] specialized for gspo-style rec variant for now</span>
+            <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">aggregate_loss</span><span class="p">(</span>
+                <span class="n">values</span><span class="o">=</span><span class="n">pg_losses</span><span class="p">,</span>
+                <span class="n">mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">,</span>
+                <span class="n">loss_agg_mode</span><span class="o">=</span><span class="s2">&quot;seq-mean-token-mean&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pg_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
 
         <span class="n">pg_clipfrac</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">is_clipped_mask</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>

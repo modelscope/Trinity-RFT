@@ -965,6 +965,15 @@ document.write(`
         <span class="k">if</span> <span class="n">_clip_range_high</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either clip_range or clip_range_high must be specified.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_high</span> <span class="o">=</span> <span class="n">_clip_range_high</span>
+
+        <span class="k">if</span> <span class="n">loss_agg_mode</span> <span class="o">!=</span> <span class="s2">&quot;seq-mean-token-mean&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The original GSPO paper requires loss_agg_mode to be &#39;seq-mean-token-mean&#39;, but the current setting is &#39;</span><span class="si">{</span><span class="n">loss_agg_mode</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># loss_agg_mode = &quot;seq-mean-token-mean&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span></div>
 
 
