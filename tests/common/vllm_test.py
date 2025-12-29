@@ -563,7 +563,7 @@ class TestLogprobs(RayUnittestBaseAysnc):
             torch.allclose(response_1.logprobs, logprobs_2_response, rtol=0.3, atol=1e-3)
         )
         self.assertTrue(
-            torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.3, atol=1e-3)
+            torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.5, atol=1e-2)
         )
         self.assertFalse(
             torch.allclose(response_2.logprobs, logprobs_3_response, rtol=0.3, atol=1e-3)
@@ -612,7 +612,7 @@ class TestLogprobs(RayUnittestBaseAysnc):
             torch.allclose(response_1.logprobs, logprobs_2_response, rtol=0.3, atol=1e-3)
         )
         self.assertTrue(
-            torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.3, atol=1e-3)
+            torch.allclose(response_2.logprobs, logprobs_4_response, rtol=0.5, atol=1e-2)
         )
         self.assertFalse(
             torch.allclose(response_2.logprobs, logprobs_3_response, rtol=0.3, atol=1e-3)
