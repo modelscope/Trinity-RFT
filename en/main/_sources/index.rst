@@ -42,6 +42,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/example_react.md
    tutorial/example_search_email.md
    tutorial/example_dpo.md
+   tutorial/example_tinker_backend.md
    tutorial/example_megatron.md
    tutorial/example_data_functionalities.md
    tutorial/example_dataset_perspective.md
