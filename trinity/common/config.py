@@ -477,6 +477,7 @@ class ModelConfig:
 class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
     model_path: Optional[str] = None
+    name: Optional[str] = None
 
     engine_type: str = "vllm"
     engine_num: int = 1

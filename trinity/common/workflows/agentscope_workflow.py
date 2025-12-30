@@ -118,13 +118,18 @@ class AgentScopeWorkflowAdapterV1(Workflow):
                 "top_logprobs": self.task.rollout_args.logprobs,
             },
         )
-        self.auxiliary_chat_models = [
-            TrinityChatModel(
-                openai_async_client=aux_model,
-                # TODO: customize generate_kwargs for auxiliary models if needed
-            )
-            for aux_model in (self.auxiliary_models or [])
-        ]
+
+        # TODO: customize generate_kwargs for auxiliary models if needed
+        if self.auxiliary_model_wrappers is not None and self.auxiliary_models is not None:
+            self.auxiliary_chat_models = {
+                aux_model_wrapper.model_name
+                or f"auxiliary_model_{i}": TrinityChatModel(openai_async_client=aux_model)
+                for i, (aux_model_wrapper, aux_model) in enumerate(
+                    zip(self.auxiliary_model_wrappers, self.auxiliary_models)
+                )
+            }
+        else:
+            self.auxiliary_chat_models = {}
 
     def construct_experiences(
         self,

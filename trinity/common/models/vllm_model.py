@@ -39,6 +39,7 @@ class vLLMRolloutModel(InferenceModel):
         import vllm
         from vllm.sampling_params import RequestOutputKind
 
+        self.name = config.name
         self.logger = get_logger(__name__)
         self.vllm_version = get_vllm_version()
         self.config = config
@@ -717,6 +718,9 @@ class vLLMRolloutModel(InferenceModel):
 
     def get_model_path(self) -> str:
         return self.config.model_path  # type: ignore [return-value]
+
+    def get_model_name(self) -> Optional[str]:
+        return self.name  # type: ignore [return-value]
 
     def get_lora_request(self, lora_path: Optional[str] = None) -> Any:
         from vllm.lora.request import LoRARequest
