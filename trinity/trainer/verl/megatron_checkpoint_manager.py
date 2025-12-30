@@ -63,9 +63,26 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         self.checkpoint_monitor = CheckpointMonitor.get_actor(
             namespace=ray_namespace,
         )
-        self.previous_state_dict_step = None
+        self.latest_model_save_step = None
+        self.latest_tokenizer_save_step = None
+        self.latest_extra_state_save_step = None
+        self.latest_hf_model_save_step = None
 
-    def _save_state_dict(self, local_path, global_step):
+    def _save_state_dict(self, local_path, global_step) -> bool:
+        """
+        Save the model state dict to the specified local path.
+
+        Args:
+            local_path (str): The local path where the model state dict should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the model save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_model_save_step == global_step:
+            return False
+
         dist_checkpoint_path = get_dist_checkpoint_path(local_path)
         hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
 
@@ -144,18 +161,154 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         else:
             finalize_save_fn()
 
-        self.previous_state_dict_step = global_step
+        self.latest_model_save_step = global_step
+        return True
+
+    def _save_tokenizer(self, local_path, global_step) -> bool:
+        """
+        Save the tokenizer class to the specified local path.
+
+        Args:
+            local_path (str): The local path where the tokenizer class should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the tokenizer save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_tokenizer_save_step == global_step:
+            return False
+
+        # Only rank 0 saves the hf config and tokenizer to huggingface path
+        # No matter whether we save hf model or not
+        if self.rank == 0:
+            # Save tokenizer
+            hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
+            self.processing_class.save_pretrained(hf_config_tokenizer_path)
+            log_with_rank(
+                f"Saved Huggingface tokenizer to {hf_config_tokenizer_path}",
+                rank=self.rank,
+                logger=logger,
+                log_only_rank_0=True,
+            )
+
+        self.latest_tokenizer_save_step = global_step
+        return self.rank == 0
+
+    def _save_extra_state(self, local_path, global_step) -> bool:
+        """
+        Save the extra state dict to the specified local path.
+
+        Args:
+            local_path (str): The local path where the extra state dict should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the extra state dict save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_extra_state_save_step == global_step:
+            return False
+
+        if self.rank == 0:
+            # Save transformer config
+            log_with_rank(
+                f"Transformer config: {self.transformer_config}", rank=self.rank, logger=logger
+            )
+            transformer_config_dict = asdict(self.transformer_config)
+            to_convert_types = {torch.dtype: str, AttnBackend: str}
+            ignore_types = [Callable]
+            pop_keys = []
+            for key, value in transformer_config_dict.items():
+                if type(value) in to_convert_types:
+                    transformer_config_dict[key] = to_convert_types[type(value)](value)
+                if type(value) in ignore_types:
+                    pop_keys.append(key)
+                if callable(value):
+                    pop_keys.append(key)
+            for key in pop_keys:
+                transformer_config_dict.pop(key)
+            transformer_config_path = get_transformer_config_checkpoint_path(local_path)
+            with open(transformer_config_path, "w") as f:
+                json.dump(transformer_config_dict, f, indent=2)
+
+        return self.rank == 0
+
+    def _save_hf_model(self, local_path, global_step) -> bool:
+        """
+        Save the Huggingface model to the specified local path.
+
+        Args:
+            local_path (str): The local path where the Huggingface model should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the Huggingface model save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_hf_model_save_step == global_step:
+            return False
+
+        try:
+            # wait for everyone to dump to local
+            state_dict = self.weight_saver(
+                self.model,
+                self.hf_config,
+                dtype=self.param_dtype,
+                is_value_model=self.is_value_model,
+                tie_word_embeddings=self.share_embeddings_and_output_weights,
+            )
+
+            torch.distributed.barrier()
+            if self.rank == 0:
+                # TODO: async save or use mbridge to save hf model
+                hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
+                import warnings
+
+                from accelerate import init_empty_weights
+
+                with init_empty_weights(), warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    if "mistral7b-rm" in self.config.model.path:
+                        from transformers import MistralForSequenceClassification
+
+                        model = MistralForSequenceClassification.from_pretrained(
+                            self.config.model.path, torch_dtype=torch.bfloat16
+                        )  # use score head instead of lm_head
+                        state_dict["score.weight"] = state_dict["score.weight"]
+                    else:
+                        from transformers import AutoModelForCausalLM
+
+                        model = AutoModelForCausalLM.from_pretrained(
+                            self.config.model.path, torch_dtype=torch.bfloat16
+                        )
+                state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
+                model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
+                log_with_rank(
+                    f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
+                    rank=self.rank,
+                    logger=logger,
+                    log_only_rank_0=True,
+                )
+        except Exception:
+            logger.error(
+                f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it.",
+                exc_info=True,
+            )
+
+        self.latest_hf_model_save_step = global_step
+        return self.rank == 0
 
     def save_state_dict(  # noqa: C901
         self,
         local_path: str,
         global_step: int = 0,
     ):
-        if self.previous_state_dict_step is None:
+        if self.latest_model_save_step is None:
             # First sync in trainer.prepare
-            self.previous_state_dict_step = global_step
+            self.latest_model_save_step = global_step
             return
-        elif self.previous_state_dict_step == global_step:
+        elif self.latest_model_save_step == global_step:
             # No need to save for sync again
             return
 
@@ -167,7 +320,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
             )
         )
 
-    def save_checkpoint(  # noqa: C901
+    def save_checkpoint(
         self,
         local_path: str,
         global_step: int = 0,
@@ -192,93 +345,15 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         state_dict_thread_count = 0
         if self.should_save_model:
-            if self.previous_state_dict_step != global_step:
-                self._save_state_dict(local_path, global_step)
-                state_dict_thread_count += 1
+            state_dict_thread_count += self._save_state_dict(local_path, global_step)
 
-        # Only rank 0 saves the hf config and tokenizer to huggingface path
-        # No matter whether we save hf model or not
-        if self.rank == 0:
-            # Save tokenizer
-            hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
-            self.processing_class.save_pretrained(hf_config_tokenizer_path)
-            log_with_rank(
-                f"Saved Huggingface tokenizer to {hf_config_tokenizer_path}",
-                rank=self.rank,
-                logger=logger,
-                log_only_rank_0=True,
-            )
+        self._save_tokenizer(local_path, global_step)
 
         if self.should_save_extra:
-            if self.rank == 0:
-                # Save transformer config
-                log_with_rank(
-                    f"Transformer config: {self.transformer_config}", rank=self.rank, logger=logger
-                )
-                transformer_config_dict = asdict(self.transformer_config)
-                to_convert_types = {torch.dtype: str, AttnBackend: str}
-                ignore_types = [Callable]
-                pop_keys = []
-                for key, value in transformer_config_dict.items():
-                    if type(value) in to_convert_types:
-                        transformer_config_dict[key] = to_convert_types[type(value)](value)
-                    if type(value) in ignore_types:
-                        pop_keys.append(key)
-                    if callable(value):
-                        pop_keys.append(key)
-                for key in pop_keys:
-                    transformer_config_dict.pop(key)
-                transformer_config_path = get_transformer_config_checkpoint_path(local_path)
-                with open(transformer_config_path, "w") as f:
-                    json.dump(transformer_config_dict, f, indent=2)
+            self._save_extra_state(local_path, global_step)
 
         if self.should_save_hf_model or save_as_hf:
-            try:
-                # wait for everyone to dump to local
-                state_dict = self.weight_saver(
-                    self.model,
-                    self.hf_config,
-                    dtype=self.param_dtype,
-                    is_value_model=self.is_value_model,
-                    tie_word_embeddings=self.share_embeddings_and_output_weights,
-                )
-
-                torch.distributed.barrier()
-                if self.rank == 0:
-                    # TODO: async save or use mbridge to save hf model
-                    hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
-                    import warnings
-
-                    from accelerate import init_empty_weights
-
-                    with init_empty_weights(), warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        if "mistral7b-rm" in self.config.model.path:
-                            from transformers import MistralForSequenceClassification
-
-                            model = MistralForSequenceClassification.from_pretrained(
-                                self.config.model.path, torch_dtype=torch.bfloat16
-                            )  # use score head instead of lm_head
-                            state_dict["score.weight"] = state_dict["score.weight"]
-                        else:
-                            from transformers import AutoModelForCausalLM
-
-                            model = AutoModelForCausalLM.from_pretrained(
-                                self.config.model.path, torch_dtype=torch.bfloat16
-                            )
-                    state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
-                    model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
-                    log_with_rank(
-                        f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
-                        rank=self.rank,
-                        logger=logger,
-                        log_only_rank_0=True,
-                    )
-            except Exception:
-                logger.error(
-                    f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it.",
-                    exc_info=True,
-                )
+            self._save_hf_model(local_path, global_step)
 
         ray.get(
             self.checkpoint_monitor.register_thread_count.remote(

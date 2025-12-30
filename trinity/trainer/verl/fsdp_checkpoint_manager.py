@@ -72,7 +72,11 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._optimizer_state_dict_thread = None
         self._extra_state_dict_thread = None
         self._save_model_thread = None
-        self.previous_state_dict_step = None
+        self.latest_model_save_step = None
+        self.latest_optimizer_save_step = None
+        self.latest_extra_state_save_step = None
+        self.latest_hf_model_save_step = None
+        self.latest_tokenizer_save_step = None
 
     def _upload_state_dict(self, state_dict: Union[dict, None], global_step: int):
         """
@@ -133,21 +137,65 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         thread.start()
         setattr(self, thread_name, thread)
 
-    def _save_model(self, local_path, global_step):
+    def _save_model(self, local_path, global_step) -> bool:
+        """
+        Save the model state dict to the specified local path.
+
+        Args:
+            local_path (str): The local path where the model state dict should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the model save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_model_save_step == global_step:
+            return False
+
         model_state_dict = self.model.state_dict()
         self._save_with_thread(
             model_state_dict, local_path, "model", "_model_state_dict_thread", global_step, True
         )
+        self.latest_model_save_step = global_step
+        return True
 
-        self.previous_state_dict_step = global_step
+    def _save_optimizer(self, local_path, global_step) -> bool:
+        """
+        Save the optimizer state dict to the specified local path.
 
-    def _save_optimizer(self, local_path, global_step):
+        Args:
+            local_path (str): The local path where the optimizer state dict should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the optimizer save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_optimizer_save_step == global_step:
+            return False
+
         optimizer_state_dict = self.optimizer.state_dict()
         self._save_with_thread(
             optimizer_state_dict, local_path, "optim", "_optimizer_state_dict_thread", global_step
         )
+        self.latest_optimizer_save_step = global_step
+        return True
 
-    def _save_extra_state(self, local_path, global_step):
+    def _save_extra_state(self, local_path, global_step) -> bool:
+        """
+        Save the extra state dict to the specified local path.
+
+        Args:
+            local_path (str): The local path where the extra state dict should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the extra state dict save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_extra_state_save_step == global_step:
+            return False
+
         lr_scheduler_state_dict = (
             self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
         )
@@ -158,18 +206,177 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._save_with_thread(
             extra_state_dict, local_path, "extra_state", "_extra_state_dict_thread", global_step
         )
+        self.latest_extra_state_save_step = global_step
+        return True
 
-    def save_state_dict(  # noqa: C901
+    def _get_model_config(self):
+        if fsdp_version(self.model) == 1:
+            unwrap_model = self.model._fsdp_wrapped_module
+        else:
+            unwrap_model = self.model
+
+        model_config = unwrap_model.config
+        if (
+            unwrap_model.can_generate()
+            and hasattr(model_config, "name_or_path")
+            and model_config.name_or_path
+        ):
+            # Some model's name_or_path is empty if not initialized from pretrained,
+            # in this cases, we don't save generation config.
+            generation_config = GenerationConfig.from_pretrained(model_config.name_or_path)
+            # generation_config.save_pretrained(hf_config_tokenizer_path)
+        else:
+            generation_config = None
+
+        return model_config, generation_config
+
+    def _save_tokenizer(self, local_path, global_step):
+        """
+        Save the tokenizer class to the specified local path.
+
+        Args:
+            local_path (str): The local path where the tokenizer class should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the tokenizer save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+        if self.latest_tokenizer_save_step == global_step:
+            return False
+
+        if self.rank == 0:
+            # Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether
+            # huggingface model is requested to be saved or not.
+
+            hf_config_tokenizer_path = os.path.join(local_path, "huggingface")
+            local_mkdir_safe(hf_config_tokenizer_path)
+
+            model_config, generation_config = self._get_model_config()
+            model_config.save_pretrained(hf_config_tokenizer_path)
+            if generation_config is not None:
+                generation_config.save_pretrained(hf_config_tokenizer_path)
+
+            self.processing_class.save_pretrained(hf_config_tokenizer_path)
+            log_with_rank(
+                f"Saved model config and tokenizer class to {os.path.abspath(hf_config_tokenizer_path)}",
+                rank=self.rank,
+                logger=logger,
+                log_only_rank_0=True,
+            )
+
+            # Also save runtime FSDP config
+            fsdp_config_path = os.path.join(local_path, "fsdp_config.json")
+            fsdp_config = FSDPConfig(
+                FSDP_version=fsdp_version(self.model),
+                world_size=self.world_size,
+            )
+            with open(fsdp_config_path, "w") as f:
+                json.dump(asdict(fsdp_config), f, indent=4)
+
+        # wait for everyone to dump to local
+        torch.distributed.barrier()
+        self.latest_tokenizer_save_step = global_step
+
+        return self.rank == 0
+
+    def _save_hf_model(self, local_path, global_step) -> bool:
+        """
+        Save the HuggingFace model to the specified local path.
+
+        Args:
+            local_path (str): The local path where the HuggingFace model should be saved.
+            global_step (int): The current training step number.
+
+        Returns:
+            bool: True if the HuggingFace model save operation was initiated, False if a save for
+                  this global_step has already been performed.
+        """
+
+        if self.latest_hf_model_save_step == global_step:
+            return False
+
+        # Only rank 0 will save hf model and,
+        # offload to cpu to save LLMs which may be too large to fit in one GPU
+        state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)
+
+        if self.rank == 0:
+            hf_local_path = os.path.join(local_path, "huggingface")
+            os.makedirs(hf_local_path, exist_ok=True)
+
+            model_config, generation_config = self._get_model_config()
+
+            if "ForTokenClassification" in model_config.architectures[0]:
+                from transformers import AutoModelForTokenClassification
+
+                auto_model_cls = AutoModelForTokenClassification
+            elif "ForCausalLM" in model_config.architectures[0]:
+                from transformers import AutoModelForCausalLM
+
+                auto_model_cls = AutoModelForCausalLM
+            elif "ForConditionalGeneration" in model_config.architectures[0]:
+                from transformers import AutoModelForVision2Seq
+
+                auto_model_cls = AutoModelForVision2Seq
+            else:
+                raise NotImplementedError(f"Unknown architecture {model_config['architectures']}")
+
+            with init_empty_weights():
+                save_model = auto_model_cls.from_config(model_config, torch_dtype=torch.bfloat16)
+            save_model.to_empty(device="cpu")
+
+            if save_model.can_generate():
+                if generation_config is not None:
+                    save_model.generation_config = generation_config
+                else:
+                    logger.warning(
+                        f"{self.__class__.__name__}.save_checkpoint: Generation config file not found in, "
+                        "using a generation config created from the model config when saving hf_model."
+                    )
+
+            if self._save_model_thread is not None:
+                self._save_model_thread.join()
+
+            state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
+
+            def _save_model():
+                runtime_context = ray.get_runtime_context()
+                node_id = runtime_context.get_node_id()
+                job_id = runtime_context.get_job_id()
+                ray.get(
+                    self.checkpoint_monitor.notify_started.remote(node_id=node_id, job_id=job_id)
+                )
+                save_model.save_pretrained(hf_local_path, state_dict=state_dict)
+                log_with_rank(
+                    f"Saved hf_model to {os.path.abspath(hf_local_path)}",
+                    rank=self.rank,
+                    logger=logger,
+                    log_only_rank_0=True,
+                )
+                ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
+
+            self._save_model_thread = threading.Thread(
+                target=_save_model,
+            )
+            self._save_model_thread.start()
+
+        # wait for rank0 to dump hf_model to local
+        torch.distributed.barrier()
+        self.latest_hf_model_save_step = global_step
+
+        return self.rank == 0
+
+    def save_state_dict(
         self,
         local_path: str,
         global_step: int = 0,
     ):
-        if self.previous_state_dict_step is None:
+        if self.latest_model_save_step is None:
             # First sync in trainer.prepare
-            self.previous_state_dict_step = global_step
+            self.latest_model_save_step = global_step
             self._upload_state_dict(None, global_step)
             return
-        elif self.previous_state_dict_step == global_step:
+        elif self.latest_model_save_step == global_step:
             # No need to save for sync again
             return
         if local_path is None:
@@ -192,7 +399,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             )
         )
 
-    def save_checkpoint(  # noqa: C901
+    def save_checkpoint(
         self,
         local_path: str,
         global_step: int = 0,
@@ -259,134 +466,18 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
                 if self.should_save_model:
-                    if self.previous_state_dict_step != global_step:
-                        state_dict_thread_count += 1
-                        self._save_model(local_path, global_step)
+                    state_dict_thread_count += self._save_model(local_path, global_step)
 
                 if self.should_save_optimizer:
-                    checkpoint_thread_count += 1
-                    self._save_optimizer(local_path, global_step)
+                    checkpoint_thread_count += self._save_optimizer(local_path, global_step)
 
                 if self.should_save_extra:
-                    checkpoint_thread_count += 1
-                    self._save_extra_state(local_path, global_step)
+                    checkpoint_thread_count += self._save_extra_state(local_path, global_step)
 
-        if self.rank == 0:
-            # Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether
-            # huggingface model is requested to be saved or not.
-
-            if fsdp_version(self.model) == 1:
-                unwrap_model = self.model._fsdp_wrapped_module
-            else:
-                unwrap_model = self.model
-
-            hf_config_tokenizer_path = os.path.join(local_path, "huggingface")
-            local_mkdir_safe(hf_config_tokenizer_path)
-            model_config = unwrap_model.config
-            if (
-                unwrap_model.can_generate()
-                and hasattr(model_config, "name_or_path")
-                and model_config.name_or_path
-            ):
-                # Some model's name_or_path is empty if not initialized from pretrained,
-                # in this cases, we don't save generation config.
-                generation_config = GenerationConfig.from_pretrained(model_config.name_or_path)
-                generation_config.save_pretrained(hf_config_tokenizer_path)
-            else:
-                generation_config = None
-
-            model_config.save_pretrained(hf_config_tokenizer_path)
-            self.processing_class.save_pretrained(hf_config_tokenizer_path)
-            log_with_rank(
-                f"Saved model config and tokenizer class to {os.path.abspath(hf_config_tokenizer_path)}",
-                rank=self.rank,
-                logger=logger,
-                log_only_rank_0=True,
-            )
-
-            # Also save runtime FSDP config
-            fsdp_config_path = os.path.join(local_path, "fsdp_config.json")
-            fsdp_config = FSDPConfig(
-                FSDP_version=fsdp_version(self.model),
-                world_size=self.world_size,
-            )
-            with open(fsdp_config_path, "w") as f:
-                json.dump(asdict(fsdp_config), f, indent=4)
-
-        # wait for everyone to dump to local
-        torch.distributed.barrier()
+        self._save_tokenizer(local_path, global_step)
 
         if self.should_save_hf_model or save_as_hf:
-            # Only rank 0 will save hf model and,
-            # offload to cpu to save LLMs which may be too large to fit in one GPU
-            state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)
-
-            if self.rank == 0:
-                checkpoint_thread_count += 1
-                hf_local_path = os.path.join(local_path, "huggingface")
-                os.makedirs(hf_local_path, exist_ok=True)
-
-                if "ForTokenClassification" in model_config.architectures[0]:
-                    from transformers import AutoModelForTokenClassification
-
-                    auto_model_cls = AutoModelForTokenClassification
-                elif "ForCausalLM" in model_config.architectures[0]:
-                    from transformers import AutoModelForCausalLM
-
-                    auto_model_cls = AutoModelForCausalLM
-                elif "ForConditionalGeneration" in model_config.architectures[0]:
-                    from transformers import AutoModelForVision2Seq
-
-                    auto_model_cls = AutoModelForVision2Seq
-                else:
-                    raise NotImplementedError(
-                        f"Unknown architecture {model_config['architectures']}"
-                    )
-
-                with init_empty_weights():
-                    save_model = auto_model_cls.from_config(
-                        model_config, torch_dtype=torch.bfloat16
-                    )
-                save_model.to_empty(device="cpu")
-
-                if save_model.can_generate():
-                    if generation_config is not None:
-                        save_model.generation_config = generation_config
-                    else:
-                        print(
-                            f"Warning: {self.__class__.__name__}.save_checkpoint: Generation config file not found in, using a generation config created from the model config when saving hf_model."
-                        )
-
-                if self._save_model_thread is not None:
-                    self._save_model_thread.join()
-
-                state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
-
-                def _save_model():
-                    runtime_context = ray.get_runtime_context()
-                    node_id = runtime_context.get_node_id()
-                    job_id = runtime_context.get_job_id()
-                    ray.get(
-                        self.checkpoint_monitor.notify_started.remote(
-                            node_id=node_id, job_id=job_id
-                        )
-                    )
-                    save_model.save_pretrained(hf_local_path, state_dict=state_dict)
-                    log_with_rank(
-                        f"Saved hf_model to {os.path.abspath(hf_local_path)}",
-                        rank=self.rank,
-                        logger=logger,
-                        log_only_rank_0=True,
-                    )
-                    ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
-
-                self._save_model_thread = threading.Thread(
-                    target=_save_model,
-                )
-                self._save_model_thread.start()
-
-            # wait for rank0 to dump hf_model to local
-            torch.distributed.barrier()
+            checkpoint_thread_count += self._save_hf_model(local_path, global_step)
 
         ray.get(
             self.checkpoint_monitor.register_thread_count.remote(
