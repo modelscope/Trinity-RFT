@@ -277,6 +277,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -287,6 +291,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -363,6 +368,7 @@
 <li class="toctree-l4 current active"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -596,9 +602,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -614,14 +618,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> 目录 </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs"><code class="docutils literal notranslate"><span class="pre">patch_vllm_prompt_logprobs()</span></code></a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -631,14 +627,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-trinity.common.models.vllm_patch.worker_patch">
-<span id="trinity-common-models-vllm-patch-worker-patch-module"></span><h1>trinity.common.models.vllm_patch.worker_patch module<a class="headerlink" href="#module-trinity.common.models.vllm_patch.worker_patch" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs">
-<span class="sig-prename descclassname"><span class="pre">trinity.common.models.vllm_patch.worker_patch.</span></span><span class="sig-name descname"><span class="pre">patch_vllm_prompt_logprobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_runner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GPUModelRunner</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_patch/worker_patch.html#patch_vllm_prompt_logprobs"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs" title="Link to this definition">#</a></dt>
-<dd><p>Patch vLLM model runner to support prompt logprobs extraction.</p>
-</dd></dl>
-
+  <section id="trinity-common-models-vllm-patch-worker-patch-module">
+<h1>trinity.common.models.vllm_patch.worker_patch module<a class="headerlink" href="#trinity-common-models-vllm-patch-worker-patch-module" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -676,21 +666,6 @@ document.write(`
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> 目录
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs"><code class="docutils literal notranslate"><span class="pre">patch_vllm_prompt_logprobs()</span></code></a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

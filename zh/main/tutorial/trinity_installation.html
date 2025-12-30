@@ -277,6 +277,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -287,6 +291,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -363,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -619,6 +625,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">如果您拥有 GPU 并希望使用它们：</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-gpu">如果您没有 GPU（或不希望使用 GPU）：</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">源码安装（推荐）</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1. 克隆仓库</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">2. 创建虚拟环境</a><ul class="nav section-nav flex-column">
@@ -646,12 +654,24 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <span id="id1"></span><h1>安装指南<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>安装 Trinity-RFT 有三种方式：源码安装（推荐）、通过 PyPI 安装，或使用 Docker。</p>
-<p>在安装前，请确保您的系统满足以下要求：</p>
+<p><strong>开始之前</strong>，请检查您的系统配置：</p>
+<section id="gpu">
+<h2>如果您拥有 GPU 并希望使用它们：<a class="headerlink" href="#gpu" title="Link to this heading">#</a></h2>
+<p>请确保您的系统满足以下要求：</p>
 <ul class="simple">
-<li><p><strong>Python</strong>：3.10 至 3.12（包含）</p></li>
-<li><p><strong>CUDA</strong>：大于等于 12.8</p></li>
-<li><p><strong>GPU</strong>：至少 2 块 GPU</p></li>
+<li><p><strong>Python</strong>：3.10 – 3.12</p></li>
+<li><p><strong>CUDA</strong>：12.8 或更高版本</p></li>
+<li><p><strong>GPU</strong>：至少 2 块可用</p></li>
 </ul>
+</section>
+<section id="gpu-gpu">
+<h2>如果您没有 GPU（或不希望使用 GPU）：<a class="headerlink" href="#gpu-gpu" title="Link to this heading">#</a></h2>
+<p>您可以改用 <code class="docutils literal notranslate"><span class="pre">tinker</span></code> 选项，该选项仅需满足：</p>
+<ul class="simple">
+<li><p><strong>Python</strong>：3.11 – 3.12</p></li>
+<li><p><strong>GPU</strong>：无需</p></li>
+</ul>
+</section>
 <hr class="docutils" />
 <section id="id2">
 <h2>源码安装（推荐）<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
@@ -671,10 +691,15 @@ document.write(`
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>trinity<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
 conda<span class="w"> </span>activate<span class="w"> </span>trinity
 
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[flash_attn]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[vllm,flash_attn]&quot;</span>
+
+<span class="c1"># 如果没有GPU，可以注释上一行的命令，改为使用Tinker：</span>
+<span class="c1"># pip install -e &quot;.[tinker]&quot;</span>
+
 <span class="c1"># 如果安装 flash-attn 时遇到问题，可尝试：</span>
 <span class="c1"># pip install flash-attn==2.8.1 --no-build-isolation</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span><span class="w">  </span><span class="c1"># 用于调试和开发</span>
 </pre></div>
 </div>
 </section>
@@ -683,17 +708,25 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
 <span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[flash_attn]&quot;</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[vllm,flash_attn]&quot;</span>
+
+<span class="c1"># 如果没有GPU，可以注释上一行的命令，改为使用Tinker：</span>
+<span class="c1"># pip install -e &quot;.[tinker]&quot;</span>
+
 <span class="c1"># 如果安装 flash-attn 时遇到问题，可尝试：</span>
 <span class="c1"># pip install flash-attn==2.8.1 --no-build-isolation</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span><span class="w">  </span><span class="c1"># 用于调试和开发</span>
 </pre></div>
 </div>
 </section>
 <section id="uv">
 <h4>使用 <code class="docutils literal notranslate"><span class="pre">uv</span></code><a class="headerlink" href="#uv" title="Link to this heading">#</a></h4>
 <p><a class="reference external" href="https://github.com/astral-sh/uv"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a> 是现代的 Python 包管理工具。</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>--extra<span class="w"> </span>flash_attn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>vllm<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>--extra<span class="w"> </span>flash_attn
+
+<span class="c1"># 如果没有GPU，可以改为使用Tinker：</span>
+<span class="c1"># uv sync --extra tinker --extra dev</span>
 </pre></div>
 </div>
 </section>
@@ -791,6 +824,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">如果您拥有 GPU 并希望使用它们：</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu-gpu">如果您没有 GPU（或不希望使用 GPU）：</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">源码安装（推荐）</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1. 克隆仓库</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">2. 创建虚拟环境</a><ul class="nav section-nav flex-column">

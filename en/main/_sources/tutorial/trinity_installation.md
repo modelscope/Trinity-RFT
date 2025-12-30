@@ -3,11 +3,18 @@
 
 For installing Trinity-RFT, you have three options: from source (recommended), via PyPI, or using Docker.
 
-Before installing, ensure your system meets the following requirements:
+**Before you begin**, check your system setup:
 
-- **Python**: Version 3.10 to 3.12 (inclusive)
-- **CUDA**: Version >= 12.8
-- **GPUs**: At least 2 GPUs
+### If you have GPUs and want to use them:
+Make sure your system meets these requirements:
+- **Python**: 3.10 – 3.12
+- **CUDA**: 12.8 or higher
+- **GPUs**: At least 2 available
+
+### If you don’t have GPUs (or prefer not to use them):
+You can use the `tinker` option instead, which only requires:
+- **Python**: 3.11 – 3.12
+- **GPUs**: Not required
 
 ---
 
@@ -32,10 +39,15 @@ Choose one of the following options:
 conda create -n trinity python=3.12
 conda activate trinity
 
-pip install -e ".[dev]"
-pip install -e ".[flash_attn]"
-# if you encounter issues when installing flash-attn, try:
+pip install -e ".[vllm,flash_attn]"
+
+# If you have no GPU, comment out the line above and uncomment this instead:
+# pip install -e ".[tinker]"
+
+# If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
 #### Using venv
@@ -44,10 +56,15 @@ pip install -e ".[flash_attn]"
 python3.10 -m venv .venv
 source .venv/bin/activate
 
-pip install -e ".[dev]"
-pip install -e ".[flash_attn]"
-# if you encounter issues when installing flash-attn, try:
+pip install -e ".[vllm,flash_attn]"
+
+# If you have no GPU, comment out the line above and uncomment this instead:
+# pip install -e ".[tinker]"
+
+# If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
+
+pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
 #### Using `uv`
@@ -55,7 +72,10 @@ pip install -e ".[flash_attn]"
 [`uv`](https://github.com/astral-sh/uv) is a modern Python package installer.
 
 ```bash
-uv sync --extra dev --extra flash_attn
+uv sync --extra vllm --extra dev --extra flash_attn
+
+# If you have no GPU, try to use Tinker instead:
+# uv sync --extra tinker --extra dev
 ```
 
 ---

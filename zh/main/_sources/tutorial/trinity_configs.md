@@ -164,9 +164,20 @@ model:
   max_response_tokens: 16384
   min_response_tokens: 1
   enable_prompt_truncation: true
+  repetition_penalty: 1.0
+  lora_configs: null
+  rope_scaling: null
+  rope_theta: null
+  tinker:
+    enable: false
+    rank: 32
+    seed: null
+    train_mlp: true
+    train_attn: true
+    train_unembed: true
 ```
 
-- `model_path`: 被训练模型的路径。
+- `model_path`: 被训练模型的路径。如果启用了`tinker`，则该路径为本地 tokenizer 的路径。
 - `critic_model_path`: 可选的独立 critic 模型路径。若为空，则默认为 `model_path`。
 - `custom_chat_template`: 可选的自定义 chat template 字符串格式。若未指定，系统会使用 tokenizer 的默认 chat template。
 - `chat_template_path`: 可选的 chat template 文件路径，类型通常为 jinja2；若设置，则覆盖 `custom_chat_template`。若未指定，系统会使用 tokenizer 的默认 chat template。
@@ -175,6 +186,24 @@ model:
 - `max_response_tokens`: 模型生成的回复中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `min_response_tokens`: 模型生成的回复中允许的最小 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `enable_prompt_truncation`: 是否截断 prompt。默认为 `true`。若设置为 `true`，则 prompt 将被截断为 `max_prompt_tokens` 个 token；若设置为 `false`，则 prompt 不会被截断，存在 prompt 和 response 长度之和超过 `max_model_len` 的风险。在 OpenAI API 模式下不生效。
+- `repetition_penalty`：重复惩罚因子。默认值为 `1.0`。
+- `lora_configs`：可选的 LoRA 配置。若未指定，则默认为 `null`。目前仅支持一个 LoRA 配置，并且如果启用了`tinker`，则不会使用此LoRA配置。
+  - `name`：LoRA 的名称。默认为 `None`。
+  - `path`：LoRA 的路径。默认为 `None`。
+  - `base_model_name`：LoRA 所基于的基础模型名称。若未指定，则默认为 `None`。
+  - `lora_rank`：LoRA 的秩（rank）。默认为 `32`。
+  - `lora_alpha`：LoRA 的 alpha 值。默认为 `32`。
+  - `lora_dtype`：LoRA 的数据类型。默认为 `auto`。
+  - `target_modules`：LoRA 的目标模块列表。默认为 `all-linear`。
+- `rope_scaling`：可选的 RoPE 缩放配置，采用 JSON 格式。若未指定，则默认为 `null`。
+- `rope_theta`：可选的 RoPE theta 值。若未指定，则默认为 `null`。
+- `tinker`：可选的 Tinker 配置。注意：若启用 Tinker，则 LoRA 配置将被忽略。
+  - `enable`：是否启用 Tinker。默认为 `false`。
+  - `rank`：控制适配矩阵大小的 LoRA 秩（rank）。默认为 `32`。
+  - `seed`：Tinker 使用的随机种子。若未指定，则默认为 `null`。
+  - `train_mlp`：是否训练 MLP 层。默认为 `true`。
+  - `train_attn`：是否训练注意力层。默认为 `true`。
+  - `train_unembed`：是否训练反嵌入（unembedding）层。默认为 `true`。
 
 ```{tip}
 如果使用的是 Explorer 提供的 openai API，则只有 `max_model_len` 会生效，而 `max_response_tokens`、`max_prompt_tokens` 和 `min_response_tokens` 的值将被忽略，在没有独立指定 `max_tokens` 时，每次 API 调用将生成最多 `max_model_len - prompt_length` 个 token，因此在使用时请确保 prompt 长度小于 `max_model_len`。

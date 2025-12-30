@@ -639,6 +639,10 @@ window.addEventListener("load", load);
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../build_api/trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -649,6 +653,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -725,6 +730,7 @@ window.addEventListener("load", load);
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -946,7 +952,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">representative_sample</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomField</span><span class="p">,</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomField</span><span class="p">,</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.timer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 
 
@@ -998,7 +1004,7 @@ document.write(`
 
 <div class="viewcode-block" id="MixSampleStrategy.sample">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html#trinity.algorithm.sample_strategy.mix_sample_strategy.MixSampleStrategy.sample">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/read_experience&quot;</span><span class="p">):</span>
             <span class="n">usual_exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
@@ -1027,24 +1033,21 @@ document.write(`
             <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_model_version_metric</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/gather_experience&quot;</span><span class="p">):</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span>
-                <span class="n">experiences</span><span class="o">=</span><span class="n">exp_list</span><span class="p">,</span>
-                <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
-                <span class="n">custom_fields</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">CustomField</span><span class="p">(</span>
-                        <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;is_expert&quot;</span><span class="p">,</span>
-                        <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;expert_mask&quot;</span><span class="p">,</span>
-                        <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span>
-                    <span class="p">),</span>
-                    <span class="n">CustomField</span><span class="p">(</span>
-                        <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
-                        <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
-                        <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">],</span>
-            <span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
+        <span class="n">custom_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">CustomField</span><span class="p">(</span>
+                <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;is_expert&quot;</span><span class="p">,</span>
+                <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;expert_mask&quot;</span><span class="p">,</span>
+                <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">CustomField</span><span class="p">(</span>
+                <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
+                <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
+                <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exp_list</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">custom_fields</span> <span class="o">=</span> <span class="n">custom_fields</span>
+        <span class="k">return</span> <span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
 
 
 <div class="viewcode-block" id="MixSampleStrategy.default_args">

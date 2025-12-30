@@ -946,7 +946,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.sample_strategy</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunningStatus</span><span class="p">,</span> <span class="n">SyncMethod</span><span class="p">,</span> <span class="n">SyncStyle</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.state_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -972,7 +972,6 @@ document.write(`
             <span class="n">path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="n">trainer_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span>
         <span class="p">)</span>
         <span class="n">trainer_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">load_trainer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
             <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
             <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">group</span><span class="p">,</span>
@@ -993,7 +992,7 @@ document.write(`
             <span class="n">sample_strategy_state</span> <span class="o">=</span> <span class="n">trainer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sample_strategy_state&quot;</span><span class="p">,</span> <span class="p">{})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">sample_strategy_state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_time</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_steps</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_hf_checkpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_hf_checkpoint</span></div>
@@ -1003,8 +1002,8 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.Trainer.prepare">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the trainer.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_trainer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">)</span></div>
 
 
@@ -1051,7 +1050,7 @@ document.write(`
 
 <div class="viewcode-block" id="Trainer.train_step">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.Trainer.train_step">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Train one step.</span>
 
 <span class="sd">        Returns:</span>
@@ -1061,22 +1060,22 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> started.&quot;</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/train_step&quot;</span><span class="p">):</span>
-            <span class="n">train_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+            <span class="n">train_metrics</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> finished.&quot;</span><span class="p">)</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">train_metrics</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">metrics</span></div>
 
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample a batch of experiences.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Experiences: A batch of experiences.</span>
+<span class="sd">            List[Experience]: A batch of experiences.</span>
 <span class="sd">            Dict: Metrics of the sampling step.</span>
 <span class="sd">            List[Dict]: A list of representative samples for logging.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;sample/task_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eid</span><span class="o">.</span><span class="n">tid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">eids</span><span class="p">))</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;sample/task_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">tid</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span>
 
 <div class="viewcode-block" id="Trainer.need_sync">
@@ -1090,14 +1089,17 @@ document.write(`
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_style</span> <span class="o">==</span> <span class="n">SyncStyle</span><span class="o">.</span><span class="n">DYNAMIC_BY_TRAINER</span><span class="p">:</span>
-                <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span>
                 <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_interval</span><span class="p">:</span>
                     <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_trainer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span><span class="p">)</span>
             <span class="n">explorer_status_counts</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">get_explorer_status_counts</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">WAITING_SYNC</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># memory &amp; checkpoint</span>
-                <span class="k">return</span> <span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
+                    <span class="ow">and</span> <span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Trainer.need_save">
@@ -1124,7 +1126,6 @@ document.write(`
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Trainer sync_weights failed.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_state_dict</span><span class="p">()</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">MEMORY</span><span class="p">:</span>
@@ -1198,7 +1199,7 @@ document.write(`
 <div class="viewcode-block" id="TrainEngineWrapper.prepare">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.TrainEngineWrapper.prepare">[文档]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Do some preparation before training started.&quot;&quot;&quot;</span></div>
 
 
@@ -1210,11 +1211,11 @@ document.write(`
 <div class="viewcode-block" id="TrainEngineWrapper.train_step">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.TrainEngineWrapper.train_step">[文档]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Training one step.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            batch (Experiences): A batch of experiences to train.</span>
+<span class="sd">            batch_exps (List[Experience]): A batch of experiences to train.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict: Metrics of the training step.</span>
@@ -1259,6 +1260,10 @@ document.write(`
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerlPPOTrainerWrapper</span>
 
         <span class="k">return</span> <span class="n">VerlPPOTrainerWrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;tinker&quot;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.tinker_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TinkerTrainerWrapper</span>
+
+        <span class="k">return</span> <span class="n">TinkerTrainerWrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 

@@ -585,9 +585,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -603,19 +601,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension"><code class="docutils literal notranslate"><span class="pre">WorkerExtension</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.apply_patches"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.apply_patches()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.init_process_group"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.init_process_group()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.update_weight"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.update_weight()</span></code></a></li>
-</ul>
-</li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -625,33 +610,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-trinity.common.models.vllm_worker">
-<span id="trinity-common-models-vllm-worker-module"></span><h1>trinity.common.models.vllm_worker module<a class="headerlink" href="#module-trinity.common.models.vllm_worker" title="Link to this heading">#</a></h1>
-<p>Custom vLLM Worker.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_worker.WorkerExtension">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.models.vllm_worker.</span></span><span class="sig-name descname"><span class="pre">WorkerExtension</span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_worker.html#WorkerExtension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_worker.WorkerExtension" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_worker.WorkerExtension.apply_patches">
-<span class="sig-name descname"><span class="pre">apply_patches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_worker.html#WorkerExtension.apply_patches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_worker.WorkerExtension.apply_patches" title="Link to this definition">#</a></dt>
-<dd><p>Apply necessary patches to vLLM.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_worker.WorkerExtension.init_process_group">
-<span class="sig-name descname"><span class="pre">init_process_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nccl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dict_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorer_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_worker.html#WorkerExtension.init_process_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_worker.WorkerExtension.init_process_group" title="Link to this definition">#</a></dt>
-<dd><p>Init torch process group for model weights update</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_worker.WorkerExtension.update_weight">
-<span class="sig-name descname"><span class="pre">update_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_worker.html#WorkerExtension.update_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_worker.WorkerExtension.update_weight" title="Link to this definition">#</a></dt>
-<dd><p>Broadcast weight to all vllm workers from source rank 0 (actor model)</p>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="trinity-common-models-vllm-worker-module">
+<h1>trinity.common.models.vllm_worker module<a class="headerlink" href="#trinity-common-models-vllm-worker-module" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -689,26 +649,6 @@ document.write(`
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension"><code class="docutils literal notranslate"><span class="pre">WorkerExtension</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.apply_patches"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.apply_patches()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.init_process_group"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.init_process_group()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_worker.WorkerExtension.update_weight"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.update_weight()</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

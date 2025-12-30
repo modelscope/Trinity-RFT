@@ -275,6 +275,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -285,6 +289,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -361,6 +366,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -617,6 +623,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs (or prefer not to use them):</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended">From Source (Recommended)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clone-the-repository">1. Clone the Repository</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-virtual-environment">2. Set Up a Virtual Environment</a><ul class="nav section-nav flex-column">
@@ -644,12 +652,24 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>For installing Trinity-RFT, you have three options: from source (recommended), via PyPI, or using Docker.</p>
-<p>Before installing, ensure your system meets the following requirements:</p>
+<p><strong>Before you begin</strong>, check your system setup:</p>
+<section id="if-you-have-gpus-and-want-to-use-them">
+<h2>If you have GPUs and want to use them:<a class="headerlink" href="#if-you-have-gpus-and-want-to-use-them" title="Link to this heading">#</a></h2>
+<p>Make sure your system meets these requirements:</p>
 <ul class="simple">
-<li><p><strong>Python</strong>: Version 3.10 to 3.12 (inclusive)</p></li>
-<li><p><strong>CUDA</strong>: Version &gt;= 12.8</p></li>
-<li><p><strong>GPUs</strong>: At least 2 GPUs</p></li>
+<li><p><strong>Python</strong>: 3.10 – 3.12</p></li>
+<li><p><strong>CUDA</strong>: 12.8 or higher</p></li>
+<li><p><strong>GPUs</strong>: At least 2 available</p></li>
 </ul>
+</section>
+<section id="if-you-dont-have-gpus-or-prefer-not-to-use-them">
+<h2>If you don’t have GPUs (or prefer not to use them):<a class="headerlink" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them" title="Link to this heading">#</a></h2>
+<p>You can use the <code class="docutils literal notranslate"><span class="pre">tinker</span></code> option instead, which only requires:</p>
+<ul class="simple">
+<li><p><strong>Python</strong>: 3.11 – 3.12</p></li>
+<li><p><strong>GPUs</strong>: Not required</p></li>
+</ul>
+</section>
 <hr class="docutils" />
 <section id="from-source-recommended">
 <h2>From Source (Recommended)<a class="headerlink" href="#from-source-recommended" title="Link to this heading">#</a></h2>
@@ -669,10 +689,15 @@ document.write(`
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>trinity<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
 conda<span class="w"> </span>activate<span class="w"> </span>trinity
 
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[flash_attn]&quot;</span>
-<span class="c1"># if you encounter issues when installing flash-attn, try:</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[vllm,flash_attn]&quot;</span>
+
+<span class="c1"># If you have no GPU, comment out the line above and uncomment this instead:</span>
+<span class="c1"># pip install -e &quot;.[tinker]&quot;</span>
+
+<span class="c1"># If you encounter issues when installing flash-attn, try:</span>
 <span class="c1"># pip install flash-attn==2.8.1 --no-build-isolation</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span><span class="w">  </span><span class="c1"># for development like linting and debugging</span>
 </pre></div>
 </div>
 </section>
@@ -681,17 +706,25 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
 <span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[flash_attn]&quot;</span>
-<span class="c1"># if you encounter issues when installing flash-attn, try:</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[vllm,flash_attn]&quot;</span>
+
+<span class="c1"># If you have no GPU, comment out the line above and uncomment this instead:</span>
+<span class="c1"># pip install -e &quot;.[tinker]&quot;</span>
+
+<span class="c1"># If you encounter issues when installing flash-attn, try:</span>
 <span class="c1"># pip install flash-attn==2.8.1 --no-build-isolation</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span><span class="w">  </span><span class="c1"># for development like linting and debugging</span>
 </pre></div>
 </div>
 </section>
 <section id="using-uv">
 <h4>Using <code class="docutils literal notranslate"><span class="pre">uv</span></code><a class="headerlink" href="#using-uv" title="Link to this heading">#</a></h4>
 <p><a class="reference external" href="https://github.com/astral-sh/uv"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a> is a modern Python package installer.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>--extra<span class="w"> </span>flash_attn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>vllm<span class="w"> </span>--extra<span class="w"> </span>dev<span class="w"> </span>--extra<span class="w"> </span>flash_attn
+
+<span class="c1"># If you have no GPU, try to use Tinker instead:</span>
+<span class="c1"># uv sync --extra tinker --extra dev</span>
 </pre></div>
 </div>
 </section>
@@ -789,6 +822,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs (or prefer not to use them):</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended">From Source (Recommended)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clone-the-repository">1. Clone the Repository</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-virtual-environment">2. Set Up a Virtual Environment</a><ul class="nav section-nav flex-column">

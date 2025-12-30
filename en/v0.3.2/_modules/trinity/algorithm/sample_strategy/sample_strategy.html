@@ -931,7 +931,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.sample_strategy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">representative_sample</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">gather_metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.timer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
@@ -943,7 +943,7 @@ document.write(`
 <div class="viewcode-block" id="SampleStrategy.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.SampleStrategy.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">pad_token_id</span></div>
+        <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="SampleStrategy.set_model_version_metric">
@@ -960,14 +960,14 @@ document.write(`
 <div class="viewcode-block" id="SampleStrategy.sample">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.SampleStrategy.sample">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample data from buffer.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            step (`int`): The step number of current step.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            `Experiences`: The sampled Experiences data.</span>
+<span class="sd">            `List[Experience]`: The sampled List[Experience] data.</span>
 <span class="sd">            `Dict`: Metrics for logging.</span>
 <span class="sd">            `List`: Representative data for logging.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
@@ -1009,15 +1009,13 @@ document.write(`
 
 <div class="viewcode-block" id="DefaultSampleStrategy.sample">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.DefaultSampleStrategy.sample">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/read_experience&quot;</span><span class="p">):</span>
             <span class="n">exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
             <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_model_version_metric</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/gather_experience&quot;</span><span class="p">):</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
+        <span class="k">return</span> <span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
 
 
 <div class="viewcode-block" id="DefaultSampleStrategy.default_args">
@@ -1054,16 +1052,14 @@ document.write(`
 
 <div class="viewcode-block" id="StalenessControlSampleStrategy.sample">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.StalenessControlSampleStrategy.sample">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="n">min_model_version</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">step</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_staleness</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/read_experience&quot;</span><span class="p">):</span>
             <span class="n">exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="n">min_model_version</span><span class="o">=</span><span class="n">min_model_version</span><span class="p">)</span>
             <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_model_version_metric</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;time/gather_experience&quot;</span><span class="p">):</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
+        <span class="k">return</span> <span class="n">exp_list</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
 </div>
 
 

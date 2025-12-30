@@ -273,6 +273,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -283,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -359,6 +364,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -887,6 +893,7 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ExperiencePipelineConfig"><code class="docutils literal notranslate"><span class="pre">ExperiencePipelineConfig</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TaskPipelineConfig"><code class="docutils literal notranslate"><span class="pre">TaskPipelineConfig</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.DataProcessorConfig"><code class="docutils literal notranslate"><span class="pre">DataProcessorConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig"><code class="docutils literal notranslate"><span class="pre">TinkerConfig</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig"><code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.AlgorithmConfig"><code class="docutils literal notranslate"><span class="pre">AlgorithmConfig</span></code></a></li>
@@ -1117,6 +1124,11 @@ document.write(`
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.trainer.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker.html">trinity.trainer.tinker package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.html#module-trinity.trainer.tinker">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#module-trinity.trainer.verl">Module contents</a></li>
@@ -1125,6 +1137,7 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.trainer.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.trainer.html">trinity.trainer.trainer module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.trainer.html#trinity.trainer.trainer.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a></li>

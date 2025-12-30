@@ -277,6 +277,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="trinity.trainer.html">trinity.trainer package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -287,6 +291,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -363,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -754,7 +760,7 @@ Note that this trainer runs on the driver process on a single CPU/GPU node.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.prepare"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.prepare"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare" title="Link to this definition">#</a></dt>
 <dd><p>Do some preparation before training started.</p>
 </dd></dl>
 
@@ -772,11 +778,11 @@ Note that this trainer runs on the driver process on a single CPU/GPU node.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step">
-<span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.train_step"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.train_step"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step" title="Link to this definition">#</a></dt>
 <dd><p>Training one step.</p>
 <dl class="field-list simple">
 <dt class="field-odd">参数<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>batch</strong> (<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><em>Experiences</em></a>) -- A batch of experiences to train.</p>
+<dd class="field-odd"><p><strong>batch_exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) -- A batch of experiences to train.</p>
 </dd>
 <dt class="field-even">返回<span class="colon">:</span></dt>
 <dd class="field-even"><p>Metrics of the training step.</p>

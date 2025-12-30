@@ -992,6 +992,13 @@ document.write(`
         <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="InferenceModel.sync_model">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.sync_model">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync the model with the latest model_version.&quot;&quot;&quot;</span></div>
+
+
 <div class="viewcode-block" id="InferenceModel.get_model_version">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_version">[docs]</a>
     <span class="nd">@abstractmethod</span>
@@ -1068,7 +1075,9 @@ document.write(`
 <span class="sd">            enable_history (bool): Whether to enable history recording. Default to False.</span>
 <span class="sd">            enable_thinking (Optional[bool]): Whether to enable thinking mode. Default to None. Only used for Qwen3 series models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">engine_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">),</span> <span class="s2">&quot;Only vLLM model is supported for now.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">engine_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;tinker&quot;</span>
+        <span class="p">),</span> <span class="s2">&quot;Only vLLM and tinker model is supported for now.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_address</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1186,7 +1195,7 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of experiences from a list of messages.&quot;&quot;&quot;</span>
         <span class="n">lora_request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ModelWrapper.chat_async">
@@ -1195,7 +1204,7 @@ document.write(`
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a list of experiences from a list of messages in async.&quot;&quot;&quot;</span>
         <span class="n">lora_request</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request_async</span><span class="p">()</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ModelWrapper.chat_mm">

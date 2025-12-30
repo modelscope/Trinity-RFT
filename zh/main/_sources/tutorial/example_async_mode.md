@@ -112,6 +112,10 @@ trainer:
 bash examples/async_gsm8k/run.sh
 ```
 
+```{note}
+目前异步 RFT 训练中，最好需要先启动Trainer后启动Explorer，以避免在Explorer进程提前结束之后，Trainer读取不到生成的Experience数据。此问题将在未来的版本中解决。
+```
+
 下图展示了 GRPO 在异步模式下的学习曲线：
 > 此结果仅应视为基线，因为 GRPO 本质上是一种 on-policy 算法。
 > 我们正在持续研究其他在异步模式下适用的强化学习算法（例如 [OPMD](./example_reasoning_advanced.md)）。

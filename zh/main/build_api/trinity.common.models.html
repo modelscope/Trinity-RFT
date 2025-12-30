@@ -277,6 +277,10 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.tinker.html">trinity.trainer.tinker package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.tinker.utils.html">trinity.trainer.tinker.utils module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
@@ -287,6 +291,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.trainer.tinker_trainer.html">trinity.trainer.tinker_trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
 </ul>
@@ -363,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
@@ -646,27 +652,12 @@ document.write(`
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_patch.html">trinity.common.models.vllm_patch package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_patch.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html">trinity.common.models.vllm_patch.api_patch module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.PatchedChatCompletionResponseChoice"><code class="docutils literal notranslate"><span class="pre">PatchedChatCompletionResponseChoice</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.PatchedChatCompletionResponse"><code class="docutils literal notranslate"><span class="pre">PatchedChatCompletionResponse</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.chat_completion_full_generator"><code class="docutils literal notranslate"><span class="pre">chat_completion_full_generator()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.run_server_in_ray"><code class="docutils literal notranslate"><span class="pre">run_server_in_ray()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.dummy_add_signal_handler"><code class="docutils literal notranslate"><span class="pre">dummy_add_signal_handler()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.patch_and_serve_http"><code class="docutils literal notranslate"><span class="pre">patch_and_serve_http()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html#trinity.common.models.vllm_patch.api_patch.run_api_server_in_ray_actor"><code class="docutils literal notranslate"><span class="pre">run_api_server_in_ray_actor()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch.html">trinity.common.models.vllm_patch.api_patch module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.api_patch_v12.html">trinity.common.models.vllm_patch.api_patch_v12 module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.worker_patch.html">trinity.common.models.vllm_patch.worker_patch module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_patch.worker_patch.html#trinity.common.models.vllm_patch.worker_patch.patch_vllm_prompt_logprobs"><code class="docutils literal notranslate"><span class="pre">patch_vllm_prompt_logprobs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.worker_patch.html">trinity.common.models.vllm_patch.worker_patch module</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_patch.html#module-trinity.common.models.vllm_patch">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_patch.html#trinity.common.models.vllm_patch.get_vllm_version"><code class="docutils literal notranslate"><span class="pre">get_vllm_version()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_patch.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -688,6 +679,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.logprobs"><code class="docutils literal notranslate"><span class="pre">InferenceModel.logprobs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">InferenceModel.convert_messages_to_experience()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.prepare"><code class="docutils literal notranslate"><span class="pre">InferenceModel.prepare()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.sync_model"><code class="docutils literal notranslate"><span class="pre">InferenceModel.sync_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_version()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_available_address"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_available_address()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_server_url()</span></code></a></li>
@@ -730,6 +722,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.extract_logprobs"><code class="docutils literal notranslate"><span class="pre">extract_logprobs()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.tinker_model.html">trinity.common.models.tinker_model module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.common.models.utils.html">trinity.common.models.utils module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.tokenize_and_mask_messages_hf"><code class="docutils literal notranslate"><span class="pre">tokenize_and_mask_messages_hf()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.tokenize_and_mask_messages_default"><code class="docutils literal notranslate"><span class="pre">tokenize_and_mask_messages_default()</span></code></a></li>
@@ -744,42 +737,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.get_megatron_converter"><code class="docutils literal notranslate"><span class="pre">get_megatron_converter()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.__init__"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.prepare"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.prepare()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.chat()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.generate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.chat_mm()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate_mm"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.generate_mm()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.logprobs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sample"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sample()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.convert_messages_to_experience()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.shutdown()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sync_model()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.init_process_group()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.run_api_server()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_api_server_url()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.reset_prefix_cache()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_model_version()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_model_path()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_lora_request"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_lora_request()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_message_token_len"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_message_token_len()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sleep()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.wake_up()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension"><code class="docutils literal notranslate"><span class="pre">WorkerExtension</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.apply_patches"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.apply_patches()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.init_process_group"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.init_process_group()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.update_weight"><code class="docutils literal notranslate"><span class="pre">WorkerExtension.update_weight()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
 </ul>
 </div>
 </section>

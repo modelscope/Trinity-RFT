@@ -933,6 +933,7 @@ document.write(`
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -941,80 +942,103 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_latest_ckpt_path</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Experience</span><span class="p">,</span>
+    <span class="n">gather_action_masks</span><span class="p">,</span>
+    <span class="n">gather_attention_masks</span><span class="p">,</span>
+    <span class="n">gather_response_attrs</span><span class="p">,</span>
+    <span class="n">gather_token_ids</span><span class="p">,</span>
+    <span class="n">split_dpo_experience_to_single_turn</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="to_data_proto">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.utils.html#trinity.trainer.verl.utils.to_data_proto">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">to_data_proto</span><span class="p">(</span><span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataProto</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Experiences to verl DataProto.&quot;&quot;&quot;</span>
-    <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_data_proto</span><span class="p">(</span>
+    <span class="n">experiences</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">pad_token_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataProto</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert List[Experience] to verl DataProto.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No experiences provided.&quot;</span>
+    <span class="k">if</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">experience_type</span> <span class="o">==</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="n">split_dpo_experience_to_single_turn</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span>
+    <span class="n">max_prompt_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span>
+    <span class="n">max_response_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span>  <span class="c1"># type: ignore</span>
+
+    <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">gather_attention_masks</span><span class="p">(</span>
+        <span class="n">experiences</span><span class="p">,</span> <span class="n">max_prompt_length</span><span class="p">,</span> <span class="n">max_response_length</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
     <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">position_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cumsum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="n">gather_token_ids</span><span class="p">(</span>
+        <span class="n">experiences</span><span class="p">,</span> <span class="n">max_prompt_length</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">,</span> <span class="n">pad_token_id</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
     <span class="n">batch_dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">eid</span><span class="o">.</span><span class="n">tid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">eids</span><span class="p">]),</span>
-        <span class="s2">&quot;unique_ids&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">eid</span><span class="o">.</span><span class="n">uid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">eids</span><span class="p">]),</span>
+        <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">tid</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">]),</span>
+        <span class="s2">&quot;unique_ids&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">uid</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">]),</span>
         <span class="s2">&quot;position_ids&quot;</span><span class="p">:</span> <span class="n">position_ids</span><span class="p">,</span>
-        <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;action_masks&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-        <span class="p">),</span>
+        <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">tokens</span><span class="p">,</span>
+        <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">tokens</span><span class="p">[:,</span> <span class="n">max_prompt_length</span><span class="p">:],</span>
+        <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="p">,</span>
+        <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="n">gather_action_masks</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">),</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">experiences</span><span class="o">.</span><span class="n">token_level_rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">experiences</span><span class="o">.</span><span class="n">logprobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">token_level_rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">have_reward</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">)</span>
+    <span class="n">have_token_level_reward</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">token_level_reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">have_reward</span> <span class="ow">or</span> <span class="n">have_token_level_reward</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">),</span> <span class="s2">&quot;No logprobs provided.&quot;</span>
+        <span class="k">if</span> <span class="n">have_token_level_reward</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">have_reward</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;Both experiences.rewards and experiences.token_level_rewards are provided. &quot;</span>
                     <span class="s2">&quot;Using experiences.token_level_rewards.&quot;</span>
                 <span class="p">)</span>
-            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">token_level_rewards</span>
+            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span>
+                <span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;token_level_reward&quot;</span><span class="p">,</span> <span class="n">max_response_length</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="n">eos_mask_idx</span> <span class="o">=</span> <span class="n">cumsum</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">token_level_rewards</span><span class="p">[</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">eos_mask_idx</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span>
-            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">token_level_rewards</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span>
+            <span class="n">token_level_rewards</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)),</span> <span class="n">eos_mask_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">token_level_rewards</span><span class="p">[:,</span> <span class="n">max_prompt_length</span><span class="p">:]</span>
         <span class="n">batch_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;token_level_scores&quot;</span><span class="p">:</span> <span class="n">token_level_rewards</span><span class="p">,</span>
-                <span class="s2">&quot;old_log_probs&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="s2">&quot;old_log_probs&quot;</span><span class="p">:</span> <span class="n">gather_response_attrs</span><span class="p">(</span>
+                    <span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="n">max_response_length</span>
+                <span class="p">),</span>
             <span class="p">}</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">advantages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;advantages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">advantages</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">teacher_logprobs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;teacher_log_probs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">teacher_logprobs</span>
 
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">multi_modal_inputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;unique_ids&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;advantages&quot;</span><span class="p">,</span> <span class="s2">&quot;returns&quot;</span><span class="p">,</span> <span class="s2">&quot;teacher_logprobs&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
+            <span class="n">batch_dict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">gather_response_attrs</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">max_response_length</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">multi_modal_inputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">multi_modal_inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
         <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">multi_modal_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
-            <span class="p">],</span>
+            <span class="p">[{</span><span class="n">key</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">multi_modal_inputs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">}</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">],</span>  <span class="c1"># type: ignore</span>
             <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
-                <span class="n">batch_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="n">custom_fields_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_fields_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">custom_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">custom_fields_set</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">custom_field</span> <span class="ow">in</span> <span class="n">custom_fields</span><span class="p">:</span>
+            <span class="n">batch_dict</span><span class="p">[</span><span class="n">custom_field</span><span class="o">.</span><span class="n">destination_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">custom_field</span><span class="o">.</span><span class="n">source_field</span><span class="p">]</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">],</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">custom_field</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Custom fields are not consistent across experiences.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">DataProto</span><span class="o">.</span><span class="n">from_single_dict</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="compute_data_metrics">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.utils.html#trinity.trainer.verl.utils.compute_data_metrics">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_data_metrics</span><span class="p">(</span><span class="n">batch</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">,</span> <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_data_metrics</span><span class="p">(</span><span class="n">batch</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes various metrics from a batch of data for PPO training.</span>
 <span class="sd">    Modified from verl.trainer.ppo.metric_utils.compute_data_metrics</span>
@@ -1025,7 +1049,6 @@ document.write(`
 
 <span class="sd">    Args:</span>
 <span class="sd">        batch: A DataProto object containing batch data with token-level scores, rewards, advantages, etc.</span>
-<span class="sd">        use_critic: Whether to include critic-specific metrics. Defaults to True.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A dictionary of metrics including:</span>
@@ -1033,8 +1056,8 @@ document.write(`
 <span class="sd">            - critic/rewards/mean, max, min: Statistics about sequence rewards</span>
 <span class="sd">            - critic/advantages/mean, max, min: Statistics about advantages</span>
 <span class="sd">            - critic/returns/mean, max, min: Statistics about returns</span>
-<span class="sd">            - critic/values/mean, max, min: Statistics about critic values (if use_critic=True)</span>
-<span class="sd">            - critic/vf_explained_var: Explained variance of the value function (if use_critic=True)</span>
+<span class="sd">            - critic/values/mean, max, min: Statistics about critic values</span>
+<span class="sd">            - critic/vf_explained_var: Explained variance of the value function</span>
 <span class="sd">            - response_length/mean, max, min, clip_ratio: Statistics about response lengths</span>
 <span class="sd">            - prompt_length/mean, max, min, clip_ratio: Statistics about prompt lengths</span>
 <span class="sd">    &quot;&quot;&quot;</span>

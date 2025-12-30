@@ -656,14 +656,8 @@ document.write(`
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.get_megatron_converter"><code class="docutils literal notranslate"><span class="pre">get_megatron_converter()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension"><code class="docutils literal notranslate"><span class="pre">WorkerExtension</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.html#module-trinity.common.models">Module contents</a><ul>
@@ -1048,6 +1042,16 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.DataProcessorConfig.__init__"><code class="docutils literal notranslate"><span class="pre">DataProcessorConfig.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig"><code class="docutils literal notranslate"><span class="pre">TinkerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.enable"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.enable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.rank"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.rank</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.seed"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.seed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.train_mlp"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.train_mlp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.train_attn"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.train_attn</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.train_unembed"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.train_unembed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.TinkerConfig.__init__"><code class="docutils literal notranslate"><span class="pre">TinkerConfig.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig"><code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.model_path"><code class="docutils literal notranslate"><span class="pre">ModelConfig.model_path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.critic_model_path"><code class="docutils literal notranslate"><span class="pre">ModelConfig.critic_model_path</span></code></a></li>
@@ -1068,6 +1072,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.max_cpu_loras"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_cpu_loras</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.rope_scaling"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rope_scaling</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.rope_theta"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rope_theta</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.tinker"><code class="docutils literal notranslate"><span class="pre">ModelConfig.tinker</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ModelConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1388,6 +1393,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.chosen"><code class="docutils literal notranslate"><span class="pre">Experience.chosen</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.rejected"><code class="docutils literal notranslate"><span class="pre">Experience.rejected</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.teacher_logprobs"><code class="docutils literal notranslate"><span class="pre">Experience.teacher_logprobs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.custom_fields"><code class="docutils literal notranslate"><span class="pre">Experience.custom_fields</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.serialize"><code class="docutils literal notranslate"><span class="pre">Experience.serialize()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.deserialize"><code class="docutils literal notranslate"><span class="pre">Experience.deserialize()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience.to_dict"><code class="docutils literal notranslate"><span class="pre">Experience.to_dict()</span></code></a></li>

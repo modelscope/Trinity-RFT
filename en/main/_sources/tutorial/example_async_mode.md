@@ -112,6 +112,10 @@ You can run this example with the following command:
 bash examples/async_gsm8k/run.sh
 ```
 
+```{note}
+In the current asynchronous RFT training, it is recommended to start the Trainer before starting the Explorer to avoid the situation where the Trainer cannot read the generated experience data after the Explorer process terminates prematurely. This issue will be resolved in a future version.
+```
+
 The following plot shows the learning curve of GRPO in the asynchronous mode.
 > This result should be regarded merely as a baseline, since GRPO is supposed to be an on-policy algorithm.
 > We are continuously investigating other RL algorithms (e.g., [OPMD](./example_reasoning_advanced.md)) in the asynchronous mode.

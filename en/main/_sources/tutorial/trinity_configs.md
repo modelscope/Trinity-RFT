@@ -164,9 +164,20 @@ model:
   max_response_tokens: 16384
   min_response_tokens: 1
   enable_prompt_truncation: true
+  repetition_penalty: 1.0
+  lora_configs: null
+  rope_scaling: null
+  rope_theta: null
+  tinker:
+    enable: false
+    rank: 32
+    seed: null
+    train_mlp: true
+    train_attn: true
+    train_unembed: true
 ```
 
-- `model_path`: Path to the model being trained.
+- `model_path`: Path to the model being trained. If `tinker` is enabled, this is the path to the local tokenizer.
 - `critic_model_path`: Optional path to a separate critic model. If empty, defaults to `model_path`.
 - `custom_chat_template`: Optional custom chat template in string format. If not specified, the system will use the default chat template from tokenizer.
 - `chat_template_path`: Optional path to the chat template file in jinja2 type; overrides `custom_chat_template` if set. If not specified, the system will use the default chat template from tokenizer.
@@ -175,6 +186,24 @@ model:
 - `max_prompt_tokens`: Maximum number of tokens allowed in prompts. Only for `chat` and `generate` methods in `InferenceModel`.
 - `min_response_tokens`: Minimum number of tokens allowed in generated responses. Only for `chat` and `generate` methods in `InferenceModel`. Default is `1`. It must be less than `max_response_tokens`.
 - `enable_prompt_truncation`: Whether to truncate the prompt. Default is `true`. If set to `true`, the prompt will be truncated to `max_prompt_tokens` tokens; if set to `false`, the prompt will not be truncated and there is a risk that the prompt length plus response length exceeds `max_model_len`. This function does not work with openai api mode.
+- `repetition_penalty`: Repetition penalty factor. Default is `1.0`.
+- `lora_configs`: Optional LoRA configuration. If not specified, defaults to `null`. Currently, only one LoRA configuration is supported, and this configuration will not be applied if `tinker` is enabled.
+  - `name`: Name of the LoRA. Default is `None`.
+  - `path`: Path to the LoRA. Default is `None`.
+  - `base_model_name`: Name of the base model for LoRA. If not specified, defaults to `None`.
+  - `lora_rank`: Rank of the LoRA. Default is `32`.
+  - `lora_alpha`: Alpha value of the LoRA. Default is `32`.
+  - `lora_dtype`: Data type of the LoRA. Default is `auto`.
+  - `target_modules`: List of target modules for LoRA. Default is `all-linear`.
+- `rope_scaling`: Optional RoPE scaling configuration in JSON format. If not specified, defaults to `null`.
+- `rope_theta`: Optional RoPE theta value. If not specified, defaults to `null`.
+- `tinker`: Optional Tinker configuration. Note: LoRA configuration will be ignored if Tinker is enabled.
+  - `enable`: Whether to enable Tinker. Default is `false`.
+  - `rank`: LoRA rank controlling the size of adaptation matrices. Default is `32`.
+  - `seed`: Random seed for Tinker. If not specified, defaults to `null`.
+  - `train_mlp`: Whether to train the MLP layer. Default is `true`.
+  - `train_attn`: Whether to train the attention layer. Default is `true`.
+  - `train_unembed`: Whether to train the unembedding layer. Default is `true`.
 
 ```{tip}
 If you are using the openai API provided by Explorer, only `max_model_len` will take effect, and the value of `max_response_tokens`, `max_prompt_tokens`, and `min_response_tokens` will be ignored. When `max_tokens` is not independently specified, each API call will generate up to `max_model_len - prompt_length` tokens. Therefore, please ensure that the prompt length is less than `max_model_len` when using the API.
