@@ -253,7 +253,7 @@ class RayUnittestBase(unittest.TestCase):
         ray.shutdown(_exiting_interpreter=True)
 
 
-class RayUnittestBaseAysnc(unittest.IsolatedAsyncioTestCase):
+class RayUnittestBaseAsync(unittest.IsolatedAsyncioTestCase):
     @classmethod
     def setUpClass(cls):
         ray.init(ignore_reinit_error=True, namespace="trinity_unittest")

@@ -184,4 +184,4 @@ class TestConfig(unittest.TestCase):
 
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):
-            shutil.rmtree(CHECKPOINT_ROOT_DIR)
+            shutil.rmtree(CHECKPOINT_ROOT_DIR, ignore_errors=True)

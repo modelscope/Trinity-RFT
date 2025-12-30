@@ -16,7 +16,7 @@ from parameterized import parameterized_class
 
 from tests.tools import (
     RayUnittestBase,
-    RayUnittestBaseAysnc,
+    RayUnittestBaseAsync,
     TensorBoardParser,
     get_checkpoint_path,
     get_lora_config,
@@ -109,22 +109,22 @@ class TestTrainerCountdown(BaseTrainerCase):
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
         eval_metrics = parser.metric_list("eval")
-        self.assertTrue(len(eval_metrics) > 0)
+        self.assertGreater(len(eval_metrics), 0)
         self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 8)
         actor_kl_metrics = parser.metric_list("actor/kl")
-        self.assertTrue(len(actor_kl_metrics) > 0)
+        self.assertGreater(len(actor_kl_metrics), 0)
         actor_kl_loss = parser.metric_values("actor/kl_loss")
         self.assertEqual(actor_kl_loss[0], 0.0)
         critic_kl_metrics = parser.metric_list("critic/kl")
-        self.assertTrue(len(critic_kl_metrics) > 0)
+        self.assertGreater(len(critic_kl_metrics), 0)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 8)
         ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
@@ -138,13 +138,13 @@ class TestTrainerCountdown(BaseTrainerCase):
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
         )
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_4, "actor"))) > 0)
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))) > 0)
-        self.assertTrue(
-            len(os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))) > 0
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_4, "actor"))), 0)
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))), 0)
+        self.assertGreater(
+            len(os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))), 0
         )
-        self.assertTrue(
-            len(os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))) > 0
+        self.assertGreater(
+            len(os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))), 0
         )
         self.assertEqual(step_num, 8)
         ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
@@ -161,7 +161,7 @@ class TestTrainerCountdown(BaseTrainerCase):
         for prefix in ["eval", "bench"]:
             for taskset_name in ["countdown", "copy_countdown"]:
                 metrics = parser.metric_list(f"{prefix}/{taskset_name}")
-                self.assertTrue(len(metrics) > 0)
+                self.assertGreater(len(metrics), 0, f"{prefix}/{taskset_name} metrics not found")
                 for eval_stats in ["mean", "best", "worst"]:
                     for k in [2, 4]:
                         for stats in ["mean", "std"]:
@@ -171,7 +171,7 @@ class TestTrainerCountdown(BaseTrainerCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestStepAheadAsyncRL(BaseTrainerCase):
@@ -200,17 +200,17 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
         actor_kl_metrics = parser.metric_list("actor/kl")
-        self.assertTrue(len(actor_kl_metrics) > 0)
+        self.assertGreater(len(actor_kl_metrics), 0)
         critic_kl_metrics = parser.metric_list("critic/kl")
-        self.assertTrue(len(critic_kl_metrics) > 0)
+        self.assertGreater(len(critic_kl_metrics), 0)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
         ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
@@ -224,7 +224,7 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 @parameterized_class(
@@ -266,15 +266,15 @@ class TestTrainerGSM8K(BaseTrainerCase):
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         pipeline_metrics = parser.metric_list("experience_pipeline")
-        self.assertTrue(len(pipeline_metrics) > 0)
+        self.assertGreater(len(pipeline_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
         # TODO: used for real testing
         # rewards = parser.metric_values("critic/rewards/mean")
@@ -285,7 +285,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
@@ -342,12 +342,12 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         sft_config = stage_configs[0]
         parser = TensorBoardParser(os.path.join(sft_config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) == 0)
+        self.assertEqual(len(rollout_metrics), 0)
         sft_metrics = parser.metric_list("actor/sft")
-        self.assertTrue(len(sft_metrics) > 0)
+        self.assertGreater(len(sft_metrics), 0)
         self.assertEqual(parser.metric_max_step(sft_metrics[0]), 3)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_min_step(response_metrics[0]), 1)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 3)
 
@@ -355,14 +355,14 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         grpo_config = stage_configs[1]
         parser = TensorBoardParser(os.path.join(grpo_config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         sft_metrics = parser.metric_list("actor/sft")
-        self.assertTrue(len(sft_metrics) == 0)
+        self.assertEqual(len(sft_metrics), 0)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_min_step(response_metrics[0]), 1)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
         # test save checkpoint when sft finish
@@ -378,11 +378,11 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
             trainer_type="verl",
         )
         self.assertEqual(step_num, 4)
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_dir, "actor"))), 0)
 
     def tearDown(self):
         # TODO: remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerDPO(BaseTrainerCase):
@@ -404,12 +404,12 @@ class TestTrainerDPO(BaseTrainerCase):
         train(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerSFT(BaseTrainerCase):
@@ -432,12 +432,12 @@ class TestTrainerSFT(BaseTrainerCase):
         train(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerToolsSFT(BaseTrainerCase):
@@ -460,15 +460,15 @@ class TestTrainerToolsSFT(BaseTrainerCase):
         train(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
-def run_trainer(config: Config) -> None:
+def run_trainer(config: Config, stop_event=None) -> None:
     ray.init(
         namespace=config.ray_namespace,
         runtime_env={
@@ -478,10 +478,15 @@ def run_trainer(config: Config) -> None:
             }
         },
     )
-    train(config)
+    try:
+        train(config)
+    finally:
+        if stop_event:
+            stop_event.set()
+        ray.shutdown()
 
 
-def run_explorer(config: Config) -> None:
+def run_explorer(config: Config, stop_event=None) -> None:
     ray.init(
         namespace=config.ray_namespace,
         runtime_env={
@@ -491,10 +496,15 @@ def run_explorer(config: Config) -> None:
             }
         },
     )
-    explore(config)
+    try:
+        explore(config)
+    finally:
+        if stop_event:
+            stop_event.set()
+        ray.shutdown()
 
 
-def run_both(config: Config) -> None:
+def run_both(config: Config, stop_event=None) -> None:
     ray.init(
         namespace=config.ray_namespace,
         runtime_env={
@@ -504,10 +514,15 @@ def run_both(config: Config) -> None:
             }
         },
     )
-    both(config)
+    try:
+        both(config)
+    finally:
+        if stop_event:
+            stop_event.set()
+        ray.shutdown()
 
 
-def run_serve(config: Config) -> None:
+def run_serve(config: Config, stop_event=None) -> None:
     ray.init(
         namespace=config.ray_namespace,
         runtime_env={
@@ -517,7 +532,12 @@ def run_serve(config: Config) -> None:
             }
         },
     )
-    serve(config)
+    try:
+        serve(config)
+    finally:
+        if stop_event:
+            stop_event.set()
+        ray.shutdown()
 
 
 @parameterized_class(
@@ -528,6 +548,7 @@ class TestFullyAsyncMode(unittest.TestCase):
     def setUp(self):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
+        self.process_list = []
 
     def test_fully_async_mode(self):
         config = get_template_config()
@@ -578,8 +599,12 @@ class TestFullyAsyncMode(unittest.TestCase):
         explorer2_config.trainer = deepcopy(trainer_config.trainer)
         explorer1_config.check_and_update()
 
-        trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))
+        trainer_stop_event = multiprocessing.Event()
+        trainer_process = multiprocessing.Process(
+            target=run_trainer, args=(trainer_config, trainer_stop_event)
+        )
         trainer_process.start()
+        self.process_list.append(trainer_process)
 
         ray.init(ignore_reinit_error=True)
         while True:
@@ -590,20 +615,34 @@ class TestFullyAsyncMode(unittest.TestCase):
                 print("waiting for trainer to start.")
                 time.sleep(5)
 
-        explorer_process_1 = multiprocessing.Process(target=run_explorer, args=(explorer1_config,))
+        explorer1_stop_event = multiprocessing.Event()
+        explorer_process_1 = multiprocessing.Process(
+            target=run_explorer, args=(explorer1_config, explorer1_stop_event)
+        )
         explorer_process_1.start()
+        self.process_list.append(explorer_process_1)
 
         time.sleep(5)
         explorer2_config.explorer.name = "explorer2"
         explorer2_config.check_and_update()
-        explorer_process_2 = multiprocessing.Process(target=run_explorer, args=(explorer2_config,))
+        explorer2_stop_event = multiprocessing.Event()
+        explorer_process_2 = multiprocessing.Process(
+            target=run_explorer, args=(explorer2_config, explorer2_stop_event)
+        )
         explorer_process_2.start()
+        self.process_list.append(explorer_process_2)
 
-        explorer_process_1.join()
-        explorer_process_2.join()
+        explorer_process_1.join(timeout=300)
+        if explorer_process_1.is_alive():
+            self.fail("explorer1 process is still alive")
+        explorer_process_2.join(timeout=300)
+        if explorer_process_2.is_alive():
+            self.fail("explorer2 process is still alive")
 
         # wait for trainer process to finish.
         trainer_process.join(timeout=200)
+        if trainer_process.is_alive():
+            self.fail("trainer process is still alive")
 
         # check the tensorboard
         parser = TensorBoardParser(
@@ -661,26 +700,33 @@ class TestFullyAsyncMode(unittest.TestCase):
             8,
         )
         log_files = os.listdir(os.path.join(explorer1_config.checkpoint_job_dir, "log"))
-        self.assertTrue("trainer.log" in log_files)
-        self.assertTrue("synchronizer.log" in log_files)
-        self.assertTrue("explorer1.log" in log_files)
-        self.assertTrue("explorer2.log" in log_files)
-        self.assertTrue("explorer1_runner_0.log" in log_files)
-        self.assertTrue("explorer1_runner_7.log" in log_files)
-        self.assertTrue("explorer2_runner_0.log" in log_files)
-        self.assertTrue("explorer2_runner_7.log" in log_files)
-        self.assertTrue("explorer1_experience_pipeline.log" in log_files)
-        self.assertTrue("explorer2_experience_pipeline.log" in log_files)
+        self.assertIn("trainer.log", log_files)
+        self.assertIn("synchronizer.log", log_files)
+        self.assertIn("explorer1.log", log_files)
+        self.assertIn("explorer2.log", log_files)
+        self.assertIn("explorer1_runner_0.log", log_files)
+        self.assertIn("explorer1_runner_7.log", log_files)
+        self.assertIn("explorer2_runner_0.log", log_files)
+        self.assertIn("explorer2_runner_7.log", log_files)
+        self.assertIn("explorer1_experience_pipeline.log", log_files)
+        self.assertIn("explorer2_experience_pipeline.log", log_files)
         files_to_check = ["trainer.log", "synchronizer.log", "explorer1.log", "explorer2.log"]
         for file_name in files_to_check:
             with open(os.path.join(explorer1_config.checkpoint_job_dir, "log", file_name)) as f:
                 lines = f.readlines()
-                self.assertTrue(len(lines) > 0)
+                self.assertGreater(len(lines), 0, f"{file_name} is empty")
         ray.shutdown()
 
     def tearDown(self):
         checkpoint_path = get_checkpoint_path()
-        shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
+        shutil.rmtree(os.path.join(checkpoint_path, "unittest"), ignore_errors=True)
+        for process in self.process_list:
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=10)
+                if process.is_alive():
+                    process.kill()
+                    process.join()
 
 
 @parameterized_class(
@@ -712,6 +758,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
         self.config.trainer.save_hf_checkpoint = "last"
         self.config.trainer.trainer_strategy = self.strategy
         self.config.check_and_update()
+        self.process_list = []
 
     def test_trainer(self):
         """Test the checkpoint saving."""
@@ -723,8 +770,10 @@ class TestTrainerCheckpointSave(unittest.TestCase):
         _trainer_config.trainer.max_actor_ckpt_to_keep = 2
         _trainer_config.trainer.max_critic_ckpt_to_keep = 2
 
-        trainer_process = multiprocessing.Process(target=run_both, args=(self.config,))
+        stop_event = multiprocessing.Event()
+        trainer_process = multiprocessing.Process(target=run_both, args=(self.config, stop_event))
         trainer_process.start()
+        self.process_list.append(trainer_process)
 
         default_local_dir = _trainer_config.trainer.default_local_dir
         state_dict_iteration = checkpoint_iteration = 0
@@ -744,7 +793,10 @@ class TestTrainerCheckpointSave(unittest.TestCase):
             "__1_1.distcp",
             "__0_0.distcp",
         }
-        while state_dict_iteration < 4 and checkpoint_iteration < 4:
+        start_time = time.time()
+        while not stop_event.is_set() and time.time() - start_time < 60 * 10:
+            time.sleep(10)
+
             if os.path.exists(state_dict_iteration_file):
                 try:
                     with open(state_dict_iteration_file, "r") as f:
@@ -776,10 +828,10 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                     items = os.listdir(huggingface_dir)
                     self.assertIn("config.json", items)
                     self.assertIn("generation_config.json", items)
-                print(f"State dict check at {state_dict_iteration} iteration passed.")
+                # print(f"State dict check at {state_dict_iteration} iteration passed.")  # for debug
 
             if checkpoint_iteration > 0:
-                for sub_dir_name in ["actor", "critic"]:
+                for sub_dir_name in ["critic", "actor"]:
                     iteration_dir = os.path.join(
                         default_local_dir, f"global_step_{checkpoint_iteration}", sub_dir_name
                     )
@@ -804,8 +856,10 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                             megatron_dist_ckpt_items,
                         )
                     huggingface_dir = os.path.join(iteration_dir, "huggingface")
+                    huggingface_dir_files = os.listdir(huggingface_dir)
                     self.assertEqual(
-                        set(os.listdir(huggingface_dir)) - {"generation_config.json"},
+                        set(huggingface_dir_files)
+                        - {"generation_config.json", "model.safetensors"},
                         {
                             "vocab.json",
                             "merges.txt",
@@ -817,14 +871,22 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                             "special_tokens_map.json",
                         },
                     )
-                print(f"Checkpoint check at {checkpoint_iteration} iteration passed.")
-
-            time.sleep(1)
-        trainer_process.join()
+                # print(f"Checkpoint check at {checkpoint_iteration} iteration passed.")  # for debug
+        if not stop_event.is_set():
+            self.fail("Training process failed to stop.")
+        trainer_process.join(timeout=10)
+        self.assertIn("model.safetensors", huggingface_dir_files)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
+        for process in self.process_list:
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=10)
+                if process.is_alive():
+                    process.kill()
+                    process.join()
 
 
 class TestTrainerMIX(BaseTrainerCase):
@@ -883,20 +945,20 @@ class TestTrainerMIX(BaseTrainerCase):
 
         # test rollout metrics
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
             parser.metric_values("experience_pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         expert_metrics = parser.metric_list("actor/expert/")
         self.assertEqual(parser.metric_max_step(expert_metrics[0]), 4)  # SFT
         usual_metrics = parser.metric_list("actor/usual/")
         self.assertEqual(parser.metric_max_step(usual_metrics[0]), 4)  # RFT
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_min_step(response_metrics[0]), 1)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
         # test save checkpoint at last step
@@ -905,10 +967,10 @@ class TestTrainerMIX(BaseTrainerCase):
             trainer_type="verl",
         )
         self.assertEqual(step_num, 4)
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_dir, "actor"))), 0)
 
     def tearDown(self):
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 async def run_math_workflow(serve_url: str, task: dict):
@@ -943,14 +1005,13 @@ async def run_math_workflow(serve_url: str, task: dict):
     await proxy_client.feedback_async(sum(reward.values()), [response.id])
 
 
-class TestServeWithTrainer(RayUnittestBaseAysnc):
+class TestServeWithTrainer(RayUnittestBaseAsync):
     def setUp(self):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
         checkpoint_path = get_checkpoint_path()
         shutil.rmtree(os.path.join(checkpoint_path, "unittest"), ignore_errors=True)
 
-    async def test_serve_with_trainer(self):  # noqa: C901
         config = get_template_config()
         config.project = "unittest"
         config.name = f"serve_with_trainer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -976,14 +1037,18 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
         config.explorer.rollout_model.enable_openai_api = True
         config.explorer.rollout_model.tensor_parallel_size = 1
         config.explorer.service_status_check_interval = 5
+        self.config = config
+        self.process_list = []
 
-        trainer_config = deepcopy(config)
+    async def test_serve_with_trainer(self):  # noqa: C901
+        trainer_config = deepcopy(self.config)
         trainer_config.mode = "train"
         trainer_config.check_and_update()
         trainer_config.trainer.max_actor_ckpt_to_keep = 10
 
         trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))
         trainer_process.start()
+        self.process_list.append(trainer_process)
 
         ray.init(ignore_reinit_error=True)
         while True:
@@ -993,11 +1058,12 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
             except ValueError:
                 print("waiting for trainer to start.")
                 await asyncio.sleep(5)
-        serve_config = deepcopy(config)
+        serve_config = deepcopy(self.config)
         serve_config.mode = "serve"
         serve_config.check_and_update()
         serve_process = multiprocessing.Process(target=run_serve, args=(serve_config,))
         serve_process.start()
+        self.process_list.append(serve_process)
 
         state_manager = StateManager(
             path=serve_config.checkpoint_job_dir,
@@ -1023,60 +1089,64 @@ class TestServeWithTrainer(RayUnittestBaseAysnc):
                 break
             await asyncio.sleep(2)
 
-        config.buffer.explorer_input.taskset.batch_size = 4
-        reader = get_buffer_reader(config.buffer.explorer_input.taskset)
+        self.config.buffer.explorer_input.taskset.batch_size = 4
+        reader = get_buffer_reader(self.config.buffer.explorer_input.taskset)
 
-        try:
-            for i in range(3):
-                tasks = reader.read()
-                await asyncio.gather(
-                    *(run_math_workflow(server_url, task.raw_task) for task in tasks)
+        for i in range(3):
+            tasks = reader.read()
+            await asyncio.gather(*(run_math_workflow(server_url, task.raw_task) for task in tasks))
+            await proxy_client.commit_async()
+            # wait for synchronizer started
+            end_time = time.time()
+            find_checkpoint = False
+            while time.time() - end_time < 100:
+                _, step_num = get_checkpoint_dir_with_step_num(
+                    checkpoint_root_path=serve_config.checkpoint_job_dir,
+                    raise_error=False,
                 )
-                await proxy_client.commit_async()
-                # wait for synchronizer started
-                end_time = time.time()
-                find_checkpoint = False
-                while time.time() - end_time < 100:
-                    _, step_num = get_checkpoint_dir_with_step_num(
-                        checkpoint_root_path=serve_config.checkpoint_job_dir,
-                        raise_error=False,
-                    )
-                    if step_num >= i + 1:  # checkpoint has been generated
-                        find_checkpoint = True
-                        break
-                    await asyncio.sleep(1)
-                self.assertTrue(find_checkpoint, f"Checkpoint at step {i + 1} not found in time.")
-                metrics = await proxy_client.get_metrics_async()
-                self.assertTrue(metrics["rollout/total_experience_count"] == 4 * (i + 1))
-                self.assertTrue(metrics["rollout/ready_experience_count"] == 4 * (i + 1))
-                self.assertTrue(metrics["rollout/model_0/total_request_count"] > 0)
-                self.assertTrue(metrics["rollout/model_1/total_request_count"] > 0)
-                if i > 1:
-                    self.assertTrue(metrics["rollout/model_0/model_version"] > 0)
-                    self.assertTrue(metrics["rollout/model_1/model_version"] > 0)
+                if step_num >= i + 1:  # checkpoint has been generated
+                    find_checkpoint = True
+                    break
+                await asyncio.sleep(1)
+            self.assertTrue(find_checkpoint, f"Checkpoint at step {i + 1} not found in time.")
             metrics = await proxy_client.get_metrics_async()
-            self.assertEqual(metrics["rollout/total_experience_count"], 12)
-            self.assertEqual(metrics["rollout/ready_experience_count"], 12)
-            self.assertTrue(metrics["rollout/model_0/total_request_count"] > 0)
-            self.assertTrue(metrics["rollout/model_1/total_request_count"] > 0)
-            self.assertEqual(
-                metrics["rollout/model_0/total_request_count"]
-                + metrics["rollout/model_1/total_request_count"],
-                metrics["rollout/total_experience_count"],
-            )
-            # at least updated to version 2
-            self.assertTrue(metrics["rollout/model_0/model_version"] >= 2)
-            self.assertTrue(metrics["rollout/model_1/model_version"] >= 2)
-            # check final checkpoint
-            _, step_num = get_checkpoint_dir_with_step_num(
-                checkpoint_root_path=serve_config.checkpoint_job_dir,
-                step_num=3,
-            )
-        finally:
-            serve_process.terminate()
-            trainer_process.terminate()
-            serve_process.join()
-            trainer_process.join()
+            self.assertEqual(metrics["rollout/total_experience_count"], 4 * (i + 1))
+            self.assertEqual(metrics["rollout/ready_experience_count"], 4 * (i + 1))
+            self.assertGreater(metrics["rollout/model_0/total_request_count"], 0)
+            self.assertGreater(metrics["rollout/model_1/total_request_count"], 0)
+            if i > 1:
+                self.assertGreater(metrics["rollout/model_0/model_version"], 0)
+                self.assertGreater(metrics["rollout/model_1/model_version"], 0)
+        metrics = await proxy_client.get_metrics_async()
+        self.assertEqual(metrics["rollout/total_experience_count"], 12)
+        self.assertEqual(metrics["rollout/ready_experience_count"], 12)
+        self.assertGreater(metrics["rollout/model_0/total_request_count"], 0)
+        self.assertGreater(metrics["rollout/model_1/total_request_count"], 0)
+        self.assertEqual(
+            metrics["rollout/model_0/total_request_count"]
+            + metrics["rollout/model_1/total_request_count"],
+            metrics["rollout/total_experience_count"],
+        )
+        # at least updated to version 2
+        await asyncio.sleep(5)  # wait for model version update
+        self.assertGreaterEqual(metrics["rollout/model_0/model_version"], 2)
+        self.assertGreaterEqual(metrics["rollout/model_1/model_version"], 2)
+        # check final checkpoint
+        _, step_num = get_checkpoint_dir_with_step_num(
+            checkpoint_root_path=serve_config.checkpoint_job_dir,
+            step_num=3,
+        )
+
+    def tearDown(self):
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
+        for process in self.process_list:
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=10)
+                if process.is_alive():
+                    process.kill()
+                    process.join()
+        super().tearDown()
 
 
 class TestMultiModalGRPO(BaseTrainerCase):
@@ -1099,25 +1169,25 @@ class TestMultiModalGRPO(BaseTrainerCase):
         # check metrics are available
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 2)
         # check save lastest checkpoint
         checkpoint_step_2, step_num = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
         )
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))) > 0)
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))), 0)
         self.assertEqual(step_num, 2)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestMultiModalSFT(BaseTrainerCase):
@@ -1142,22 +1212,22 @@ class TestMultiModalSFT(BaseTrainerCase):
         # check metrics are available
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 2)
         # check save lastest checkpoint
         checkpoint_step_2, step_num = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
         )
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))) > 0)
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))), 0)
         self.assertEqual(step_num, 2)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerLoRA(BaseTrainerCase):
@@ -1187,13 +1257,13 @@ class TestTrainerLoRA(BaseTrainerCase):
         # check metrics are available
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 2)
         ray.shutdown(_exiting_interpreter=True)
         # check save lastest checkpoint
@@ -1201,9 +1271,9 @@ class TestTrainerLoRA(BaseTrainerCase):
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
         )
-        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))) > 0)
-        self.assertTrue(
-            len(os.listdir(os.path.join(checkpoint_step_2, "actor", "lora_adapter"))) > 0
+        self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))), 0)
+        self.assertGreater(
+            len(os.listdir(os.path.join(checkpoint_step_2, "actor", "lora_adapter"))), 0
         )
         self.assertEqual(step_num, 2)
 
@@ -1217,7 +1287,7 @@ class TestTrainerLoRA(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         for prefix in ["eval", "bench"]:
             gsm8k_metrics = parser.metric_list(f"{prefix}/gsm8k")
-            self.assertTrue(len(gsm8k_metrics) > 0)
+            self.assertGreater(len(gsm8k_metrics), 0, f"{prefix}/gsm8k metrics not found")
             for eval_stats in ["mean", "best", "worst"]:
                 for k in [2, 4, 8]:
                     for stats in ["mean", "std"]:
@@ -1226,7 +1296,7 @@ class TestTrainerLoRA(BaseTrainerCase):
                         self.assertEqual(metric_steps, [0, 2])
 
     def tearDown(self):
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestOverRollout(BaseTrainerCase):
@@ -1257,29 +1327,29 @@ class TestOverRollout(BaseTrainerCase):
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         eval_metrics = parser.metric_list("eval")
-        self.assertTrue(len(eval_metrics) > 0)
+        self.assertGreater(len(eval_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
         self.assertTrue(parser.metric_exist("experience_pipeline/experience_count"))
         experience_counts = parser.metric_values("experience_pipeline/experience_count")
-        self.assertTrue(len(experience_counts) == 2)
+        self.assertEqual(len(experience_counts), 2)
         for count in experience_counts:
-            self.assertTrue(
-                count >= 2 * 4
+            self.assertGreaterEqual(
+                count, 2 * 4
             )  # at least process 2 tasks in each step, repeat_times is 4
         pg_loss = parser.metric_values("actor/pg_loss")
-        self.assertTrue(len(pg_loss) >= 1)  # trainer only has at least 1 step
+        self.assertGreaterEqual(len(pg_loss), 1)  # trainer only has at least 1 step
         exp_save_path = self.config.buffer.trainer_input.experience_buffer.path
         with open(exp_save_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-            self.assertTrue(
-                len(lines) >= 2 * 4 * 2
+            self.assertGreaterEqual(
+                len(lines), 2 * 4 * 2
             )  # at least contain total_steps * repeat_times * batch_size * min_waited_tasks
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTrainerPromptTruncation(BaseTrainerCase):
@@ -1300,10 +1370,10 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
 
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)
         max_prompt_length = parser.metric_values("prompt_length/max")
         self.assertEqual(max(max_prompt_length), 5)
@@ -1320,7 +1390,7 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
 class TestTinkerTrainer(BaseTrainerCase):
@@ -1342,17 +1412,17 @@ class TestTinkerTrainer(BaseTrainerCase):
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
-        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertGreater(len(rollout_metrics), 0)
         pipeline_metrics = parser.metric_list("experience_pipeline")
-        self.assertTrue(len(pipeline_metrics) > 0)
+        self.assertGreater(len(pipeline_metrics), 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
-        self.assertTrue(len(actor_metrics) > 0)
+        self.assertGreater(len(actor_metrics), 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
         response_metrics = parser.metric_list("response_length")
-        self.assertTrue(len(response_metrics) > 0)
+        self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
 
     def tearDown(self):
         # remove dir only when the test passed
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)

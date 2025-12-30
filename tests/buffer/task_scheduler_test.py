@@ -33,7 +33,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         if os.path.exists(cls.temp_output_path):
-            shutil.rmtree(cls.temp_output_path)
+            shutil.rmtree(cls.temp_output_path, ignore_errors=True)
 
     def _check_batch_tasks(self, batch_tasks: List[Task], indices: List[Dict[str, int]]) -> None:
         for task, index in zip(batch_tasks, indices):

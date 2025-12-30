@@ -82,12 +82,14 @@ def run_trainer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
     trainer_monkey_patch(config, max_steps, intervals)
     train(config)
+    ray.shutdown()
 
 
 def run_explorer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
     explorer_monkey_patch(config, max_steps, intervals)
     explore(config)
+    ray.shutdown()
 
 
 def run_both(
@@ -97,17 +99,26 @@ def run_both(
     trainer_monkey_patch(config, max_steps, trainer_intervals)
     explorer_monkey_patch(config, max_steps, explorer_intervals)
     both(config)
+    ray.shutdown()
 
 
 class BaseTestSynchronizer(unittest.TestCase):
     def setUp(self):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
+        self.process_list = []
 
     def tearDown(self):
-        checkpoint_path = get_checkpoint_path()
         ray.shutdown(_exiting_interpreter=True)
-        shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
+        if os.path.exists(CHECKPOINT_ROOT_DIR):
+            shutil.rmtree(CHECKPOINT_ROOT_DIR, ignore_errors=True)
+        for process in self.process_list:
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=10)
+                if process.is_alive():
+                    process.kill()
+                    process.join()
 
 
 class TestSynchronizerExit(BaseTestSynchronizer):
@@ -151,6 +162,8 @@ class TestSynchronizerExit(BaseTestSynchronizer):
             target=run_trainer, args=(trainer_config, 8, [2, 1, 2, 1, 2, 1, 2, 1])
         )
         trainer_process.start()
+        self.process_list.append(trainer_process)
+
         ray.init(ignore_reinit_error=True)
         while True:
             try:
@@ -164,6 +177,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
             args=(explorer1_config, 8, [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5]),
         )
         explorer_process_1.start()
+        self.process_list.append(explorer_process_1)
 
         self.assertEqual(
             synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
@@ -176,14 +190,13 @@ class TestSynchronizerExit(BaseTestSynchronizer):
             except ValueError:
                 print("waiting for explorer1 to start.")
                 time.sleep(5)
-        trainer_process.terminate()
-        trainer_process.join()
+
+        trainer_process.join(timeout=200)
         self.assertEqual(
             synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
         )
 
-        explorer_process_1.terminate()
-        explorer_process_1.join()
+        explorer_process_1.join(timeout=200)
         time.sleep(6)
         with self.assertRaises(ValueError):
             ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
@@ -278,6 +291,8 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
             target=run_trainer, args=(trainer_config, self.max_steps, self.trainer_intervals)
         )
         trainer_process.start()
+        self.process_list.append(trainer_process)
+
         ray.init(ignore_reinit_error=True)
         while True:
             try:
@@ -291,10 +306,12 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
             args=(explorer1_config, self.max_steps, self.explorer1_intervals),
         )
         explorer_process_1.start()
+        self.process_list.append(explorer_process_1)
         explorer_process_2 = multiprocessing.Process(
             target=run_explorer, args=(explorer2_config, self.max_steps, self.explorer2_intervals)
         )
         explorer_process_2.start()
+        self.process_list.append(explorer_process_2)
 
         explorer_process_1.join(timeout=200)
         explorer_process_2.join(timeout=200)
@@ -364,6 +381,7 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
             args=(config, self.max_steps, self.trainer_intervals, self.explorer_intervals),
         )
         both_process.start()
+        self.process_list.append(both_process)
         both_process.join(timeout=200)
 
         # check the tensorboard
@@ -375,7 +393,3 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
         )
         rollout_metrics = parser.metric_list("rollout")
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
-
-    def tearDown(self):
-        if os.path.exists(CHECKPOINT_ROOT_DIR):
-            shutil.rmtree(CHECKPOINT_ROOT_DIR)

@@ -5,7 +5,7 @@ from collections import deque
 import torch
 from parameterized import parameterized_class
 
-from tests.tools import RayUnittestBaseAysnc, get_template_config
+from tests.tools import RayUnittestBaseAsync, get_template_config
 from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY
 from trinity.algorithm.sample_strategy.sample_strategy import SampleStrategy
 from trinity.buffer.buffer import get_buffer_writer
@@ -21,7 +21,7 @@ from trinity.common.experience import Experience
         (6,),
     ],
 )
-class ExperienceStorageTest(RayUnittestBaseAysnc):
+class ExperienceStorageTest(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.num_steps = 20
@@ -249,5 +249,5 @@ class ExperienceStorageTest(RayUnittestBaseAysnc):
 
     def tearDown(self):
         asyncio.run(self.buffer_writer.release())
-        shutil.rmtree(self.config.checkpoint_job_dir)
+        shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
         return super().tearDown()

@@ -7,7 +7,7 @@ import ray
 import torch
 from parameterized import parameterized
 
-from tests.tools import RayUnittestBaseAysnc
+from tests.tools import RayUnittestBaseAsync
 from trinity.buffer.reader.queue_reader import QueueReader
 from trinity.buffer.writer.queue_writer import QueueWriter
 from trinity.common.config import ExperienceBufferConfig, ReplayBufferConfig
@@ -17,7 +17,7 @@ from trinity.common.experience import Experience
 BUFFER_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_queue_buffer.jsonl")
 
 
-class TestQueueBuffer(RayUnittestBaseAysnc):
+class TestQueueBuffer(RayUnittestBaseAsync):
     @parameterized.expand(
         [
             (

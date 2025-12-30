@@ -8,7 +8,7 @@ from parameterized import parameterized_class
 from transformers import AutoTokenizer
 
 from tests.tools import (
-    RayUnittestBaseAysnc,
+    RayUnittestBaseAsync,
     get_api_model_path,
     get_model_path,
     get_template_config,
@@ -113,7 +113,7 @@ CHAT_TEMPLATE = r"""
         (2, 1, 3, True, True),
     ],
 )
-class ModelWrapperTest(RayUnittestBaseAysnc):
+class ModelWrapperTest(RayUnittestBaseAsync):
     def setUp(self):
         # configure the model
         self.config = get_template_config()
@@ -233,7 +233,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         (20, 5, 15),
     ],
 )
-class TestModelLen(RayUnittestBaseAysnc):
+class TestModelLen(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -302,7 +302,7 @@ class TestModelLen(RayUnittestBaseAysnc):
         )
 
 
-class TestModelLenWithoutPromptTruncation(RayUnittestBaseAysnc):
+class TestModelLenWithoutPromptTruncation(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -351,7 +351,7 @@ class TestModelLenWithoutPromptTruncation(RayUnittestBaseAysnc):
         )
 
 
-class TestAPIServer(RayUnittestBaseAysnc):
+class TestAPIServer(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -482,7 +482,7 @@ The maximum number of steps remaining is 10.
 """
 
 
-class TestLogprobs(RayUnittestBaseAysnc):
+class TestLogprobs(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -669,7 +669,7 @@ class TestLogprobs(RayUnittestBaseAysnc):
         )
 
 
-class TestAsyncAPIServer(RayUnittestBaseAysnc):
+class TestAsyncAPIServer(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -880,7 +880,7 @@ class TestTokenizer(unittest.TestCase):
         (False, None),
     ],
 )
-class TestAPIServerToolCall(RayUnittestBaseAysnc):
+class TestAPIServerToolCall(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -1161,7 +1161,7 @@ class TestAPIServerToolCall(RayUnittestBaseAysnc):
         )
 
 
-class TestSuperLongGeneration(RayUnittestBaseAysnc):
+class TestSuperLongGeneration(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -1217,7 +1217,7 @@ class TestSuperLongGeneration(RayUnittestBaseAysnc):
         self.assertGreater(response.logprobs.shape[0], 1000)
 
 
-class TestTinkerAPI(RayUnittestBaseAysnc):
+class TestTinkerAPI(RayUnittestBaseAsync):
     """Test the Tinker API integration with the vLLM engine."""
 
     def setUp(self):

@@ -4,7 +4,7 @@ import ray
 import torch
 from parameterized import parameterized
 
-from tests.tools import RayUnittestBaseAysnc
+from tests.tools import RayUnittestBaseAsync
 from trinity.buffer import get_buffer_reader
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
@@ -19,7 +19,7 @@ from trinity.common.experience import Experience
 db_path = os.path.join(os.path.dirname(__file__), "test.db")
 
 
-class TestSQLBuffer(RayUnittestBaseAysnc):
+class TestSQLBuffer(RayUnittestBaseAsync):
     @parameterized.expand(
         [
             (True,),

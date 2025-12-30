@@ -219,7 +219,7 @@ class TestDataJuicerExperiencePipeline(unittest.IsolatedAsyncioTestCase):
 class TestDataJuicerTaskPipeline(RayUnittestBase):
     def setUp(self):
         if os.path.exists(TASKSET_OUTPUT_DIR):
-            shutil.rmtree(TASKSET_OUTPUT_DIR)
+            shutil.rmtree(TASKSET_OUTPUT_DIR, ignore_errors=True)
 
     def test_data_juicer_task_pipeline(self):
         config = get_template_config()

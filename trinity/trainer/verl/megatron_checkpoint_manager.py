@@ -329,6 +329,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
     ):
         # record the previous global step
         self.previous_global_step = global_step
+        local_path = local_mkdir_safe(local_path)
 
         # remove previous local_path
         if (
@@ -336,12 +337,13 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
             and isinstance(max_ckpt_to_keep, int)
             and max_ckpt_to_keep > 0
             and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
-        ):
+            and local_path != self.previous_saved_paths[-1]  # type: ignore
+        ):  # last step may save twice
             keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
             self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
             self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
 
-        local_path = local_mkdir_safe(local_path)
+        torch.distributed.barrier()
 
         state_dict_thread_count = 0
         if self.should_save_model:
@@ -360,4 +362,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 global_step, state_dict_thread_count=state_dict_thread_count
             )
         )
-        self.previous_saved_paths.append(local_path)
+        if (
+            len(self.previous_saved_paths) == 0 or local_path != self.previous_saved_paths[-1]
+        ):  # last step may save twice
+            self.previous_saved_paths.append(local_path)

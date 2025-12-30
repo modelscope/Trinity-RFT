@@ -224,7 +224,6 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             # Some model's name_or_path is empty if not initialized from pretrained,
             # in this cases, we don't save generation config.
             generation_config = GenerationConfig.from_pretrained(model_config.name_or_path)
-            # generation_config.save_pretrained(hf_config_tokenizer_path)
         else:
             generation_config = None
 
@@ -339,7 +338,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
             state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
 
-            def _save_model():
+            def _save_hf_model_thread_target():
                 runtime_context = ray.get_runtime_context()
                 node_id = runtime_context.get_node_id()
                 job_id = runtime_context.get_job_id()
@@ -356,7 +355,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
 
             self._save_model_thread = threading.Thread(
-                target=_save_model,
+                target=_save_hf_model_thread_target,
             )
             self._save_model_thread.start()
 
@@ -428,6 +427,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
         # record the previous global step
         self.previous_global_step = global_step
+        local_path = local_mkdir_safe(local_path)
 
         # remove previous local_path, only rank 0 should do this
         if (
@@ -436,12 +436,12 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             and isinstance(max_ckpt_to_keep, int)
             and max_ckpt_to_keep > 0
             and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
-        ):
+            and local_path != self.previous_saved_paths[-1]  # type: ignore
+        ):  # last step may save twice
             keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
             self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
             self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
 
-        local_path = local_mkdir_safe(local_path)
         torch.distributed.barrier()
 
         # check if the checkpoint_save_contents is valid
@@ -486,7 +486,10 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 checkpoint_thread_count=checkpoint_thread_count,
             )
         )
-        self.previous_saved_paths.append(local_path)
+        if (
+            len(self.previous_saved_paths) == 0 or local_path != self.previous_saved_paths[-1]
+        ):  # last step may save twice
+            self.previous_saved_paths.append(local_path)
 
     def wait_on_save_thread(self) -> None:
         """

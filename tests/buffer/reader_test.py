@@ -1,4 +1,4 @@
-from tests.tools import RayUnittestBaseAysnc, get_unittest_dataset_config
+from tests.tools import RayUnittestBaseAsync, get_unittest_dataset_config
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.reader import READER
 from trinity.buffer.reader.file_reader import FileReader, TaskFileReader
@@ -12,7 +12,7 @@ class CustomReader(TaskFileReader):
         super().__init__(config)
 
 
-class TestBufferReader(RayUnittestBaseAysnc):
+class TestBufferReader(RayUnittestBaseAsync):
     async def test_buffer_reader_registration(self) -> None:
         config = get_unittest_dataset_config("countdown", "train")
         config.batch_size = 2

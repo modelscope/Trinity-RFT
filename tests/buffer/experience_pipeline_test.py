@@ -4,7 +4,7 @@ from typing import List
 import ray
 import torch
 
-from tests.tools import RayUnittestBaseAysnc, get_template_config
+from tests.tools import RayUnittestBaseAsync, get_template_config
 from trinity.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
 from trinity.common.config import (
@@ -34,7 +34,7 @@ def get_experiences(task_num: int, repeat_times: int = 1, step_num: int = 1) -> 
     ]
 
 
-class TestExperiencePipeline(RayUnittestBaseAysnc):
+class TestExperiencePipeline(RayUnittestBaseAsync):
     def setUp(self):
         if os.path.exists(BUFFER_FILE_PATH):
             os.remove(BUFFER_FILE_PATH)

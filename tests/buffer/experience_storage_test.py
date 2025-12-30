@@ -7,7 +7,7 @@ import time
 import torch
 from parameterized import parameterized
 
-from tests.tools import RayUnittestBaseAysnc
+from tests.tools import RayUnittestBaseAsync
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
 from trinity.common.config import ExperienceBufferConfig, ReplayBufferConfig
@@ -17,7 +17,7 @@ from trinity.common.experience import EID, Experience
 DB_PATH = os.path.join(os.path.dirname(__file__), "test.db")
 
 
-class ExperienceStorageTest(RayUnittestBaseAysnc):
+class ExperienceStorageTest(RayUnittestBaseAsync):
     def setUp(self):
         self.total_num = 8
         self.put_batch_size = 2

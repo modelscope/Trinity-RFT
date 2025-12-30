@@ -12,7 +12,7 @@ import ray
 
 from tests.tools import (
     RayUnittestBase,
-    RayUnittestBaseAysnc,
+    RayUnittestBaseAsync,
     TensorBoardParser,
     get_api_model_path,
     get_checkpoint_path,
@@ -180,7 +180,7 @@ def run_agent(proxy_url, model_path: str):
     return response.choices[0].message.content
 
 
-class ServeTest(RayUnittestBaseAysnc):
+class ServeTest(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "serve"
