@@ -331,12 +331,15 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
             ),
         ]
         self.config.check_and_update()
+        old_taskset_path = self.config.stages[1].buffer.explorer_input.taskset.path
+        self.config.stages[1].buffer.explorer_input.taskset.path = "/invalid/path"
 
-        mock_load.return_value = self.config
+        mock_load.return_value = deepcopy(self.config)
 
-        run(config_path="dummy.yaml")
+        with self.assertRaises(Exception):
+            run(config_path="dummy.yaml")
 
-        stage_configs = [cfg.check_and_update() for cfg in self.config]
+        stage_configs = [cfg.check_and_update() for cfg in deepcopy(self.config)]
 
         # sft warmup stage
         sft_config = stage_configs[0]
@@ -350,6 +353,10 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         self.assertTrue(len(response_metrics) > 0)
         self.assertEqual(parser.metric_min_step(response_metrics[0]), 1)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 3)
+
+        self.config.stages[1].buffer.explorer_input.taskset.path = old_taskset_path
+        mock_load.return_value = deepcopy(self.config)
+        run(config_path="dummy.yaml")
 
         # grpo stage
         grpo_config = stage_configs[1]

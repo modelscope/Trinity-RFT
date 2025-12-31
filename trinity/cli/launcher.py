@@ -191,6 +191,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
                         f"> Skipping completed stage {i + 1}/{len(config.stages)}...\n"
                         "==========================================================="
                     )
+                    stage_config.check_and_update()
                 else:
                     logger.info(
                         "===========================================================\n"
