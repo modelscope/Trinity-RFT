@@ -347,7 +347,8 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         state_dict_thread_count = 0
         if self.should_save_model:
-            state_dict_thread_count += self._save_state_dict(local_path, global_step)
+            if self._save_state_dict(local_path, global_step):
+                state_dict_thread_count += 1
 
         self._save_tokenizer(local_path, global_step)
 

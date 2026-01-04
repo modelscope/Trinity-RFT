@@ -466,18 +466,22 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
                 if self.should_save_model:
-                    state_dict_thread_count += self._save_model(local_path, global_step)
+                    if self._save_model(local_path, global_step):
+                        state_dict_thread_count += 1
 
                 if self.should_save_optimizer:
-                    checkpoint_thread_count += self._save_optimizer(local_path, global_step)
+                    if self._save_optimizer(local_path, global_step):
+                        checkpoint_thread_count += 1
 
                 if self.should_save_extra:
-                    checkpoint_thread_count += self._save_extra_state(local_path, global_step)
+                    if self._save_extra_state(local_path, global_step):
+                        checkpoint_thread_count += 1
 
         self._save_tokenizer(local_path, global_step)
 
         if self.should_save_hf_model or save_as_hf:
-            checkpoint_thread_count += self._save_hf_model(local_path, global_step)
+            if self._save_hf_model(local_path, global_step):
+                checkpoint_thread_count += 1
 
         ray.get(
             self.checkpoint_monitor.register_thread_count.remote(
