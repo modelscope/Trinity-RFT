@@ -121,12 +121,15 @@ class AgentScopeWorkflowAdapterV1(Workflow):
 
         # TODO: customize generate_kwargs for auxiliary models if needed
         self.auxiliary_chat_models: Optional[Dict[str, "TrinityChatModel"]] = None
+        self.auxiliary_chat_model_cls = TrinityChatModel
 
     async def _init_auxiliary_chat_models(self):
         if self.auxiliary_model_wrappers is not None and self.auxiliary_models is not None:
             self.auxiliary_chat_models = {
                 aux_model_wrapper.model_name
-                or f"auxiliary_model_{i}": TrinityChatModel(openai_async_client=aux_model)
+                or f"auxiliary_model_{i}": self.auxiliary_chat_model_cls(
+                    openai_async_client=aux_model
+                )
                 for i, (aux_model_wrapper, aux_model) in enumerate(
                     zip(self.auxiliary_model_wrappers, self.auxiliary_models)
                 )
