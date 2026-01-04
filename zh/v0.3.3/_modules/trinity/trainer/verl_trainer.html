@@ -1233,8 +1233,7 @@ document.write(`
             <span class="n">ray_worker_group_cls</span><span class="p">,</span>
             <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_workers</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_full_save_step</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_workers</span><span class="p">()</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># TODO</span>
@@ -1464,9 +1463,7 @@ document.write(`
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.save_checkpoint">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_until_saved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_full_save_step</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_full_save_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span><span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span><span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">block_until_saved</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">wait_on_save_thread</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
