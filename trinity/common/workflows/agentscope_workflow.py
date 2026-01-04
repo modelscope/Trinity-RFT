@@ -120,10 +120,6 @@ class AgentScopeWorkflowAdapterV1(Workflow):
         )
 
         # TODO: customize generate_kwargs for auxiliary models if needed
-        self.auxiliary_chat_models: Optional[Dict[str, "TrinityChatModel"]] = None
-        self.auxiliary_chat_model_cls = TrinityChatModel
-
-    async def _init_auxiliary_chat_models(self):
         if self.auxiliary_model_wrappers is not None and self.auxiliary_models is not None:
             self.auxiliary_chat_models = {
                 aux_model_wrapper.model_name
@@ -167,9 +163,6 @@ class AgentScopeWorkflowAdapterV1(Workflow):
             raise ImportError(
                 "Fail to import agentscope tuner related types. Please ensure agentscope>=1.0.11 is installed."
             )
-
-        if self.auxiliary_chat_models is None:
-            await self._init_auxiliary_chat_models()
 
         metrics = {}
         workflow_output: WorkflowOutput = await self.workflow_func(
