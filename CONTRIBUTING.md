@@ -2,7 +2,7 @@
 
 Thank you for your interest in Trinity-RFT! Our framework is built on a decoupled architecture consisting of the **Explorer**, **Trainer**, and **Buffer**. We welcome all forms of contributions—from core feature enhancements and new algorithms to documentation and bug reports.
 
-## Track Your Contributions
+## Where to Contribute
 
 Trinity-RFT provides modular interfaces for different technical interests. Please refer to our [Developer Guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_overview.html) for detailed implementation standards:
 
@@ -10,9 +10,9 @@ Trinity-RFT provides modular interfaces for different technical interests. Pleas
 | :--- | :--- | :--- |
 | **Agentic Workflows** | `Workflow` | Implementing multi-turn dialogs, ReAct workflows, or domain-specific agent training capabilities (e.g., Coding, Math). |
 | **RL Algorithms** | `Algorithm` | Integrating new RL algorithms (e.g., RLOO, GSPO) or optimizing loss functions and advantage estimations. |
-| **Data & Experience** | `Operator` & `Selector` | Designing data cleaning, selection, reward modeling, or experience augmentation and replay strategies. |
+| **Data & Experience** | `Operator`, `Selector` | Designing data cleaning, selection, reward modeling, or experience augmentation and replay strategies. |
 | **Use Cases** | `Examples` | Sharing new usages and improving built-in demonstrated configurations. |
-| **General Utility** | Docs & Bugfix | Improving documentation, adding translations, fixing bugs, or enhancing CLI/GUI tools. |
+| **General Utility** | `docs/`, `tests/` | Improving documentation, adding translations, fixing bugs, or enhancing CLI/GUI tools. |
 
 ## How to Start: The "Plugin-First" Approach
 
