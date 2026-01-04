@@ -1063,13 +1063,18 @@ document.write(`
                 <span class="s2">&quot;top_logprobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">TrinityChatModel</span><span class="p">(</span>
-                <span class="n">openai_async_client</span><span class="o">=</span><span class="n">aux_model</span><span class="p">,</span>
-                <span class="c1"># TODO: customize generate_kwargs for auxiliary models if needed</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">aux_model</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[])</span>
-        <span class="p">]</span></div>
+
+        <span class="c1"># TODO: customize generate_kwargs for auxiliary models if needed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">aux_model_wrapper</span><span class="o">.</span><span class="n">model_name</span>
+                <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;auxiliary_model_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">TrinityChatModel</span><span class="p">(</span><span class="n">openai_async_client</span><span class="o">=</span><span class="n">aux_model</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">aux_model_wrapper</span><span class="p">,</span> <span class="n">aux_model</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                    <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_wrappers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_chat_models</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapterV1.construct_experiences">

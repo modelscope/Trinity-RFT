@@ -1045,6 +1045,13 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the model path&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="InferenceModel.get_model_name">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the name of the model.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 </div>
 
 
@@ -1095,6 +1102,7 @@ document.write(`
             <span class="n">engine_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;tinker&quot;</span>
         <span class="p">),</span> <span class="s2">&quot;Only vLLM and tinker model is supported for now.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_address</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openai_async_client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">AsyncOpenAI</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1113,6 +1121,7 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.prepare">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the model wrapper.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_model_name</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_address</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_api_server_url</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;API server is not enabled for inference model.&quot;</span><span class="p">)</span>
@@ -1306,6 +1315,16 @@ document.write(`
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">model_path_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the model path.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_model_path</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the name of the model.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">model_name_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the name of the model.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span>
 
 <div class="viewcode-block" id="ModelWrapper.get_lora_request">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_lora_request">[docs]</a>
