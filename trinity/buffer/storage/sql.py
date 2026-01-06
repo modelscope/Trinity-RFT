@@ -197,7 +197,7 @@ class SQLExperienceStorage(SQLStorage):
         if self.stopped:
             raise StopIteration()
 
-        batch_size = batch_size or self.batch_size
+        batch_size = self.batch_size if batch_size is None else batch_size
         return self._read_method(batch_size, **kwargs)
 
     @classmethod
@@ -248,7 +248,7 @@ class SQLTaskStorage(SQLStorage):
             raise StopIteration()
         if self.offset > self.total_samples:
             raise StopIteration()
-        batch_size = batch_size or self.batch_size
+        batch_size = self.batch_size if batch_size is None else batch_size
         with retry_session(self.session, self.max_retry_times, self.max_retry_interval) as session:
             query = (
                 session.query(self.table_model_cls)
