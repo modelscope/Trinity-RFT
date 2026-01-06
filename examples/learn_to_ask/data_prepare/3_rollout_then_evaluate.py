@@ -5,6 +5,7 @@ This script is used to use VLLM to generate rollout samples from the converted c
 import argparse
 import copy
 import gc
+import importlib
 import json
 import math
 import os
@@ -14,6 +15,13 @@ import time
 import torch
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
+
+spec = importlib.util.spec_from_file_location(
+    "prompt_learn2ask",
+    os.path.join(os.path.dirname(__file__), "..", "workflow", "prompt_learn2ask.py"),
+)
+prompt_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(prompt_module)
 
 
 def init_llm(model_path):
@@ -35,15 +43,7 @@ def init_llm(model_path):
 
 
 def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, rollout_repeat=3):
-    import importlib
-
-    spec = importlib.util.spec_from_file_location(
-        "prompt_learn2ask",
-        os.path.join(os.path.dirname(__file__), "..", "workflow", "prompt_learn2ask.py"),
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    rollout_prompt = module.rollout_prompt_med
+    rollout_prompt = prompt_module.rollout_prompt_med
 
     with open(input_file_path, "r") as lines:
         sample_list = [json.loads(line.strip()) for line in lines]
@@ -74,15 +74,7 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
 
 
 def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_path):
-    import importlib
-
-    spec = importlib.util.spec_from_file_location(
-        "prompt_learn2ask",
-        os.path.join(os.path.dirname(__file__), "..", "workflow", "prompt_learn2ask.py"),
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    grader_prompt = module.reward_prompt_med
+    grader_prompt = prompt_module.reward_prompt_med
 
     print(f"input_file_path: {input_file_path}")
     print(f"output_file_path: {output_file_path}")
@@ -196,20 +188,31 @@ def compute_score(input_file_path):
             )
             total_format += grade["format_score"]
 
+    total_count = continue_count + stop_count
     result = {
-        "ave_continue_content": continue_content_score / continue_count,
-        "win_continue_content": continue_content_full / continue_count,
-        "ave_continue_content if correct": continue_content_score_correct / continue_count_correct,
-        "win_continue_content if correct": continue_content_full_correct / continue_count_correct,
-        "ave_continue_decision": continue_decision_score / continue_count,
-        "ave_stop_decision": stop_decision_score / stop_count,
-        "ave_total_decision": (continue_decision_score + stop_decision_score)
-        / (continue_count + stop_count),
-        "ave_total_format": total_format / (continue_count + stop_count),
-        "ave_total_reward": total_reward / (continue_count + stop_count),
+        "ave_continue_content": continue_content_score / continue_count if continue_count else 0.0,
+        "win_continue_content": continue_content_full / continue_count if continue_count else 0.0,
+        "ave_continue_content if correct": (
+            continue_content_score_correct / continue_count_correct
+            if continue_count_correct
+            else 0.0
+        ),
+        "win_continue_content if correct": (
+            continue_content_full_correct / continue_count_correct
+            if continue_count_correct
+            else 0.0
+        ),
+        "ave_continue_decision": (
+            continue_decision_score / continue_count if continue_count else 0.0
+        ),
+        "ave_stop_decision": stop_decision_score / stop_count if stop_count else 0.0,
+        "ave_total_decision": (
+            (continue_decision_score + stop_decision_score) / total_count if total_count else 0.0
+        ),
+        "ave_total_format": total_format / total_count if total_count else 0.0,
+        "ave_total_reward": total_reward / total_count if total_count else 0.0,
     }
-
-    print(f"total count: {continue_count + stop_count}")
+    print(f"total count: {total_count}")
     print(json.dumps(result, ensure_ascii=False, indent=4))
 
 
