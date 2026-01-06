@@ -1,6 +1,7 @@
 # Learn2Ask: Getting Started
 
 This guide demonstrates how to train a proactive LLM using the **Learn2Ask** framework from [Grounded in Reality: Learning and Deploying Proactive LLM from Offline Logs](https://arxiv.org/abs/2510.25441).
+
 **Hardware requirement**: ≥32 H20 (or equivalent) GPUs for full-scale reproduction.
 
 All relevant files are located under `examples/learn_to_ask/`:

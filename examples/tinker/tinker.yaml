@@ -19,7 +19,6 @@ model:
   max_response_tokens: 2048
   tinker:
     enable: true
-    base_model: Qwen/Qwen3-4B-Instruct-2507
 buffer:
   batch_size: 96
   total_epochs: 1

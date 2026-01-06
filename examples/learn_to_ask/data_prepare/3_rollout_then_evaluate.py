@@ -6,6 +6,7 @@ import argparse
 import copy
 import gc
 import json
+import math
 import os
 import re
 import time
@@ -13,9 +14,6 @@ import time
 import torch
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
-
-from trinity.common.constants import PLUGIN_DIRS_ENV_VAR
-from trinity.utils.plugin_loader import load_plugins
 
 
 def init_llm(model_path):
@@ -37,9 +35,15 @@ def init_llm(model_path):
 
 
 def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, rollout_repeat=3):
-    from examples.learn_to_ask.workflow.prompt_learn2ask import (
-        rollout_prompt_med as rollout_prompt,
+    import importlib
+
+    spec = importlib.util.spec_from_file_location(
+        "prompt_learn2ask",
+        os.path.join(os.path.dirname(__file__), "..", "workflow", "prompt_learn2ask.py"),
     )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    rollout_prompt = module.rollout_prompt_med
 
     with open(input_file_path, "r") as lines:
         sample_list = [json.loads(line.strip()) for line in lines]
@@ -70,9 +74,15 @@ def rollout(llm, tokenizer, sampling_params, input_file_path, output_file_path, 
 
 
 def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_path):
-    from examples.learn_to_ask.workflow.prompt_learn2ask import (
-        reward_prompt_med as grader_prompt,
+    import importlib
+
+    spec = importlib.util.spec_from_file_location(
+        "prompt_learn2ask",
+        os.path.join(os.path.dirname(__file__), "..", "workflow", "prompt_learn2ask.py"),
     )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    grader_prompt = module.reward_prompt_med
 
     print(f"input_file_path: {input_file_path}")
     print(f"output_file_path: {output_file_path}")
@@ -156,6 +166,53 @@ def eval_sample(llm, tokenizer, sampling_params, input_file_path, output_file_pa
         print("\n======================\n")
 
 
+def compute_score(input_file_path):
+    with open(input_file_path, "r") as lines:
+        sample_list = [json.loads(line.strip()) for line in lines]
+    continue_count, continue_content_score, continue_content_full = 0, 0, 0
+    continue_decision_score = 0
+    stop_count, stop_decision_score = 0, 0
+    total_reward, total_format = 0, 0
+    continue_count_correct, continue_content_score_correct, continue_content_full_correct = 0, 0, 0
+    for sample in sample_list:
+        for rollout, grade in zip(sample["rollouts"], sample["grades"]):
+            if math.isnan(grade["content_score"]) or math.isnan(grade["format_score"]):
+                continue
+            if sample["decision_truth"] == "continue":
+                continue_count += 1
+                continue_content_score += grade["content_score"]
+                continue_content_full += 1 if grade["content_score"] == 1 else 0
+                continue_decision_score += grade["action_score"]
+                if "<stop />" not in rollout:
+                    continue_count_correct += 1
+                    continue_content_score_correct += grade["content_score"]
+                    continue_content_full_correct += 1 if grade["content_score"] == 1 else 0
+
+            else:
+                stop_count += 1
+                stop_decision_score += grade["action_score"]
+            total_reward += (
+                grade["action_score"] * (1 + 2 * grade["content_score"]) + grade["format_score"]
+            )
+            total_format += grade["format_score"]
+
+    result = {
+        "ave_continue_content": continue_content_score / continue_count,
+        "win_continue_content": continue_content_full / continue_count,
+        "ave_continue_content if correct": continue_content_score_correct / continue_count_correct,
+        "win_continue_content if correct": continue_content_full_correct / continue_count_correct,
+        "ave_continue_decision": continue_decision_score / continue_count,
+        "ave_stop_decision": stop_decision_score / stop_count,
+        "ave_total_decision": (continue_decision_score + stop_decision_score)
+        / (continue_count + stop_count),
+        "ave_total_format": total_format / (continue_count + stop_count),
+        "ave_total_reward": total_reward / (continue_count + stop_count),
+    }
+
+    print(f"total count: {continue_count + stop_count}")
+    print(json.dumps(result, ensure_ascii=False, indent=4))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--rollout_repeat", type=int, default=3)
@@ -177,9 +234,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    os.environ[PLUGIN_DIRS_ENV_VAR] = os.path.join(os.path.dirname(__file__), "..", "workflow")
-    load_plugins()
-
     # rollout stage
     llm, tokenizer, sampling_params = init_llm(args.eval_model_path)
     rollout(
@@ -197,3 +251,4 @@ if __name__ == "__main__":
     # eval stage
     llm2, tokenizer2, sampling_params2 = init_llm(args.grader_model_path)
     eval_sample(llm2, tokenizer2, sampling_params2, args.rollout_file_path, args.eval_file_path)
+    compute_score(args.eval_file_path)
