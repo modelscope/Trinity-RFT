@@ -21,7 +21,7 @@ class QueueReader(BufferReader):
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         try:
-            batch_size = batch_size or self.read_batch_size
+            batch_size = self.read_batch_size if batch_size is None else batch_size
             exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout, **kwargs))
             if len(exps) != batch_size:
                 raise TimeoutError(
@@ -32,7 +32,7 @@ class QueueReader(BufferReader):
         return exps
 
     async def read_async(self, batch_size: Optional[int] = None, **kwargs) -> List:
-        batch_size = batch_size or self.read_batch_size
+        batch_size = self.read_batch_size if batch_size is None else batch_size
         exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout, **kwargs)
         if len(exps) != batch_size:
             raise TimeoutError(
