@@ -16,15 +16,18 @@ class SQLReader(BufferReader):
     def __init__(self, config: StorageConfig) -> None:
         assert config.storage_type == StorageType.SQL.value
         self.wrap_in_ray = config.wrap_in_ray
+        self.read_batch_size = config.batch_size
         self.storage = SQLStorage.get_wrapper(config)
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
+        batch_size = batch_size or self.read_batch_size
         if self.wrap_in_ray:
             return ray.get(self.storage.read.remote(batch_size, **kwargs))
         else:
             return self.storage.read(batch_size, **kwargs)
 
     async def read_async(self, batch_size: Optional[int] = None, **kwargs) -> List:
+        batch_size = batch_size or self.read_batch_size
         if self.wrap_in_ray:
             try:
                 return await self.storage.read.remote(batch_size, **kwargs)
