@@ -1160,7 +1160,7 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">batch_size</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_method</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -1226,7 +1226,7 @@ document.write(`
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_samples</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">batch_size</span>
         <span class="k">with</span> <span class="n">retry_session</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
             <span class="n">query</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="p">)</span>
