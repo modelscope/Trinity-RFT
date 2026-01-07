@@ -1143,13 +1143,20 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span></div>
 
 
-<div class="viewcode-block" id="MultiTurnWorkflow.process_messages_to_experience">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.process_messages_to_experience">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">process_messages_to_experience</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">truncate_status</span><span class="o">=</span><span class="kc">None</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_experience_from_converted</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">converted_experience</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">truncate_status</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-        <span class="n">converted_experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">convert_messages_to_experience</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Private helper method to build Experience from converted_experience.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            converted_experience: The converted experience from the model.</span>
+<span class="sd">            reward: The reward value.</span>
+<span class="sd">            info: Additional info dictionary.</span>
+<span class="sd">            truncate_status: Optional truncate status to override.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Experience: The constructed Experience object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">converted_experience</span><span class="o">.</span><span class="n">truncate_status</span> <span class="o">==</span> <span class="s2">&quot;response_truncated&quot;</span><span class="p">:</span>
             <span class="n">reward</span> <span class="o">=</span> <span class="mf">0.0</span>
 
@@ -1176,7 +1183,28 @@ document.write(`
             <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span>
             <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">experience</span></div>
+        <span class="k">return</span> <span class="n">experience</span>
+
+<div class="viewcode-block" id="MultiTurnWorkflow.process_messages_to_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.process_messages_to_experience">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_messages_to_experience</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">truncate_status</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
+        <span class="n">converted_experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">convert_messages_to_experience</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_experience_from_converted</span><span class="p">(</span>
+            <span class="n">converted_experience</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">truncate_status</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultiTurnWorkflow.process_messages_to_experience_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.process_messages_to_experience_async">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_messages_to_experience_async</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{},</span> <span class="n">truncate_status</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
+        <span class="n">converted_experience</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">convert_messages_to_experience_async</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_experience_from_converted</span><span class="p">(</span>
+            <span class="n">converted_experience</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">truncate_status</span>
+        <span class="p">)</span></div>
 </div>
 
 
