@@ -209,6 +209,39 @@ class MultiTurnWorkflow(Workflow):
         )
         return experience
 
+    async def process_messages_to_experience_async(
+        self, messages, reward, info={}, truncate_status=None
+    ) -> Experience:
+        converted_experience = await self.model.convert_messages_to_experience_async(messages)
+
+        if converted_experience.truncate_status == "response_truncated":
+            reward = 0.0
+
+        tokens = converted_experience.tokens
+        log_probs = converted_experience.logprobs
+        assert converted_experience.action_mask is not None
+        generation_mask = converted_experience.action_mask
+        log_probs = log_probs * generation_mask
+
+        metrics = {}
+        for k, v in info.items():
+            if isinstance(v, float) or isinstance(v, int):
+                metrics[k] = float(v)
+
+        experience = Experience(
+            tokens=tokens,
+            action_mask=generation_mask,
+            prompt_length=converted_experience.prompt_length,
+            prompt_text=converted_experience.prompt_text,
+            response_text=converted_experience.response_text,
+            truncate_status=converted_experience.truncate_status or truncate_status,
+            reward=reward,
+            logprobs=log_probs,
+            info=info,
+            metrics=metrics,
+        )
+        return experience
+
 
 class BaseSimpleWorkflow(Workflow):
     def __init__(

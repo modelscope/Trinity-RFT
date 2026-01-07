@@ -14,7 +14,7 @@ from trinity.common.workflows.envs.alfworld.RAFT_utils import (
     generate_default_empty_experience,
     generate_reward_feedback,
     parse_response,
-    process_messages_to_experience,
+    process_messages_to_experience_async,
     save_task_data,
     validate_trajectory_format,
 )
@@ -215,9 +215,9 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             or (re_explore_info["efficiency_improved"] and re_explore_info["new_reward"] >= 1.0)
         )
 
-    def _generate_experience_from_sft(self, sft_messages: list, metrics: dict) -> Experience:
+    async def _generate_experience_from_sft(self, sft_messages: list, metrics: dict) -> Experience:
         """Generate experience from SFT messages"""
-        return process_messages_to_experience(self.model, sft_messages, info=metrics)
+        return await process_messages_to_experience_async(self.model, sft_messages, info=metrics)
 
     async def run_async(self) -> List[Experience]:
         """Run the RAFT alfworld workflow and return experiences"""
@@ -245,7 +245,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
         # Handle first attempt success cases
         if reward >= 1 and traj_format_valid:
             print("✅ Task completed successfully in the first attempt!")
-            experience = process_messages_to_experience(
+            experience = await process_messages_to_experience_async(
                 self.model, trajectory, info={"success": success, "reward": reward, "steps": steps}
             )
             return [experience]
@@ -275,7 +275,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
         kept_for_sft = self._should_keep_for_sft(second_traj_format_valid, re_explore_info)
 
         if kept_for_sft:
-            experience = self._generate_experience_from_sft(sft_messages, metrics)
+            experience = await self._generate_experience_from_sft(sft_messages, metrics)
             experiences.append(experience)
             print(
                 f"✅ Generated good training data: orig={reward}, steps={steps}, new={re_explore_info['new_reward']}, new_steps={re_explore_info['new_steps']}"
