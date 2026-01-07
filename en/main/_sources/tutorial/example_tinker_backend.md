@@ -208,4 +208,4 @@ synchronizer:
 
 Since Llama-3.2-3B is a base (non-instruct-tuned) model, it has limited ability to follow formatting instructions. Additionally, we trained for only **one epoch**. As a result, both backends achieved final rewards just slightly above 0.1. Nonetheless, the training curves show a clear upward trend in reward, indicating successful learning. The results are visualized below:
 
-![Training Rewards on GSM8K](../../docs/sphinx_doc/assets/tinker-gsm8k.png)
+![Training Rewards on GSM8K](../../assets/tinker-gsm8k.png)

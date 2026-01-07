@@ -207,4 +207,4 @@ synchronizer:
 
 由于 Llama-3.2-3B 是基础（非指令微调）模型，其格式化指令跟随能力有限，且本实验仅训练了**一个 epoch**。因此，两种后端的最终 reward 都略高于 0.1。但训练曲线显示 reward 呈明显上升趋势，表明模型已成功学习。结果可视化如下：
 
-![GSM8K 训练奖励曲线](../../docs/sphinx_doc/assets/tinker-gsm8k.png)
+![GSM8K 训练奖励曲线](../../assets/tinker-gsm8k.png)
