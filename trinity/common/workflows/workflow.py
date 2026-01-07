@@ -176,11 +176,20 @@ class MultiTurnWorkflow(Workflow):
         self.repeat_times = repeat_times
         self.run_id_base = run_id_base
 
-    def process_messages_to_experience(
-        self, messages, reward, info={}, truncate_status=None
+    def _build_experience_from_converted(
+        self, converted_experience, reward, info={}, truncate_status=None
     ) -> Experience:
-        converted_experience = self.model.convert_messages_to_experience(messages)
+        """Private helper method to build Experience from converted_experience.
 
+        Args:
+            converted_experience: The converted experience from the model.
+            reward: The reward value.
+            info: Additional info dictionary.
+            truncate_status: Optional truncate status to override.
+
+        Returns:
+            Experience: The constructed Experience object.
+        """
         if converted_experience.truncate_status == "response_truncated":
             reward = 0.0
 
@@ -208,39 +217,22 @@ class MultiTurnWorkflow(Workflow):
             metrics=metrics,
         )
         return experience
+
+    def process_messages_to_experience(
+        self, messages, reward, info={}, truncate_status=None
+    ) -> Experience:
+        converted_experience = self.model.convert_messages_to_experience(messages)
+        return self._build_experience_from_converted(
+            converted_experience, reward, info, truncate_status
+        )
 
     async def process_messages_to_experience_async(
         self, messages, reward, info={}, truncate_status=None
     ) -> Experience:
         converted_experience = await self.model.convert_messages_to_experience_async(messages)
-
-        if converted_experience.truncate_status == "response_truncated":
-            reward = 0.0
-
-        tokens = converted_experience.tokens
-        log_probs = converted_experience.logprobs
-        assert converted_experience.action_mask is not None
-        generation_mask = converted_experience.action_mask
-        log_probs = log_probs * generation_mask
-
-        metrics = {}
-        for k, v in info.items():
-            if isinstance(v, float) or isinstance(v, int):
-                metrics[k] = float(v)
-
-        experience = Experience(
-            tokens=tokens,
-            action_mask=generation_mask,
-            prompt_length=converted_experience.prompt_length,
-            prompt_text=converted_experience.prompt_text,
-            response_text=converted_experience.response_text,
-            truncate_status=converted_experience.truncate_status or truncate_status,
-            reward=reward,
-            logprobs=log_probs,
-            info=info,
-            metrics=metrics,
+        return self._build_experience_from_converted(
+            converted_experience, reward, info, truncate_status
         )
-        return experience
 
 
 class BaseSimpleWorkflow(Workflow):
