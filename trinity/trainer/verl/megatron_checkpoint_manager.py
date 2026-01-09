@@ -13,10 +13,11 @@
 # limitations under the License.
 """
 Megatron Checkpoint Manager.
-Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/utils/checkpoint/megatron_checkpoint_manager.py
+Modified from https://github.com/volcengine/verl/blob/v0.7.0/verl/utils/checkpoint/megatron_checkpoint_manager.py
 """
 
 import json
+import os
 from collections.abc import Callable
 from dataclasses import asdict
 
@@ -44,7 +45,7 @@ from trinity.trainer.verl_trainer import CheckpointMonitor
 
 class MegatronCheckpointManager(OldMegatronCheckpointManager):
     """
-    An enhanced version of the original FSDP checkpoint manager that:
+    An enhanced version of the original Megatron checkpoint manager that:
 
     1. Uploads model state dicts to a remote Synchronizer actor (either directly or via checkpoints).
     """
@@ -86,9 +87,13 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         dist_checkpoint_path = get_dist_checkpoint_path(local_path)
         hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
 
+        # Note that model weights, optimizer states, and extra states are generated
+        # together in a state dict, we save them in one time
         if self.use_dist_checkpointing:
             # Generate state dict for saving
-            state_dict = self.generate_state_dict()
+            state_dict = self.generate_state_dict(
+                self.should_save_model, self.should_save_optimizer, self.should_save_extra
+            )
             # log_with_rank(f"Generated state dict for saving: {state_dict.keys()}", rank=self.rank, logger=logger)
             # for vpp_rank, model in enumerate(self.model):
             #     if len(self.model) > 1:
@@ -105,10 +110,6 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 async_save=self.checkpoint_config.async_save,
             )
 
-            if self.rank == 0:
-                # Save huggingface config
-                self.hf_config.save_pretrained(hf_ckpt_path)
-
             # Synchronize all async save requests
             if not self.checkpoint_config.async_save:
                 assert (
@@ -118,27 +119,66 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         else:
             assert (
                 self.use_hf_checkpoint
-            ), "use_hf_checkpoint should be True when not using dist checkpointing"
-            log_with_rank(
-                f"Saving HF model checkpoint to {local_path} with bridge",
-                rank=self.rank,
-                logger=logger,
+            ), "When not using distributed checkpointing, use_hf_checkpoint should be True."
+            # Generate optimizer and exra state dicts
+            state_dict = self.generate_state_dict(
+                generate_model=False,
+                generate_optimizer=self.should_save_optimizer,
+                generate_extra=self.should_save_extra,
             )
-            self.bridge.save_weights(self.model, hf_ckpt_path)
-            log_with_rank(
-                f"Saved bridge checkpoint to {hf_ckpt_path}", rank=self.rank, logger=logger
+            # Save optimizer and extra states to local path
+            # Start Async save if enabled
+            async_save_request = save_dist_checkpointing(
+                sharded_state_dict=state_dict,
+                ckpt_path=dist_checkpoint_path,
+                async_save=self.checkpoint_config.async_save,
             )
 
-        if self.rank == 0:
-            if hasattr(self.hf_config, "name_or_path") and self.hf_config.name_or_path:
-                try:
-                    generation_config = GenerationConfig.from_pretrained(
-                        self.hf_config.name_or_path
+            # Synchronize all async save requests
+            if not self.checkpoint_config.async_save:
+                assert (
+                    async_save_request is None
+                ), "Async save request should be None when not using async save."
+                torch.distributed.barrier()
+
+        if self.should_save_model:
+            # Save adapter-only checkpoint if PEFT is enabled
+            if self.peft_cls is not None:
+                from verl.utils.megatron_peft_utils import save_adapter_checkpoint
+
+                adapter_ckpt_path = os.path.join(local_path, "adapter_checkpoint")
+
+                # Save adapter weights only (much smaller than full model)
+                save_adapter_checkpoint(
+                    self.model,
+                    adapter_ckpt_path,
+                    self.rank,
+                )
+
+                log_with_rank(
+                    f"Saved adapter-only checkpoint to {adapter_ckpt_path}",
+                    rank=self.rank,
+                    logger=logger,
+                    log_only_rank_0=True,
+                )
+            if self.use_hf_checkpoint:
+                # Use mbridge to save HF model checkpoint
+                log_with_rank(
+                    f"Saving HF model checkpoint to {local_path} with bridge",
+                    rank=self.rank,
+                    logger=logger,
+                )
+                hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
+                if self.vanilla_bridge:
+                    self.bridge.save_weights(
+                        self.model, hf_ckpt_path, distributed_filesystem=True, memory_efficient=True
                     )
-                    generation_config.save_pretrained(hf_ckpt_path)
-                except Exception:
-                    # if the generation config isn't available, we don't save it
-                    pass
+                else:
+                    self.bridge.save_hf_weights(self.model, hf_ckpt_path)
+
+                log_with_rank(
+                    f"Saved bridge checkpoint to {hf_ckpt_path}", rank=self.rank, logger=logger
+                )
 
         def finalize_save_fn():
             # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
@@ -158,6 +198,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 async_save_request is not None
             ), "Async save request should not be None when using async save."
             async_save_request.add_finalize_fn(finalize_save_fn)
+            from megatron.core.dist_checkpointing.strategies.base import async_calls
+
+            async_calls.schedule_async_request(async_save_request)
         else:
             finalize_save_fn()
 
@@ -179,18 +222,31 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         if self.latest_tokenizer_save_step == global_step:
             return False
 
-        # Only rank 0 saves the hf config and tokenizer to huggingface path
-        # No matter whether we save hf model or not
-        if self.rank == 0:
-            # Save tokenizer
-            hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
-            self.processing_class.save_pretrained(hf_config_tokenizer_path)
-            log_with_rank(
-                f"Saved Huggingface tokenizer to {hf_config_tokenizer_path}",
-                rank=self.rank,
-                logger=logger,
-                log_only_rank_0=True,
-            )
+        if self.should_save_model:
+            # Only rank 0 saves the hf config and tokenizer to huggingface path
+            # No matter whether we save hf model or not
+            if self.rank == 0:
+                # Save tokenizer
+                hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
+                if self.processing_class is not None:
+                    self.processing_class.save_pretrained(hf_config_tokenizer_path)
+                # Save huggingface config
+                self.hf_config.save_pretrained(hf_config_tokenizer_path)
+                if hasattr(self.hf_config, "name_or_path") and self.hf_config.name_or_path:
+                    try:
+                        generation_config = GenerationConfig.from_pretrained(
+                            self.hf_config.name_or_path
+                        )
+                        generation_config.save_pretrained(hf_config_tokenizer_path)
+                    except Exception:
+                        # if the generation config isn't available, we don't save it
+                        pass
+                log_with_rank(
+                    f"Saved Huggingface config and tokenizer to {hf_config_tokenizer_path}",
+                    rank=self.rank,
+                    logger=logger,
+                    log_only_rank_0=True,
+                )
 
         self.latest_tokenizer_save_step = global_step
         return self.rank == 0
@@ -212,10 +268,23 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         if self.rank == 0:
             # Save transformer config
-            log_with_rank(
-                f"Transformer config: {self.transformer_config}", rank=self.rank, logger=logger
-            )
+            print(self.transformer_config)
+            bypass_keys = [
+                "finalize_model_grads_func",
+                "grad_scale_func",
+                "no_sync_func",
+                "grad_sync_func",
+                "param_sync_func",
+                "generation_config",
+            ]
+            backup = {}
+            for k in bypass_keys:
+                if hasattr(self.transformer_config, k):
+                    backup[k] = getattr(self.transformer_config, k, None)
+                    delattr(self.transformer_config, k)
             transformer_config_dict = asdict(self.transformer_config)
+            for k in backup:
+                setattr(self.transformer_config, k, backup[k])
             to_convert_types = {torch.dtype: str, AttnBackend: str}
             ignore_types = [Callable]
             pop_keys = []
@@ -251,45 +320,56 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         try:
             # wait for everyone to dump to local
-            state_dict = self.weight_saver(
-                self.model,
-                self.hf_config,
-                dtype=self.param_dtype,
-                is_value_model=self.is_value_model,
-                tie_word_embeddings=self.share_embeddings_and_output_weights,
-            )
-
-            torch.distributed.barrier()
-            if self.rank == 0:
-                # TODO: async save or use mbridge to save hf model
+            if self.bridge is not None:
                 hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
-                import warnings
-
-                from accelerate import init_empty_weights
-
-                with init_empty_weights(), warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    if "mistral7b-rm" in self.config.model.path:
-                        from transformers import MistralForSequenceClassification
-
-                        model = MistralForSequenceClassification.from_pretrained(
-                            self.config.model.path, torch_dtype=torch.bfloat16
-                        )  # use score head instead of lm_head
-                        state_dict["score.weight"] = state_dict["score.weight"]
-                    else:
-                        from transformers import AutoModelForCausalLM
-
-                        model = AutoModelForCausalLM.from_pretrained(
-                            self.config.model.path, torch_dtype=torch.bfloat16
-                        )
-                state_dict = {k: v.to(torch.bfloat16) for k, v in state_dict.items()}
-                model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
-                log_with_rank(
-                    f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
-                    rank=self.rank,
-                    logger=logger,
-                    log_only_rank_0=True,
+                if self.vanilla_bridge:
+                    self.bridge.save_weights(
+                        self.model,
+                        hf_model_ckpt_path,
+                        distributed_filesystem=True,
+                        memory_efficient=True,
+                    )
+                else:
+                    self.bridge.save_hf_weights(self.model, hf_model_ckpt_path)
+            else:
+                state_dict = self.weight_saver(
+                    self.model,
+                    self.hf_config,
+                    dtype=self.param_dtype,
+                    is_value_model=self.is_value_model,
+                    tie_word_embeddings=self.share_embeddings_and_output_weights,
                 )
+
+                torch.distributed.barrier()
+                if self.rank == 0:
+                    hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
+                    import warnings
+
+                    from accelerate import init_empty_weights
+
+                    with init_empty_weights(), warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        if "mistral7b-rm" in self.config.model.path:
+                            from transformers import MistralForSequenceClassification
+
+                            model = MistralForSequenceClassification.from_pretrained(
+                                self.config.model.path
+                            )  # use score head instead of lm_head
+                            state_dict["score.weight"] = state_dict["score.weight"]
+                        else:
+                            from transformers import AutoModelForCausalLM
+
+                            model = AutoModelForCausalLM.from_pretrained(
+                                self.config.model.path, torch_dtype="auto"
+                            )
+                    model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
+                    log_with_rank(
+                        f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
+                        rank=self.rank,
+                        logger=logger,
+                        log_only_rank_0=True,
+                    )
+
         except Exception:
             logger.error(
                 f"Failed to save Huggingface model to {local_path}, you can try to set `use_mbridge=true` to save it.",
@@ -333,7 +413,8 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         # remove previous local_path
         if (
-            max_ckpt_to_keep
+            not self.checkpoint_config.async_save
+            and max_ckpt_to_keep
             and isinstance(max_ckpt_to_keep, int)
             and max_ckpt_to_keep > 0
             and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
@@ -346,16 +427,15 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         torch.distributed.barrier()
 
         state_dict_thread_count = 0
-        if self.should_save_model:
-            if self._save_state_dict(local_path, global_step):
-                state_dict_thread_count += 1
+        if self._save_state_dict(local_path, global_step):
+            state_dict_thread_count += 1
 
         self._save_tokenizer(local_path, global_step)
 
         if self.should_save_extra:
             self._save_extra_state(local_path, global_step)
 
-        if self.should_save_hf_model or save_as_hf:
+        if (self.should_save_hf_model or save_as_hf) and not self.use_hf_checkpoint:
             self._save_hf_model(local_path, global_step)
 
         ray.get(

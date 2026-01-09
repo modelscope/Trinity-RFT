@@ -1,9 +1,13 @@
+from typing import Optional
+
+
 def create_dummy_lora(
     model_path: str,
     checkpoint_job_dir: str,
     lora_rank: int,
     lora_alpha: int,
     target_modules: str,
+    exclude_modules: Optional[str] = None,
 ) -> str:
     import torch
     from peft import LoraConfig, TaskType, get_peft_model
@@ -16,6 +20,7 @@ def create_dummy_lora(
         "r": lora_rank,
         "lora_alpha": lora_alpha,
         "target_modules": target_modules,
+        "exclude_modules": exclude_modules,
         "bias": "none",
     }
     peft_model = get_peft_model(model, LoraConfig(**lora_config))

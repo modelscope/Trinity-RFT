@@ -15,7 +15,7 @@
 # limitations under the License.
 """
 Single Process Actor.
-Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/actor/dp_actor.py
+Modified from https://github.com/volcengine/verl/blob/v0.7.0/verl/workers/actor/dp_actor.py
 """
 
 import logging
@@ -67,9 +67,8 @@ class DataParallelPPOActor(DPActor):
         # make sure we are in training mode
         self.actor_module.train()
 
-        temperature = data.meta_info[
-            "temperature"
-        ]  # temperature must be in the data.meta_info to avoid silent error
+        # temperature must be in the data.meta_info to avoid silent error
+        temperature = data.meta_info["temperature"]
         select_keys = [
             "input_ids",
             "position_ids",
@@ -80,6 +79,8 @@ class DataParallelPPOActor(DPActor):
         select_keys.extend(self.policy_loss_fn.select_keys)
         if not isinstance(self.kl_loss_fn, DummyKLFn):
             select_keys.append("ref_log_prob")
+        # rollout_is_weights will be used in policy loss
+        # rollout_log_probs is equal to old_log_prob in Trinity
         select_keys = list(set(select_keys))
 
         has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
@@ -87,6 +88,8 @@ class DataParallelPPOActor(DPActor):
 
         data = data.select(batch_keys=select_keys, non_tensor_batch_keys=non_tensor_select_keys)
 
+        # Split to make minibatch iterator for updating the actor
+        # See PPO paper for details. https://arxiv.org/abs/1707.06347
         mini_batches = data.split(self.config.ppo_mini_batch_size)
 
         # EXPERIMENTAL: apply loss scale fix
@@ -119,12 +122,11 @@ class DataParallelPPOActor(DPActor):
                 self.actor_optimizer.zero_grad()
 
                 for micro_batch in micro_batches:
+                    micro_batch = micro_batch.to(get_device_id())
                     micro_batch_metrics = {}
-                    model_inputs = {
-                        **micro_batch.batch.to(get_device_id()),
-                        **micro_batch.non_tensor_batch,
-                    }
+                    model_inputs = {**micro_batch.batch, **micro_batch.non_tensor_batch}
                     response_mask = model_inputs["response_mask"]
+                    loss_mode = self.config.policy_loss.get("loss_mode", "vanilla")
 
                     # all return: (bsz, response_length)
                     calculate_entropy = self.entropy_loss_fn != DummyEntropyLossFn
@@ -140,6 +142,23 @@ class DataParallelPPOActor(DPActor):
                     prefix_metrics(
                         src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics
                     )
+
+                    # TODO: to be check
+                    # Skip if using bypass_mode loss (metrics already computed in pg_metrics)
+                    rollout_log_prob = model_inputs.get("rollout_log_probs", None)
+                    if loss_mode != "bypass_mode" and rollout_log_prob is not None:
+                        # Compute metrics using CURRENT policy π_θ vs π_rollout
+                        # Tracks evolving off-policy gap as π_θ updates during mini-batch training
+                        from verl.trainer.ppo.rollout_corr_helper import (
+                            compute_rollout_corr_metrics_from_logprobs,
+                        )
+
+                        rollout_corr_metrics = compute_rollout_corr_metrics_from_logprobs(
+                            log_prob=log_prob,
+                            rollout_log_prob=rollout_log_prob,
+                            response_mask=response_mask,
+                        )
+                        micro_batch_metrics.update(rollout_corr_metrics)
 
                     # compute entropy loss from entropy
                     entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
@@ -185,7 +204,15 @@ class DataParallelPPOActor(DPActor):
 
                     loss = policy_loss * loss_scale
                     micro_batch_metrics["actor/final_loss"] = loss.detach().item()
-                    loss.backward()
+                    if "actor/kl_loss" in micro_batch_metrics:
+                        micro_batch_metrics["actor/kl_loss"] *= loss_scale
+                    if "actor/pg_loss" in micro_batch_metrics:
+                        micro_batch_metrics["actor/pg_loss"] *= loss_scale
+
+                    if self.scaler is not None:
+                        self.scaler.scale(loss).backward()
+                    else:
+                        loss.backward()
 
                     append_to_dict(metrics, micro_batch_metrics)
 

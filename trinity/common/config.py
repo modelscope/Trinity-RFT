@@ -116,6 +116,8 @@ class LoRAConfig:
     lora_alpha: int = 32
     lora_dtype: str = "auto"
     target_modules: str = "all-linear"
+    exclude_modules: Optional[str] = None
+    is_dummy: bool = False  # DO NOT SET, automatically set
 
 
 @Experimental
@@ -1356,16 +1358,19 @@ class Config:
             self.explorer.rollout_model.enable_lora = True
             if len(self.model.lora_configs) > 1:
                 raise ValueError("Only one lora adapter is supported for now.")
-            if self.model.lora_configs[0].path is None:
+            lora_config = self.model.lora_configs[0]
+            if lora_config.path is None:
                 logger.info("Creating dummy lora, since no lora_path is provided.")
                 lora_path = create_dummy_lora(
                     model_path=self.model.model_path,
                     checkpoint_job_dir=self.checkpoint_job_dir,
-                    lora_rank=self.model.lora_configs[0].lora_rank,
-                    lora_alpha=self.model.lora_configs[0].lora_alpha,
-                    target_modules=self.model.lora_configs[0].target_modules,
+                    lora_rank=lora_config.lora_rank,
+                    lora_alpha=lora_config.lora_alpha,
+                    target_modules=lora_config.target_modules,
+                    exclude_modules=lora_config.exclude_modules,
                 )
-                self.model.lora_configs[0].path = lora_path
+                lora_config.path = lora_path
+                lora_config.is_dummy = True
             self.explorer.rollout_model.lora_modules = [
                 {
                     "lora_int_id": i + 1,

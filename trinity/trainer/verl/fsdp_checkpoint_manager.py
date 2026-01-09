@@ -13,7 +13,7 @@
 # limitations under the License.
 """
 FSDP Checkpoint Manager.
-Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/utils/checkpoint/fsdp_checkpoint_manager.py
+Modified from https://github.com/volcengine/verl/blob/v0.7.0/verl/utils/checkpoint/fsdp_checkpoint_manager.py
 """
 
 import json
@@ -33,6 +33,7 @@ from torch.distributed.fsdp import (
     StateDictType,
 )
 from transformers import GenerationConfig
+from transformers.dynamic_module_utils import custom_object_save
 from verl.utils.checkpoint.fsdp_checkpoint_manager import (
     FSDPCheckpointManager as OldFSDPCheckpointManager,
 )
@@ -209,7 +210,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self.latest_extra_state_save_step = global_step
         return True
 
-    def _get_model_config(self):
+    def _get_unwrap_model_and_config(self):
         if fsdp_version(self.model) == 1:
             unwrap_model = self.model._fsdp_wrapped_module
         else:
@@ -221,13 +222,21 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             and hasattr(model_config, "name_or_path")
             and model_config.name_or_path
         ):
-            # Some model's name_or_path is empty if not initialized from pretrained,
-            # in this cases, we don't save generation config.
-            generation_config = GenerationConfig.from_pretrained(model_config.name_or_path)
+            try:
+                # Some model's name_or_path is empty if not initialized from pretrained,
+                # in this cases, we don't save generation config.
+                generation_config = GenerationConfig.from_pretrained(model_config.name_or_path)
+            except Exception:
+                # if the generation config isn't available, we don't save it
+                generation_config = None
         else:
             generation_config = None
 
-        return model_config, generation_config
+        if hasattr(model_config, "auto_map") and None in model_config.auto_map:
+            model_config.auto_map = {
+                k: v for k, v in model_config.auto_map.items() if k is not None
+            }
+        return unwrap_model, model_config, generation_config
 
     def _save_tokenizer(self, local_path, global_step):
         """
@@ -251,18 +260,23 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             hf_config_tokenizer_path = os.path.join(local_path, "huggingface")
             local_mkdir_safe(hf_config_tokenizer_path)
 
-            model_config, generation_config = self._get_model_config()
+            unwrap_model, model_config, generation_config = self._get_unwrap_model_and_config()
             model_config.save_pretrained(hf_config_tokenizer_path)
             if generation_config is not None:
                 generation_config.save_pretrained(hf_config_tokenizer_path)
-
-            self.processing_class.save_pretrained(hf_config_tokenizer_path)
+            if self.processing_class is not None:
+                self.processing_class.save_pretrained(hf_config_tokenizer_path)
             log_with_rank(
                 f"Saved model config and tokenizer class to {os.path.abspath(hf_config_tokenizer_path)}",
                 rank=self.rank,
                 logger=logger,
                 log_only_rank_0=True,
             )
+
+            # If we have a custom model, we copy the file defining it in the folder and set the attributes so it can be
+            # loaded from the Hub.
+            if hasattr(model_config, "auto_map"):
+                custom_object_save(unwrap_model, hf_config_tokenizer_path, config=model_config)
 
             # Also save runtime FSDP config
             fsdp_config_path = os.path.join(local_path, "fsdp_config.json")
@@ -303,7 +317,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             hf_local_path = os.path.join(local_path, "huggingface")
             os.makedirs(hf_local_path, exist_ok=True)
 
-            model_config, generation_config = self._get_model_config()
+            _, model_config, generation_config = self._get_unwrap_model_and_config()
 
             if "ForTokenClassification" in model_config.architectures[0]:
                 from transformers import AutoModelForTokenClassification
@@ -314,9 +328,20 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
                 auto_model_cls = AutoModelForCausalLM
             elif "ForConditionalGeneration" in model_config.architectures[0]:
-                from transformers import AutoModelForVision2Seq
+                # Handle different transformers versions for Vision2Seq models
+                import transformers
+                from packaging import version
 
-                auto_model_cls = AutoModelForVision2Seq
+                if version.parse(transformers.__version__) >= version.parse("4.54.0"):
+                    # transformers >= 4.54.0 uses AutoModelForImageTextToText
+                    from transformers import AutoModelForImageTextToText
+
+                    auto_model_cls = AutoModelForImageTextToText
+                else:
+                    # transformers < 4.54.0 uses AutoModelForVision2Seq
+                    from transformers import AutoModelForVision2Seq
+
+                    auto_model_cls = AutoModelForVision2Seq
             else:
                 raise NotImplementedError(f"Unknown architecture {model_config['architectures']}")
 

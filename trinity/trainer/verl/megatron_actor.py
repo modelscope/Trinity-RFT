@@ -18,7 +18,7 @@ In megatron actor, the differences are:
 
 Note that our model doesn't have to be `MegatronModule` because we don't share embedding in the last layer
 
-Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/actor/megatron_actor.py
+Modified from https://github.com/volcengine/verl/blob/v0.7.0/verl/workers/actor/megatron_actor.py
 """
 
 from functools import partial
@@ -31,10 +31,18 @@ from megatron.core.tensor_parallel.cross_entropy import VocabParallelCrossEntrop
 from verl import DataProto
 from verl.utils.device import get_device_id, get_torch_device
 from verl.utils.megatron.pipeline_parallel import make_batch_generator
+from verl.utils.megatron.router_replay_patch import RouterReplay, RouterReplayAction
+from verl.utils.megatron.router_replay_utils import (
+    RouterReplayHelper,
+    merge_router_topk_indices,
+    reorder_and_merge_vpp_layers,
+    set_router_replay_data,
+)
 from verl.utils.megatron.tensor_parallel import (
     vocab_parallel_entropy,
     vocab_parallel_log_probs_from_logits,
 )
+from verl.utils.megatron_utils import unwrap_model
 from verl.utils.profiler import GPUMemoryLogger
 from verl.utils.py_functional import append_to_dict
 from verl.utils.seqlen_balancing import rearrange_micro_batches
@@ -87,12 +95,15 @@ class MegatronPPOActor(OldMegatronPPOActor):
         """
         # broadcast from last pp rank to all other pp ranks
         # TODO: actually, we just need to control the sampling order.
+        data.to(get_device_id())
+        data.batch = data.batch.contiguous()
         mini_batch = data
         broadcast_dict_tensor(
             mini_batch.batch,
             src=mpu.get_pipeline_model_parallel_last_rank(),
             group=mpu.get_pipeline_model_parallel_group(),
         )
+        mini_batch.to("cpu")
         # split into micro-batches
         mini_batch.batch["attention_mask"] = mini_batch.batch["attention_mask"].to(bool)
         self.has_multi_modal_inputs = "multi_modal_inputs" in mini_batch.non_tensor_batch.keys()
@@ -110,6 +121,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
             ]  # mcore patch recompute qwen2vl's pos ids during forward
 
         indices = None
+        temperature = data.meta_info["temperature"]
         if use_dynamic_bsz:
             assert (
                 max_token_len is not None
@@ -150,7 +162,17 @@ class MegatronPPOActor(OldMegatronPPOActor):
         def loss_func(output, data, meta_info):
             # For memory efficiency
             # We move calculation of entropy to compute_log_probs, forward_only == True
-            device = output["log_probs"].device
+            log_probs = None
+            entropy = None
+            if isinstance(output, dict):
+                log_probs = output["log_probs"]
+                if "entropy" in output:
+                    entropy = output["entropy"]
+            else:
+                assert isinstance(output, torch.Tensor)
+                log_probs = output
+
+            device = log_probs.device
             metrics = {}
             if forward_only:
                 if post_process_fn is None:
@@ -167,14 +189,34 @@ class MegatronPPOActor(OldMegatronPPOActor):
             response_mask = data["response_mask"].to(bool)
 
             # compute policy loss
-            log_prob = output["log_probs"][:, -response_length - 1 : -1].contiguous()
+            log_prob = log_probs[:, -response_length - 1 : -1].contiguous()
             ret_entropy = None
             stats = {}
             if not forward_only:
+                loss_mode = self.config.policy_loss.get("loss_mode", "vanilla")
+
                 pg_loss, pg_loss_metrics = self.policy_loss_fn(  # type: ignore
                     logprob=log_prob, **data
                 )
                 prefix_metrics(src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=stats)
+
+                # TODO: to be check
+                # Skip if using bypass_mode loss (metrics already computed in pg_metrics)
+                rollout_log_prob = data.get("rollout_log_probs", None)
+                if loss_mode != "bypass_mode" and rollout_log_prob is not None:
+                    # Compute metrics using CURRENT policy π_θ vs π_rollout
+                    # Tracks evolving off-policy gap as π_θ updates during mini-batch training
+                    from verl.trainer.ppo.rollout_corr_helper import (
+                        compute_rollout_corr_metrics_from_logprobs,
+                    )
+
+                    rollout_corr_metrics = compute_rollout_corr_metrics_from_logprobs(
+                        log_prob=log_prob,
+                        rollout_log_prob=rollout_log_prob,
+                        response_mask=response_mask,
+                    )
+                    stats.update(rollout_corr_metrics)
+
                 policy_loss = pg_loss
 
             if calculate_entropy:
@@ -220,20 +262,54 @@ class MegatronPPOActor(OldMegatronPPOActor):
             append_to_dict(metrics, stats)
             return policy_loss, [metrics, ret_entropy]
 
-        def forward_step(batch_iter, model):
+        def forward_step(batch_iter, model, return_schedule_plan: bool = False):
+            """
+            Args:
+                batch_iter: the batch iterator
+                model: the model
+                return_schedule_plan: whether to return the schedule plan, for 1f1b overlap
+            """
+            if return_schedule_plan:
+                assert (
+                    self.tf_config.overlap_moe_expert_parallel_comm
+                ), "overlap_moe_expert_parallel_comm must be enabled to return the schedule plan"
+                # TODO: Fix this
+                assert (
+                    not calculate_entropy
+                ), "calculate_entropy must be disabled to return the schedule plan"
+                from megatron.core.models.gpt.gpt_model import GPTModel
+
+                assert isinstance(model, GPTModel), "model must be a GPTModel"
+                assert (
+                    self.use_fused_kernels
+                ), "use_fused_kernels must be enabled to return the schedule plan"
+                # TODO: support VLM with MoE
+                from verl.models.mcore.model_forward_1f1b_overlap import (
+                    gptmodel_forward_1f1b_overlap,
+                )
+
             batch = next(batch_iter)
+            batch = batch.to(get_device_id())
+            batch = batch.contiguous()
+
             input_ids = batch["input_ids"]
             attention_mask = batch["attention_mask"].to(bool)
             position_ids = batch["position_ids"]
 
+            unwrapped_model = unwrap_model(model)
+            if hasattr(unwrapped_model, "vp_stage"):
+                vp_rank = unwrapped_model.vp_stage
+            else:
+                vp_rank = 0
+
             multi_modal_inputs = {}
             if "multi_modal_inputs" in batch:
-                for key in batch["multi_modal_inputs"][0].keys():
-                    idxs = batch["multi_modal_inputs_idx"]
-                    mmi = batch["multi_modal_inputs"]
-                    multi_modal_inputs[key] = torch.cat(
-                        [mmi[idx].get(key) for idx in idxs if mmi[idx].get(key) is not None], dim=0
-                    )
+                from verl.utils.model import extract_multi_modal_inputs
+
+                indices = batch.get("multi_modal_inputs_idx", None)
+                multi_modal_inputs = extract_multi_modal_inputs(
+                    batch["multi_modal_inputs"], indices
+                )
             responses = batch["responses"]
             response_length = responses.size(1)
             label = position_ids.clone()
@@ -242,6 +318,17 @@ class MegatronPPOActor(OldMegatronPPOActor):
             label_mask[:, : -response_length - 1] = False
             label_mask[:, -1] = False
 
+            if RouterReplayHelper.is_replay_backward_action(self.tf_config, vp_rank):
+                router_instance_list = RouterReplayHelper.get_micro_batch_router_list(
+                    self.tf_config, vp_rank
+                )
+                for router in router_instance_list:
+                    router.set_router_replay_action(RouterReplayAction.REPLAY_FORWARD)
+
+            if RouterReplayHelper.is_replay_forward_action(self.tf_config, vp_rank):
+                layers_topk_idx = batch["routed_experts"]
+                set_router_replay_data(layers_topk_idx, attention_mask, self.tf_config, vp_rank)
+
             from verl.models.mcore import (
                 get_mcore_forward_fn,
                 get_mcore_forward_fused_fn,
@@ -249,16 +336,18 @@ class MegatronPPOActor(OldMegatronPPOActor):
 
             if self.use_fused_kernels:
                 forward_fn = get_mcore_forward_fused_fn(self.hf_config)
+                if return_schedule_plan:
+                    forward_fn = gptmodel_forward_1f1b_overlap
                 # return dict of [logits, entropy]
                 output = forward_fn(
-                    model,
-                    input_ids,
-                    position_ids,
-                    attention_mask,
-                    sequence_parallel=self.tf_config.sequence_parallel,
-                    multi_modal_inputs=multi_modal_inputs,
+                    model=model,
+                    input_ids=input_ids,
+                    position_ids=position_ids,
+                    attention_mask=attention_mask,
                     labels=label,
                     labels_mask=label_mask,
+                    temperature=temperature,
+                    multi_modal_inputs=multi_modal_inputs,
                 )
             else:
                 forward_fn = get_mcore_forward_fn(self.hf_config)
@@ -266,25 +355,35 @@ class MegatronPPOActor(OldMegatronPPOActor):
                 def logits_processor(logits, label, label_mask):
                     assert logits.shape[:2] == label.shape[:2]
                     assert label.shape == label_mask.shape
+                    logits.div_(temperature)
                     ret = {}
                     if calculate_entropy:
+                        logits_bak = logits.clone()
+                        # # disable the hint until the fused_kernel is optimized for triton>=3.3
+                        # logger.warning_once(
+                        #     "For memory-efficient computation, enable fused kernels via "
+                        #     "`actor_rollout_ref.model.use_fused_kernels=True`. "
+                        #     "The current `clone()` operation ensures correctness but increases memory usage."
+                        # )
                         entropy = vocab_parallel_entropy(logits)
                         ret["entropy"] = entropy
-                    log_probs = vocab_parallel_log_probs_from_logits(logits, label)
+                    else:
+                        logits_bak = logits
+                    log_probs = vocab_parallel_log_probs_from_logits(logits_bak, label)
                     log_probs = log_probs.masked_fill(~label_mask, 0.0)
                     ret["log_probs"] = log_probs
                     return ret
 
                 logits_processor_args = {"label": label, "label_mask": label_mask}
                 output = forward_fn(
-                    model,
-                    input_ids,
-                    attention_mask,
-                    position_ids,
-                    sequence_parallel=self.tf_config.sequence_parallel,
+                    model=model,
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    position_ids=position_ids,
                     multi_modal_inputs=multi_modal_inputs,
                     logits_processor=logits_processor,
                     logits_processor_args=logits_processor_args,
+                    data_format="thd" if self.config.megatron.use_remove_padding else "bshd",
                 )
 
             if forward_only:
@@ -296,6 +395,23 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     "entropy_coeff": self.config.entropy_coeff,
                     "clip_ratio_c": clip_ratio_c,
                 }
+
+            if RouterReplayHelper.is_r2_record_action(self.tf_config, vp_rank):
+                merge_router_topk_indices(
+                    attention_mask,
+                    input_ids,
+                    self.mini_layer_topk_idx_list,  # type: ignore
+                    self.tf_config,
+                    vp_rank,
+                )
+
+            if RouterReplayHelper.is_replay_forward_action(self.tf_config, vp_rank):
+                router_instance_list = RouterReplayHelper.get_micro_batch_router_list(
+                    self.tf_config, vp_rank
+                )
+                for router in router_instance_list:
+                    router.set_router_replay_action(RouterReplayAction.REPLAY_BACKWARD)
+
             return output, partial(loss_func, data=batch, meta_info=meta_info)
 
         # batch should be a list of batches inside micro-batches
@@ -333,6 +449,23 @@ class MegatronPPOActor(OldMegatronPPOActor):
         losses_reduced = {"output": losses_reduced}
         if use_dynamic_bsz:
             losses_reduced["indices"] = indices
+        if RouterReplayHelper.is_r2_record_action(self.tf_config):
+            if self.tf_config.virtual_pipeline_model_parallel_size is not None:
+                # config = self.actor_module[0].module.module.config
+                vp_size = len(self.actor_module)
+                microbatch_group_size_per_vp_stage = (
+                    self.tf_config.microbatch_group_size_per_vp_stage
+                )
+                bs = n_micro_batch
+                losses_reduced["mini_layer_topk_idx_tensor"] = reorder_and_merge_vpp_layers(
+                    self.mini_layer_topk_idx_list, bs, vp_size, microbatch_group_size_per_vp_stage  # type: ignore
+                )
+            else:
+                losses_reduced["mini_layer_topk_idx_tensor"] = torch.cat(
+                    self.mini_layer_topk_idx_list, dim=0  # type: ignore
+                )
+            self.mini_layer_topk_idx_list = []
+
         return losses_reduced
 
     @GPUMemoryLogger(role="megatron actor", logger=logger)
@@ -349,9 +482,11 @@ class MegatronPPOActor(OldMegatronPPOActor):
 
         """
         metrics = {}
-        self.prof.start()
+        if self.use_torch_profiler and self.prof and self.prof.enable:
+            self.prof.start()
         for data in dataloader:
-            data.to(get_device_id())
+            if self.config.router_replay.mode in ["R2", "R3"]:
+                RouterReplay.set_global_router_replay_action(RouterReplayAction.REPLAY_FORWARD)
             self.actor_optimizer.zero_grad()
             # use use_contiguous_buffers_in_local_ddp and no overlap_dp_param_comm
             for chunk in self.actor_module:
@@ -393,10 +528,17 @@ class MegatronPPOActor(OldMegatronPPOActor):
                 pass
             else:
                 raise NotImplementedError
-            self.prof.step()
+            if self.use_torch_profiler and self.prof and self.prof.enable:
+                self.prof.step()
+
+            if self.config.router_replay.mode in ["R2", "R3"]:
+                RouterReplay.clear_global_router_replay_action()
+                RouterReplay.clear_global_indices()
+
         # add empty cache after each compute
-        self.prof.stop_and_save()
-        self.prof.stop_trace()
+        if self.use_torch_profiler and self.prof and self.prof.enable:
+            self.prof.stop_and_save()
+            self.prof.stop_trace()
         get_torch_device().empty_cache()
         return metrics
 

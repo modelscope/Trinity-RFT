@@ -13,6 +13,7 @@ import ray
 import torch
 from omegaconf import OmegaConf
 from verl import DataProto
+from verl.trainer.ppo.core_algos import agg_loss
 from verl.trainer.ppo.metric_utils import (
     compute_throughout_metrics,
     compute_timing_metrics,
@@ -29,6 +30,7 @@ from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 from verl.utils.metric import reduce_metrics
+from verl.workers.config import FSDPEngineConfig
 
 from trinity.algorithm import ADVANTAGE_FN, ALGORITHM_TYPE, KL_FN
 from trinity.algorithm.utils import prefix_metrics
@@ -198,29 +200,22 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         tokenizer = hf_tokenizer(local_path, trust_remote_code=trust_remote_code)
         # processor for multimodal LLM, could be None
         processor = hf_processor(local_path, trust_remote_code=trust_remote_code, use_fast=True)
+        from verl.single_controller.ray import RayWorkerGroup
+
+        ray_worker_group_cls = RayWorkerGroup
 
         # define worker classes
         if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:
-            assert config.critic.strategy in ["fsdp", "fsdp2"]
-            from verl.single_controller.ray import RayWorkerGroup
-
             from trinity.trainer.verl.fsdp_workers import (
                 ActorRolloutRefWorker,
                 CriticWorker,
             )
 
-            ray_worker_group_cls = RayWorkerGroup
-
         elif config.actor_rollout_ref.actor.strategy == "megatron":
-            assert config.actor_rollout_ref.actor.strategy == config.critic.strategy
-            from verl.single_controller.ray.megatron import NVMegatronRayWorkerGroup
-
             from trinity.trainer.verl.megatron_workers import (
                 ActorRolloutRefWorker,
                 CriticWorker,
             )
-
-            ray_worker_group_cls = NVMegatronRayWorkerGroup
 
         else:
             raise NotImplementedError
@@ -272,12 +267,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
         self.init_workers()
 
-    def _validate_config(self):  # TODO
-        algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
-        self.use_critic = algorithm.use_critic
-        super()._validate_config()
-
-    def init_workers(self):
+    def init_workers(self):  # noqa: C901
         """Initialize distributed training workers using Ray backend.
 
 
@@ -295,42 +285,98 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         }
 
         # create actor and rollout
+        actor_role = (
+            Role.ActorRolloutRef
+            if Role.ActorRolloutRef in self.role_worker_mapping
+            else Role.ActorRollout
+        )
         if self.hybrid_engine:
-            resource_pool = self.resource_pool_manager.get_resource_pool(Role.ActorRollout)
+            resource_pool = self.resource_pool_manager.get_resource_pool(actor_role)
             actor_rollout_cls = RayClassWithInitArgs(
-                cls=self.role_worker_mapping[Role.ActorRollout],
+                cls=self.role_worker_mapping[actor_role],
                 config=self.config.actor_rollout_ref,
-                role="actor",
+                role=str(actor_role),
             )
-            self.resource_pool_to_cls[resource_pool]["actor"] = actor_rollout_cls
+            self.resource_pool_to_cls[resource_pool][str(actor_role)] = actor_rollout_cls
         else:
             raise NotImplementedError
 
         # create critic
         if self.use_critic:
             resource_pool = self.resource_pool_manager.get_resource_pool(Role.Critic)
+
+            critic_cfg = self.config.critic
+
+            if self.use_legacy_worker_impl == "disable":
+                # convert critic_cfg into TrainingWorkerConfig
+                from verl.workers.engine_workers import TrainingWorkerConfig
+
+                orig_critic_cfg = critic_cfg
+                if orig_critic_cfg.strategy == "fsdp":
+                    engine_config: FSDPEngineConfig = orig_critic_cfg.model.fsdp_config
+                    engine_config.infer_max_token_len_per_gpu = (
+                        critic_cfg.ppo_infer_max_token_len_per_gpu
+                    )
+                    engine_config.max_token_len_per_gpu = critic_cfg.ppo_max_token_len_per_gpu
+                else:
+                    raise NotImplementedError(f"Unknown strategy {orig_critic_cfg.strategy=}")
+
+                critic_cfg = TrainingWorkerConfig(
+                    model_type="value_model",
+                    model_config=orig_critic_cfg.model_config,
+                    engine_config=engine_config,
+                    optimizer_config=orig_critic_cfg.optim,
+                    checkpoint_config=orig_critic_cfg.checkpoint,
+                )
+
             critic_cls = RayClassWithInitArgs(
-                cls=self.role_worker_mapping[Role.Critic], config=self.config.critic
+                cls=self.role_worker_mapping[Role.Critic], config=critic_cfg
             )
-            self.resource_pool_to_cls[resource_pool]["critic"] = critic_cls
+            self.resource_pool_to_cls[resource_pool][str(Role.Critic)] = critic_cls
 
         # create reference policy if needed
-        if self.use_reference_policy:
+        if self.use_reference_policy and Role.RefPolicy in self.role_worker_mapping:
             resource_pool = self.resource_pool_manager.get_resource_pool(Role.RefPolicy)
             ref_policy_cls = RayClassWithInitArgs(
                 self.role_worker_mapping[Role.RefPolicy],
                 config=self.config.actor_rollout_ref,
-                role="ref",
+                role=str(Role.RefPolicy),
             )
-            self.resource_pool_to_cls[resource_pool]["ref"] = ref_policy_cls
+            self.resource_pool_to_cls[resource_pool][str(Role.RefPolicy)] = ref_policy_cls
+
         # create a reward model if reward_fn is None
-        if self.use_rm:
-            # we create a RM here
-            resource_pool = self.resource_pool_manager.get_resource_pool(Role.RewardModel)
-            rm_cls = RayClassWithInitArgs(
-                self.role_worker_mapping[Role.RewardModel], config=self.config.reward_model
+        # for legacy discriminative reward model, we create a reward model worker here
+        # for reward loop discriminative reward model, we create a reward loop manager here
+        if not self.use_reward_loop:
+            # legacy reward model only handle reward-model based scenario
+            if self.use_rm:
+                # we create a RM here
+                resource_pool = self.resource_pool_manager.get_resource_pool(Role.RewardModel)
+                rm_cls = RayClassWithInitArgs(
+                    self.role_worker_mapping[Role.RewardModel], config=self.config.reward_model
+                )
+                self.resource_pool_to_cls[resource_pool][str(Role.RewardModel)] = rm_cls
+        else:
+            # reward loop handle hybrid reward scenario (rule, disrm, genrm, ...)
+            # Note: mode is always "async" since sync mode is deprecated
+            can_reward_loop_parallelize = (
+                not self.use_rm or self.config.reward_model.enable_resource_pool
             )
-            self.resource_pool_to_cls[resource_pool]["rm"] = rm_cls
+            # judge if we can asynchronously parallelize reward model with actor rollout
+            # two condition that we can parallelize reward model with actor rollout:
+            # 1. reward model is not enabled (rule-based reward can parallelize)
+            # 2. reward model is enabled but extra resource pool is enabled
+            # If we cannot parallelize, we should enable synchronous mode here, and launch a reward loop manager here
+            # else for parallelize mode, we launch a reward worker for each rollout worker (in agent loop, not here)
+            if not can_reward_loop_parallelize:
+                from verl.experimental.reward_loop import RewardLoopManager
+
+                self.config.reward_model.n_gpus_per_node = self.config.trainer.n_gpus_per_node
+                resource_pool = self.resource_pool_manager.get_resource_pool(Role.RewardModel)
+                self.reward_loop_manager = RewardLoopManager(
+                    config=self.config,
+                    rm_resource_pool=resource_pool,
+                )
 
         # initialize WorkerGroup
         # NOTE: if you want to use a different resource pool for each role, which can support different parallel size,
@@ -343,32 +389,68 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             wg_kwargs[
                 "ray_wait_register_center_timeout"
             ] = self.config.trainer.ray_wait_register_center_timeout
+        if OmegaConf.select(self.config.global_profiler, "steps") is not None:
+            wg_kwargs["profile_steps"] = OmegaConf.select(self.config.global_profiler, "steps")
+            # Only require nsight worker options when tool is nsys
+            if OmegaConf.select(self.config.global_profiler, "tool") == "nsys":
+                assert (
+                    OmegaConf.select(
+                        self.config.global_profiler.global_tool_config.nsys, "worker_nsight_options"
+                    )
+                    is not None
+                ), "worker_nsight_options must be set when using nsys with profile_steps"
+                wg_kwargs["worker_nsight_options"] = OmegaConf.to_container(
+                    OmegaConf.select(
+                        self.config.global_profiler.global_tool_config.nsys, "worker_nsight_options"
+                    )
+                )
+        wg_kwargs["device_name"] = self.device_name
+
         for resource_pool, class_dict in self.resource_pool_to_cls.items():
             worker_dict_cls = create_colocated_worker_cls(class_dict=class_dict)
             wg_dict = self.ray_worker_group_cls(
                 resource_pool=resource_pool,
                 ray_cls_with_init=worker_dict_cls,
-                device_name=self.device_name,
                 **wg_kwargs,
             )
             spawn_wg = wg_dict.spawn(prefix_set=class_dict.keys())
             all_wg.update(spawn_wg)
 
         if self.use_critic:
-            self.critic_wg = all_wg["critic"]
-            self.critic_wg.init_model()
+            self.critic_wg = all_wg[str(Role.Critic)]
+            if self.use_legacy_worker_impl == "disable":
+                self.critic_wg.reset()
+                # assign critic loss
+                from functools import partial
+
+                from verl.workers.utils.losses import value_loss
+
+                value_loss_ = partial(value_loss, config=orig_critic_cfg)
+                self.critic_wg.set_loss_fn(value_loss_)
+            else:
+                self.critic_wg.init_model()
 
         if self.use_reference_policy and not self.ref_in_actor:
-            self.ref_policy_wg = all_wg["ref"]
-            self.ref_policy_wg.init_model()
+            if str(Role.RefPolicy) in all_wg:
+                self.ref_policy_wg = all_wg[str(Role.RefPolicy)]
+                self.ref_policy_wg.init_model()
+            else:
+                # Model engine: ActorRolloutRefWorker
+                assert str(Role.ActorRolloutRef) in all_wg, f"{all_wg.keys()=}"
+                self.ref_policy_wg = all_wg[str(Role.ActorRolloutRef)]
 
-        if self.use_rm:
-            self.rm_wg = all_wg["rm"]
+        self.rm_wg = None
+        # initalization of rm_wg will be deprecated in the future
+        if self.use_rm and not self.use_reward_loop:
+            self.rm_wg = all_wg[str(Role.RewardModel)]
             self.rm_wg.init_model()
 
         # we should create rollout at the end so that vllm can have a better estimation of kv cache memory
-        self.actor_rollout_wg = all_wg["actor"]
+        self.actor_rollout_wg = all_wg[str(actor_role)]
         self.actor_rollout_wg.init_model()
+
+        if self.ref_in_actor:
+            self.ref_policy_wg = self.actor_rollout_wg
 
     @property
     def train_step_num(self) -> int:
@@ -424,13 +506,57 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 batch.batch["attention_mask"], dim=-1
             ).tolist()
 
+            # Operating Mode Selection:
+            # - Bypass mode: Sets old_log_probs = rollout_log_probs (2 policies: π_rollout, π_θ)
+            # - Decoupled mode: Recomputes old_log_probs as proximal anchor (3 policies: π_rollout, π_old, π_θ)
+            #   Note: π_old computed once per data batch, serves as stable reference during mini-batch updates
+            rollout_corr_config = self.config.algorithm.get("rollout_correction", None)
+            bypass_recomputing_logprobs = rollout_corr_config and rollout_corr_config.get(
+                "bypass_mode", False
+            )
+            if bypass_recomputing_logprobs:  # Use `rollout_log_probs`
+                from verl.trainer.ppo.rollout_corr_helper import apply_bypass_mode
+
+                apply_bypass_mode(
+                    batch=batch,
+                    rollout_corr_config=rollout_corr_config,
+                    policy_loss_config=self.config.actor_rollout_ref.actor.policy_loss,
+                )
+            else:  # Recompute old_log_probs  TODO: to be check
+                if (batch.meta_info["model_versions"] != self.global_steps - 1).any():
+                    self.logger.warning(
+                        f"model_versions mismatch: {batch.meta_info['model_versions']} vs {self.global_steps - 1}"
+                    )
+                with marked_timer("old_log_prob", timing_raw, color="blue"):
+                    old_log_prob, old_log_prob_mfu = self._compute_old_log_prob(batch)
+                    entropys = old_log_prob.batch["entropys"]
+                    response_masks = batch.batch["response_mask"]
+                    actor_config = self.config.actor_rollout_ref.actor
+                    entropy_agg = agg_loss(
+                        loss_mat=entropys,
+                        loss_mask=response_masks,
+                        loss_agg_mode=actor_config.loss_agg_mode,
+                        loss_scale_factor=actor_config.loss_scale_factor,
+                    )
+                    old_log_prob_metrics = {
+                        "actor/entropy": entropy_agg.detach().item(),
+                        "perf/mfu/actor_infer": old_log_prob_mfu,
+                    }
+                    metrics.update(old_log_prob_metrics)
+                    old_log_prob.batch.pop("entropys")
+                    batch = batch.union(old_log_prob)
+                    if "rollout_log_probs" in batch.batch.keys():
+                        # TODO: we may want to add diff of probs too.
+                        from verl.utils.debug.metrics import calculate_debug_metrics
+
+                        metrics.update(calculate_debug_metrics(batch))
+
+            assert "old_log_probs" in batch.batch, f'"old_log_prob" not in {batch.batch.keys()=}'
+
             if self.algorithm.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
-                with marked_timer("ref", timing_raw):
-                    if not self.ref_in_actor:
-                        ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
-                    else:
-                        ref_log_prob = self.actor_rollout_wg.compute_ref_log_prob(batch)
+                with marked_timer(str(Role.RefPolicy), timing_raw, color="olive"):
+                    ref_log_prob = self._compute_ref_log_prob(batch)
                     batch = batch.union(ref_log_prob)
 
             if self.algorithm.use_critic:
@@ -451,10 +577,30 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     assert "token_level_rewards" not in batch.batch.keys()
                     batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
 
+            # TODO: to be check
+            # Compute rollout correction: IS weights, rejection sampling, and metrics
+            # Only runs in decoupled mode (computes once per batch using stable π_old)
+            # In bypass mode, this is skipped - actor computes metrics from evolving π_θ vs π_rollout
+            if (
+                rollout_corr_config is not None
+                and "rollout_log_probs" in batch.batch
+                and not bypass_recomputing_logprobs  # Only in decoupled mode
+            ):
+                from verl.trainer.ppo.rollout_corr_helper import (
+                    compute_rollout_correction_and_add_to_batch,
+                )
+
+                # Compute IS weights, apply rejection sampling, compute metrics
+                batch, is_metrics = compute_rollout_correction_and_add_to_batch(
+                    batch, rollout_corr_config
+                )
+                # IS and off-policy metrics already have rollout_corr/ prefix
+                metrics.update(is_metrics)
+
             # update critic
             if self.algorithm.use_critic:
-                with marked_timer("update_critic", timing_raw):
-                    critic_output = self.critic_wg.update_critic(batch)
+                with marked_timer("update_critic", timing_raw, color="pink"):
+                    critic_output = self._update_critic(batch)
                 critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
                 metrics.update(critic_output_metrics)
 
@@ -464,9 +610,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 or self.config.trainer.critic_warmup <= self.global_steps
             ):
                 # update actor
-                with marked_timer("update_actor", timing_raw):
-                    actor_output = self.actor_rollout_wg.update_actor(batch)
-                    # TODO add send weight explorer
+                with marked_timer("update_actor", timing_raw, color="red"):
+                    actor_output = self._update_actor(batch)
                 actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
                 metrics.update(actor_output_metrics)
 
@@ -518,7 +663,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         self.actor_rollout_wg.save_checkpoint(
             actor_local_path,
-            self.global_steps,
+            global_step=self.global_steps,
             max_ckpt_to_keep=max_actor_ckpt_to_keep,
             save_as_hf=save_as_hf,
         )
@@ -527,7 +672,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             critic_local_path = os.path.join(local_global_step_folder, "critic")
             self.critic_wg.save_checkpoint(
                 critic_local_path,
-                self.global_steps,
+                global_step=self.global_steps,
                 max_ckpt_to_keep=max_critic_ckpt_to_keep,
             )
 
