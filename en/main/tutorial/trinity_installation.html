@@ -624,9 +624,9 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs (or prefer not to use them):</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended">From Source (Recommended)</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs or prefer not to use them</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended-for-experienced-users">From Source (Recommended for experienced users)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clone-the-repository">1. Clone the Repository</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-virtual-environment">2. Set Up a Virtual Environment</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#using-conda">Using Conda</a></li>
@@ -637,7 +637,11 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#via-pypi">Via PyPI</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker">Using Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker">Using Docker</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pull-from-github-container-registry-recommended-for-beginners">Pull from GitHub Container Registry (Recommended for beginners)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-locally">Build Locally</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
             </nav>
@@ -652,10 +656,10 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<p>For installing Trinity-RFT, you have three options: from source (recommended), via PyPI, or using Docker.</p>
+<p>For installing Trinity-RFT, you have three options: from source (recommended for experienced users), using Docker (recommended for beginners) or via PyPI.</p>
 <p><strong>Before you begin</strong>, check your system setup:</p>
 <section id="if-you-have-gpus-and-want-to-use-them">
-<h2>If you have GPUs and want to use them:<a class="headerlink" href="#if-you-have-gpus-and-want-to-use-them" title="Link to this heading">#</a></h2>
+<h2>If you have GPUs and want to use them<a class="headerlink" href="#if-you-have-gpus-and-want-to-use-them" title="Link to this heading">#</a></h2>
 <p>Make sure your system meets these requirements:</p>
 <ul class="simple">
 <li><p><strong>Python</strong>: 3.10 – 3.12</p></li>
@@ -664,7 +668,7 @@ document.write(`
 </ul>
 </section>
 <section id="if-you-dont-have-gpus-or-prefer-not-to-use-them">
-<h2>If you don’t have GPUs (or prefer not to use them):<a class="headerlink" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them" title="Link to this heading">#</a></h2>
+<h2>If you don’t have GPUs or prefer not to use them<a class="headerlink" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them" title="Link to this heading">#</a></h2>
 <p>You can use the <code class="docutils literal notranslate"><span class="pre">tinker</span></code> option instead, which only requires:</p>
 <ul class="simple">
 <li><p><strong>Python</strong>: 3.11 – 3.12</p></li>
@@ -672,8 +676,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="from-source-recommended">
-<h2>From Source (Recommended)<a class="headerlink" href="#from-source-recommended" title="Link to this heading">#</a></h2>
+<section id="from-source-recommended-for-experienced-users">
+<h2>From Source (Recommended for experienced users)<a class="headerlink" href="#from-source-recommended-for-experienced-users" title="Link to this heading">#</a></h2>
 <p>This method is best if you plan to customize or contribute to Trinity-RFT.</p>
 <section id="clone-the-repository">
 <h3>1. Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Link to this heading">#</a></h3>
@@ -748,7 +752,31 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <hr class="docutils" />
 <section id="using-docker">
 <h2>Using Docker<a class="headerlink" href="#using-docker" title="Link to this heading">#</a></h2>
-<p>We provide a Docker setup for hassle-free environment configuration.</p>
+<p>You can download the Trinity-RFT Docker image from Github Container Registry or build it locally.</p>
+<section id="pull-from-github-container-registry-recommended-for-beginners">
+<h3>Pull from GitHub Container Registry (Recommended for beginners)<a class="headerlink" href="#pull-from-github-container-registry-recommended-for-beginners" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
+<span class="nb">cd</span><span class="w"> </span>Trinity-RFT
+
+docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/modelscope/trinity-rft:latest
+
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gpus<span class="w"> </span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--shm-size<span class="o">=</span><span class="s2">&quot;64g&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="nv">$PWD</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>&lt;path_to_your_data_and_checkpoints&gt;:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/modelscope/trinity-rft:latest
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This docker image use <code class="docutils literal notranslate"><span class="pre">uv</span></code> to manage python packages, you need to activate the virtual environment using <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">/opt/venv/bin/activate</span></code> after entering the docker container.
+The image has include dependencies such as vllm, flash-attn and Megatron-LM, if you need to download more packages, don’t forget to activate the virtual environment and use <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span></code> to install them.</p>
+</div>
+</section>
+<section id="build-locally">
+<h3>Build Locally<a class="headerlink" href="#build-locally" title="Link to this heading">#</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
 <span class="nb">cd</span><span class="w"> </span>Trinity-RFT
 
@@ -766,12 +794,13 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <span class="w">  </span>trinity-rft:latest
 </pre></div>
 </div>
+<hr class="docutils" />
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For training with <strong>Megatron-LM</strong>, please refer to <a class="reference internal" href="example_megatron.html#megatron-lm"><span class="std std-ref">Megatron-LM Backend</span></a>.</p>
 </div>
 </section>
-<hr class="docutils" />
+</section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h2>
 <p>If you encounter installation issues, refer to the FAQ or <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/issues">GitHub Issues</a>.</p>
@@ -823,9 +852,9 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them:</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs (or prefer not to use them):</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended">From Source (Recommended)</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-have-gpus-and-want-to-use-them">If you have GPUs and want to use them</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-you-dont-have-gpus-or-prefer-not-to-use-them">If you don’t have GPUs or prefer not to use them</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-source-recommended-for-experienced-users">From Source (Recommended for experienced users)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clone-the-repository">1. Clone the Repository</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-a-virtual-environment">2. Set Up a Virtual Environment</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#using-conda">Using Conda</a></li>
@@ -836,7 +865,11 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#via-pypi">Via PyPI</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker">Using Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker">Using Docker</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pull-from-github-container-registry-recommended-for-beginners">Pull from GitHub Container Registry (Recommended for beginners)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#build-locally">Build Locally</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
   </nav></div>
