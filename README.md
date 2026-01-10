@@ -244,7 +244,7 @@ uv sync --extra vllm --extra dev --extra flash_attn
 pip install trinity-rft
 pip install flash-attn==2.8.1
 ```
-
+> For training with **Megatron-LM**, please refer to [Megatron-LM Backend](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_megatron.html).
 ### Step 2: prepare dataset and model
 
 Trinity-RFT supports most datasets and models from Huggingface and ModelScope.
