@@ -198,7 +198,7 @@ docker run -it \
   -v <path_to_your_data_and_checkpoints>:/data \
   ghcr.io/modelscope/trinity-rft:latest
 ```
-
+> This image has used `uv` to install all GPU-related dependencies of Trinity-RFT. The virtual environment will be automatically activated upon entering the container (you can also manually activate it via `source /opt/venv/bin/activate` if needed). You can use `uv pip install` to add extra packages as necessary.
 **Using Conda**
 
 ```bash
