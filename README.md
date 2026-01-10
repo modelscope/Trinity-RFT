@@ -298,7 +298,7 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-(Optional) You may use [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) for better monitoring.
+(Optional) You may use [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) for better monitoring. Please refer to [this documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration) for the corresponding configurations.
 
 For command-line users, run the RFT process:
 
