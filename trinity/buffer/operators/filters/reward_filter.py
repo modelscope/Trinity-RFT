@@ -50,7 +50,7 @@ class RewardSTDFilter(ExperienceOperator):
         final_count = len(result_exps)
         metrics["filtered_count"] = original_count - final_count
         return result_exps, metrics
-    
+
 
 class InvalidRewardFilter(ExperienceOperator):
     """
@@ -61,8 +61,8 @@ class InvalidRewardFilter(ExperienceOperator):
     reward is removed to prevent low-quality data from entering the training
     pipeline.
     """
+
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], dict]:
         kept = [e for e in exps if e.reward is not None and e.reward == e.reward]
 
         return kept, {"filtered_count": len(exps) - len(kept)}
-
