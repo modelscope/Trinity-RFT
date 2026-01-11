@@ -141,7 +141,7 @@ If you do not have access to a GPU, you can still try Trinity-RFT using the Tink
 
 ```bash
 # Create and activate environment
-python3 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 
 # Install Trinity-RFT with CPU-only backend
