@@ -191,8 +191,7 @@ git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 ```
 
-2. Set Up Environment
-   Choose one of the following options:
+Then, set up environment via one of the following options:
 
 **Using Pre-built Docker Image (Recommended for Beginners)**
 
