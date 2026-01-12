@@ -154,7 +154,9 @@ Run a simple example:
 trinity run --config examples/tinker/tinker.yaml
 ```
 
-This example is designed to run on CPU-only machines and is recommended for first-time users.
+This example is designed to run on CPU-only machines. See the complete [Tinker training example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker) for more details.
+
+To run Trinity-RFT on GPU machines instead, please follow the steps below.
 
 ### Step 1: Installation
 
