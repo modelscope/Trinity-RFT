@@ -156,17 +156,17 @@ trinity run --config examples/tinker/tinker_example.yaml
 
 This example is designed to run on CPU-only machines and is recommended for first-time users.
 
-## Step 1: Installation
+### Step 1: Installation
 
 Before installing, make sure your system meets the following requirements:
 
-### GPU Requirements
+#### GPU Requirements
 
 - Python: version 3.10 to 3.12 (inclusive)
 - CUDA: version >= 12.8 (required for GPU training)
 - GPUs: at least 2 GPUs (for standard distributed training)
 
-### CPU-Only Support
+#### CPU-Only Support
 
 - CPU-only execution is supported via the Tinker backend.
 - This mode is intended for testing, development, and experimentation.  
