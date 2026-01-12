@@ -151,7 +151,7 @@ pip install -e ".[tinker]"
 Run a simple example:
 
 ```bash
-trinity run --config examples/tinker/tinker_example.yaml
+trinity run --config examples/tinker/tinker.yaml
 ```
 
 This example is designed to run on CPU-only machines and is recommended for first-time users.
