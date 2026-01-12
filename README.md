@@ -184,7 +184,7 @@ Before installing, make sure your system meets the following requirements:
 
 If you plan to customize or contribute to Trinity-RFT, this is the best option.
 
-1. Clone the Repository
+First, clone the repository:
 
 ```bash
 git clone https://github.com/modelscope/Trinity-RFT
