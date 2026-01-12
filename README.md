@@ -17,7 +17,7 @@
 
 ## 💡 What is Trinity-RFT?
 
-Trinity-RFT is a general-purpose, flexible and user-friendly framework for LLM reinforcement fine-tuning (RFT).  
+Trinity-RFT is a general-purpose, flexible and user-friendly framework for LLM reinforcement fine-tuning (RFT).
 It decouples RFT into three components that work in coordination:
 
 * **Explorer** generates experience data via agent-environment interaction;
@@ -169,7 +169,7 @@ Before installing, make sure your system meets the following requirements:
 #### CPU-Only Support
 
 - CPU-only execution is supported via the Tinker backend.
-- This mode is intended for testing, development, and experimentation.  
+- This mode is intended for testing, development, and experimentation.
   (see: Minimal CPU-Only Quick Start)
 
 **Recommended for first-time users:**
@@ -189,7 +189,7 @@ git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 ```
 
-2. Set Up Environment  
+2. Set Up Environment
    Choose one of the following options:
 
 **Using Pre-built Docker Image (Recommended for Beginners)**
