@@ -1000,6 +1000,28 @@ document.write(`
         <span class="k">return</span> <span class="n">result_exps</span><span class="p">,</span> <span class="n">metrics</span></div>
 </div>
 
+
+
+<div class="viewcode-block" id="InvalidRewardFilter">
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.InvalidRewardFilter">[文档]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvalidRewardFilter</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filters out experiences with invalid reward values.</span>
+
+<span class="sd">    Note: This operator assumes that rewards are already computed and stored in the</span>
+<span class="sd">    Experience object.Any experience with a missing (`None`) or invalid (`NaN`)</span>
+<span class="sd">    reward is removed to prevent low-quality data from entering the training</span>
+<span class="sd">    pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="InvalidRewardFilter.process">
+<a class="viewcode-back" href="../../../../../build_api/trinity.buffer.operators.filters.reward_filter.html#trinity.buffer.operators.filters.reward_filter.InvalidRewardFilter.process">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="nb">dict</span><span class="p">]:</span>
+        <span class="n">kept</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exps</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">reward</span> <span class="o">==</span> <span class="n">e</span><span class="o">.</span><span class="n">reward</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">kept</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;filtered_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">kept</span><span class="p">)}</span></div>
+</div>
+
 </pre></div>
 
                 </article>
