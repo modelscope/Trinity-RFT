@@ -337,7 +337,7 @@ We welcome contributions of all kinds, including:
 
 If you're new to the project, documentation and example updates are a great place to start.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines, as well as our [good-first-issue list](https://github.com/modelscope/Trinity-RFT/issues/470).
 
 ## Acknowledgements
 
