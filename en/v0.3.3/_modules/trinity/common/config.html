@@ -2254,6 +2254,11 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;tinker&quot;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Rollout model engine type is set to `tinker`.&quot;</span><span class="p">)</span>
 
+        <span class="k">for</span> <span class="n">aux_model_config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aux_model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">!=</span> <span class="s2">&quot;tinker&quot;</span><span class="p">:</span>
+                <span class="n">aux_model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;tinker&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Auxiliary model engine type is set to `tinker`.&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">!=</span> <span class="s2">&quot;tinker&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">=</span> <span class="s2">&quot;tinker&quot;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Trainer type is set to `tinker`.&quot;</span><span class="p">)</span>

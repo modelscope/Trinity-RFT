@@ -619,7 +619,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_available_address"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_available_address()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_server_url()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_api_key"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_key()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_config"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_path"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_path()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper"><code class="docutils literal notranslate"><span class="pre">ModelWrapper</span></code></a><ul class="nav section-nav flex-column">
@@ -637,9 +639,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.logprobs_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.logprobs_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.convert_messages_to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.convert_messages_to_experience_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.convert_messages_to_experience_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.api_key"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.api_key</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_version"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_version</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_version_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_version_async</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_path"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_path_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_path_async</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_name"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_name</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.generate_kwargs"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.generate_kwargs</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_lora_request"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_lora_request()</span></code></a></li>
@@ -736,9 +740,21 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_api_key">
+<span class="sig-name descname"><span class="pre">get_api_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_api_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_api_key" title="Link to this definition">#</a></dt>
+<dd><p>Get the API key.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_model_config">
 <span class="sig-name descname"><span class="pre">get_model_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig" title="trinity.common.config.InferenceModelConfig"><span class="pre">InferenceModelConfig</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_model_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_model_config" title="Link to this definition">#</a></dt>
 <dd><p>Get the model configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_model_path">
+<span class="sig-name descname"><span class="pre">get_model_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_model_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_model_path" title="Link to this definition">#</a></dt>
+<dd><p>Get the model path</p>
 </dd></dl>
 
 </dd></dl>
@@ -836,6 +852,12 @@ document.write(`
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.api_key">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">api_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.api_key" title="Link to this definition">#</a></dt>
+<dd><p>Get the API key.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.model_version">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.model_version" title="Link to this definition">#</a></dt>
 <dd><p>Get the version of the model.</p>
@@ -850,7 +872,21 @@ document.write(`
 <dl class="py property">
 <dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.model_path">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.model_path" title="Link to this definition">#</a></dt>
-<dd><p>Get the model path.</p>
+<dd><p>Returns the path to the model files based on the current engine type.</p>
+<ul class="simple">
+<li><p>For ‘vllm’ engine: returns the model path from the configuration (<cite>config.model_path</cite>)</p></li>
+<li><p>For ‘tinker’ engine: returns the path to the most recent sampler weights</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.model_path_async">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_path_async</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.model_path_async" title="Link to this definition">#</a></dt>
+<dd><p>Returns the path to the model files based on the current engine type.</p>
+<ul class="simple">
+<li><p>For ‘vllm’ engine: returns the model path from the configuration (<cite>config.model_path</cite>)</p></li>
+<li><p>For ‘tinker’ engine: returns the path to the most recent sampler weights</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py property">
@@ -1016,7 +1052,9 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_available_address"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_available_address()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_server_url()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_api_key"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_key()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_config"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_config()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.InferenceModel.get_model_path"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_path()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper"><code class="docutils literal notranslate"><span class="pre">ModelWrapper</span></code></a><ul class="nav section-nav flex-column">
@@ -1034,9 +1072,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.logprobs_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.logprobs_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.convert_messages_to_experience()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.convert_messages_to_experience_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.convert_messages_to_experience_async()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.api_key"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.api_key</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_version"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_version</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_version_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_version_async</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_path"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_path_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_path_async</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.model_name"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_name</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.generate_kwargs"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.generate_kwargs</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.model.ModelWrapper.get_lora_request"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_lora_request()</span></code></a></li>
