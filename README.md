@@ -285,7 +285,7 @@ trinity studio --port 8080
 
 Then you can configure your RFT process in the web page and generate a config file.
 
-Advanced users can also edit the config file directly.  
+Advanced users can also edit the config file directly.
 We provide example config files in [`examples`](examples/).
 
 For complete GUI features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-Studio).
