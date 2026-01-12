@@ -228,6 +228,7 @@ pip install -e ".[vllm,flash_attn]"
 
 # If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
+
 pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
