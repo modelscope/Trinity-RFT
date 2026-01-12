@@ -131,10 +131,6 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 > [!NOTE]
 > This project is currently under active development. Comments and suggestions are welcome!
 
-> **No GPU? No problem!** You can still try it out using the Tinker backend:
-> 1. Follow the installation steps (skip GPU-specific packages like `flash-attn`)
-> 2. Run the **[Tinker training example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/tinker)**, which is designed for CPU-only systems.
-
 ### Minimal CPU-Only Quick Start
 
 If you do not have access to a GPU, you can still try Trinity-RFT using the Tinker backend.
@@ -168,12 +164,6 @@ Before installing, make sure your system meets the following requirements:
 - CUDA: version >= 12.8
 - GPUs: at least 2 GPUs
 
-#### CPU-Only Support
-
-- CPU-only execution is supported via the Tinker backend.
-- This mode is intended for testing, development, and experimentation.
-  (see: Minimal CPU-Only Quick Start)
-
 **Recommended for first-time users:**
 
 * If you have no GPU → Use Tinker backend
@@ -198,6 +188,7 @@ Then, set up environment via one of the following options:
 ```bash
 docker pull ghcr.io/modelscope/trinity-rft:latest
 
+# Run the container, replacing <path_to_your_data_and_checkpoints> with your actual path
 docker run -it \
   --gpus all \
   --shm-size="64g" \
@@ -216,7 +207,7 @@ conda activate trinity
 
 pip install -e ".[vllm,flash_attn]"
 
-# If you have no GPU:
+# If you have no GPU, comment out the line above and uncomment this instead:
 # pip install -e ".[tinker]"
 
 # If you encounter issues when installing flash-attn, try:
@@ -232,12 +223,12 @@ source .venv/bin/activate
 
 pip install -e ".[vllm,flash_attn]"
 
-# If you have no GPU:
+# If you have no GPU, comment out the line above and uncomment this instead:
 # pip install -e ".[tinker]"
 
 # If you encounter issues when installing flash-attn, try:
 # pip install flash-attn==2.8.1 --no-build-isolation
-pip install -e ".[dev]"
+pip install -e ".[dev]"  # for development like linting and debugging
 ```
 
 **Using uv**
@@ -245,16 +236,26 @@ pip install -e ".[dev]"
 ```bash
 uv sync --extra vllm --extra dev --extra flash_attn
 
-# If you have no GPU:
+# If you have no GPU, try to use Tinker instead:
 # uv sync --extra tinker --extra dev
 ```
 
 #### Via PyPI
 
+If you just want to use the package without modifying the code:
+
 ```bash
 pip install trinity-rft
 pip install flash-attn==2.8.1
 ```
+
+Or with `uv`:
+
+```bash
+uv pip install trinity-rft
+uv pip install flash-attn==2.8.1
+```
+
 > For training with **Megatron-LM**, please refer to [Megatron-LM Backend](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_megatron.html).
 ### Step 2: prepare dataset and model
 
@@ -269,6 +270,10 @@ huggingface-cli download {model_name} --local-dir $MODEL_PATH/{model_name}
 modelscope download {model_name} --local_dir $MODEL_PATH/{model_name}
 ```
 
+For more details about model downloading, see [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli) or [ModelScope](https://modelscope.cn/docs/models/download).
+
+
+
 **Prepare the dataset** in the local directory `$DATASET_PATH/{dataset_name}`:
 
 ```bash
@@ -277,6 +282,9 @@ huggingface-cli download {dataset_name} --repo-type dataset --local-dir $DATASET
 # Using Modelscope
 modelscope download --dataset {dataset_name} --local_dir $DATASET_PATH/{dataset_name}
 ```
+For more details about dataset downloading, see [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space) or [ModelScope](https://modelscope.cn/docs/datasets/download).
+
+
 
 ### Step 3: configurations
 
@@ -291,12 +299,25 @@ To launch the web interface for minimal configurations, you can run
 trinity studio --port 8080
 ```
 
-Then you can configure your RFT process in the web page and generate a config file.
+Then you can configure your RFT process in the web page and generate a config file. You can save the config file for later use or run it directly as described in the following section.
 
 Advanced users can also edit the config file directly.
 We provide example config files in [`examples`](examples/).
 
 For complete GUI features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-Studio).
+
+
+<details>
+
+<summary> Example: config manager GUI </summary>
+
+![config-manager](https://img.alicdn.com/imgextra/i1/O1CN01yhYrV01lGKchtywSH_!!6000000004791-2-tps-1480-844.png)
+
+
+</details>
+
+
+
 
 ### Step 4: run the RFT process
 
@@ -310,6 +331,12 @@ ray start --address=<master_address>
 ```
 
 (Optional) You may use [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) for better monitoring. Please refer to [this documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration) for the corresponding configurations.
+For example, to log in to Wandb:
+
+```shell
+export WANDB_API_KEY=<your_api_key>
+wandb login
+```
 
 For command-line users, run the RFT process:
 
@@ -322,6 +349,8 @@ Example — fine-tuning Qwen2.5-1.5B-Instruct on GSM8k with GRPO:
 ```bash
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
+
+For studio users, click "Run" in the web interface.
 
 ---
 
@@ -343,12 +372,14 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed contribution guidelines, a
 
 This project is built upon many excellent open-source projects, including:
 
-* [verl](https://github.com/volcengine/verl), [FSDP](https://pytorch.org/docs/stable/fsdp.html) and [Megatron-LM](https://github.com/NVIDIA/Megatron-LM) for LLM training
-* [vLLM](https://github.com/vllm-project/vllm) for LLM inference
-* [Data-Juicer](https://github.com/modelscope/data-juicer?tab=readme-ov-file) for data processing pipelines
-* [AgentScope](https://github.com/agentscope-ai/agentscope) for agentic workflow
-* [Ray](https://github.com/ray-project/ray) for distributed systems
-* RL frameworks like [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF), [TRL](https://github.com/huggingface/trl), [ChatLearn](https://github.com/alibaba/ChatLearn) and [rLLM](https://github.com/rllm-org/rllm)
+* [verl](https://github.com/volcengine/verl), [FSDP](https://pytorch.org/docs/stable/fsdp.html) and [Megatron-LM](https://github.com/NVIDIA/Megatron-LM) for LLM training;
+* [vLLM](https://github.com/vllm-project/vllm) for LLM inference;
+* [Data-Juicer](https://github.com/modelscope/data-juicer?tab=readme-ov-file) for data processing pipelines;
+* [AgentScope](https://github.com/agentscope-ai/agentscope) for agentic workflow;
+* [Ray](https://github.com/ray-project/ray) for distributed systems;
++ we have also drawn inspirations from RL frameworks like [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF), [TRL](https://github.com/huggingface/trl), [ChatLearn](https://github.com/alibaba/ChatLearn) and [rLLM](https://github.com/rllm-org/rllm);
++ ......
+
 
 ## Citation
 
