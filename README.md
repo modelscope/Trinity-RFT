@@ -165,8 +165,8 @@ Before installing, make sure your system meets the following requirements:
 #### GPU Requirements
 
 - Python: version 3.10 to 3.12 (inclusive)
-- CUDA: version >= 12.8 (required for GPU training)
-- GPUs: at least 2 GPUs (for standard distributed training)
+- CUDA: version >= 12.8
+- GPUs: at least 2 GPUs
 
 #### CPU-Only Support
 
