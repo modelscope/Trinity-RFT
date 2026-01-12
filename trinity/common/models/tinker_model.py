@@ -1,6 +1,6 @@
 import time
 from os import getenv
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 import ray
 import tinker
@@ -57,7 +57,7 @@ class TinkerModel(InferenceModel):
             topk_prompt_logprobs=kwargs.get("topk_prompt_logprobs", self.config.logprobs),
         )
 
-    async def generate(self, prompt: str, **kwargs) -> List[Experience]:
+    async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
         """Generate a responses from a prompt in async."""
         if self.tokenizer is None:
             await self._initialize_tokenizer()
@@ -152,7 +152,7 @@ class TinkerModel(InferenceModel):
 
         return experiences
 
-    async def chat(self, messages: List[dict], **kwargs) -> List[Experience]:
+    async def chat(self, messages: List[dict], **kwargs) -> Sequence[Experience]:
         """Generate experiences from a list of history chat messages in async."""
         if self.tokenizer is None:
             await self._initialize_tokenizer()
@@ -274,5 +274,5 @@ class TinkerModel(InferenceModel):
         return getenv("TINKER_API_KEY")
 
     def get_model_path(self) -> Optional[str]:
-        """Get the model path"""
+        """Get the latest sampler weight path."""
         return self.model_path

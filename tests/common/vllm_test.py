@@ -2,6 +2,7 @@ import asyncio
 import os
 import unittest
 
+import ray
 import torch
 from openai import BadRequestError
 from parameterized import parameterized_class
@@ -13,12 +14,14 @@ from tests.tools import (
     get_model_path,
     get_template_config,
 )
+from trinity.common.config import Config
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
     tokenize_and_mask_messages_hf,
 )
+from trinity.manager.synchronizer import Synchronizer
 
 DEBUG = False
 
@@ -777,6 +780,7 @@ class TestAsyncAPIServer(RayUnittestBaseAsync):
         self.assertEqual(len(self.model_wrapper_no_history.history), 0)
 
 
+@unittest.skipIf("TINKER_API_KEY" not in os.environ, "TINKER_API_KEY is not set")
 class TestTinkerAsyncAPIServer(TestAsyncAPIServer):
     engine_type: str = "tinker"
     model_path: str = "Qwen/Qwen3-4B-Instruct-2507"
@@ -786,16 +790,8 @@ class TestTinkerAsyncAPIServer(TestAsyncAPIServer):
         self.config.model.tinker.enable = True
         self.config.algorithm.algorithm_type = "grpo"
         super()._update_config()
-        from pprint import pprint
-
-        pprint(self.config)
 
     async def _setup_engines(self):
-        import ray
-
-        from trinity.common.config import Config
-        from trinity.manager.synchronizer import Synchronizer
-
         @ray.remote
         class FakeTrainer:
             def __init__(self, config: Config):

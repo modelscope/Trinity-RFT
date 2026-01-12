@@ -313,12 +313,22 @@ class ModelWrapper:
 
     @property
     def model_path(self) -> str:
-        """Get the model path."""
+        """
+        Returns the path to the model files based on the current engine type.
+
+        - For 'vllm' engine: returns the model path from the configuration (`config.model_path`)
+        - For 'tinker' engine: returns the path to the most recent sampler weights
+        """
         return ray.get(self.model.get_model_path.remote())
 
     @property
     async def model_path_async(self) -> str:
-        """Get the model path."""
+        """
+        Returns the path to the model files based on the current engine type.
+
+        - For 'vllm' engine: returns the model path from the configuration (`config.model_path`)
+        - For 'tinker' engine: returns the path to the most recent sampler weights
+        """
         return await self.model.get_model_path.remote()
 
     @property
@@ -366,9 +376,7 @@ class ModelWrapper:
         if self.engine_type == "tinker":
             # ! TODO: because tinker's OpenAI API interface is in beta,
             # we need to use original API in thinker instead.
-            ori_create = self.openai_async_client.chat.completions.create
-
-            async def chat_completions(*args, **kwargs):
+            def chat_completions(*args, **kwargs):
                 messages = kwargs.pop("messages")
                 chat_response = ray.get(
                     self.model.chat.remote(
@@ -383,7 +391,7 @@ class ModelWrapper:
                     self.history.extend(chat_response)
                 return response
 
-            self.openai_async_client.chat.completions.create = chat_completions
+            self.openai_client.chat.completions.create = chat_completions
         elif self.enable_history:
             # add a decorator to the openai client to record history
 
@@ -427,8 +435,6 @@ class ModelWrapper:
         if self.engine_type == "tinker":
             # ! TODO: because tinker's OpenAI API interface is in beta,
             # we need to use original API in thinker instead.
-            ori_create = self.openai_async_client.chat.completions.create
-
             async def chat_completions(*args, **kwargs):
                 messages = kwargs.pop("messages")
                 chat_response = await self.model.chat.remote(
@@ -464,7 +470,6 @@ class ModelWrapper:
 
             self.openai_async_client.chat.completions.create = record_chat_completions
         # get model_path from the sync openai client to avoid async call here
-        # openai_client = self.get_openai_client()
         setattr(self.openai_async_client, "model_path", self.model_path)
         return self.openai_async_client
 

@@ -1402,7 +1402,7 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
 
 
 class TestTinkerTrainer(BaseTrainerCase):
-    @unittest.skip("Require tinker API key")
+    @unittest.skipIf("TINKER_API_KEY" not in os.environ, "TINKER_API_KEY is not set")
     def test_trainer(self):
         """Test GSM8K on tinker."""
         # test both mode
