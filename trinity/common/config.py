@@ -1218,6 +1218,11 @@ class Config:
             self.explorer.rollout_model.engine_type = "tinker"
             logger.warning("Rollout model engine type is set to `tinker`.")
 
+        for aux_model_config in self.explorer.auxiliary_models:
+            if aux_model_config.engine_type != "tinker":
+                aux_model_config.engine_type = "tinker"
+                logger.warning("Auxiliary model engine type is set to `tinker`.")
+
         if self.trainer.trainer_type != "tinker":
             self.trainer.trainer_type = "tinker"
             logger.warning("Trainer type is set to `tinker`.")
