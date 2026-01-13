@@ -160,7 +160,7 @@ class DummyAsyncMultiTurnWorkflow(MultiTurnWorkflow):
             await asyncio.sleep(0.1)
             memory.append({"role": "user", "content": content})
             memory.append({"role": "assistant", "content": content.upper()})
-            experience = self.process_messages_to_experience(memory, 0, {})
+            experience = await self.process_messages_to_experience_async(memory, 0, {})
             experience_list.append(experience)
         return experience_list
 

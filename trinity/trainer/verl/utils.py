@@ -66,7 +66,8 @@ def to_data_proto(
             token_level_rewards = torch.zeros(attention_mask.shape, dtype=torch.float32)
             eos_mask_idx = cumsum.argmax(dim=-1)
             token_level_rewards[torch.arange(len(experiences)), eos_mask_idx] = torch.tensor(
-                [exp.reward for exp in experiences]
+                [exp.reward for exp in experiences],
+                dtype=torch.float32,
             )
             token_level_rewards = token_level_rewards[:, max_prompt_length:]
         batch_dict.update(

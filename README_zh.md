@@ -181,9 +181,27 @@ git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 ```
 
-### 2. 创建虚拟环境
+### 2. 构建环境
 
 可选择以下任一方式：
+
+#### 使用预构建 Docker 镜像（推荐初学者使用该方法）
+
+
+```bash
+docker pull ghcr.io/modelscope/trinity-rft:latest
+
+# 将 <path_to_your_data_and_checkpoints> 替换为实际需要挂载的路径
+docker run -it \
+  --gpus all \
+  --shm-size="64g" \
+  --rm \
+  -v $PWD:/workspace \
+  -v <path_to_your_data_and_checkpoints>:/data \
+  ghcr.io/modelscope/trinity-rft:latest
+```
+
+> 该镜像已经通过 `uv` 安装了 Trinity-RFT 以及所有 GPU 相关依赖，且会自动激活虚拟环境（也可通过 `source /opt/venv/bin/activate` 手动激活）。必要时可使用 `uv pip install` 添加额外的包。
 
 #### 使用 Conda
 
@@ -244,28 +262,6 @@ pip install flash-attn==2.8.1
 ```bash
 uv pip install trinity-rft
 uv pip install flash-attn==2.8.1
-```
-
-## 使用 Docker
-
-我们提供了 Docker 环境，方便快速配置。
-
-```bash
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-
-# 构建 Docker 镜像
-## 提示：可根据需要修改 Dockerfile 添加镜像源或设置 API 密钥
-docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
-
-# 运行容器，请将 <path_to_your_data_and_checkpoints> 替换为实际需要挂载的路径
-docker run -it \
-  --gpus all \
-  --shm-size="64g" \
-  --rm \
-  -v $PWD:/workspace \
-  -v <path_to_your_data_and_checkpoints>:/data \
-  trinity-rft:latest
 ```
 
 > 如需使用 **Megatron-LM** 进行训练，请参考 [Megatron-LM 支持](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_megatron.html)
@@ -336,8 +332,6 @@ trinity studio --port 8080
 
 
 </details>
-
-
 
 
 ### 第四步：运行 RFT 流程

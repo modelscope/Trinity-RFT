@@ -1,24 +1,28 @@
 (Installation)=
 # Installation
 
-For installing Trinity-RFT, you have three options: from source (recommended), via PyPI, or using Docker.
+For installing Trinity-RFT, you have three options: from source (recommended for experienced users), using Docker (recommended for beginners) or via PyPI.
 
 **Before you begin**, check your system setup:
 
-### If you have GPUs and want to use them:
+### If you have GPUs and want to use them
+
 Make sure your system meets these requirements:
+
 - **Python**: 3.10 – 3.12
 - **CUDA**: 12.8 or higher
 - **GPUs**: At least 2 available
 
-### If you don’t have GPUs (or prefer not to use them):
+### If you don’t have GPUs or prefer not to use them
+
 You can use the `tinker` option instead, which only requires:
+
 - **Python**: 3.11 – 3.12
 - **GPUs**: Not required
 
 ---
 
-## From Source (Recommended)
+## From Source (Recommended for experienced users)
 
 This method is best if you plan to customize or contribute to Trinity-RFT.
 
@@ -100,7 +104,31 @@ uv pip install flash-attn==2.8.1
 
 ## Using Docker
 
-We provide a Docker setup for hassle-free environment configuration.
+You can download the Trinity-RFT Docker image from Github Container Registry or build it locally.
+
+### Pull from GitHub Container Registry (Recommended for beginners)
+
+```bash
+git clone https://github.com/modelscope/Trinity-RFT
+cd Trinity-RFT
+
+docker pull ghcr.io/modelscope/trinity-rft:latest
+
+docker run -it \
+  --gpus all \
+  --shm-size="64g" \
+  --rm \
+  -v $PWD:/workspace \
+  -v <path_to_your_data_and_checkpoints>:/data \
+  ghcr.io/modelscope/trinity-rft:latest
+```
+
+```{note}
+This docker image use `uv` to manage python packages, you need to activate the virtual environment using `source /opt/venv/bin/activate` after entering the docker container.
+The image has include dependencies such as vllm, flash-attn and Megatron-LM, if you need to download more packages, don't forget to activate the virtual environment and use `uv pip install` to install them.
+```
+
+### Build Locally
 
 ```bash
 git clone https://github.com/modelscope/Trinity-RFT
@@ -120,11 +148,11 @@ docker run -it \
   trinity-rft:latest
 ```
 
+---
+
 ```{note}
 For training with **Megatron-LM**, please refer to {ref}`Megatron-LM Backend <Megatron-LM>`.
 ```
-
----
 
 ## Troubleshooting
 

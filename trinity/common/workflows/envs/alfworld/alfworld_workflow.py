@@ -135,7 +135,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
             if done:
                 final_reward = reward
                 break
-        experience = self.process_messages_to_experience(
+        experience = await self.process_messages_to_experience_async(
             memory, final_reward, {"env_rounds": r, "env_done": 1 if done else 0}
         )
         # Close the env to save cpu memory

@@ -54,6 +54,8 @@ class vLLMRolloutModel(InferenceModel):
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
         if self.vllm_version >= parse_version("0.11.0"):
             os.environ["VLLM_ALLREDUCE_USE_SYMM_MEM"] = "0"
+        if self.config.enable_runtime_lora_updating:
+            os.environ["VLLM_ALLOW_RUNTIME_LORA_UPDATING"] = "1"
         if not config.enforce_eager:
             # To avoid torch compile conflicts when multiple model are started simultaneously.
             # remove this when the following PR is released:

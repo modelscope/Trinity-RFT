@@ -71,16 +71,18 @@ def create_inference_models(
             for i in range(engine_num)
         ]
         auxiliary_engines = [
-            ray.remote(engine_cls)
-            .options(
-                name=f"{config.explorer.name}_auxiliary_model_{i}_{j}",
-                namespace=namespace,
-            )
-            .remote(
-                config=config.explorer.auxiliary_models[i],
-            )
+            [
+                ray.remote(engine_cls)
+                .options(
+                    name=f"{config.explorer.name}_auxiliary_model_{i}_{j}",
+                    namespace=namespace,
+                )
+                .remote(
+                    config=config.explorer.auxiliary_models[i],
+                )
+                for j in range(model_config.engine_num)
+            ]
             for i, model_config in enumerate(config.explorer.auxiliary_models)
-            for j in range(model_config.engine_num)
         ]
         return rollout_engines, auxiliary_engines
     else:

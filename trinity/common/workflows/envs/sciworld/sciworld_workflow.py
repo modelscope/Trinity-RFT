@@ -107,7 +107,7 @@ class SciWorldWorkflow(MultiTurnWorkflow):
                 if done:
                     break
             final_reward = final_reward / 100.0
-            experience = self.process_messages_to_experience(
+            experience = await self.process_messages_to_experience_async(
                 memory,
                 final_reward,
                 {"env_rounds": r, "env_done": 1 if done else 0, "golden_rounds": golden_rounds},

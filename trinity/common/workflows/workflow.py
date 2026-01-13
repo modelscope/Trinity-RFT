@@ -176,11 +176,20 @@ class MultiTurnWorkflow(Workflow):
         self.repeat_times = repeat_times
         self.run_id_base = run_id_base
 
-    def process_messages_to_experience(
-        self, messages, reward, info={}, truncate_status=None
+    def _build_experience_from_converted(
+        self, converted_experience, reward, info={}, truncate_status=None
     ) -> Experience:
-        converted_experience = self.model.convert_messages_to_experience(messages)
+        """Private helper method to build Experience from converted_experience.
 
+        Args:
+            converted_experience: The converted experience from the model.
+            reward: The reward value.
+            info: Additional info dictionary.
+            truncate_status: Optional truncate status to override.
+
+        Returns:
+            Experience: The constructed Experience object.
+        """
         if converted_experience.truncate_status == "response_truncated":
             reward = 0.0
 
@@ -208,6 +217,22 @@ class MultiTurnWorkflow(Workflow):
             metrics=metrics,
         )
         return experience
+
+    def process_messages_to_experience(
+        self, messages, reward, info={}, truncate_status=None
+    ) -> Experience:
+        converted_experience = self.model.convert_messages_to_experience(messages)
+        return self._build_experience_from_converted(
+            converted_experience, reward, info, truncate_status
+        )
+
+    async def process_messages_to_experience_async(
+        self, messages, reward, info={}, truncate_status=None
+    ) -> Experience:
+        converted_experience = await self.model.convert_messages_to_experience_async(messages)
+        return self._build_experience_from_converted(
+            converted_experience, reward, info, truncate_status
+        )
 
 
 class BaseSimpleWorkflow(Workflow):

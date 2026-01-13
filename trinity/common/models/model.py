@@ -71,9 +71,17 @@ class InferenceModel(ABC):
         """Get the API server URL if available."""
         return None
 
+    def get_api_key(self) -> str:
+        """Get the API key."""
+        return "EMPTY"
+
     def get_model_config(self) -> InferenceModelConfig:
         """Get the model configuration."""
         return self.config
+
+    def get_model_path(self) -> Optional[str]:
+        """Get the model path"""
+        return self.config.model_path
 
 
 def _history_recorder(func):
@@ -118,10 +126,11 @@ class ModelWrapper:
             engine_type.startswith("vllm") or engine_type == "tinker"
         ), "Only vLLM and tinker model is supported for now."
         self.model = model
+        self.engine_type = engine_type
         self.config: InferenceModelConfig = None  # init during prepare
         self._model_name: str = None
-        self._model_path: str = None
         self.api_address: str = None
+        self._api_key: str = None
         self.openai_client: openai.OpenAI = None
         self.openai_async_client: openai.AsyncOpenAI = None
         self.logger = get_logger(__name__)
@@ -138,7 +147,7 @@ class ModelWrapper:
         """Prepare the model wrapper."""
         self.config = await self.model.get_model_config.remote()
         self._model_name = self.config.name
-        self._model_path = self.config.model_path
+        self._api_key = await self.model.get_api_key.remote()
         self._generate_kwargs = {
             "temperature": self.config.temperature,
             "top_p": self.config.top_p,
@@ -151,6 +160,8 @@ class ModelWrapper:
         self.api_address = await self.model.get_api_server_url.remote()
         if self.api_address is None:
             self.logger.info("API server is not enabled for inference model.")
+            return
+        if self.engine_type == "tinker":
             return
         max_retries = 30
         interval = 2  # seconds
@@ -286,6 +297,11 @@ class ModelWrapper:
         )
 
     @property
+    def api_key(self) -> str:
+        """Get the API key."""
+        return self._api_key
+
+    @property
     def model_version(self) -> int:
         """Get the version of the model."""
         return ray.get(self.model.get_model_version.remote())
@@ -297,8 +313,23 @@ class ModelWrapper:
 
     @property
     def model_path(self) -> str:
-        """Get the model path."""
-        return self._model_path
+        """
+        Returns the path to the model files based on the current engine type.
+
+        - For 'vllm' engine: returns the model path from the configuration (`config.model_path`)
+        - For 'tinker' engine: returns the path to the most recent sampler weights
+        """
+        return ray.get(self.model.get_model_path.remote())
+
+    @property
+    async def model_path_async(self) -> str:
+        """
+        Returns the path to the model files based on the current engine type.
+
+        - For 'vllm' engine: returns the model path from the configuration (`config.model_path`)
+        - For 'tinker' engine: returns the path to the most recent sampler weights
+        """
+        return await self.model.get_model_path.remote()
 
     @property
     def model_name(self) -> Optional[str]:
@@ -332,6 +363,7 @@ class ModelWrapper:
             openai.OpenAI: The openai client. And `model_path` is added to the client which refers to the model path.
         """
         if self.openai_client is not None:
+            setattr(self.openai_client, "model_path", self.model_path)
             return self.openai_client
         if not self.api_address:
             raise ValueError(
@@ -339,9 +371,28 @@ class ModelWrapper:
             )
         self.openai_client = openai.OpenAI(
             base_url=f"{self.api_address}/v1",
-            api_key="EMPTY",
+            api_key=self._api_key,
         )
-        if self.enable_history:
+        if self.engine_type == "tinker":
+            # ! TODO: because tinker's OpenAI API interface is in beta,
+            # we need to use original API in thinker instead.
+            def chat_completions(*args, **kwargs):
+                messages = kwargs.pop("messages")
+                chat_response = ray.get(
+                    self.model.chat.remote(
+                        messages=messages,
+                        with_chat_completion=True,
+                        return_token_ids=self.enable_history,
+                        **kwargs,
+                    )
+                )
+                response = chat_response.pop()
+                if self.enable_history:
+                    self.history.extend(chat_response)
+                return response
+
+            self.openai_client.chat.completions.create = chat_completions
+        elif self.enable_history:
             # add a decorator to the openai client to record history
 
             ori_create = self.openai_client.chat.completions.create
@@ -359,7 +410,7 @@ class ModelWrapper:
                 return response
 
             self.openai_client.chat.completions.create = record_chat_completions
-        setattr(self.openai_client, "model_path", self.openai_client.models.list().data[0].id)
+        setattr(self.openai_client, "model_path", self.model_path)
         return self.openai_client
 
     def get_openai_async_client(self) -> openai.AsyncOpenAI:
@@ -369,6 +420,7 @@ class ModelWrapper:
             openai.AsyncOpenAI: The async openai client. And `model_path` is added to the client which refers to the model path.
         """
         if self.openai_async_client is not None:
+            setattr(self.openai_async_client, "model_path", self.model_path)
             return self.openai_async_client
         if not self.api_address:
             raise ValueError(
@@ -377,9 +429,27 @@ class ModelWrapper:
         # first make sure that we have the sync openai client
         self.openai_async_client = openai.AsyncOpenAI(
             base_url=f"{self.api_address}/v1",
-            api_key="EMPTY",
+            api_key=self._api_key,
         )
-        if self.enable_history:
+
+        if self.engine_type == "tinker":
+            # ! TODO: because tinker's OpenAI API interface is in beta,
+            # we need to use original API in thinker instead.
+            async def chat_completions(*args, **kwargs):
+                messages = kwargs.pop("messages")
+                chat_response = await self.model.chat.remote(
+                    messages=messages,
+                    with_chat_completion=True,
+                    return_token_ids=self.enable_history,
+                    **kwargs,
+                )
+                response = chat_response.pop()
+                if self.enable_history:
+                    self.history.extend(chat_response)
+                return response
+
+            self.openai_async_client.chat.completions.create = chat_completions
+        elif self.enable_history:
             # add a decorator to the openai client to record history
 
             ori_create = self.openai_async_client.chat.completions.create
@@ -400,8 +470,7 @@ class ModelWrapper:
 
             self.openai_async_client.chat.completions.create = record_chat_completions
         # get model_path from the sync openai client to avoid async call here
-        openai_client = self.get_openai_client()
-        setattr(self.openai_async_client, "model_path", openai_client.models.list().data[0].id)
+        setattr(self.openai_async_client, "model_path", self.model_path)
         return self.openai_async_client
 
     async def get_current_load(self) -> int:

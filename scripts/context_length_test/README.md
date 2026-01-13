@@ -124,7 +124,7 @@ Below are empirical results from running this script on various Qwen3 models acr
 
 ### A100 80GB
 
-#### Vallina Settings (Baseline)
+#### Vanilla Settings (Baseline)
 
 | #GPU | SP | Qwen3-0.6B | Qwen3-1.7B | Qwen3-4B | Qwen3-8B | Qwen3-14B |
 | ---- | -- | ---------- | ---------- | -------- | -------- | --------- |
@@ -177,7 +177,7 @@ Below are empirical results from running this script on various Qwen3 models acr
 ### H20 96GB (Higher VRAM, Slower Bandwidth)
 
 
-#### Vallina Settings
+#### Vanilla Settings
 
 
 | #GPU | SP | Qwen3-0.6B | Qwen3-1.7B | Qwen3-4B | Qwen3-8B | Qwen3-14B |

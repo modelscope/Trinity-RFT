@@ -107,13 +107,13 @@ def create_alfworld_environment(game_file):
         raise ImportError(error_message)
 
 
-def process_messages_to_experience(model, messages, info=None) -> Experience:
+async def process_messages_to_experience_async(model, messages, info=None) -> Experience:
     """Convert messages to experience for training, with fallback to default empty experience"""
     if info is None:
         info = {}
 
     try:
-        converted_experience = model.convert_messages_to_experience(messages)
+        converted_experience = await model.convert_messages_to_experience_async(messages)
 
         metrics = {}
         for k, v in info.items():

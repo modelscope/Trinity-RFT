@@ -2,6 +2,7 @@ import asyncio
 import os
 import unittest
 
+import ray
 import torch
 from openai import BadRequestError
 from parameterized import parameterized_class
@@ -13,12 +14,14 @@ from tests.tools import (
     get_model_path,
     get_template_config,
 )
+from trinity.common.config import Config
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
     tokenize_and_mask_messages_hf,
 )
+from trinity.manager.synchronizer import Synchronizer
 
 DEBUG = False
 
@@ -669,10 +672,17 @@ class TestLogprobs(RayUnittestBaseAsync):
 
 
 class TestAsyncAPIServer(RayUnittestBaseAsync):
-    def setUp(self):
+    engine_type: str = "vllm"
+    model_path: str = get_model_path()
+
+    async def asyncSetUp(self):
         self.config = get_template_config()
+        self._update_config()
+        await self._setup_engines()
+
+    def _update_config(self):
         self.config.mode = "explore"
-        self.config.model.model_path = get_model_path()
+        self.config.model.model_path = self.model_path
         self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
@@ -680,10 +690,14 @@ class TestAsyncAPIServer(RayUnittestBaseAsync):
         self.config.explorer.rollout_model.enable_openai_api = True
 
         self.config.check_and_update()
+
+    async def _setup_engines(self):
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
-        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+        self.model_wrapper = ModelWrapper(
+            self.engines[0], engine_type=self.engine_type, enable_history=True
+        )
         self.model_wrapper_no_history = ModelWrapper(
-            self.engines[0], engine_type="vllm", enable_history=False
+            self.engines[0], engine_type=self.engine_type, enable_history=False
         )
 
     async def test_api_async(self):
@@ -695,7 +709,7 @@ class TestAsyncAPIServer(RayUnittestBaseAsync):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What is your name?"},
         ]
-        model_id = (await openai_client.models.list()).data[0].id
+        model_id = openai_client.model_path
         response = await openai_client.chat.completions.create(
             model=model_id, messages=messages, n=1
         )
@@ -713,7 +727,8 @@ class TestAsyncAPIServer(RayUnittestBaseAsync):
         self.assertTrue(response.choices[0].logprobs is not None)
         self.assertEqual(0, len(response.choices[0].logprobs.content[2].top_logprobs))
         # here we check the 3rd token logprob, because the first two tokens (`<think>`,`\n` usually have zero logprob)
-        self.assertTrue(response.choices[0].logprobs.content[2].logprob < 0)
+        if "Instruct" not in self.model_path:
+            self.assertTrue(response.choices[0].logprobs.content[2].logprob < 0)
         self.assertTrue(hasattr(response, "prompt_token_ids"))
         self.assertTrue(len(response.prompt_token_ids) > 0)
         self.assertTrue(hasattr(response.choices[0], "token_ids"))
@@ -763,6 +778,32 @@ class TestAsyncAPIServer(RayUnittestBaseAsync):
         with self.assertRaises(ValueError):
             self.model_wrapper_no_history.extract_experience_from_history()
         self.assertEqual(len(self.model_wrapper_no_history.history), 0)
+
+
+@unittest.skipIf("TINKER_API_KEY" not in os.environ, "TINKER_API_KEY is not set")
+class TestTinkerAsyncAPIServer(TestAsyncAPIServer):
+    engine_type: str = "tinker"
+    model_path: str = "Qwen/Qwen3-4B-Instruct-2507"
+    # llama model in Tinker does not support chat template
+
+    def _update_config(self):
+        self.config.model.tinker.enable = True
+        self.config.algorithm.algorithm_type = "grpo"
+        super()._update_config()
+
+    async def _setup_engines(self):
+        @ray.remote
+        class FakeTrainer:
+            def __init__(self, config: Config):
+                self.config = config
+                self.synchronizer = Synchronizer.get_actor(config)
+
+        fake_trainer = FakeTrainer.remote(self.config)
+        await fake_trainer.__ray_ready__.remote()
+        await super()._setup_engines()
+
+    async def test_api_async(self):
+        await super().test_api_async()
 
 
 class TestTokenizer(unittest.TestCase):
@@ -1228,6 +1269,8 @@ class TestTinkerAPI(RayUnittestBaseAsync):
         self.config.explorer.rollout_model.tensor_parallel_size = 1
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
+        self.config.explorer.rollout_model.enable_lora = True
+        self.config.explorer.rollout_model.enable_runtime_lora_updating = True
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)

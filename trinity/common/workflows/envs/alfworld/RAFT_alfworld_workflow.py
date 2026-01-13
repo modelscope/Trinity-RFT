@@ -10,7 +10,7 @@ from trinity.common.workflows.envs.alfworld.RAFT_utils import (
     generate_default_empty_experience,
     get_jinja_env,
     parse_response,
-    process_messages_to_experience,
+    process_messages_to_experience_async,
     validate_trajectory_format,
 )
 from trinity.common.workflows.workflow import Task, Workflow
@@ -202,7 +202,7 @@ class RAFTAlfworldWorkflow(Workflow):
 
         if reward >= 1 and traj_format_valid:
             print("✅ Task completed successfully in the first attempt!")
-            experience = process_messages_to_experience(
+            experience = await process_messages_to_experience_async(
                 self.model, trajectory, info={"success": success, "reward": reward, "steps": steps}
             )
             return [experience]

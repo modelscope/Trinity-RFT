@@ -61,7 +61,7 @@ class WorkflowRunner:
         self.model = model
         self.model_wrapper = ModelWrapper(
             model,
-            config.explorer.rollout_model.engine_type,
+            engine_type=config.explorer.rollout_model.engine_type,
             enable_lora=config.explorer.rollout_model.enable_lora,
             enable_history=config.explorer.rollout_model.enable_history,
         )
@@ -69,8 +69,11 @@ class WorkflowRunner:
         self.auxiliary_model_wrappers = [
             ModelWrapper(
                 model,
+                engine_type=aux_model_config.engine_type,
             )
-            for model in self.auxiliary_models
+            for model, aux_model_config in zip(
+                self.auxiliary_models, config.explorer.auxiliary_models
+            )
         ]
         self.workflow_instance: Workflow = None
         self.runner_id = runner_id

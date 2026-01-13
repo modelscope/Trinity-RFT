@@ -258,9 +258,9 @@ class WebShopWorkflow(MultiTurnWorkflow):
                     final_reward = 0
                 else:
                     final_reward = -0.1
-            experience = self.process_messages_to_experience(
+            experience = await self.process_messages_to_experience_async(
                 memory,
-                final_reward,
+                float(final_reward),
                 {"session_id": session_id, "env_rounds": r, "env_done": 1 if done else 0},
             )
             experience_list.append(experience)

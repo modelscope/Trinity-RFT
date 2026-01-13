@@ -1,3 +1,5 @@
+import time
+from os import getenv
 from typing import List, Optional, Sequence
 
 import ray
@@ -22,6 +24,7 @@ class TinkerModel(InferenceModel):
         self.model_version = -1
         self.synchronizer = Synchronizer.get_actor(namespace=ray.get_runtime_context().namespace)
         self.model = None
+        self.model_path = config.model_path
         self.tokenizer = None
         self.chat_template = None
         if self.config.chat_template:
@@ -31,10 +34,10 @@ class TinkerModel(InferenceModel):
 
     async def _initialize_tokenizer(self) -> None:
         """Initialize the tokenizer."""
-        trainer_client = await self.service_client.create_lora_training_client_async(
+        self.trainer_client = await self.service_client.create_lora_training_client_async(
             base_model=self.config.model_path
         )
-        self.tokenizer = trainer_client.get_tokenizer()
+        self.tokenizer = self.trainer_client.get_tokenizer()
 
     async def _generate_internal(self, prompt: dict, **kwargs) -> types.SampleResponse:
         assert self.model is not None
@@ -88,17 +91,64 @@ class TinkerModel(InferenceModel):
                     for _ in range(kwargs.get("n", 1))
                 ]
 
+        with_chat_completion = kwargs.get("with_chat_completion", False)
+        if with_chat_completion:
+            create_time = int(time.time())
         output = await self._generate_internal(prompt={"prompt_token_ids": token_ids}, **kwargs)
+        return_logprobs = kwargs.get("logprobs", self.config.logprobs is not None)
         experiences = [
             Experience(
                 tokens=torch.tensor(token_ids + sequence.tokens, dtype=torch.int32),
-                logprobs=torch.tensor(sequence.logprobs, dtype=torch.float32),
+                logprobs=(
+                    torch.tensor(sequence.logprobs, dtype=torch.float32)
+                    if return_logprobs
+                    else torch.tensor([], dtype=torch.float32)
+                ),
                 prompt_length=len(token_ids),
                 prompt_text=self.tokenizer.decode(token_ids),
                 response_text=self.tokenizer.decode(sequence.tokens),
             )
             for sequence in output.sequences
         ]
+        if with_chat_completion:
+            from openai.types.chat.chat_completion import (
+                ChatCompletion,
+                ChatCompletionMessage,
+                ChatCompletionTokenLogprob,
+                Choice,
+                ChoiceLogprobs,
+            )
+
+            return_token_ids = kwargs.get("return_token_ids", False)
+            chat_completion = ChatCompletion(
+                id="",
+                choices=[
+                    Choice(
+                        finish_reason=sequence.stop_reason,
+                        index=i,
+                        logprobs=ChoiceLogprobs(
+                            content=[
+                                ChatCompletionTokenLogprob(
+                                    token=self.tokenizer.decode(token_id),
+                                    logprob=logprob,
+                                    top_logprobs=[],
+                                )
+                                for token_id, logprob in zip(sequence.tokens, sequence.logprobs)
+                            ]
+                        ),
+                        message=ChatCompletionMessage(
+                            content=self.tokenizer.decode(sequence.tokens), role="assistant"
+                        ),
+                        token_ids=(sequence.tokens if return_token_ids else None),
+                    )
+                    for i, sequence in enumerate(output.sequences)
+                ],
+                created=create_time,
+                model=self.model_path,
+                object="chat.completion",
+                prompt_token_ids=token_ids,
+            )
+            experiences.append(chat_completion)
 
         return experiences
 
@@ -108,6 +158,16 @@ class TinkerModel(InferenceModel):
             await self._initialize_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
+
+        # TODO: this is a hack to support openai chat messages, which only supports text
+        for msg in messages:
+            if isinstance(msg["content"], list):
+                text_parts = [item["text"] for item in msg["content"] if item["type"] == "text"]
+                content_str = "".join(text_parts)
+            else:
+                content_str = msg["content"]
+            msg["content"] = content_str
+
         if messages[-1]["role"] == "assistant":
             prompt = self.tokenizer.apply_chat_template(
                 messages,
@@ -127,7 +187,7 @@ class TinkerModel(InferenceModel):
 
     async def logprobs(self, token_ids: List[int], **kwargs) -> Tensor:
         """Generate logprobs for a list of tokens in async."""
-        logprobs = await self.model.compute_logprobs_async(types.ModelInput(token_ids))
+        logprobs = await self.model.compute_logprobs_async(types.ModelInput.from_ints(token_ids))
         return torch.tensor(logprobs[1:], dtype=torch.float32)
 
     async def convert_messages_to_experience(
@@ -180,6 +240,7 @@ class TinkerModel(InferenceModel):
         self.model = await self.service_client.create_sampling_client_async(
             base_model=self.config.model_path,
         )
+        await self._initialize_tokenizer()
 
     async def sync_model(self, model_version: int) -> int:
         self.model_version = model_version
@@ -187,6 +248,7 @@ class TinkerModel(InferenceModel):
         self.model = await self.service_client.create_sampling_client_async(
             model_path=remote_sampler_path,
         )
+        self.model_path = remote_sampler_path
         return model_version
 
     def get_model_version(self) -> int:
@@ -194,6 +256,23 @@ class TinkerModel(InferenceModel):
         return self.model_version
 
     def get_api_server_url(self) -> Optional[str]:
-        """Get the API server URL if available."""
-        # TODO: tinker will support openai api later
-        return None
+        """
+        Get the Tinker Openai API interface URL.
+
+        Documentation: https://tinker-docs.thinkingmachines.ai/compatible-apis/openai
+
+        Note: This URL is currently not in active use because Tinker's OpenAI-compatible
+        API implementation is still incomplete. Instead, we're using our custom `self.chat()`
+        method to replicate the functionality of `openai.OpenAI.chat.completions.create()`.
+
+        Once Tinker's API is fully implemented and stable, we plan to switch to using this
+        official endpoint directly.
+        """
+        return "https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/"
+
+    def get_api_key(self):
+        return getenv("TINKER_API_KEY")
+
+    def get_model_path(self) -> Optional[str]:
+        """Get the latest sampler weight path."""
+        return self.model_path

@@ -353,9 +353,9 @@ class FrozenLakeWorkflow(MultiTurnWorkflow):
         # Create experience from messages
         final_reward = sum(self.step_rewards)
         # print(f"final_reward: {final_reward}, terminate_reason: {terminate_reason}")
-        experience = self.process_messages_to_experience(
+        experience = await self.process_messages_to_experience_async(
             messages=messages,
-            reward=final_reward,
+            reward=float(final_reward),
             info={
                 "env_steps": self.step_count,
                 "env_done": 1 if self.done else 0,
