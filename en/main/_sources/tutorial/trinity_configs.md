@@ -475,6 +475,7 @@ trainer:
   use_dynamic_bsz: true
   max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
+  max_checkpoints_to_keep: 5
   trainer_config: null
 ```
 
@@ -499,6 +500,7 @@ trainer:
 - `use_dynamic_bsz`: Whether to use dynamic batch size.
 - `max_token_len_per_gpu`:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when `use_dynamic_bsz=true`.
 - `ulysses_sequence_parallel_size`: Sequence parallel size.
+- `max_checkpoints_to_keep`: Maximum number of checkpoints to keep. Older checkpoints will be deleted. If not specified, all checkpoints will be kept.
 - `trainer_config`: The trainer configuration provided inline.
 ---
 

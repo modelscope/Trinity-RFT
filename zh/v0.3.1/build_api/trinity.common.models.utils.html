@@ -755,6 +755,16 @@ load the latest checkpoint. Defaults to None.</p></li>
 <li><p><strong>trainer_type</strong> (<em>str</em>) -- The trainer type. Only support &quot;verl&quot; for now.</p></li>
 </ul>
 </dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The state dict. If the checkpoint uses</dt><dd><p>megatron dist checkpointing, return a tuple of (method, checkpoint_dir).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">返回类型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[dict, Tuple[str, str]]</p>
+</dd>
 </dl>
 </dd></dl>
 

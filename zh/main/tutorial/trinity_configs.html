@@ -1185,6 +1185,7 @@ document.write(`
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">max_checkpoints_to_keep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </pre></div>
 </div>
@@ -1219,6 +1220,7 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz</span></code>: 是否使用动态批量大小。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_token_len_per_gpu</span></code>: 训练过程中，每个 GPU 最大 token 长度; 当 <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code> 时生效。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ulysses_sequence_parallel_size</span></code>: 序列并行的并行度，即用于分割单个序列的 GPU 数量。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_checkpoints_to_keep</span></code>: 保留的最大检查点数量。超过此数量后，最旧的检查点将被删除。如果未指定，则将保留所有检查点。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: 内联提供的 trainer 配置。</p></li>
 </ul>
 </section>

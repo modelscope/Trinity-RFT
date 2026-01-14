@@ -1185,6 +1185,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">max_checkpoints_to_keep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </pre></div>
 </div>
@@ -1219,6 +1220,7 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz</span></code>: Whether to use dynamic batch size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_token_len_per_gpu</span></code>:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ulysses_sequence_parallel_size</span></code>: Sequence parallel size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_checkpoints_to_keep</span></code>: Maximum number of checkpoints to keep. Older checkpoints will be deleted. If not specified, all checkpoints will be kept.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: The trainer configuration provided inline.</p></li>
 </ul>
 </section>
