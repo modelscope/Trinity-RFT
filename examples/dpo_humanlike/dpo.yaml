@@ -7,7 +7,7 @@ algorithm:
     lr: 5e-7
     lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
     min_lr_ratio: 0.1   # only useful for warmup with cosine
-    warmup_style: cosine  # select from constant/cosine
+    lr_scheduler_type: cosine  # select from constant/cosine
     betas: [0.9, 0.95]
   kl_loss_fn: k1
   kl_loss_fn_args:

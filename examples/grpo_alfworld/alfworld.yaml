@@ -65,7 +65,7 @@ trainer:
 #       optimizer:
 #         lr: 5e-6
 #         lr_warmup_steps_ratio: 0.0
-#         warmup_style: constant
+#         lr_scheduler_type: constant
 #     buffer:
 #       total_epochs: 1
 #       train_batch_size: 32

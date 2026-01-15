@@ -61,6 +61,7 @@ class Optim:
     lr_warmup_steps: int = -1
     lr_warmup_steps_ratio: float = 0.0
     min_lr_ratio: Optional[float] = 0.0
+    warmup_style: Optional[str] = None  # deprecated !
     lr_scheduler_type: str = "constant"
     total_training_steps: int = -1  # ! DO NOT SET, use trainer.total_steps
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])

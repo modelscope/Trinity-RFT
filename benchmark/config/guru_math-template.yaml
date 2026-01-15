@@ -16,7 +16,7 @@ algorithm:
     lr: 1e-6
     weight_decay: 0.1
     lr_warmup_steps: 80
-    warmup_style: constant
+    lr_scheduler_type: constant
 cluster:
   node_num: 1
   gpu_per_node: 8

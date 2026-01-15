@@ -9,7 +9,7 @@ algorithm:
   optimizer:
     lr: 1e-06
     lr_warmup_steps_ratio: 0.0
-    warmup_style: constant
+    lr_scheduler_type: constant
   advantage_fn: ppo
 data_processor: {}
 model:
@@ -78,7 +78,7 @@ trainer:
       optim:
         lr: 1e-5
         lr_warmup_steps_ratio: 0.0
-        warmup_style: constant
+        lr_scheduler_type: constant
       ppo_max_token_len_per_gpu: 12800
       forward_max_token_len_per_gpu: 12800
       cliprange_value: 0.5

@@ -13,7 +13,7 @@ algorithm:
   optimizer:
     lr: 5.0e-07
     lr_warmup_steps_ratio: 0.0
-    warmup_style: constant
+    lr_scheduler_type: constant
 data_processor: {}
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}

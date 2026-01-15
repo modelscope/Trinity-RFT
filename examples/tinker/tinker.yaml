@@ -11,7 +11,7 @@ algorithm:
   optimizer:
     lr: 1.0e-05
     lr_warmup_steps_ratio: 0.0
-    warmup_style: constant
+    lr_scheduler_type: constant
 data_processor: {}
 model:
   model_path: Qwen/Qwen3-4B-Instruct-2507
