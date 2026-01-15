@@ -639,6 +639,15 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.config.trainer.default_local_dir, f"global_step_{self.global_steps}"
         )
 
+        # save a flag to indicate this is a full checkpoint dir
+        # make sure this flag is created before notifying the synchronizer
+        # to avoid the synchronizer recognizing it as a state_dict-only checkpoint
+        # TODO: use a better way to indicate full checkpoint
+        os.makedirs(local_global_step_folder, exist_ok=True)
+        flag_path = os.path.join(local_global_step_folder, ".full_checkpoint")
+        with open(flag_path, "w") as f:
+            f.write("")
+
         self.logger.info(f"local_global_step_folder: {local_global_step_folder}")
         actor_local_path = os.path.join(local_global_step_folder, "actor")
 

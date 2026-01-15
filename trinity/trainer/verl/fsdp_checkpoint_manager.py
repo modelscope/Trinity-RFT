@@ -49,6 +49,7 @@ from verl.utils.logger import log_with_rank
 
 from trinity.manager.synchronizer import Synchronizer
 from trinity.trainer.verl_trainer import CheckpointMonitor
+from trinity.utils.log import get_logger
 
 
 class FSDPCheckpointManager(OldFSDPCheckpointManager):
@@ -63,6 +64,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
     def __init__(self, *args, ray_namespace: str = "", **kwargs):
         super().__init__(*args, **kwargs)
+        self.logger = get_logger()
         self.synchronizer = Synchronizer.get_actor(namespace=ray_namespace)
         self.checkpoint_monitor = CheckpointMonitor.get_actor(
             namespace=ray_namespace,
@@ -464,6 +466,10 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             and local_path != self.previous_saved_paths[-1]  # type: ignore
         ):  # last step may save twice
             keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
+            self.logger.info(
+                "Checkpoint manager is removing previous checkpoints at "
+                + str(self.previous_saved_paths[:keep_start])  # type: ignore
+            )
             self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
             self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
 

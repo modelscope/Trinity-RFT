@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import shutil
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -95,13 +96,14 @@ class Synchronizer:
         )
         while True:
             if os.path.exists(local_latest_state_dict_iteration):
+                current_model_version = self.model_version
                 try:
                     with open(local_latest_state_dict_iteration, "r") as f:
                         latest_model_version = int(f.read().strip())
                 except (IOError, ValueError) as e:
                     self.logger.warning(f"Failed to read or parse state dict iteration file: {e}")
                     continue
-                if latest_model_version > self.model_version:
+                if latest_model_version > current_model_version:
                     self.logger.info(
                         f"Synchronizer has found a new model state dict at step {latest_model_version}."
                     )
@@ -119,7 +121,21 @@ class Synchronizer:
                         f"Synchronizer has loaded model state dict from checkpoint {latest_model_version}."
                     )
                     await self.set_model_state_dict(model_state_dict, latest_model_version)
+                    # remove the previous checkpoints to save disk space
+                    await self._remove_previous_state_dict(current_model_version)
             await asyncio.sleep(1)
+
+    async def _remove_previous_state_dict(self, previous_model_version: int) -> None:
+        previous_state_dict_dir = os.path.join(
+            self.config.checkpoint_job_dir, f"global_step_{previous_model_version}"
+        )
+        if os.path.exists(previous_state_dict_dir):
+            # check if it's a full checkpoint, only remove checkpoints for sync
+            if not os.path.exists(os.path.join(previous_state_dict_dir, ".full_checkpoint")):
+                self.logger.info(
+                    f"Removing previous checkpoint for sync at step {previous_model_version}."
+                )
+                shutil.rmtree(previous_state_dict_dir, ignore_errors=True)
 
     async def _find_tinker_latest_state_dict(self) -> None:
         default_local_dir = self.config.checkpoint_job_dir
@@ -320,9 +336,7 @@ class Synchronizer:
         async with self._ready_condition:
             return self.model_version
 
-    async def ready_to_nccl_sync(
-        self, module: str, trainer_step: Optional[int] = None
-    ) -> Union[int, None]:
+    async def ready_to_nccl_sync(self, module: str, trainer_step: int) -> Union[int, None]:
         """
         Prepare for NCCL-based synchronization between modules.
 
@@ -330,7 +344,7 @@ class Synchronizer:
 
         Args:
             module: Either 'trainer' or 'explorer'.
-            trainer_step: Optional step number from the trainer.
+            trainer_step: Step number from the trainer.
 
         Returns:
             The model version if both sides are ready; otherwise None.

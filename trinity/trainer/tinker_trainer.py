@@ -282,6 +282,15 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             f"global_step_{self.train_step_num}",
         )
         os.makedirs(local_path, exist_ok=True)
+
+        # save a flag to indicate this is a full checkpoint dir
+        # make sure this flag is created before notifying the synchronizer
+        # to avoid the synchronizer recognizing it as a state_dict-only checkpoint
+        # TODO: use a better way to indicate full checkpoint
+        flag_path = os.path.join(local_path, ".full_checkpoint")
+        with open(flag_path, "w") as f:
+            f.write("")
+
         remote_checkpoint_path = os.path.join(local_path, "remote_checkpoint_path.txt")
         with open(remote_checkpoint_path, "w") as f:
             f.write(self.latest_remote_checkpoint_path)

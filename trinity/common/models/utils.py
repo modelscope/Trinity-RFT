@@ -199,6 +199,10 @@ def load_state_dict(checkpoint_dir: str, config: TrainerConfig) -> Union[dict, T
     Args:
         checkpoint_dir (str): The checkpoint directory.
         trainer_type (str): The trainer type. Only support "verl" for now.
+
+    Returns:
+        Union[dict, Tuple[str, str]]: The state dict. If the checkpoint uses
+            megatron dist checkpointing, return a tuple of (method, checkpoint_dir).
     """
     if config.trainer_type == "verl":
         strategy = config.trainer_strategy

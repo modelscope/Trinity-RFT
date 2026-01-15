@@ -68,6 +68,7 @@ class WorkerExtension:
         if self._weight_update_rank == 0:
             state_dict, model_version = ray.get(self.synchronizer.get_model_state_dict.remote())
             if isinstance(state_dict, tuple):
+                # currently only megatron return a tuple
                 method, checkpoint_dir = state_dict
                 if method == "megatron":
                     if self._checkpoint_converter is None:

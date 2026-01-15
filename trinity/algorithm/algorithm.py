@@ -63,6 +63,27 @@ class SFTAlgorithm(AlgorithmType):
             "entropy_loss_fn": "none",
         }
 
+    @classmethod
+    def check_config(cls, config: Config) -> None:
+        if config.mode == "train":
+            if (
+                config.buffer.trainer_input.experience_buffer is None
+                or not config.buffer.trainer_input.experience_buffer.path
+            ):
+                raise ValueError(
+                    "`buffer.trainer_input.experience_buffer.path` is required when `algorithm.algorithm_type == sft`"
+                )
+        elif config.mode in ["both", "explore"]:
+            raise ValueError(f"SFT does not support `{config.mode}` mode")
+
+        if config.synchronizer.sync_method != SyncMethod.CHECKPOINT:
+            config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+            logger.warning(
+                "SFT only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+            )
+
+        config.synchronizer.sync_interval = config.trainer.save_interval
+
 
 class PPOAlgorithm(AlgorithmType):
     """PPO Algorithm."""
@@ -232,6 +253,7 @@ class DPOAlgorithm(AlgorithmType):
             logger.warning(
                 "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
+        config.synchronizer.sync_interval = config.trainer.save_interval
         if config.algorithm.repeat_times != 2:
             config.algorithm.repeat_times = 2  # Fake repeat times
         if config.algorithm.kl_loss_fn in {"none", None}:

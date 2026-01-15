@@ -738,6 +738,7 @@ class TrainerConfig:
     # TODO: extract more train-related params from underlying trainer engine
 
     save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
+    max_checkpoints_to_keep: Optional[int] = None
 
     trainer_config: Any = field(default_factory=dict)
     trainer_config_path: str = ""  # deprecated, use `trainer_config` instead

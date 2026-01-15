@@ -453,6 +453,9 @@ class veRLConfig:
         self.trainer.group_name = config.group
         self.trainer.experiment_name = config.name
         self.trainer.default_local_dir = config.checkpoint_job_dir
+        if config.trainer.max_checkpoints_to_keep is not None:
+            self.trainer.max_actor_ckpt_to_keep = config.trainer.max_checkpoints_to_keep
+            self.trainer.max_critic_ckpt_to_keep = config.trainer.max_checkpoints_to_keep
         if not config.continue_from_checkpoint:
             self.trainer.resume_mode = "disable"
         else:
