@@ -259,6 +259,11 @@ class MegatronPPOActor(OldMegatronPPOActor):
 
                 # return loss and stats
 
+            # apply scale on log
+            if "actor/kl_loss" in stats:
+                stats["actor/kl_loss"] /= n_micro_batch
+            if "actor/pg_loss" in stats:
+                stats["actor/pg_loss"] /= n_micro_batch
             append_to_dict(metrics, stats)
             return policy_loss, [metrics, ret_entropy]
 
@@ -358,7 +363,10 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     logits.div_(temperature)
                     ret = {}
                     if calculate_entropy:
-                        logits_bak = logits.clone()
+                        # The veRL fix consumes more GPU memory than our implementation 
+                        # (.clone() v.s. monkey patch on megatron function);
+                        # therefore, we have temporarily commented out the veRL fix.
+                        # logits_bak = logits.clone()
                         # # disable the hint until the fused_kernel is optimized for triton>=3.3
                         # logger.warning_once(
                         #     "For memory-efficient computation, enable fused kernels via "
@@ -367,9 +375,10 @@ class MegatronPPOActor(OldMegatronPPOActor):
                         # )
                         entropy = vocab_parallel_entropy(logits)
                         ret["entropy"] = entropy
-                    else:
-                        logits_bak = logits
-                    log_probs = vocab_parallel_log_probs_from_logits(logits_bak, label)
+                    # else:
+                    #     logits_bak = logits
+                    # log_probs = vocab_parallel_log_probs_from_logits(logits_bak, label)
+                    log_probs = vocab_parallel_log_probs_from_logits(logits, label)
                     log_probs = log_probs.masked_fill(~label_mask, 0.0)
                     ret["log_probs"] = log_probs
                     return ret

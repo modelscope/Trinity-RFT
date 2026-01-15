@@ -79,7 +79,9 @@ megatron = [
     # if you found "undefined symbol" error in transformer engine
     # reinstall it with --no-build-isolation and `--no-cache-dir` flag
     # "transformer_engine[pytorch]==2.8.0",
-    "mbridge>=0.13.0",
+
+    # Install mbridge from main branch (unreleased version)
+    "mbridge @ git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612",
 ]
 tinker = [
     "tinker; python_version >= '3.11'",

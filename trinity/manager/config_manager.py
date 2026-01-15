@@ -302,7 +302,7 @@ class ConfigManager:
     def _expert_verl_actor_part(self):
         st.subheader("Actor Model Config")
 
-        self.get_configs("actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio")
+        self.get_configs("actor_lr", "actor_lr_scheduler_type", "actor_lr_warmup_steps_ratio")
 
         self.get_configs("actor_grad_clip", "actor_ulysses_sequence_parallel_size")
 
@@ -324,7 +324,7 @@ class ConfigManager:
             "critic_ppo_micro_batch_size_per_gpu", "critic_ulysses_sequence_parallel_size"
         )
 
-        self.get_configs("critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio")
+        self.get_configs("critic_lr", "critic_lr_scheduler_type", "critic_lr_warmup_steps_ratio")
 
         self.get_configs("critic_grad_clip", "critic_cliprange_value")
         self.get_configs("critic_load_checkpoint", "critic_save_checkpoint")
@@ -490,7 +490,7 @@ class ConfigManager:
                 "optim": {
                     "lr": st.session_state["critic_lr"],
                     "lr_warmup_steps_ratio": st.session_state["critic_lr_warmup_steps_ratio"],
-                    "warmup_style": st.session_state["critic_warmup_style"],
+                    "lr_scheduler_type": st.session_state["critic_lr_scheduler_type"],
                 },
                 "model": {
                     "override_config": {},
@@ -550,7 +550,7 @@ class ConfigManager:
         optimizer_config = {
             "lr": st.session_state["actor_lr"],
             "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
-            "warmup_style": st.session_state["actor_warmup_style"],
+            "lr_scheduler_type": st.session_state["actor_lr_scheduler_type"],
         }
         algorithm_config["optimizer"] = optimizer_config
         return algorithm_config

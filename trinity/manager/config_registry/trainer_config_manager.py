@@ -367,7 +367,7 @@ def set_actor_lr(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value="constant")
-def set_actor_warmup_style(**kwargs):
+def set_actor_lr_scheduler_type(**kwargs):
     st.selectbox(
         "LR Warmup Style :blue-badge[(Actor)]",
         ["constant", "cosine"],
@@ -416,7 +416,7 @@ def set_critic_lr(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value="constant", visible=use_critic)
-def set_critic_warmup_style(**kwargs):
+def set_critic_lr_scheduler_type(**kwargs):
     st.selectbox(
         "LR Warmup Style :blue-badge[(Critic)]",
         ["constant", "cosine"],

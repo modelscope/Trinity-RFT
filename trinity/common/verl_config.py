@@ -55,13 +55,13 @@ class ActorModel:
 class Optim:
     # For actor, most fields are set in algorithm.optimizer
     # For critic, you can set trainer_config.critic.optim
-    optimizer: str = "AdamW"
+    optimizer: str = "adam"
     optimizer_impl: str = "torch.optim"
     lr: float = 1e-6
     lr_warmup_steps: int = -1
     lr_warmup_steps_ratio: float = 0.0
     min_lr_ratio: Optional[float] = 0.0
-    warmup_style: str = "constant"
+    lr_scheduler_type: str = "constant"
     total_training_steps: int = -1  # ! DO NOT SET, use trainer.total_steps
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     clip_grad: float = 1.0
@@ -104,10 +104,10 @@ class Checkpoint:
 
 @dataclass
 class OverrideTransformerConfig:
-    recompute_granularity: Optional[str] = None
+    recompute_granularity: Optional[str] = "full"
     recompute_modules: List[str] = field(default_factory=lambda: ["core_attn"])
-    recompute_method: Optional[str] = None
-    recompute_num_layers: Optional[int] = None
+    recompute_method: Optional[str] = "uniform"
+    recompute_num_layers: Optional[int] = 1
 
 
 @dataclass
@@ -243,6 +243,10 @@ class CriticModel:
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = True
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
+
+    # rope configs
+    rope_scaling: Optional[dict] = None
+    rope_theta: Optional[float] = None
 
 
 @dataclass
@@ -544,6 +548,8 @@ class veRLConfig:
         set_if_none(self.critic, "strategy", config.trainer.trainer_strategy)
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
+        self.critic.model.rope_scaling = config.model.rope_scaling
+        self.critic.model.rope_theta = config.model.rope_theta
         self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
         self.critic.optim.total_training_steps = self.trainer.total_training_steps
@@ -600,16 +606,20 @@ class veRLConfig:
         for field_name in config.algorithm.optimizer.__dataclass_fields__:
             field_value = getattr(config.algorithm.optimizer, field_name)
             if field_name == "optimizer_type":
-                if config.trainer.trainer_strategy.startswith("fsdp"):
-                    optim_map = {
-                        "adam": "AdamW",
-                        "adamw": "AdamW",
-                        "sgd": "SGD",
-                    }
-                    field_value = optim_map.get(field_value, field_value)
                 setattr(self.actor_rollout_ref.actor.optim, "optimizer", field_value)
             elif hasattr(self.actor_rollout_ref.actor.optim, field_name):
                 setattr(self.actor_rollout_ref.actor.optim, field_name, field_value)
+        # fix optimizer type for fsdp
+        if config.trainer.trainer_strategy.startswith("fsdp"):
+            optim_map = {
+                "adam": "AdamW",
+                "adamw": "AdamW",
+                "sgd": "SGD",
+            }
+            actor_optim = self.actor_rollout_ref.actor.optim
+            actor_optim.optimizer = optim_map.get(actor_optim.optimizer, actor_optim.optimizer)
+            critic_optim = self.critic.optim
+            critic_optim.optimizer = optim_map.get(critic_optim.optimizer, critic_optim.optimizer)
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
         self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"
         # TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to

@@ -1322,7 +1322,7 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
     def save_checkpoint(
         self,
         checkpoint_path,
-        global_steps=0,
+        global_step=0,
         max_ckpt_to_keep=None,
         save_as_hf=False,
     ):
@@ -1330,7 +1330,7 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
             load_megatron_model_to_gpu(self.critic_module)
         self.checkpoint_mananager.save_checkpoint(
             local_path=checkpoint_path,
-            global_step=global_steps,
+            global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
             save_as_hf=save_as_hf,
         )
