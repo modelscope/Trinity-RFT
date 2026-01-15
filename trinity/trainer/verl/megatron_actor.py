@@ -363,7 +363,7 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     logits.div_(temperature)
                     ret = {}
                     if calculate_entropy:
-                        # The veRL fix consumes more GPU memory than our implementation 
+                        # The veRL fix consumes more GPU memory than our implementation
                         # (.clone() v.s. monkey patch on megatron function);
                         # therefore, we have temporarily commented out the veRL fix.
                         # logits_bak = logits.clone()

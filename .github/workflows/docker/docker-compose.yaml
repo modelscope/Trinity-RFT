@@ -1,6 +1,6 @@
 services:
   trinity-node-1:
-    image: trinity-rft-unittest:20251225
+    image: trinity-rft-unittest:20260115
     pull_policy: never
     command: bash -c "source /opt/venv/bin/activate && uv pip install -e .[dev] && ray start --head --dashboard-host 0.0.0.0 --include-dashboard true --block"
     environment:
@@ -30,7 +30,7 @@ services:
             capabilities: [gpu]
 
   trinity-node-2:
-    image: trinity-rft-unittest:20251225
+    image: trinity-rft-unittest:20260115
     pull_policy: never
     command: bash -c "source /opt/venv/bin/activate && uv pip install -e .[dev] && ray start --address=trinity-node-1:6379 --block"
     environment:

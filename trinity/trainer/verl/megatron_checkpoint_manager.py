@@ -396,6 +396,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         local_path = local_mkdir_safe(local_path)
         self._save_state_dict(local_path, global_step)
+        self._save_tokenizer(local_path, global_step)
         ray.get(
             self.checkpoint_monitor.register_thread_count.remote(
                 global_step, state_dict_thread_count=1

@@ -53,7 +53,6 @@ from verl.utils.device import (
     get_device_name,
     get_nccl_backend,
     get_torch_device,
-    set_expandable_segments,
 )
 from verl.utils.flops_counter import FlopsCounter
 from verl.utils.fs import copy_to_local
@@ -75,7 +74,6 @@ from verl.utils.fsdp_utils import (
 )
 from verl.utils.import_utils import import_external_libs
 from verl.utils.logger import log_with_rank
-from verl.utils.memory_utils import aggressive_empty_cache
 from verl.utils.profiler import (
     DistProfiler,
     DistProfilerExtension,
@@ -639,24 +637,6 @@ class ActorRolloutRefWorker(Worker, DistProfilerExtension):
             actor_lr_scheduler = None
 
         return actor_module_fsdp, actor_optimizer, actor_lr_scheduler, actor_model_config
-
-    async def trainer_mode(self):  # TODO: check this
-        """Context switch hybridengine to trainer mode."""
-        # if self.config.rollout.free_cache_engine:
-        #     log_gpu_memory_usage("Before rollout offload", logger=logger)
-        #     await self.rollout.release()
-        #     log_gpu_memory_usage("After rollout offload", logger=logger)
-
-        self.actor_module_fsdp.train()
-
-        # add empty cache after each compute
-        aggressive_empty_cache(force_sync=True)
-
-        set_expandable_segments(True)
-
-        # restore random states
-        self.gen_random_states = get_torch_device().get_rng_state()
-        get_torch_device().set_rng_state(self.torch_random_states)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def init_model(self):
@@ -1604,7 +1584,7 @@ class CriticWorker(Worker, DistProfilerExtension):
             )
 
             lr = self.critic_lr_scheduler.get_last_lr()[0]
-            metrics["critic/lr"] = lr
+            metrics["critic/lr"] = lr.item() if torch.is_tensor(lr) else lr
             self.critic_lr_scheduler.step()
 
             output = DataProto(batch=None, meta_info={"metrics": metrics})

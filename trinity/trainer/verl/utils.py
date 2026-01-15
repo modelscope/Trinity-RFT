@@ -100,7 +100,7 @@ def to_data_proto(
             )
     else:
         raise ValueError("Custom fields are not consistent across experiences.")
-    meta_info = {"model_versions": np.array([exp.info["model_version"] for exp in experiences])}
+    meta_info = {"model_versions": np.array([exp.info.get("model_version", 0) for exp in experiences])}
     return DataProto.from_single_dict(batch_dict, meta_info=meta_info)
 
 

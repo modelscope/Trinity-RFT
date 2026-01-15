@@ -13,7 +13,7 @@ from trinity.utils.log import get_logger
 class WorkerExtension:
     def apply_patches(self):
         """Apply necessary patches to vLLM."""
-        from verl.utils.vllm_utils import patch_vllm_moe_model_weight_loader
+        from verl.utils.vllm.patch import patch_vllm_moe_model_weight_loader
 
         patch_vllm_moe_model_weight_loader(self.model_runner.model)
         patch_vllm_prompt_logprobs(self.model_runner)
