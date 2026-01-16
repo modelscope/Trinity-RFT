@@ -112,7 +112,7 @@ algorithm:
 - `optimizer`: Optimizer configuration for actor.
   - `lr`: Learning rate for actor.
   - `warmup_style`: Deprecated, use `lr_scheduler_type` instead. We will remove this field in future versions.
-  - `lr_scheduler_type`: Learning rate scheduler type for actor model. Default is `constant`. Supported types: `constant`, `consine`.
+  - `lr_scheduler_type`: Learning rate scheduler type for actor model. Default is `constant`. Supported types: `constant`, `cosine`.
 - `sample_strategy`: The sampling strategy used for loading experiences from experience buffer. Supported types: `default`, `staleness_control`, `mix`.
 - `advantage_fn`: The advantage function used for computing advantages.
 - `kl_penalty_fn`: The KL penalty function used for computing KL penalty applied in reward.
