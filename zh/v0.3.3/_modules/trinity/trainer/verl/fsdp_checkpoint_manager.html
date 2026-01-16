@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.trainer.verl.fsdp_checkpoint_manager &#8212; Trinity-RFT 0.4.0 文档</title>
+    <title>trinity.trainer.verl.fsdp_checkpoint_manager &#8212; Trinity-RFT 0.4.1 文档</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=0a12e38e"></script>
+    <script src="../../../../_static/documentation_options.js?v=a35297e8"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -571,8 +571,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
-    <script>document.write(`<img src="../../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
+    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
+    <script>document.write(`<img src="../../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -1015,7 +1015,7 @@ document.write(`
 <span class="c1"># limitations under the License.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">FSDP Checkpoint Manager.</span>
-<span class="sd">Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/utils/checkpoint/fsdp_checkpoint_manager.py</span>
+<span class="sd">Modified from https://github.com/volcengine/verl/blob/v0.7.0/verl/utils/checkpoint/fsdp_checkpoint_manager.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -1035,6 +1035,7 @@ document.write(`
     <span class="n">StateDictType</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenerationConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">transformers.dynamic_module_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">custom_object_save</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.fsdp_checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">FSDPCheckpointManager</span> <span class="k">as</span> <span class="n">OldFSDPCheckpointManager</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1221,7 +1222,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">latest_extra_state_save_step</span> <span class="o">=</span> <span class="n">global_step</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_model_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_unwrap_model_and_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">fsdp_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">unwrap_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_fsdp_wrapped_module</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1233,13 +1234,21 @@ document.write(`
             <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="s2">&quot;name_or_path&quot;</span><span class="p">)</span>
             <span class="ow">and</span> <span class="n">model_config</span><span class="o">.</span><span class="n">name_or_path</span>
         <span class="p">):</span>
-            <span class="c1"># Some model&#39;s name_or_path is empty if not initialized from pretrained,</span>
-            <span class="c1"># in this cases, we don&#39;t save generation config.</span>
-            <span class="n">generation_config</span> <span class="o">=</span> <span class="n">GenerationConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">name_or_path</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Some model&#39;s name_or_path is empty if not initialized from pretrained,</span>
+                <span class="c1"># in this cases, we don&#39;t save generation config.</span>
+                <span class="n">generation_config</span> <span class="o">=</span> <span class="n">GenerationConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">name_or_path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># if the generation config isn&#39;t available, we don&#39;t save it</span>
+                <span class="n">generation_config</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">generation_config</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">return</span> <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="s2">&quot;auto_map&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">model_config</span><span class="o">.</span><span class="n">auto_map</span><span class="p">:</span>
+            <span class="n">model_config</span><span class="o">.</span><span class="n">auto_map</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">model_config</span><span class="o">.</span><span class="n">auto_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">unwrap_model</span><span class="p">,</span> <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_save_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1263,18 +1272,23 @@ document.write(`
             <span class="n">hf_config_tokenizer_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">)</span>
             <span class="n">local_mkdir_safe</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span>
 
-            <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_config</span><span class="p">()</span>
+            <span class="n">unwrap_model</span><span class="p">,</span> <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_unwrap_model_and_config</span><span class="p">()</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">generation_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">generation_config</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">processing_class</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processing_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processing_class</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span>
             <span class="n">log_with_rank</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Saved model config and tokenizer class to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">hf_config_tokenizer_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
                 <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
                 <span class="n">log_only_rank_0</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="c1"># If we have a custom model, we copy the file defining it in the folder and set the attributes so it can be</span>
+            <span class="c1"># loaded from the Hub.</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="s2">&quot;auto_map&quot;</span><span class="p">):</span>
+                <span class="n">custom_object_save</span><span class="p">(</span><span class="n">unwrap_model</span><span class="p">,</span> <span class="n">hf_config_tokenizer_path</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">model_config</span><span class="p">)</span>
 
             <span class="c1"># Also save runtime FSDP config</span>
             <span class="n">fsdp_config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;fsdp_config.json&quot;</span><span class="p">)</span>
@@ -1315,7 +1329,7 @@ document.write(`
             <span class="n">hf_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">)</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">hf_local_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_config</span><span class="p">()</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">model_config</span><span class="p">,</span> <span class="n">generation_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_unwrap_model_and_config</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="s2">&quot;ForTokenClassification&quot;</span> <span class="ow">in</span> <span class="n">model_config</span><span class="o">.</span><span class="n">architectures</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForTokenClassification</span>
@@ -1326,9 +1340,20 @@ document.write(`
 
                 <span class="n">auto_model_cls</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span>
             <span class="k">elif</span> <span class="s2">&quot;ForConditionalGeneration&quot;</span> <span class="ow">in</span> <span class="n">model_config</span><span class="o">.</span><span class="n">architectures</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForVision2Seq</span>
+                <span class="c1"># Handle different transformers versions for Vision2Seq models</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">transformers</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">packaging</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
 
-                <span class="n">auto_model_cls</span> <span class="o">=</span> <span class="n">AutoModelForVision2Seq</span>
+                <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">transformers</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;4.54.0&quot;</span><span class="p">):</span>
+                    <span class="c1"># transformers &gt;= 4.54.0 uses AutoModelForImageTextToText</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForImageTextToText</span>
+
+                    <span class="n">auto_model_cls</span> <span class="o">=</span> <span class="n">AutoModelForImageTextToText</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># transformers &lt; 4.54.0 uses AutoModelForVision2Seq</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModelForVision2Seq</span>
+
+                    <span class="n">auto_model_cls</span> <span class="o">=</span> <span class="n">AutoModelForVision2Seq</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown architecture </span><span class="si">{</span><span class="n">model_config</span><span class="p">[</span><span class="s1">&#39;architectures&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1406,6 +1431,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StateDictType</span><span class="o">.</span><span class="n">SHARDED_STATE_DICT</span><span class="p">,</span> <span class="n">state_dict_cfg</span><span class="p">,</span> <span class="n">optim_cfg</span>
             <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_save_model</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_tokenizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
         <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">register_thread_count</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
                 <span class="n">global_step</span><span class="p">,</span> <span class="n">state_dict_thread_count</span><span class="o">=</span><span class="mi">1</span>

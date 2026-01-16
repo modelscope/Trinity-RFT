@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.common.config &#8212; Trinity-RFT 0.4.0 documentation</title>
+    <title>trinity.common.config &#8212; Trinity-RFT 0.4.1 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=183391d5"></script>
+    <script src="../../../_static/documentation_options.js?v=a3cf13c8"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -570,8 +570,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -1120,14 +1120,15 @@ document.write(`
     <span class="n">lr_warmup_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">lr_warmup_steps_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">min_lr_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">warmup_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+    <span class="n">warmup_style</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># deprecated !</span>
+    <span class="n">lr_scheduler_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
     <span class="n">optimizer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span>
     <span class="n">betas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">])</span>
     <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
     <span class="n">clip_grad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">lr_warmup_init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">lr_decay_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">lr_decay_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+    <span class="n">lr_decay_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>  <span class="c1"># duplicated with lr_scheduler_type in veRL</span>
     <span class="n">min_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span></div>
 
 
@@ -1144,7 +1145,9 @@ document.write(`
     <span class="n">lora_rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
     <span class="n">lora_alpha</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
     <span class="n">lora_dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
-    <span class="n">target_modules</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all-linear&quot;</span></div>
+    <span class="n">target_modules</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all-linear&quot;</span>
+    <span class="n">exclude_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">is_dummy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># DO NOT SET, automatically set</span></div>
 
 
 
@@ -2289,6 +2292,14 @@ document.write(`
             <span class="c1"># override loss_agg_mode in policy_loss_fn_args</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">policy_loss_fn_args</span><span class="p">[</span><span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">loss_agg_mode</span>  <span class="c1"># type: ignore [index]</span>
 
+        <span class="n">optim_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">optimizer</span>
+        <span class="k">if</span> <span class="n">optim_config</span><span class="o">.</span><span class="n">warmup_style</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">optim_config</span><span class="o">.</span><span class="n">lr_scheduler_type</span> <span class="o">=</span> <span class="n">optim_config</span><span class="o">.</span><span class="n">warmup_style</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;`warmup_style` is deprecated. Please use `lr_scheduler_type` instead. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;And `lr_scheduler_type` is set to </span><span class="si">{</span><span class="n">optim_config</span><span class="o">.</span><span class="n">lr_scheduler_type</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">critic_model_path</span><span class="p">:</span>
@@ -2485,16 +2496,19 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only one lora adapter is supported for now.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lora_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">lora_config</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating dummy lora, since no lora_path is provided.&quot;</span><span class="p">)</span>
                 <span class="n">lora_path</span> <span class="o">=</span> <span class="n">create_dummy_lora</span><span class="p">(</span>
                     <span class="n">model_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
                     <span class="n">checkpoint_job_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span>
-                    <span class="n">lora_rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lora_rank</span><span class="p">,</span>
-                    <span class="n">lora_alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lora_alpha</span><span class="p">,</span>
-                    <span class="n">target_modules</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">target_modules</span><span class="p">,</span>
+                    <span class="n">lora_rank</span><span class="o">=</span><span class="n">lora_config</span><span class="o">.</span><span class="n">lora_rank</span><span class="p">,</span>
+                    <span class="n">lora_alpha</span><span class="o">=</span><span class="n">lora_config</span><span class="o">.</span><span class="n">lora_alpha</span><span class="p">,</span>
+                    <span class="n">target_modules</span><span class="o">=</span><span class="n">lora_config</span><span class="o">.</span><span class="n">target_modules</span><span class="p">,</span>
+                    <span class="n">exclude_modules</span><span class="o">=</span><span class="n">lora_config</span><span class="o">.</span><span class="n">exclude_modules</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">lora_path</span>
+                <span class="n">lora_config</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">lora_path</span>
+                <span class="n">lora_config</span><span class="o">.</span><span class="n">is_dummy</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">lora_modules</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;lora_int_id&quot;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>参数配置指南 &#8212; Trinity-RFT 0.4.0 文档</title>
+    <title>参数配置指南 &#8212; Trinity-RFT 0.4.1 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=0a12e38e"></script>
+    <script src="../_static/documentation_options.js?v=a35297e8"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -757,7 +757,7 @@ document.write(`
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="w">  </span><span class="nt">optimizer</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
-<span class="w">    </span><span class="nt">warmup_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant</span>
+<span class="w">    </span><span class="nt">lr_scheduler_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant</span>
 <span class="w">  </span><span class="c1"># 以下参数为可选</span>
 <span class="w">  </span><span class="c1"># 若未指定，将根据 `algorithm_type` 自动设置</span>
 <span class="w">  </span><span class="nt">sample_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
@@ -773,7 +773,8 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">optimizer</span></code>: Actor 优化器的参数。</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: 优化器的学习率。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">warmup_style</span></code>: 学习率的预热策略。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warmup_style</span></code>：已弃用，请改用 <code class="docutils literal notranslate"><span class="pre">lr_scheduler_type</span></code>。该域将会在未来版本中移除。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lr_scheduler_type</span></code>：Actor 模型的学习率调度器类型。默认值为 <code class="docutils literal notranslate"><span class="pre">constant</span></code>。支持类型：<code class="docutils literal notranslate"><span class="pre">constant</span></code>、<code class="docutils literal notranslate"><span class="pre">cosine</span></code>。</p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sample_strategy</span></code>: 从 experience buffer 加载 experience 时使用的采样策略。支持类型：<code class="docutils literal notranslate"><span class="pre">default</span></code>、<code class="docutils literal notranslate"><span class="pre">staleness_control</span></code>、<code class="docutils literal notranslate"><span class="pre">mix</span></code>。</p></li>

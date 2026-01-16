@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>trinity.manager.config_registry.trainer_config_manager module &#8212; Trinity-RFT 0.4.0 文档</title>
+    <title>trinity.manager.config_registry.trainer_config_manager module &#8212; Trinity-RFT 0.4.1 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=0a12e38e"></script>
+    <script src="../_static/documentation_options.js?v=a35297e8"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -680,12 +680,12 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_from_logits_with_chunking()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_checkpointing()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr"><code class="docutils literal notranslate"><span class="pre">set_actor_lr()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_warmup_style"><code class="docutils literal notranslate"><span class="pre">set_actor_warmup_style()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_scheduler_type"><code class="docutils literal notranslate"><span class="pre">set_actor_lr_scheduler_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio"><code class="docutils literal notranslate"><span class="pre">set_actor_lr_warmup_steps_ratio()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_save_checkpoint"><code class="docutils literal notranslate"><span class="pre">set_actor_save_checkpoint()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_load_checkpoint"><code class="docutils literal notranslate"><span class="pre">set_actor_load_checkpoint()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr"><code class="docutils literal notranslate"><span class="pre">set_critic_lr()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup_style"><code class="docutils literal notranslate"><span class="pre">set_critic_warmup_style()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr_scheduler_type"><code class="docutils literal notranslate"><span class="pre">set_critic_lr_scheduler_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr_warmup_steps_ratio"><code class="docutils literal notranslate"><span class="pre">set_critic_lr_warmup_steps_ratio()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_grad_clip"><code class="docutils literal notranslate"><span class="pre">set_critic_grad_clip()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_cliprange_value"><code class="docutils literal notranslate"><span class="pre">set_critic_cliprange_value()</span></code></a></li>
@@ -972,8 +972,8 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_warmup_style">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_warmup_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_warmup_style" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_lr_scheduler_type">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_lr_scheduler_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_scheduler_type" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -997,8 +997,8 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_critic_warmup_style">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_critic_warmup_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup_style" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_critic_lr_scheduler_type">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_critic_lr_scheduler_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr_scheduler_type" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1136,12 +1136,12 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_from_logits_with_chunking()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_checkpointing()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr"><code class="docutils literal notranslate"><span class="pre">set_actor_lr()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_warmup_style"><code class="docutils literal notranslate"><span class="pre">set_actor_warmup_style()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_scheduler_type"><code class="docutils literal notranslate"><span class="pre">set_actor_lr_scheduler_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio"><code class="docutils literal notranslate"><span class="pre">set_actor_lr_warmup_steps_ratio()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_save_checkpoint"><code class="docutils literal notranslate"><span class="pre">set_actor_save_checkpoint()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_load_checkpoint"><code class="docutils literal notranslate"><span class="pre">set_actor_load_checkpoint()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr"><code class="docutils literal notranslate"><span class="pre">set_critic_lr()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup_style"><code class="docutils literal notranslate"><span class="pre">set_critic_warmup_style()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr_scheduler_type"><code class="docutils literal notranslate"><span class="pre">set_critic_lr_scheduler_type()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_lr_warmup_steps_ratio"><code class="docutils literal notranslate"><span class="pre">set_critic_lr_warmup_steps_ratio()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_grad_clip"><code class="docutils literal notranslate"><span class="pre">set_critic_grad_clip()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.config_registry.trainer_config_manager.set_critic_cliprange_value"><code class="docutils literal notranslate"><span class="pre">set_critic_cliprange_value()</span></code></a></li>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.manager.config_registry.trainer_config_manager &#8212; Trinity-RFT 0.4.0 documentation</title>
+    <title>trinity.manager.config_registry.trainer_config_manager &#8212; Trinity-RFT 0.4.1 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=183391d5"></script>
+    <script src="../../../../_static/documentation_options.js?v=a3cf13c8"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -570,8 +570,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -1385,7 +1385,7 @@ document.write(`
 
 
 <span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">set_actor_warmup_style</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_actor_lr_scheduler_type</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
         <span class="s2">&quot;LR Warmup Style :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
         <span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">],</span>
@@ -1434,7 +1434,7 @@ document.write(`
 
 
 <span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="n">use_critic</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">set_critic_warmup_style</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_critic_lr_scheduler_type</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
         <span class="s2">&quot;LR Warmup Style :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
         <span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">],</span>

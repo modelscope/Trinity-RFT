@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.manager.config_manager &#8212; Trinity-RFT 0.4.0 文档</title>
+    <title>trinity.manager.config_manager &#8212; Trinity-RFT 0.4.1 文档</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=0a12e38e"></script>
+    <script src="../../../_static/documentation_options.js?v=a35297e8"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -571,8 +571,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
-    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
+    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -1319,7 +1319,7 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_verl_actor_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;Actor Model Config&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_lr_scheduler_type&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span><span class="p">)</span>
 
@@ -1341,7 +1341,7 @@ document.write(`
             <span class="s2">&quot;critic_ppo_micro_batch_size_per_gpu&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_ulysses_sequence_parallel_size&quot;</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_warmup_style&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_lr_warmup_steps_ratio&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_lr_scheduler_type&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_lr_warmup_steps_ratio&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;critic_grad_clip&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_cliprange_value&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;critic_load_checkpoint&quot;</span><span class="p">,</span> <span class="s2">&quot;critic_save_checkpoint&quot;</span><span class="p">)</span>
@@ -1510,7 +1510,7 @@ document.write(`
                 <span class="s2">&quot;optim&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_warmup_style&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;lr_scheduler_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr_scheduler_type&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;override_config&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -1570,7 +1570,7 @@ document.write(`
         <span class="n">optimizer_config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">],</span>
             <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;lr_scheduler_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr_scheduler_type&quot;</span><span class="p">],</span>
         <span class="p">}</span>
         <span class="n">algorithm_config</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizer_config</span>
         <span class="k">return</span> <span class="n">algorithm_config</span>

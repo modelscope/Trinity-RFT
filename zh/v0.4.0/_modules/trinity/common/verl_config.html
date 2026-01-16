@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.common.verl_config &#8212; Trinity-RFT 0.4.0 文档</title>
+    <title>trinity.common.verl_config &#8212; Trinity-RFT 0.4.1 文档</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=0a12e38e"></script>
+    <script src="../../../_static/documentation_options.js?v=a35297e8"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -571,8 +571,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 文档 - Home"/>
-    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 文档 - Home"/>`);</script>
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
+    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -1022,7 +1022,9 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.workers.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyLossConfig</span><span class="p">,</span> <span class="n">RouterReplayConfig</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALGORITHM_TYPE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">SynchronizerConfig</span><span class="p">,</span> <span class="n">set_if_none</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPLORER_NAME</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -1067,6 +1069,8 @@ document.write(`
     <span class="n">lora_rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># The rank of the LoRA model, default to 0. If lora_rank &gt; 0, LoRA module is enabled in trainer</span>
     <span class="n">lora_alpha</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
     <span class="n">target_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all-linear&quot;</span>
+    <span class="n">exclude_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">lora_adapter_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># rope configs</span>
     <span class="n">rope_scaling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1080,14 +1084,15 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">Optim</span><span class="p">:</span>
     <span class="c1"># For actor, most fields are set in algorithm.optimizer</span>
     <span class="c1"># For critic, you can set trainer_config.critic.optim</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span>
+    <span class="n">optimizer_impl</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;torch.optim&quot;</span>
     <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span>
     <span class="n">lr_warmup_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">lr_warmup_steps_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">min_lr_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">warmup_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+    <span class="n">lr_scheduler_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
     <span class="n">total_training_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># ! DO NOT SET, use trainer.total_steps</span>
     <span class="n">betas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">])</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span>
     <span class="n">clip_grad</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">lr_warmup_init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">lr_decay_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1097,7 +1102,8 @@ document.write(`
     <span class="n">weight_decay_incr_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
     <span class="n">lr_wsd_decay_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;exponential&quot;</span>
     <span class="n">lr_wsd_decay_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">use_checkpoint_opt_param_scheduler</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">use_checkpoint_opt_param_scheduler</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">override_optimizer_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -1113,6 +1119,7 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.FSDPConfig">[文档]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FSDPConfig</span><span class="p">:</span>
+    <span class="n">_target_</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl.workers.config.FSDPEngineConfig&quot;</span>  <span class="c1"># DO NOT SET</span>
     <span class="n">param_offload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">optimizer_offload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">offload_policy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1130,7 +1137,7 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">Checkpoint</span><span class="p">:</span>
     <span class="n">load_contents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="s2">&quot;extra&quot;</span><span class="p">])</span>
     <span class="n">save_contents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="s2">&quot;extra&quot;</span><span class="p">])</span>
-    <span class="n">async_save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># do not set, async save has bug in verl megatron training</span></div>
+    <span class="n">async_save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># TODO: testing async save</span></div>
 
 
 
@@ -1138,10 +1145,10 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig">[文档]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">OverrideTransformerConfig</span><span class="p">:</span>
-    <span class="n">recompute_granularity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">recompute_granularity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;full&quot;</span>
     <span class="n">recompute_modules</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;core_attn&quot;</span><span class="p">])</span>
-    <span class="n">recompute_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">recompute_num_layers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">recompute_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span>
+    <span class="n">recompute_num_layers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span></div>
 
 
 
@@ -1167,7 +1174,9 @@ document.write(`
     <span class="n">override_transformer_config</span><span class="p">:</span> <span class="n">OverrideTransformerConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="n">OverrideTransformerConfig</span>
     <span class="p">)</span>
-    <span class="n">use_mbridge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">use_mbridge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bfloat16&quot;</span>
+    <span class="n">use_remove_padding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 
@@ -1207,6 +1216,9 @@ document.write(`
     <span class="n">profile</span><span class="p">:</span> <span class="n">ProfileConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ProfileConfig</span><span class="p">)</span>
     <span class="n">data_loader_seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">load_weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">policy_loss</span><span class="p">:</span> <span class="n">PolicyLossConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">PolicyLossConfig</span><span class="p">)</span>
+    <span class="n">profiler</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">router_replay</span><span class="p">:</span> <span class="n">RouterReplayConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">RouterReplayConfig</span><span class="p">)</span>
     <span class="c1"># do not set</span>
     <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span>
     <span class="n">clip_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span>
@@ -1234,7 +1246,9 @@ document.write(`
     <span class="p">)</span>
     <span class="n">megatron</span><span class="p">:</span> <span class="n">MegatronConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">MegatronConfig</span><span class="p">)</span>
     <span class="n">profile</span><span class="p">:</span> <span class="n">ProfileConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ProfileConfig</span><span class="p">)</span>
-    <span class="n">load_weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+    <span class="n">load_weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">profiler</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">router_replay</span><span class="p">:</span> <span class="n">RouterReplayConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">RouterReplayConfig</span><span class="p">)</span></div>
 
 
 
@@ -1273,6 +1287,7 @@ document.write(`
     <span class="n">actor</span><span class="p">:</span> <span class="n">Actor</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Actor</span><span class="p">)</span>
     <span class="n">ref</span><span class="p">:</span> <span class="n">Ref</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Ref</span><span class="p">)</span>
     <span class="n">rollout</span><span class="p">:</span> <span class="n">Rollout</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Rollout</span><span class="p">)</span>
+    <span class="n">nccl_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">600</span>  <span class="c1"># ! DO NOT SET, it will be set by `config.synchronizer.sync_timeout`</span>
     <span class="n">synchronizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SynchronizerConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">explorer_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">EXPLORER_NAME</span></div>
 
@@ -1289,7 +1304,11 @@ document.write(`
     <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Whether to enable loading a remote code model</span>
     <span class="n">enable_gradient_checkpointing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">use_remove_padding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">fsdp_config</span><span class="p">:</span> <span class="n">FSDPConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FSDPConfig</span><span class="p">)</span></div>
+    <span class="n">fsdp_config</span><span class="p">:</span> <span class="n">FSDPConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FSDPConfig</span><span class="p">)</span>
+
+    <span class="c1"># rope configs</span>
+    <span class="n">rope_scaling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rope_theta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -1297,6 +1316,7 @@ document.write(`
 <a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.Critic">[文档]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Critic</span><span class="p">:</span>
+    <span class="n">enable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">optim</span><span class="p">:</span> <span class="n">Optim</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Optim</span><span class="p">)</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">CriticModel</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">CriticModel</span><span class="p">)</span>
@@ -1320,7 +1340,9 @@ document.write(`
     <span class="n">profile</span><span class="p">:</span> <span class="n">ProfileConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ProfileConfig</span><span class="p">)</span>
     <span class="n">data_loader_seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">load_weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">ray_namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># automatically generated</span></div>
+    <span class="n">nccl_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">600</span>  <span class="c1"># ! DO NOT SET, it will be set by `config.synchronizer.sync_timeout`</span>
+    <span class="n">ray_namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># automatically generated</span>
+    <span class="n">profiler</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
 
 
 
@@ -1345,7 +1367,8 @@ document.write(`
     <span class="n">ulysses_sequence_parallel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">use_dynamic_bsz</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">forward_max_token_len_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">reward_manager</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;naive&quot;</span></div>
+    <span class="n">reward_manager</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;naive&quot;</span>
+    <span class="n">use_reward_loop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 
@@ -1369,10 +1392,29 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="RolloutCorrection">
+<a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.RolloutCorrection">[文档]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RolloutCorrection</span><span class="p">:</span>
+    <span class="n">rollout_is</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rollout_is_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">rollout_rs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rollout_rs_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rollout_rs_threshold_lower</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rollout_token_veto_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Because rollout and training in Trinity runs separately,</span>
+    <span class="c1"># rollout_is_batch_normalize is default to True</span>
+    <span class="n">bypass_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">loss_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ppo_clip&quot;</span>
+    <span class="n">rollout_is_batch_normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
 <div class="viewcode-block" id="Algorithm">
 <a class="viewcode-back" href="../../../build_api/trinity.common.verl_config.html#trinity.common.verl_config.Algorithm">[文档]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Algorithm</span><span class="p">:</span>
+    <span class="n">rollout_correction</span><span class="p">:</span> <span class="n">RolloutCorrection</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">RolloutCorrection</span><span class="p">)</span>
     <span class="c1"># ! DO NOT SET gamma or lam below; they are kept here merely for compatibility with verl,</span>
     <span class="c1"># and their values will be overwritten by those in AlgorithmConfig.advantage_fn_args</span>
     <span class="c1"># if they are really needed (e.g., for GAE advantage/returns computation)</span>
@@ -1432,6 +1474,7 @@ document.write(`
     <span class="n">custom_reward_function</span><span class="p">:</span> <span class="n">CustomRewardFunction</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">CustomRewardFunction</span><span class="p">)</span>
     <span class="n">algorithm</span><span class="p">:</span> <span class="n">Algorithm</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Algorithm</span><span class="p">)</span>
     <span class="n">trainer</span><span class="p">:</span> <span class="n">Trainer</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Trainer</span><span class="p">)</span>
+    <span class="n">global_profiler</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">synchronizer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SynchronizerConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">enable_preview</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -1511,8 +1554,12 @@ document.write(`
         <span class="p">)</span>  <span class="c1"># kept to pass RayPPOTrainer._validate_config</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">nccl_timeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">explorer_name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">enable</span> <span class="o">=</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">nccl_timeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">ray_namespace</span>
 
         <span class="c1"># Actor / Rollout Config</span>
@@ -1592,6 +1639,8 @@ document.write(`
         <span class="n">set_if_none</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="p">,</span> <span class="s2">&quot;strategy&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_strategy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">critic_model_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tokenizer_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">critic_model_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rope_theta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">rollout_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">n</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_training_steps</span>
@@ -1627,11 +1676,12 @@ document.write(`
 
         <span class="c1"># LoRA related config</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_rank</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lora_rank</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_alpha</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lora_alpha</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">target_modules</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span>
-                <span class="mi">0</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">target_modules</span>
+            <span class="n">lora_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">lora_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">actor_model_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lora_rank&quot;</span><span class="p">,</span> <span class="s2">&quot;lora_alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;target_modules&quot;</span><span class="p">,</span> <span class="s2">&quot;exclude_modules&quot;</span><span class="p">]:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">actor_model_config</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">lora_config</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">lora_config</span><span class="o">.</span><span class="n">is_dummy</span><span class="p">:</span>
+                <span class="n">actor_model_config</span><span class="o">.</span><span class="n">lora_adapter_path</span> <span class="o">=</span> <span class="n">lora_config</span><span class="o">.</span><span class="n">path</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Lora is only supported for fsdp and fsdp2, but got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span><span class="si">}</span><span class="s2"> instead, changed to fsdp.&quot;</span>
@@ -1650,6 +1700,17 @@ document.write(`
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="p">,</span> <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="n">field_value</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">field_value</span><span class="p">)</span>
+        <span class="c1"># fix optimizer type for fsdp</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_strategy</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fsdp&quot;</span><span class="p">):</span>
+            <span class="n">optim_map</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;adam&quot;</span><span class="p">:</span> <span class="s2">&quot;AdamW&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;adamw&quot;</span><span class="p">:</span> <span class="s2">&quot;AdamW&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sgd&quot;</span><span class="p">:</span> <span class="s2">&quot;SGD&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">actor_optim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span>
+            <span class="n">actor_optim</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">actor_optim</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">actor_optim</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
+            <span class="n">critic_optim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">optim</span>
+            <span class="n">critic_optim</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">critic_optim</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">critic_optim</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">use_kl_loss</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">kl_loss_fn</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_kl_in_reward</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">kl_penalty_fn</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span>
         <span class="c1"># TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to</span>

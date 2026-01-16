@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.utils.lora_utils &#8212; Trinity-RFT 0.4.0 documentation</title>
+    <title>trinity.utils.lora_utils &#8212; Trinity-RFT 0.4.1 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=183391d5"></script>
+    <script src="../../../_static/documentation_options.js?v=a3cf13c8"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -570,8 +570,8 @@ window.addEventListener("load", load);</script>
       
     
     
-    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -997,14 +997,18 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for trinity.utils.lora_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+
 <div class="viewcode-block" id="create_dummy_lora">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.lora_utils.html#trinity.utils.lora_utils.create_dummy_lora">[docs]</a>
-<span></span><span class="k">def</span><span class="w"> </span><span class="nf">create_dummy_lora</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_dummy_lora</span><span class="p">(</span>
     <span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">checkpoint_job_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">lora_rank</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">lora_alpha</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">target_modules</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">exclude_modules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">peft</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoraConfig</span><span class="p">,</span> <span class="n">TaskType</span><span class="p">,</span> <span class="n">get_peft_model</span>
@@ -1017,6 +1021,7 @@ document.write(`
         <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="n">lora_rank</span><span class="p">,</span>
         <span class="s2">&quot;lora_alpha&quot;</span><span class="p">:</span> <span class="n">lora_alpha</span><span class="p">,</span>
         <span class="s2">&quot;target_modules&quot;</span><span class="p">:</span> <span class="n">target_modules</span><span class="p">,</span>
+        <span class="s2">&quot;exclude_modules&quot;</span><span class="p">:</span> <span class="n">exclude_modules</span><span class="p">,</span>
         <span class="s2">&quot;bias&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">peft_model</span> <span class="o">=</span> <span class="n">get_peft_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">LoraConfig</span><span class="p">(</span><span class="o">**</span><span class="n">lora_config</span><span class="p">))</span>
