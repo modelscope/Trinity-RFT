@@ -267,7 +267,7 @@ class MIXPolicyLossFn(PolicyLossFn):
 
 With the above newly-defined classes and functions, we can run the experiments without modifying other process.
 An example showing some important configurations is shown below, including the weighting factor $\mu$ as `algorithm.policy_loss_fn_args['mu']` and the batch size of expert experiences $B'$, calculated as the product of `buffer.batch_size`, `algorithm.sample_strategy_args['expert_data_ratio']` and `algorithm.repeat_times`.
-For the full configuration, please refer to [`mix_math.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_math/mix_math.yaml).
+For the full configuration, please refer to [`mix_math.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/mix_math/mix_math.yaml).
 
 ```yaml
 algorithm:

@@ -71,7 +71,7 @@ service:
 
 Data-Juicer 的数据处理以服务形式运行，因此需要配置 data-juicer 服务。幸运的是，Trinity-RFT 提供了自动启动方式，只需在 `service` 部分将 `data-juicer` 服务的 `auto_start` 设为 `true` 即可自动启动数据处理器服务。
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml) 中找到。
 
 ```{note}
 只有当提供了任一 `xxx_pipeline`，且 pipeline 配置中提供了 `dj_process_desc` 或 `dj_config_path` 之一时，数据处理器和数据主动迭代器才会被激活。否则该部分将被跳过，直接进入探索阶段。
@@ -167,7 +167,7 @@ process:
       field_names: ["prompt", "response"]
 ```
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml) 中找到。
 
 ### 探索与训练
 完成 Trinity-RFT 配置文件准备后，可启动 Ray 集群并运行包含数据主动迭代器部分的 RFT 流程：
@@ -245,7 +245,7 @@ service:
 
 你还可以为此算子设置更多配置项（例如标注完成时的通知）。更多细节请参考 [此文档](https://github.com/modelscope/data-juicer/tree/main/configs/annotation)。
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例的配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例的配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml) 中找到。
 
 ### 开始运行
 

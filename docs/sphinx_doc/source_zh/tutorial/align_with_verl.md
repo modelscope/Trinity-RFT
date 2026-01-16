@@ -142,7 +142,7 @@ explorer:
       max_response_tokens: 1024
       max_model_len: 20480
 ```
-请参考使用 LLM-as-a-judge 的[配置](https://github.com/modelscope/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml)和[工作流](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py)了解更多详情。
+请参考使用 LLM-as-a-judge 的[配置](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml)和[工作流](https://github.com/agentscope-ai/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py)了解更多详情。
 
 
 ### Trainer

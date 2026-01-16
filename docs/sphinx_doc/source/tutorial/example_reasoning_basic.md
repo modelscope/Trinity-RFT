@@ -46,7 +46,7 @@ We run the experiment in a synchronous mode where the Explorer and Trainer opera
 
 ### Use GRPO Algorithm
 
-We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) for this experiment. Some important setups of `gsm8k.yaml` are listed in the following:
+We use the configurations in [`gsm8k.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) for this experiment. Some important setups of `gsm8k.yaml` are listed in the following:
 
 
 ```yaml

@@ -4,7 +4,7 @@ This example demonstrates how to run RFT in fully asynchronous mode using the GR
 
 Trinity-RFT supports Asynchronous RFT by running the trainer and explorer in separate processes.
 
-For this purpose, we provide two main configuration files: [`explorer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) and [`trainer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml).
+For this purpose, we provide two main configuration files: [`explorer.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) and [`trainer.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml).
 The primary difference between them is that in `explorer.yaml` we set `mode` as `explore`, while in `trainer.yaml` we set `mode` as `train`.
 The model weights of the explorer and trainer are synchronized once every `sync_interval * batch_size` tasks.
 

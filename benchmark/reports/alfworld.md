@@ -14,7 +14,7 @@ See the [documentation](https://agentscope-ai.github.io/Trinity-RFT/en/main/tuto
 
 ## 2. Experimental Settings
 
-We evaluate the performance of the following methods in Trinity-RFT framework with version [0.3.3](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.11.0) and compare against the latest release of rLLM with commit ID [ef6451f](https://github.com/rllm-org/rllm/commit/ef6451fbd7eba224c4a87e3fd944d7c0e2bcc0ea) (verl==0.5.0) as of Nov. 6, 2025.
+We evaluate the performance of the following methods in Trinity-RFT framework with version [0.3.3](https://github.com/agentscope-ai/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.11.0) and compare against the latest release of rLLM with commit ID [ef6451f](https://github.com/rllm-org/rllm/commit/ef6451fbd7eba224c4a87e3fd944d7c0e2bcc0ea) (verl==0.5.0) as of Nov. 6, 2025.
 Since rLLM does not support ALFWorld environment yet, we implement this task in rLLM for comparison.
 
 In Trinity-RFT and rLLM, we respectively evaluate the performance using GRPO algorithm on this task.

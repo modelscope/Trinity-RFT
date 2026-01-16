@@ -6,7 +6,7 @@ Guru-Math is the mathematics task derived from the [Guru](https://huggingface.co
 
 ## 2. Experimental Settings
 
-We evaluate the performance of the following methods within the Trinity-RFT framework using version [0.3.3](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.10.2). For comparison, we ported relevant code from [Reasoning360](https://github.com/LLM360/Reasoning360) to be compatible with verl==0.5.0.
+We evaluate the performance of the following methods within the Trinity-RFT framework using version [0.3.3](https://github.com/agentscope-ai/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.10.2). For comparison, we ported relevant code from [Reasoning360](https://github.com/LLM360/Reasoning360) to be compatible with verl==0.5.0.
 
 Within both Trinity-RFT and veRL, we evaluate performance using the GRPO algorithm on this task. We fine-tune a base `Qwen2.5-7B` model that has not undergone prior fine-tuning.
 

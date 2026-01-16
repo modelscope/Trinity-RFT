@@ -90,7 +90,7 @@ html_theme_options = {
     "article_header_end": "article_header_customized.html",
     "use_download_button": True,
     "use_fullscreen_button": True,
-    "repository_url": "https://github.com/modelscope/Trinity-RFT",
+    "repository_url": "https://github.com/agentscope-ai/Trinity-RFT",
     "use_repository_button": True,
 }
 

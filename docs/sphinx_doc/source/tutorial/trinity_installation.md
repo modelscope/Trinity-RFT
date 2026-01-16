@@ -29,7 +29,7 @@ This method is best if you plan to customize or contribute to Trinity-RFT.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 ```
 
@@ -109,7 +109,7 @@ You can download the Trinity-RFT Docker image from Github Container Registry or 
 ### Pull from GitHub Container Registry (Recommended for beginners)
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 
 docker pull ghcr.io/modelscope/trinity-rft:latest
@@ -131,7 +131,7 @@ The image has include dependencies such as vllm, flash-attn and Megatron-LM, if 
 ### Build Locally
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 
 # Build the Docker image
@@ -156,4 +156,4 @@ For training with **Megatron-LM**, please refer to {ref}`Megatron-LM Backend <Me
 
 ## Troubleshooting
 
-If you encounter installation issues, refer to the FAQ or [GitHub Issues](https://github.com/modelscope/Trinity-RFT/issues).
+If you encounter installation issues, refer to the FAQ or [GitHub Issues](https://github.com/agentscope-ai/Trinity-RFT/issues).

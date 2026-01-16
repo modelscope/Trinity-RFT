@@ -171,7 +171,7 @@ python examples/grpo_alfworld/get_alfworld_data.py
 
 ### 配置准备并运行实验
 
-默认配置文件是 [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step/alfworld.yaml)。
+默认配置文件是 [`alfworld.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step/alfworld.yaml)。
 你可以根据需要修改配置并运行实验！
 
 ```bash

@@ -62,7 +62,7 @@ trinity run --config tinker.yaml  # 请替换为你的实际配置文件路径
 
 3. **暂不支持多阶段训练**，后续会添加该功能。
 
-> 💡 完整的示例配置文件见 [`tinker.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/tinker/tinker.yaml)。
+> 💡 完整的示例配置文件见 [`tinker.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/tinker/tinker.yaml)。
 
 
 ## Llama-3.2-3B 模型实验结果

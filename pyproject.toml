@@ -140,5 +140,5 @@ known_third_party = ["wandb"]
 flash-attn = ["torch", "numpy"]
 
 [project.urls]
-"Homepage" = "https://github.com/modelscope/Trinity-RFT"
+"Homepage" = "https://github.com/agentscope-ai/Trinity-RFT"
 "Documentation" = "https://agentscope-ai.github.io/Trinity-RFT/"

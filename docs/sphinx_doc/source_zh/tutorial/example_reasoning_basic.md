@@ -47,7 +47,7 @@ huggingface-cli download openai/gsm8k --repo-type dataset --local-dir $DATASET_P
 
 ### 使用 GRPO 算法
 
-本实验使用 [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) 中的配置。以下是 `gsm8k.yaml` 中一些重要配置项：
+本实验使用 [`gsm8k.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) 中的配置。以下是 `gsm8k.yaml` 中一些重要配置项：
 
 ```yaml
 project: <project_name>

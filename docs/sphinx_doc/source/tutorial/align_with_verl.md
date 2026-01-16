@@ -142,7 +142,7 @@ explorer:
       max_response_tokens: 1024
       max_model_len: 20480
 ```
-Please refer to the [configuration](https://github.com/modelscope/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml) and [workflow](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py) with LLM-as-a-judge for more details.
+Please refer to the [configuration](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml) and [workflow](https://github.com/agentscope-ai/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py) with LLM-as-a-judge for more details.
 
 
 ### Trainer

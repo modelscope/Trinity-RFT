@@ -21,7 +21,7 @@ To filter the unsolvable tasks, we restrict the game map to have a valid path wi
 
 ## 2. Experimental Settings
 
-We evaluate the performance of the following methods in Trinity-RFT framework with version [0.3.3](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.11.0) and compare against the latest release of rLLM with commit ID [ef6451f](https://github.com/rllm-org/rllm/commit/ef6451fbd7eba224c4a87e3fd944d7c0e2bcc0ea) (verl==0.5.0) as of Nov. 6, 2025.
+We evaluate the performance of the following methods in Trinity-RFT framework with version [0.3.3](https://github.com/agentscope-ai/Trinity-RFT/releases/tag/v0.3.3) (verl==0.5.0, vllm==0.11.0) and compare against the latest release of rLLM with commit ID [ef6451f](https://github.com/rllm-org/rllm/commit/ef6451fbd7eba224c4a87e3fd944d7c0e2bcc0ea) (verl==0.5.0) as of Nov. 6, 2025.
 
 We fine-tune a Qwen2.5-3B-Instruct model using the training tasks with GRPO. For all experiments, we fix key parameters to `batch_size=64`, `repeat_times=8`, and `lr=1e-6`. We run each experiment for three times and report the average results.
 

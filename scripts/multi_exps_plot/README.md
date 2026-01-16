@@ -6,7 +6,7 @@ Due to the stochastic nature of RFT results, multiple experimental runs are nece
 
 ## Usage
 
-***Before running this script***, ensure your experiment results are available. For example, after running the [grpo_gsm8k](https://github.com/modelscope/Trinity-RFT/blob/main/examples/grpo_gsm8k/gsm8k.yaml) script **three times**, the result directories will be located under a path pattern such as `/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-{1, 2, 3}`. The directory structure for a single run is expected to be as follows:
+***Before running this script***, ensure your experiment results are available. For example, after running the [grpo_gsm8k](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/grpo_gsm8k/gsm8k.yaml) script **three times**, the result directories will be located under a path pattern such as `/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-{1, 2, 3}`. The directory structure for a single run is expected to be as follows:
 
     └── qwen2.5-1.5B-gsm8k-1
         ├── buffer

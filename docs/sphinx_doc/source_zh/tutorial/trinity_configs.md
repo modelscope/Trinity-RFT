@@ -53,7 +53,7 @@ stages:
   ...
 ```
 
-每个部分将在下文详细说明。关于此处未涵盖的具体参数的更多细节，请参考[源码](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py)。
+每个部分将在下文详细说明。关于此处未涵盖的具体参数的更多细节，请参考[源码](https://github.com/agentscope-ai/Trinity-RFT/blob/main/trinity/common/config.py)。
 
 ```{tip}
 Trinity-RFT 使用[OmegaConf](https://omegaconf.readthedocs.io/en/latest/) 来加载 YAML 配置文件。

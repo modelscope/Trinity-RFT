@@ -52,7 +52,7 @@ huggingface-cli download HumanLLMs/Human-Like-DPO-Dataset --repo-type dataset --
 
 ### DPO 配置
 
-我们在实验中使用 [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) 中的配置。以下列出一些重要设置：
+我们在实验中使用 [`dpo.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) 中的配置。以下列出一些重要设置：
 
 我们在 train 模式下运行实验，因为没有使用 explorer。要启用此模式，需将 `mode` 设置为 `train`，并将数据路径传递给 trainer。
 
@@ -107,7 +107,7 @@ trainer:
 
 ### SFT 配置
 
-我们将 `algorithm_type` 设为 `sft` 来运行 SFT 流程，并对配置文件 [`examples/sft_mot/sft.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml) 进行如下修改：
+我们将 `algorithm_type` 设为 `sft` 来运行 SFT 流程，并对配置文件 [`examples/sft_mot/sft.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml) 进行如下修改：
 
 ```yaml
 project: <project_name>

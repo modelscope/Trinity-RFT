@@ -257,7 +257,7 @@ class MIXPolicyLossFn(PolicyLossFn):
 ## 步骤 4：运行实验
 
 通过上述新定义的类和函数，我们可以无需修改其他流程即可运行实验。
-下面展示了一个包含关键配置的示例，包括权重因子 $\mu$（即 `algorithm.policy_loss_fn_args['mu']`）以及专家 experience 的批次大小 $B'$，其值等于 `buffer.batch_size`、`algorithm.sample_strategy_args['expert_data_ratio']` 和 `algorithm.repeat_times` 的乘积。完整配置请参考 [`mix_math.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_math/mix_math.yaml)。
+下面展示了一个包含关键配置的示例，包括权重因子 $\mu$（即 `algorithm.policy_loss_fn_args['mu']`）以及专家 experience 的批次大小 $B'$，其值等于 `buffer.batch_size`、`algorithm.sample_strategy_args['expert_data_ratio']` 和 `algorithm.repeat_times` 的乘积。完整配置请参考 [`mix_math.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/mix_math/mix_math.yaml)。
 
 ```yaml
 algorithm:
