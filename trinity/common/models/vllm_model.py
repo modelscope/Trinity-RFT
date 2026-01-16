@@ -403,6 +403,35 @@ class vLLMRolloutModel(InferenceModel):
             dtype=torch.float32,
         )
 
+    async def add_lora_adapter(self, lora_request: Any) -> int:
+        """Add a LoRA adapter to the vLLM engine.
+
+        Args:
+            lora_request (LoRARequest): The LoRA request.
+
+        Returns:
+            lora_id (int): The LoRA adapter ID.
+        """
+        lora_id = await self.async_llm.add_lora(lora_request)
+        return lora_id
+
+    async def remove_lora_adapter(self, lora_id: int) -> None:
+        """Remove a LoRA adapter from the vLLM engine.
+
+        Args:
+            lora_id (int): The LoRA adapter ID.
+        """
+        await self.async_llm.remove_lora(lora_id)
+
+    async def list_lora_adapters(self) -> Sequence[int]:
+        """List all LoRA adapter IDs in the vLLM engine.
+
+        Returns:
+            lora_ids (List[int]): The list of LoRA adapter IDs.
+        """
+        lora_ids = await self.async_llm.list_loras()
+        return list(lora_ids)
+
     async def sample(
         self,
         prompt: Any,

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.4.0"
+version = "0.4.1"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -88,7 +88,7 @@ tinker = [
 ]
 
 doc = [
-    "sphinx",
+    "sphinx<9.0.0",
     "sphinx-autobuild",
     "sphinx-book-theme",
     "myst-parser",

@@ -111,7 +111,7 @@ algorithm:
 - `repeat_times`: 每个任务重复的次数。默认为 `1`。在 `dpo` 中自动设为 `2`。某些算法如 GRPO 和 OPMD 要求 `repeat_times` > 1。
 - `optimizer`: Actor 优化器的参数。
   - `lr`: 优化器的学习率。
-  - `warmup_style`：已弃用，请改用 `lr_scheduler_type`。
+  - `warmup_style`：已弃用，请改用 `lr_scheduler_type`。该域将会在未来版本中移除。
   - `lr_scheduler_type`：Actor 模型的学习率调度器类型。默认值为 `constant`。支持类型：`constant`、`cosine`。
 - `sample_strategy`: 从 experience buffer 加载 experience 时使用的采样策略。支持类型：`default`、`staleness_control`、`mix`。
 - `advantage_fn`: 用于计算优势值的函数。

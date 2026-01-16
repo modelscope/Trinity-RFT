@@ -1270,7 +1270,6 @@ class TestTinkerAPI(RayUnittestBaseAsync):
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
         self.config.explorer.rollout_model.enable_lora = True
-        self.config.explorer.rollout_model.enable_runtime_lora_updating = True
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
@@ -1345,3 +1344,68 @@ class TestTinkerAPI(RayUnittestBaseAsync):
         self.assertEqual(response.sequences[0].stop_reason, "length")
         self.assertEqual(len(prompt.to_ints()), len(response.prompt_logprobs))
         self.assertIsNone(response.topk_prompt_logprobs)
+
+        # test add remove lora
+        from vllm.lora.request import LoRARequest
+
+        # create a dummy lora adapter with all zero weights
+        lora_path_1 = os.path.join(self.config.checkpoint_job_dir, "adapter_1")
+        lora_path_2 = os.path.join(self.config.checkpoint_job_dir, "adapter_2")
+        _create_adapter(self.config.model.model_path, lora_path_1, "adapter_1")
+        _create_adapter(self.config.model.model_path, lora_path_2, "adapter_2")
+        lora_1 = LoRARequest(
+            lora_name="test_adapter_1",
+            lora_int_id=1,
+            lora_path=os.path.join(lora_path_1, "adapter_1"),
+        )
+        lora_2 = LoRARequest(
+            lora_name="test_adapter_2",
+            lora_int_id=2,
+            lora_path=os.path.join(lora_path_2, "adapter_2"),
+        )
+        response = await engine.sample.remote(
+            prompt=prompt,
+            num_samples=1,
+            sampling_params=types.SamplingParams(max_tokens=1),
+            include_prompt_logprobs=True,
+            lora_request=lora_1,
+        )
+        ids = await engine.list_lora_adapters.remote()
+        self.assertEqual(ids, [1])
+        self.assertEqual(len(response.sequences), 1)
+        self.assertEqual(response.sequences[0].stop_reason, "length")
+        self.assertEqual(len(prompt.to_ints()), len(response.prompt_logprobs))
+        self.assertIsNone(response.topk_prompt_logprobs)
+        response = await engine.sample.remote(
+            prompt=prompt,
+            num_samples=1,
+            sampling_params=types.SamplingParams(max_tokens=1),
+            include_prompt_logprobs=True,
+            lora_request=lora_2,
+        )
+        self.assertEqual(len(response.sequences), 1)
+        self.assertEqual(response.sequences[0].stop_reason, "length")
+        self.assertEqual(len(prompt.to_ints()), len(response.prompt_logprobs))
+        self.assertIsNone(response.topk_prompt_logprobs)
+        await engine.remove_lora_adapter.remote(lora_id=1)
+        await engine.remove_lora_adapter.remote(lora_id=2)
+        ids = await engine.list_lora_adapters.remote()
+        self.assertEqual(ids, [])
+
+
+def _create_adapter(model_path: str, lora_path: str, name: str):
+    from peft import LoraConfig, get_peft_model
+    from transformers import AutoModelForCausalLM
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        device_map="cpu",
+    )
+    lora_config = LoraConfig(
+        r=8,
+        lora_alpha=8,
+        target_modules=["gate_proj", "up_proj", "down_proj"],
+        lora_dropout=0.1,
+    )
+    lora_model = get_peft_model(model, lora_config, adapter_name=name)
+    lora_model.save_pretrained(lora_path)
