@@ -798,6 +798,9 @@ class TestTinkerAsyncAPIServer(TestAsyncAPIServer):
                 self.config = config
                 self.synchronizer = Synchronizer.get_actor(config)
 
+            async def is_alive(self):
+                return True
+
         fake_trainer = FakeTrainer.remote(self.config)
         await fake_trainer.__ray_ready__.remote()
         await super()._setup_engines()

@@ -95,7 +95,8 @@ class TinkerModel(InferenceModel):
         if with_chat_completion:
             create_time = int(time.time())
         output = await self._generate_internal(prompt={"prompt_token_ids": token_ids}, **kwargs)
-        return_logprobs = kwargs.get("logprobs", self.config.logprobs is not None)
+        logprobs = kwargs.get("logprobs", self.config.logprobs)
+        return_logprobs = logprobs is not None and logprobs is not False
         experiences = [
             Experience(
                 tokens=torch.tensor(token_ids + sequence.tokens, dtype=torch.int32),

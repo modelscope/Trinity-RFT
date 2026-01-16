@@ -66,10 +66,10 @@ class Optim:
     total_training_steps: int = -1  # ! DO NOT SET, use trainer.total_steps
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     clip_grad: float = 1.0
-    lr_warmup_init: float = 0.0
+    lr_warmup_init: Optional[float] = None  # 0.0
     lr_decay_steps: Optional[int] = None
-    lr_decay_style: str = "constant"
-    min_lr: float = 0.0
+    lr_decay_style: Optional[str] = None  # "constant"
+    min_lr: Optional[float] = None  # 0.0
     weight_decay: float = 0.01
     weight_decay_incr_style: str = "constant"
     lr_wsd_decay_style: str = "exponential"
@@ -607,12 +607,24 @@ class veRLConfig:
                 self.critic.strategy = "fsdp"
 
         # Algorithm related config
-        for field_name in config.algorithm.optimizer.__dataclass_fields__:
-            field_value = getattr(config.algorithm.optimizer, field_name)
+        actor_optim = self.actor_rollout_ref.actor.optim
+        critic_optim = self.critic.optim
+        optim_config = config.algorithm.optimizer
+        for field_name in optim_config.__dataclass_fields__:
+            field_value = getattr(optim_config, field_name)
             if field_name == "optimizer_type":
-                setattr(self.actor_rollout_ref.actor.optim, "optimizer", field_value)
-            elif hasattr(self.actor_rollout_ref.actor.optim, field_name):
-                setattr(self.actor_rollout_ref.actor.optim, field_name, field_value)
+                setattr(actor_optim, "optimizer", field_value)
+            elif hasattr(actor_optim, field_name):
+                setattr(actor_optim, field_name, field_value)
+        # ensure megatron optimizer config compatibility
+        set_if_none(actor_optim, "lr_warmup_init", optim_config.min_lr_ratio * optim_config.lr)
+        set_if_none(actor_optim, "lr_decay_steps", self.trainer.total_training_steps)
+        set_if_none(actor_optim, "lr_decay_style", optim_config.lr_scheduler_type)
+        set_if_none(actor_optim, "min_lr", optim_config.min_lr_ratio * optim_config.lr)
+        set_if_none(critic_optim, "lr_warmup_init", 0.0)
+        set_if_none(critic_optim, "lr_decay_steps", self.trainer.total_training_steps)
+        set_if_none(critic_optim, "lr_decay_style", "constant")
+        set_if_none(critic_optim, "min_lr", 0.0)
         # fix optimizer type for fsdp
         if config.trainer.trainer_strategy.startswith("fsdp"):
             optim_map = {
@@ -620,9 +632,7 @@ class veRLConfig:
                 "adamw": "AdamW",
                 "sgd": "SGD",
             }
-            actor_optim = self.actor_rollout_ref.actor.optim
             actor_optim.optimizer = optim_map.get(actor_optim.optimizer, actor_optim.optimizer)
-            critic_optim = self.critic.optim
             critic_optim.optimizer = optim_map.get(critic_optim.optimizer, critic_optim.optimizer)
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
         self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"

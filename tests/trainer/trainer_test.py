@@ -1437,8 +1437,8 @@ class TestTrainerPromptTruncation(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)
 
 
+@unittest.skipIf("TINKER_API_KEY" not in os.environ, "TINKER_API_KEY is not set")
 class TestTinkerTrainer(BaseTrainerCase):
-    @unittest.skipIf("TINKER_API_KEY" not in os.environ, "TINKER_API_KEY is not set")
     def test_trainer(self):
         """Test GSM8K on tinker."""
         # test both mode
@@ -1484,6 +1484,9 @@ class TestTinkerTrainer(BaseTrainerCase):
             def __init__(self, config: Config):
                 self.config = config
                 self.synchronizer = Synchronizer.get_actor(config)
+
+            async def is_alive(self):
+                return True
 
         fake_explorer = FakeExplorer.remote(self.config)
         ray.get(fake_explorer.__ray_ready__.remote())

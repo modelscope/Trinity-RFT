@@ -6,6 +6,8 @@ import os
 import shutil
 import unittest
 
+import torch
+
 from tests.tools import get_template_config, get_unittest_dataset_config
 from trinity.common.config import InferenceModelConfig, load_config
 
@@ -143,10 +145,9 @@ class TestConfig(unittest.TestCase):
         config.algorithm.optimizer.lr = 1e-4
         config.algorithm.optimizer.weight_decay = 0.05
         config.algorithm.optimizer.clip_grad = 2.0
-        config.algorithm.optimizer.lr_decay_steps = 1000
-        config.algorithm.optimizer.lr_decay_style = "cosine"
-        config.algorithm.optimizer.lr_warmup_init = 1e-7
-        config.algorithm.optimizer.min_lr = 1e-6
+        config.trainer.total_steps = 1000
+        config.algorithm.optimizer.lr_scheduler_type = "cosine"
+        config.algorithm.optimizer.min_lr_ratio = 1e-2
         config.check_and_update()
         self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr, 1e-4)
         self.assertEqual(
@@ -159,10 +160,20 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(
             config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_decay_style, "cosine"
         )
-        self.assertEqual(
-            config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_warmup_init, 1e-7
+        self.assertTrue(
+            torch.allclose(
+                torch.tensor(
+                    config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr_warmup_init
+                ),
+                torch.tensor(1e-6),
+            )
         )
-        self.assertEqual(config.trainer.trainer_config.actor_rollout_ref.actor.optim.min_lr, 1e-6)
+        self.assertTrue(
+            torch.allclose(
+                torch.tensor(config.trainer.trainer_config.actor_rollout_ref.actor.optim.min_lr),
+                torch.tensor(1e-6),
+            )
+        )
         # critic optimizer should not be affected
         self.assertEqual(config.trainer.trainer_config.critic.optim.lr, 1e-5)
         self.assertEqual(config.trainer.trainer_config.critic.optim.weight_decay, 0.01)

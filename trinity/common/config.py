@@ -93,17 +93,13 @@ class OptimizerConfig:
     lr: float = 1e-6
     lr_warmup_steps: int = -1
     lr_warmup_steps_ratio: float = 0.0
-    min_lr_ratio: Optional[float] = 0.0
+    min_lr_ratio: float = 0.0
     warmup_style: Optional[str] = None  # deprecated !
     lr_scheduler_type: str = "constant"
     optimizer_type: str = "adam"
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     weight_decay: float = 0.01
     clip_grad: float = 1.0
-    lr_warmup_init: float = 0.0  # used in megatron
-    lr_decay_steps: Optional[int] = None  # used in megatron
-    lr_decay_style: str = "constant"  # used in megatron, duplicated with lr_scheduler_type in veRL
-    min_lr: float = 0.0
 
 
 @dataclass
