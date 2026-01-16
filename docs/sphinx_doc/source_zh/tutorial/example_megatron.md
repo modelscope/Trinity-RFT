@@ -23,7 +23,7 @@ pip install -e ".[megatron]"
 另外还需要从源码安装 mbridge 和 NVIDIA 的 Apex 库以支持混合精度训练：
 
 ```bash
-pip install -U git+https://github.com/ISEEKYAN/mbridge.git
+pip install git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
     --config-settings "--build-option=--cpp_ext" \
     --config-settings "--build-option=--cuda_ext" \
