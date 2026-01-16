@@ -81,7 +81,7 @@ megatron = [
     # "transformer_engine[pytorch]==2.8.0",
 
     # Install mbridge from main branch (unreleased version)
-    "mbridge @ git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612",
+    # "mbridge @ git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612",
 ]
 tinker = [
     "tinker; python_version >= '3.11'",

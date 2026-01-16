@@ -20,9 +20,10 @@ pip install -e ".[megatron]"
 # uv sync -extra megatron
 ```
 
-Then, install NVIDIA's Apex library for mixed-precision training:
+Then, install mbridge and NVIDIA's Apex library for mixed-precision training:
 
 ```bash
+pip install -U git+https://github.com/ISEEKYAN/mbridge.git
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
     --config-settings "--build-option=--cpp_ext" \
     --config-settings "--build-option=--cuda_ext" \
