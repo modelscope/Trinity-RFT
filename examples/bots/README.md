@@ -22,7 +22,7 @@ For unselected tasks, predicted counts (_implicit evidence_) are produced by a p
 
 ##### Step 1: Environment Preparation
 
-Ensure Trinity-RFT is well installed ([Installation Guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)). No extra dependence is required.
+Ensure Trinity-RFT is well installed ([Installation Guide](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)). No extra dependence is required.
 
 ##### Step 2: Model & Dataset Preparation
 

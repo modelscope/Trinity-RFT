@@ -23,7 +23,7 @@ Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，例�
 | 一些全局配置 | `trainer` | `monitor`、`synchronizer`、`cluster` 等 |
 
 
-在以下内容中，我们将展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。有关 Trinity-RFT 的详细参数配置，请参考[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)。
+在以下内容中，我们将展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。有关 Trinity-RFT 的详细参数配置，请参考[文档](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)。
 
 
 ```{note}

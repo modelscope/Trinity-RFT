@@ -10,7 +10,7 @@ The environment is configured as follows:
 * Reward Structure: +1 for successfully completing the task, -0.1 otherwise
 * Maximum Steps: 30 (configurable via `max_env_steps`)
 
-See the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html) for data preparation.
+See the [documentation](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html) for data preparation.
 
 ## 2. Experimental Settings
 

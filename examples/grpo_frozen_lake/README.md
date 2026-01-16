@@ -5,7 +5,7 @@ This example shows the usage of GRPO on the [Frozen Lake](https://gymnasium.fara
 
 ## Data and Environment Preparation
 
-After setting up the basic environment following the [installation guidance](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html), you need to install the additional dependencies by running the following command:
+After setting up the basic environment following the [installation guidance](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html), you need to install the additional dependencies by running the following command:
 
 ```bash
 pip install gymnasium[toy_text]

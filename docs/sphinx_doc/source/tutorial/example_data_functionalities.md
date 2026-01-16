@@ -4,7 +4,7 @@
 ## Overview
 
 Trinity-RFT provides a unified data processor to process the raw dataset and experiences for the task pipeline and the experience pipeline.
-- For tasks, the data processing capabilities come from [Data-Juicer](https://github.com/modelscope/data-juicer). You can use data processing operators from Data-Juicer. The full list of Data-Juicer operators can be found [here](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html)
+- For tasks, the data processing capabilities come from [Data-Juicer](https://github.com/modelscope/data-juicer). You can use data processing operators from Data-Juicer. The full list of Data-Juicer operators can be found [here](https://agentscope-ai.github.io/data-juicer/en/main/docs/Operators.html)
 - For experiences, in addition to Data-Juicer operators, Trinity-RFT provides several RFT-related operators and allows developers to implement their own operators.
 
 For implementing your own data processor, you can refer to this [document](trinity_programming_guide.md#operators-for-data-developers).

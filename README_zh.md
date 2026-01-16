@@ -1,4 +1,4 @@
-[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**中文文档**](https://modelscope.github.io/Trinity-RFT/zh/) | [**常见问题**](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/faq.html)
+[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**中文文档**](https://agentscope-ai.github.io/Trinity-RFT/zh/) | [**常见问题**](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/faq.html)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
@@ -12,7 +12,7 @@
 <div align="center">
 
 [![paper](http://img.shields.io/badge/cs.LG-2505.17826-B31B1B?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2505.17826)
-[![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://modelscope.github.io/Trinity-RFT/)
+[![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://agentscope-ai.github.io/Trinity-RFT/)
 [![pypi](https://img.shields.io/pypi/v/trinity-rft?logo=pypi&color=026cad)](https://pypi.org/project/trinity-rft/)
 ![license](https://img.shields.io/badge/license-Apache--2.0-000000.svg)
 
@@ -31,11 +31,11 @@ Trinity-RFT 是一个通用、灵活、用户友好的大语言模型（LLM）�
 
 Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
-* 🤖 **智能体应用开发者:** 训练智能体应用，以增强其在特定领域中完成任务的能力 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_workflow.html)
+* 🤖 **智能体应用开发者:** 训练智能体应用，以增强其在特定领域中完成任务的能力 [[教程]](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/develop_workflow.html)
 
-* 🧠 **强化学习算法研究者:** 通过定制化简洁、可插拔的模块，设计、实现与验证新的强化学习算法 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)
+* 🧠 **强化学习算法研究者:** 通过定制化简洁、可插拔的模块，设计、实现与验证新的强化学习算法 [[教程]](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)
 
-* 📊 **数据工程师:** 设计针对任务定制的数据集，构建处理流水线以支持数据清洗、增强以及人类参与场景 [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_operator.html)
+* 📊 **数据工程师:** 设计针对任务定制的数据集，构建处理流水线以支持数据清洗、增强以及人类参与场景 [[教程]](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/develop_operator.html)
 
 
 
@@ -73,16 +73,16 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 | 类别 | 教程 / 指南  |
 | --- | ----|
-| *运行各种 RFT 模式* | + [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)<br>+ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_advanced.html)<br>+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_async_mode.html)<br>+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_dpo.html)<br>+ [在无GPU环境下运行RFT训练（Tinker 后端）](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_tinker_backend.html)   |
-| *多轮智能体强化学习* | + [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)<br>+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html)<br>+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)  <br>+ [例子：训练一个网络搜索智能体](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
-| *全生命周期的数据流水线* | + [Rollout 任务混合与选取](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_selector.html)<br>+ [在线任务选择](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) (📝 [论文](https://arxiv.org/pdf/2510.26374))<br>+ [研究项目：learn-to-ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask) (📝 [论文](https://arxiv.org/pdf/2510.25441)) <br>+ [经验回放机制](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [高级数据处理能力 &  Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)  |
-| *强化学习算法开发* | + [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html) (📝 [论文](https://arxiv.org/pdf/2508.11408))<br>+ [研究项目: R3L (基于反思-重试的强化学习)](https://github.com/shiweijiezero/R3L) (📝 [论文](https://arxiv.org/abs/2601.03715))<br>+ [研究项目: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) (📝 [论文](https://arxiv.org/abs/2509.24203)) <br>+ 不可验证的领域: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [可训练 RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
+| *运行各种 RFT 模式* | + [快速开始：在 GSM8k 上运行 GRPO](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)<br>+ [Off-policy RFT](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_advanced.html)<br>+ [全异步 RFT](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_async_mode.html)<br>+ [通过 DPO 或 SFT 进行离线学习](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_dpo.html)<br>+ [在无GPU环境下运行RFT训练（Tinker 后端）](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_tinker_backend.html)   |
+| *多轮智能体强化学习* | + [拼接多轮任务](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)<br>+ [通用多轮任务](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html)<br>+ [调用智能体框架中的 ReAct 工作流](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)  <br>+ [例子：训练一个网络搜索智能体](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
+| *全生命周期的数据流水线* | + [Rollout 任务混合与选取](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/develop_selector.html)<br>+ [在线任务选择](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) (📝 [论文](https://arxiv.org/pdf/2510.26374))<br>+ [研究项目：learn-to-ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask) (📝 [论文](https://arxiv.org/pdf/2510.25441)) <br>+ [经验回放机制](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>+ [高级数据处理能力 &  Human-in-the-loop](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)  |
+| *强化学习算法开发* | + [使用 Trinity-RFT 进行 RL 算法开发](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html) (📝 [论文](https://arxiv.org/pdf/2508.11408))<br>+ [研究项目: R3L (基于反思-重试的强化学习)](https://github.com/shiweijiezero/R3L) (📝 [论文](https://arxiv.org/abs/2601.03715))<br>+ [研究项目: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) (📝 [论文](https://arxiv.org/abs/2509.24203)) <br>+ 不可验证的领域: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [可训练 RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
 | *基准测试* | + [基准测试工具 (快速验证与实验)](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/README.md)<br>+ [Guru-Math 测试 & 对比 veRL](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/guru_math.md)<br>+ [FrozenLake 测试 & 对比 rLLM](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/frozenlake.md)<br>+ [Alfworld 测试 & 对比 rLLM](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/alfworld.md) |
-| *深入认识 Trinity-RFT* | + [完整配置指南](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)<br>+ [GPU 资源与训练配置对应指南](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_gpu_configs.html)<br>+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/synchronizer.html)<br>+ [如何与 verl 对齐配置](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/align_with_verl.html)   |
+| *深入认识 Trinity-RFT* | + [完整配置指南](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)<br>+ [GPU 资源与训练配置对应指南](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/trinity_gpu_configs.html)<br>+ [理解 explorer-trainer 同步逻辑](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/synchronizer.html)<br>+ [如何与 verl 对齐配置](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/align_with_verl.html)   |
 
 
 > [!NOTE]
-> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
+> 更多教程请参考 [Trinity-RFT 文档](https://agentscope-ai.github.io/Trinity-RFT/)。
 
 
 
@@ -117,13 +117,13 @@ Trinity-RFT 面向不同背景和目标的用户提供相应功能：
 
 ## 🔨 算法支持
 
-下表列出了 Trinity-RFT 支持的算法，更多算法请参考 [算法模块](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py)。您也可以通过自定义不同的模块来构建新算法，参见 [教程](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)。
+下表列出了 Trinity-RFT 支持的算法，更多算法请参考 [算法模块](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/algorithm/algorithm.py)。您也可以通过自定义不同的模块来构建新算法，参见 [教程](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/develop_algorithm.html)。
 
 | 算法 | 文档/示例 | 核心代码 | 关键配置 |
 |:-----------|:-----------|:---------------|:-----------|
-| PPO [[论文](https://arxiv.org/pdf/1707.06347)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[Countdown 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo` |
-| GRPO [[论文](https://arxiv.org/pdf/2402.03300)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k)]| [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo` |
-| CHORD 💡 [[论文](https://arxiv.org/pdf/2508.11408)] | [[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)] [[ToolACE 例子](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
+| PPO [[论文](https://arxiv.org/pdf/1707.06347)] | [[文档](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[Countdown 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo` |
+| GRPO [[论文](https://arxiv.org/pdf/2402.03300)] | [[文档](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)] [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k)]| [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo` |
+| CHORD 💡 [[论文](https://arxiv.org/pdf/2508.11408)] | [[文档](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)] [[ToolACE 例子](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord` |
 | REC Series 💡 [[论文](https://arxiv.org/pdf/2509.24203)] | [[GSM8K 例子](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)] | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec` |
 | RLOO [[论文](https://arxiv.org/pdf/2402.14740)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `algorithm_type: rloo` |
 | REINFORCE++ [[论文](https://arxiv.org/pdf/2501.03262)] | - | [[代码](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `algorithm_type: reinforceplusplus` |
@@ -266,7 +266,7 @@ uv pip install trinity-rft
 uv pip install flash-attn==2.8.1
 ```
 
-> 如需使用 **Megatron-LM** 进行训练，请参考 [Megatron-LM 支持](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_megatron.html)
+> 如需使用 **Megatron-LM** 进行训练，请参考 [Megatron-LM 支持](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_megatron.html)
 
 
 ### 第二步：准备数据集和模型
@@ -350,7 +350,7 @@ ray start --address=<master_address>
 ```
 
 （可选）您可以使用 [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) 等工具，更方便地监控训练流程。
-相应的配置方法请参考 [这个文档](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration)。
+相应的配置方法请参考 [这个文档](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration)。
 比如使用 Wandb 时，您需要先登录：
 
 ```shell

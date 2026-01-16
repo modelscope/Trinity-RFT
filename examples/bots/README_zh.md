@@ -21,7 +21,7 @@ BOTS 以任务选择、模型训练和后验概率更新的连续循环运行。
 
 ##### 第一步：环境准备
 
-确保Trinity-RFT安装好了（[安装指南](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)）。不需要额外的依赖。
+确保Trinity-RFT安装好了（[安装指南](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)）。不需要额外的依赖。
 
 ##### 第二步：模型和数据准备
 

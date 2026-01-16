@@ -24,7 +24,7 @@ Roughly speaking, the parameters in veRL are mapped to the following modules in 
 | Some global configurations | `trainer` | `monitor`, `synchronizer`, `cluster`, etc |
 
 
-In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. Please refer to the [documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
+In the following, we show how to map the parameters in veRL to the ones in Trinity-RFT. Please refer to the [documentation](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html) for the detailed parameter configuration of Trinity-RFT.
 
 ```{note}
 To match the default training setup of veRL, we set `synchronizer.sync_style=fixed` and `synchronizer.sync_offset=0` in Trinity-RFT.

@@ -1,4 +1,4 @@
-[**中文主页**](https://github.com/modelscope/Trinity-RFT/blob/main/README_zh.md) | [**Tutorial**](https://modelscope.github.io/Trinity-RFT/) | [**FAQ**](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/faq.html)
+[**中文主页**](https://github.com/modelscope/Trinity-RFT/blob/main/README_zh.md) | [**Tutorial**](https://agentscope-ai.github.io/Trinity-RFT/) | [**FAQ**](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/faq.html)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
@@ -9,7 +9,7 @@
 <div align="center">
 
 [![paper](http://img.shields.io/badge/cs.LG-2505.17826-B31B1B?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2505.17826)
-[![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://modelscope.github.io/Trinity-RFT/)
+[![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://agentscope-ai.github.io/Trinity-RFT/)
 [![pypi](https://img.shields.io/pypi/v/trinity-rft?logo=pypi&color=026cad)](https://pypi.org/project/trinity-rft/)
 ![license](https://img.shields.io/badge/license-Apache--2.0-000000.svg)
 
@@ -26,9 +26,9 @@ It decouples RFT into three components that work in coordination:
 
 Trinity-RFT provides functionalities for users with different backgrounds and objectives:
 
-* 🤖 **Agent application developers:** Train LLM-powered agents and improve their capabilities in specific domains [[tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_workflow.html)
-* 🧠 **Reinforcement learning researchers:** Design, implement and validate new RL algorithms using compact, plug-and-play modules that allow non-invasive customization [[tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_algorithm.html)
-* 📊 **Data engineers:** Create RFT datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios [[tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_operator.html)
+* 🤖 **Agent application developers:** Train LLM-powered agents and improve their capabilities in specific domains [[tutorial]](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/develop_workflow.html)
+* 🧠 **Reinforcement learning researchers:** Design, implement and validate new RL algorithms using compact, plug-and-play modules that allow non-invasive customization [[tutorial]](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/develop_algorithm.html)
+* 📊 **Data engineers:** Create RFT datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios [[tutorial]](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/develop_operator.html)
 
 ## 🚀 News
 
@@ -60,15 +60,15 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
 | Category                          | Tutorial / Guideline                                                                                             |
 |-----------------------------------|------------------------------------------------------------------------------------------------------------------|
-| *Run diverse RFT modes*           | • [Quick start: GRPO on GSM8k](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)<br>• [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html)<br>• [Fully asynchronous RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html)<br>• [Offline learning by DPO or SFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html)<br>• [RFT without local GPU (Tinker Backend)](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_tinker_backend.html) |
-| *Multi-step agentic RL*           | • [Concatenated multi-turn workflow](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html)<br>• [General multi-step workflow](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)<br>• [ReAct workflow with an agent framework](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html)<br>• [Example: train a web-search agent](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
-| *Full-lifecycle data pipelines*   | • [Rollout task mixing and selection](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_selector.html)<br>• [Online task curriculum](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) (📝 [paper](https://arxiv.org/pdf/2510.26374))<br>• [Research project: learn-to-ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask) (📝 [paper](https://arxiv.org/pdf/2510.25441))<br>• [Experience replay with prioritization](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>• [Advanced data processing & human-in-the-loop](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html) |
-| *Algorithm development*           | • [RL algorithm development with Trinity-RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html) (📝 [paper](https://arxiv.org/pdf/2508.11408))<br>• [Research project: R3L (reflect-then-retry RL)](https://github.com/shiweijiezero/R3L) (📝 [paper](https://arxiv.org/abs/2601.03715))<br>• [Research project: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) (📝 [paper](https://arxiv.org/abs/2509.24203))<br>• Non-verifiable domains: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [trainable RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
+| *Run diverse RFT modes*           | • [Quick start: GRPO on GSM8k](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)<br>• [Off-policy RFT](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html)<br>• [Fully asynchronous RFT](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html)<br>• [Offline learning by DPO or SFT](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html)<br>• [RFT without local GPU (Tinker Backend)](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_tinker_backend.html) |
+| *Multi-step agentic RL*           | • [Concatenated multi-turn workflow](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html)<br>• [General multi-step workflow](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)<br>• [ReAct workflow with an agent framework](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_react.html)<br>• [Example: train a web-search agent](https://github.com/modelscope/Trinity-RFT/tree/main/examples/agentscope_websearch) |
+| *Full-lifecycle data pipelines*   | • [Rollout task mixing and selection](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/develop_selector.html)<br>• [Online task curriculum](https://github.com/modelscope/Trinity-RFT/tree/main/examples/bots) (📝 [paper](https://arxiv.org/pdf/2510.26374))<br>• [Research project: learn-to-ask](https://github.com/modelscope/Trinity-RFT/tree/main/examples/learn_to_ask) (📝 [paper](https://arxiv.org/pdf/2510.25441))<br>• [Experience replay with prioritization](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown_exp_replay)<br>• [Advanced data processing & human-in-the-loop](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html) |
+| *Algorithm development*           | • [RL algorithm development with Trinity-RFT](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html) (📝 [paper](https://arxiv.org/pdf/2508.11408))<br>• [Research project: R3L (reflect-then-retry RL)](https://github.com/shiweijiezero/R3L) (📝 [paper](https://arxiv.org/abs/2601.03715))<br>• [Research project: group-relative REINFORCE](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k) (📝 [paper](https://arxiv.org/abs/2509.24203))<br>• Non-verifiable domains: [RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_ruler), [trainable RULER](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_trainable_ruler), [rubric-as-reward](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_rubric_as_reward) |
 | *Benchmarks*                      | • [Benchmark toolkit (quick verification & experimentation)](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/README.md)<br>• [Guru-Math benchmark & comparison with veRL](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/guru_math.md)<br>• [FrozenLake benchmark & comparison with rLLM](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/frozenlake.md)<br>• [Alfworld benchmark & comparison with rLLM](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark/reports/alfworld.md) |
-| *Going deeper into Trinity-RFT*   | • [Full configurations](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html)<br>• [GPU resource and training configuration guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html)<br>• [Understand the coordination between explorer and trainer](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/synchronizer.html)<br>• [How to align configuration with veRL](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/align_with_verl.html) |
+| *Going deeper into Trinity-RFT*   | • [Full configurations](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html)<br>• [GPU resource and training configuration guide](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html)<br>• [Understand the coordination between explorer and trainer](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/synchronizer.html)<br>• [How to align configuration with veRL](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/align_with_verl.html) |
 
 > [!NOTE]
-> For more tutorials, please refer to the [Trinity-RFT documentation](https://modelscope.github.io/Trinity-RFT/).
+> For more tutorials, please refer to the [Trinity-RFT documentation](https://agentscope-ai.github.io/Trinity-RFT/).
 
 ## 🌟 Key Features
 
@@ -98,9 +98,9 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
 | Algorithm              | Doc / Example                                                                                   | Source Code                                                                                     | Key Configurations             |
 |------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|--------------------------------|
-| PPO [[Paper](https://arxiv.org/pdf/1707.06347)] | [[Doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)] [[Countdown Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo`          |
-| GRPO [[Paper](https://arxiv.org/pdf/2402.03300)] | [[Doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)] [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo`         |
-| CHORD 💡 [[Paper](https://arxiv.org/pdf/2508.11408)] | [[Doc](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)] [[ToolACE Example](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord`    |
+| PPO [[Paper](https://arxiv.org/pdf/1707.06347)] | [[Doc](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)] [[Countdown Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/ppo_countdown)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/ppo_policy_loss.py)] | `algorithm_type: ppo`          |
+| GRPO [[Paper](https://arxiv.org/pdf/2402.03300)] | [[Doc](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)] [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/grpo_advantage.py)] | `algorithm_type: grpo`         |
+| CHORD 💡 [[Paper](https://arxiv.org/pdf/2508.11408)] | [[Doc](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)] [[ToolACE Example](https://github.com/modelscope/Trinity-RFT/blob/main/examples/mix_chord/mix_chord_toolace.yaml)] | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/chord_policy_loss.py)] | `algorithm_type: mix_chord`    |
 | REC Series 💡 [[Paper](https://arxiv.org/pdf/2509.24203)] | [[GSM8K Example](https://github.com/modelscope/Trinity-RFT/tree/main/examples/rec_gsm8k)]       | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/policy_loss_fn/rec_policy_loss.py)] | `algorithm_type: rec`          |
 | RLOO [[Paper](https://arxiv.org/pdf/2402.14740)] | -                                                                                               | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/rloo_advantage.py)] | `algorithm_type: rloo`         |
 | REINFORCE++ [[Paper](https://arxiv.org/pdf/2501.03262)] | -                                                                                               | [[Code](https://github.com/modelscope/Trinity-RFT/tree/main/trinity/algorithm/advantage_fn/reinforce_advantage.py)] | `algorithm_type: reinforceplusplus` |
@@ -259,7 +259,7 @@ uv pip install trinity-rft
 uv pip install flash-attn==2.8.1
 ```
 
-> For training with **Megatron-LM**, please refer to [Megatron-LM Backend](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_megatron.html).
+> For training with **Megatron-LM**, please refer to [Megatron-LM Backend](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/example_megatron.html).
 ### Step 2: prepare dataset and model
 
 Trinity-RFT supports most datasets and models from Huggingface and ModelScope.
@@ -333,7 +333,7 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-(Optional) You may use [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) for better monitoring. Please refer to [this documentation](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration) for the corresponding configurations.
+(Optional) You may use [Wandb](https://docs.wandb.ai/quickstart/) / [TensorBoard](https://www.tensorflow.org/tensorboard) / [MLFlow](https://mlflow.org) for better monitoring. Please refer to [this documentation](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html#monitor-configuration) for the corresponding configurations.
 For example, to log in to Wandb:
 
 ```shell

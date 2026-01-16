@@ -4,7 +4,7 @@
 ## 概述
 
 Trinity-RFT 提供了一个统一的数据处理器，用于处理 task 流水线和 experience 流水线中的原始数据集及 experience 数据。
-- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 [此处](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html) 查看。
+- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 [此处](https://agentscope-ai.github.io/data-juicer/en/main/docs/Operators.html) 查看。
 - 对于 experience 数据，除了 Data-Juicer 算子外，Trinity-RFT 还提供了若干与 RFT 相关的算子，并允许开发者实现自定义算子。
 
 如需实现自己的数据处理器，可参考[开发者指南](trinity_programming_guide.md#operators-for-data-developers)。

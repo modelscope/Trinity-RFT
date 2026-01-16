@@ -6,7 +6,7 @@ This script automates the process of determining the **maximum context length** 
 
 ## 🧰 Requirements
 
-Ensure Trinity-RFT is well installed ([Installation Guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)). No extra dependence is required.
+Ensure Trinity-RFT is well installed ([Installation Guide](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_installation.html)). No extra dependence is required.
 
 ---
 

@@ -4,7 +4,7 @@ Thank you for your interest in Trinity-RFT! Our framework is built on a decouple
 
 ## Where to Contribute
 
-Trinity-RFT provides modular interfaces for different technical interests. Please refer to our [Developer Guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/develop_overview.html) for detailed implementation standards:
+Trinity-RFT provides modular interfaces for different technical interests. Please refer to our [Developer Guide](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/develop_overview.html) for detailed implementation standards:
 
 | Focus Area | Interface/Code Directory | Potential Tasks |
 | :--- | :--- | :--- |
@@ -45,6 +45,6 @@ To ensure a smooth review process, please complete the following:
 - **Major Changes**: For significant architectural changes or large features, please open an issue first to discuss the design with the maintainers.
 - **Documentation**: We highly value improvements to our tutorials, docstrings, and translations.
 
-*For a deep dive into the framework's architecture, please refer to the [Full Doc](https://modelscope.github.io/Trinity-RFT/en/main/index.html).*
+*For a deep dive into the framework's architecture, please refer to the [Full Doc](https://agentscope-ai.github.io/Trinity-RFT/en/main/index.html).*
 
 **Thank you for helping us build a better Reinforcement Fine-Tuning framework!**

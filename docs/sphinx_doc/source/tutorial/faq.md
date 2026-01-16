@@ -105,7 +105,7 @@ ray start --head
 - For trainer, adjust `trainer.max_token_len_per_gpu` when `trainer.use_dynamic_bsz=false`; adjust `trainer.ppo_max_token_len_per_gpu` and `trainer.ulysses_sequence_parallel_size` when `trainer.use_dynamic_bsz=true`. Setting `trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` may also help.
 - For explorer, adjust `explorer.rollout_model.tensor_parallel_size`.
 
-Besides, Trinity-RFT provides [GPU related configuration guide](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html), which you may refer to for suggestions on adjusting the configurations.
+Besides, Trinity-RFT provides [GPU related configuration guide](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html), which you may refer to for suggestions on adjusting the configurations.
 
 ## Part 3: Debugging Methods
 
