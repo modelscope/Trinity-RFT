@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import math
 import multiprocessing
 import os
 import shutil
@@ -48,6 +49,8 @@ from trinity.common.constants import (
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.explorer.proxy.client import TrinityClient
 from trinity.manager.state_manager import StateManager
+from trinity.manager.synchronizer import Synchronizer
+from trinity.trainer.tinker_trainer import TinkerTrainerWrapper
 
 
 class BaseTrainerCase(RayUnittestBase):
@@ -1448,7 +1451,7 @@ class TestTinkerTrainer(BaseTrainerCase):
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.model.tinker.enable = True
-        self.config.model.tinker.base_model = "Qwen/Qwen3-4B-Instruct-2507"
+        self.config.model.model_path = "Qwen/Qwen3-4B-Instruct-2507"
         self.config.check_and_update()
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
@@ -1463,6 +1466,40 @@ class TestTinkerTrainer(BaseTrainerCase):
         response_metrics = parser.metric_list("response_length")
         self.assertGreater(len(response_metrics), 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+
+    def test_trainer_class(self):
+        total_steps = 100
+        lr_warmup_steps = 10
+        self.config.algorithm.algorithm_type = "grpo"
+        self.config.model.tinker.enable = True
+        self.config.model.model_path = "Qwen/Qwen3-4B-Instruct-2507"
+        self.config.trainer.total_steps = total_steps
+        self.config.algorithm.optimizer.lr_warmup_steps = lr_warmup_steps
+        self.config.algorithm.optimizer.lr_scheduler_type = "cosine"
+        self.config.check_and_update()
+        lr = self.config.algorithm.optimizer.lr
+
+        @ray.remote
+        class FakeExplorer:
+            def __init__(self, config: Config):
+                self.config = config
+                self.synchronizer = Synchronizer.get_actor(config)
+
+        fake_explorer = FakeExplorer.remote(self.config)
+        ray.get(fake_explorer.__ray_ready__.remote())
+
+        tinker_trainer = TinkerTrainerWrapper(self.config)
+        tinker_trainer._train_step_num = 5
+        self.assertEqual(tinker_trainer.current_learning_rate, lr * 0.5)
+        tinker_trainer._train_step_num = 50
+        self.assertEqual(
+            tinker_trainer.current_learning_rate,
+            lr
+            * (
+                0.5
+                * (1 + math.cos((50 - lr_warmup_steps) / (total_steps - lr_warmup_steps) * math.pi))
+            ),
+        )
 
     def tearDown(self):
         # remove dir only when the test passed

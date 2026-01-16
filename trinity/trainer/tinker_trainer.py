@@ -1,4 +1,6 @@
+import math
 import os
+import sys
 from typing import Dict, List
 
 import ray
@@ -36,7 +38,7 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
 
     def _init_algorithm(self):
         self.algorithm = ALGORITHM_TYPE.get(self.config.algorithm.algorithm_type)
-        algorithm_config = self.config.algorithm
+        self.algorithm_config = algorithm_config = self.config.algorithm
         if self.algorithm.compute_advantage_in_trainer:
             self.advantage_fn = ADVANTAGE_FN.get(algorithm_config.advantage_fn)(
                 **algorithm_config.advantage_fn_args
@@ -63,12 +65,60 @@ class TinkerTrainerWrapper(TrainEngineWrapper):
             and (self.loss_agg_mode == "token-mean")
         )
 
-        self.adam_params = types.AdamParams(
-            learning_rate=algorithm_config.optimizer.lr,
-            beta1=algorithm_config.optimizer.betas[0],
-            beta2=algorithm_config.optimizer.betas[1],
+        self.lr_scheduler_type = algorithm_config.optimizer.lr_scheduler_type
+        self.total_steps = self.config.trainer.total_steps or sys.maxsize
+        self.num_warmup_steps = algorithm_config.optimizer.lr_warmup_steps
+        if self.num_warmup_steps < 0:
+            self.num_warmup_steps = int(
+                algorithm_config.optimizer.lr_warmup_steps_ratio * self.total_steps
+            )
+        self.min_lr_ratio = algorithm_config.optimizer.min_lr_ratio
+        assert 0.0 <= self.min_lr_ratio <= 1.0
+        self.logger.info(
+            f"Total steps: {self.total_steps}, num_warmup_steps: {self.num_warmup_steps}"
+        )
+
+        if self.lr_scheduler_type not in {"constant", "cosine"}:
+            raise NotImplementedError(
+                f"LR scheduler type {self.lr_scheduler_type} is not supported"
+            )
+
+    @property
+    def _current_lr_factor(self):
+        train_step_num = self._train_step_num
+        # warmup
+        if train_step_num < self.num_warmup_steps:
+            factor = float(train_step_num) / float(max(1.0, self.num_warmup_steps))
+            factor = self.min_lr_ratio + (1.0 - self.min_lr_ratio) * factor
+            return factor
+
+        # decay
+        if train_step_num >= self.total_steps:
+            progress = 1.0
+        else:
+            progress = float(train_step_num - self.num_warmup_steps) / float(
+                max(1.0, self.total_steps - self.num_warmup_steps)
+            )
+        if self.lr_scheduler_type == "constant":
+            factor = 1.0
+        elif self.lr_scheduler_type == "cosine":
+            num_cycles = 0.5  # TODO: may add to config
+            factor = 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress))
+        factor = self.min_lr_ratio + (1.0 - self.min_lr_ratio) * factor
+        return max(self.min_lr_ratio, factor)
+
+    @property
+    def current_learning_rate(self):
+        return self._current_lr_factor * self.algorithm_config.optimizer.lr
+
+    @property
+    def adam_params(self):
+        return types.AdamParams(
+            learning_rate=self.current_learning_rate,
+            beta1=self.algorithm_config.optimizer.betas[0],
+            beta2=self.algorithm_config.optimizer.betas[1],
             # eps is currently not in config
-            weight_decay=algorithm_config.optimizer.weight_decay,
+            weight_decay=self.algorithm_config.optimizer.weight_decay,
             grad_clip_norm=self.config.trainer.grad_clip,
         )
 
