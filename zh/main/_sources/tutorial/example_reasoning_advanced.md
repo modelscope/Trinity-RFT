@@ -5,7 +5,7 @@
 让我们继续使用 [之前的 GSM8k 例子](./example_reasoning_basic.md)，区别在于从 on-policy 模式切换到 off-policy 模式。
 在这个例子中，我们考虑一个名为 OPMD 的 off-policy 强化学习算法。
 该算法的设计与分析详见[我们的论文](https://arxiv.org/abs/2509.24203)中的 Section 2.2。
-本例子对应的配置文件为 [`opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml)。
+本例子对应的配置文件为 [`opmd_gsm8k.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml)。
 
 要尝试 OPMD 算法，请运行：
 ```shell

@@ -29,7 +29,7 @@
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 ```
 
@@ -91,7 +91,7 @@ uv sync --extra vllm --extra dev --extra flash_attn
 ### 从 Github 拉取预构建镜像 (推荐初学者使用该方法)
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 
 docker pull ghcr.io/modelscope/trinity-rft:latest
@@ -114,7 +114,7 @@ docker run -it \
 
 
 ```bash
-git clone https://github.com/modelscope/Trinity-RFT
+git clone https://github.com/agentscope-ai/Trinity-RFT
 cd Trinity-RFT
 
 # 构建 Docker 镜像
@@ -158,4 +158,4 @@ uv pip install flash-attn==2.8.1
 
 ## 常见问题
 
-如遇安装问题，请参考 FAQ 或 [GitHub Issues](https://github.com/modelscope/Trinity-RFT/issues)。
+如遇安装问题，请参考 FAQ 或 [GitHub Issues](https://github.com/agentscope-ai/Trinity-RFT/issues)。

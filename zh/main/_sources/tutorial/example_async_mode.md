@@ -4,7 +4,7 @@
 
 Trinity-RFT 支持通过在独立进程中运行 trainer 和 explorer 来实现异步 RFT。
 
-我们提供了两个主要配置文件：[`explorer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) 和 [`trainer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml)。
+我们提供了两个主要配置文件：[`explorer.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) 和 [`trainer.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml)。
 两者之间的主要区别是：在 `explorer.yaml` 中将 `mode` 设置为 `explore`，而在 `trainer.yaml` 中将 `mode` 设置为 `train`。
 Explorer 与 Trainer 的模型权重每处理 `sync_interval * batch_size` 个任务后同步一次。
 

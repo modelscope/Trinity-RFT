@@ -155,8 +155,8 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="faq.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.4.1/tutorial/faq.html">v0.4.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.4.0/tutorial/faq.html">v0.4.0</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../v0.3.3/tutorial/faq.html">v0.3.3</a></li>
           </ul>
         </details>
       </li>
@@ -504,7 +504,7 @@
 <div class="article-header-buttons">
 
 
-<a href="https://github.com/modelscope/Trinity-RFT" target="_blank"
+<a href="https://github.com/agentscope-ai/Trinity-RFT" target="_blank"
    class="btn btn-sm btn-source-repository-button"
    title="Source repository"
    data-bs-placement="bottom" data-bs-toggle="tooltip"
@@ -725,7 +725,7 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 <li><p>For trainer, adjust <code class="docutils literal notranslate"><span class="pre">trainer.max_token_len_per_gpu</span></code> when <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=false</span></code>; adjust <code class="docutils literal notranslate"><span class="pre">trainer.ppo_max_token_len_per_gpu</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer.ulysses_sequence_parallel_size</span></code> when <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=true</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true</span></code> may also help.</p></li>
 <li><p>For explorer, adjust <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.tensor_parallel_size</span></code>.</p></li>
 </ul>
-<p>Besides, Trinity-RFT provides <a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html">GPU related configuration guide</a>, which you may refer to for suggestions on adjusting the configurations.</p>
+<p>Besides, Trinity-RFT provides <a class="reference external" href="https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html">GPU related configuration guide</a>, which you may refer to for suggestions on adjusting the configurations.</p>
 </section>
 <section id="part-3-debugging-methods">
 <h2>Part 3: Debugging Methods<a class="headerlink" href="#part-3-debugging-methods" title="Link to this heading">#</a></h2>
@@ -824,7 +824,7 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 <li><p><strong>Separation of Explorer and Trainer</strong>: Trinity-RFT replaces the rollout model in veRL with a separate Explorer module, which handles agent-environment interactions. This separation allows for more flexible workflow designs and rollout-training scheduling.</p></li>
 <li><p><strong>Full-lifecycle Data Pipeline</strong>: Trinity-RFT adds a Buffer module between Explorer and Trainer, providing a complete data pipeline for experience storage, processing, and sampling. This design enables advanced data handling strategies, such as experience replay and prioritized sampling.</p></li>
 </ul>
-<p>We also provide benchmarks comparing Trinity-RFT with veRL and systems built on veRL (e.g., <a class="reference external" href="https://github.com/rllm-org/rllm">rLLM</a>), which show comparable or better performance and efficiency. Please refer to <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/benchmark">Benchmark</a> for more details.</p>
+<p>We also provide benchmarks comparing Trinity-RFT with veRL and systems built on veRL (e.g., <a class="reference external" href="https://github.com/rllm-org/rllm">rLLM</a>), which show comparable or better performance and efficiency. Please refer to <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/tree/main/benchmark">Benchmark</a> for more details.</p>
 </section>
 </section>
 

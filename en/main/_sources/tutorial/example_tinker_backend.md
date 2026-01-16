@@ -62,7 +62,7 @@ trinity run --config tinker.yaml  # Replace with your actual config file path
 
 3. **Multiple stages training** is not supported currently, we will add support for this in the future.
 
-> 💡 A complete example configuration file is available at [`tinker.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/tinker/tinker.yaml).
+> 💡 A complete example configuration file is available at [`tinker.yaml`](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/tinker/tinker.yaml).
 
 
 ## Results on the Llama-3.2-3B Model

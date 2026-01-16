@@ -156,6 +156,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="example_dpo.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.4.1/tutorial/example_dpo.html">v0.4.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.4.0/tutorial/example_dpo.html">v0.4.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.3/tutorial/example_dpo.html">v0.3.3</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.2/tutorial/example_dpo.html">v0.3.2</a></li>
@@ -507,7 +508,7 @@
 <div class="article-header-buttons">
 
 
-<a href="https://github.com/modelscope/Trinity-RFT" target="_blank"
+<a href="https://github.com/agentscope-ai/Trinity-RFT" target="_blank"
    class="btn btn-sm btn-source-repository-button"
    title="源码库"
    data-bs-placement="bottom" data-bs-toggle="tooltip"
@@ -695,7 +696,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <h2>第二步：配置设置<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
 <section id="dpo">
 <h3>DPO 配置<a class="headerlink" href="#dpo" title="Link to this heading">#</a></h3>
-<p>我们在实验中使用 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> 中的配置。以下列出一些重要设置：</p>
+<p>我们在实验中使用 <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> 中的配置。以下列出一些重要设置：</p>
 <p>我们在 train 模式下运行实验，因为没有使用 explorer。要启用此模式，需将 <code class="docutils literal notranslate"><span class="pre">mode</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">train</span></code>，并将数据路径传递给 trainer。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
@@ -749,7 +750,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 </section>
 <section id="sft">
 <h3>SFT 配置<a class="headerlink" href="#sft" title="Link to this heading">#</a></h3>
-<p>我们将 <code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code> 设为 <code class="docutils literal notranslate"><span class="pre">sft</span></code> 来运行 SFT 流程，并对配置文件 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml"><code class="docutils literal notranslate"><span class="pre">examples/sft_mot/sft.yaml</span></code></a> 进行如下修改：</p>
+<p>我们将 <code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code> 设为 <code class="docutils literal notranslate"><span class="pre">sft</span></code> 来运行 SFT 流程，并对配置文件 <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml"><code class="docutils literal notranslate"><span class="pre">examples/sft_mot/sft.yaml</span></code></a> 进行如下修改：</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>

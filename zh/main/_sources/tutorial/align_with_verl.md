@@ -23,7 +23,7 @@ Trinity-RFT 根据功能将强化微调的大量参数分为几个部分，例�
 | 一些全局配置 | `trainer` | `monitor`、`synchronizer`、`cluster` 等 |
 
 
-在以下内容中，我们将展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。有关 Trinity-RFT 的详细参数配置，请参考[文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)。
+在以下内容中，我们将展示如何将 veRL 中的参数映射到 Trinity-RFT 中的参数。有关 Trinity-RFT 的详细参数配置，请参考[文档](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)。
 
 
 ```{note}
@@ -142,7 +142,7 @@ explorer:
       max_response_tokens: 1024
       max_model_len: 20480
 ```
-请参考使用 LLM-as-a-judge 的[配置](https://github.com/modelscope/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml)和[工作流](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py)了解更多详情。
+请参考使用 LLM-as-a-judge 的[配置](https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/grpo_rubric_as_reward/rubric.yaml)和[工作流](https://github.com/agentscope-ai/Trinity-RFT/blob/main/trinity/common/workflows/rubric_judge_workflow.py)了解更多详情。
 
 
 ### Trainer

@@ -155,8 +155,8 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="example_async_mode.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.4.1/tutorial/example_async_mode.html">v0.4.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.4.0/tutorial/example_async_mode.html">v0.4.0</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../v0.3.3/tutorial/example_async_mode.html">v0.3.3</a></li>
           </ul>
         </details>
       </li>
@@ -504,7 +504,7 @@
 <div class="article-header-buttons">
 
 
-<a href="https://github.com/modelscope/Trinity-RFT" target="_blank"
+<a href="https://github.com/agentscope-ai/Trinity-RFT" target="_blank"
    class="btn btn-sm btn-source-repository-button"
    title="Source repository"
    data-bs-placement="bottom" data-bs-toggle="tooltip"
@@ -630,7 +630,7 @@ document.write(`
 <h1>Asynchronous RFT<a class="headerlink" href="#asynchronous-rft" title="Link to this heading">#</a></h1>
 <p>This example demonstrates how to run RFT in fully asynchronous mode using the GRPO algorithm, Qwen2.5-1.5B-Instruct model, and GSM8K dataset.</p>
 <p>Trinity-RFT supports Asynchronous RFT by running the trainer and explorer in separate processes.</p>
-<p>For this purpose, we provide two main configuration files: <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml"><code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml"><code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code></a>.
+<p>For this purpose, we provide two main configuration files: <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml"><code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code></a> and <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml"><code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code></a>.
 The primary difference between them is that in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">explore</span></code>, while in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">train</span></code>.
 The model weights of the explorer and trainer are synchronized once every <code class="docutils literal notranslate"><span class="pre">sync_interval</span> <span class="pre">*</span> <span class="pre">batch_size</span></code> tasks.</p>
 <p>Assuming we have a node with 8 GPUs, we allocate 4 GPUs for the trainer and 4 GPUs for the explorer. Key configurations in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> are as follows:</p>

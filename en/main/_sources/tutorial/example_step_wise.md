@@ -177,7 +177,7 @@ The task is described as an environment instead of a single prompt. The task des
 
 ### Config preparation and run the experiment
 
-The default config file is [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step/alfworld.yaml).
+The default config file is [`alfworld.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_alfworld_general_multi_step/alfworld.yaml).
 You may revise the configurations properly and run the experiment!
 
 ```bash

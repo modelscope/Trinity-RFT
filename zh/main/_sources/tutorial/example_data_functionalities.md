@@ -4,7 +4,7 @@
 ## 概述
 
 Trinity-RFT 提供了一个统一的数据处理器，用于处理 task 流水线和 experience 流水线中的原始数据集及 experience 数据。
-- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 [此处](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html) 查看。
+- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 [此处](https://agentscope-ai.github.io/data-juicer/en/main/docs/Operators.html) 查看。
 - 对于 experience 数据，除了 Data-Juicer 算子外，Trinity-RFT 还提供了若干与 RFT 相关的算子，并允许开发者实现自定义算子。
 
 如需实现自己的数据处理器，可参考[开发者指南](trinity_programming_guide.md#operators-for-data-developers)。
@@ -71,7 +71,7 @@ service:
 
 Data-Juicer 的数据处理以服务形式运行，因此需要配置 data-juicer 服务。幸运的是，Trinity-RFT 提供了自动启动方式，只需在 `service` 部分将 `data-juicer` 服务的 `auto_start` 设为 `true` 即可自动启动数据处理器服务。
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml) 中找到。
 
 ```{note}
 只有当提供了任一 `xxx_pipeline`，且 pipeline 配置中提供了 `dj_process_desc` 或 `dj_config_path` 之一时，数据处理器和数据主动迭代器才会被激活。否则该部分将被跳过，直接进入探索阶段。
@@ -167,7 +167,7 @@ process:
       field_names: ["prompt", "response"]
 ```
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例对应的 GSM8K 配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml) 中找到。
 
 ### 探索与训练
 完成 Trinity-RFT 配置文件准备后，可启动 Ray 集群并运行包含数据主动迭代器部分的 RFT 流程：
@@ -245,7 +245,7 @@ service:
 
 你还可以为此算子设置更多配置项（例如标注完成时的通知）。更多细节请参考 [此文档](https://github.com/modelscope/data-juicer/tree/main/configs/annotation)。
 
-`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例的配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml) 中找到。
+`data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例的配置文件可在 [该配置文件](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml) 中找到。
 
 ### 开始运行
 

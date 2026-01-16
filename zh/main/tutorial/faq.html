@@ -156,6 +156,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="faq.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.4.1/tutorial/faq.html">v0.4.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.4.0/tutorial/faq.html">v0.4.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.3/tutorial/faq.html">v0.3.3</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.2/tutorial/faq.html">v0.3.2</a></li>
@@ -507,7 +508,7 @@
 <div class="article-header-buttons">
 
 
-<a href="https://github.com/modelscope/Trinity-RFT" target="_blank"
+<a href="https://github.com/agentscope-ai/Trinity-RFT" target="_blank"
    class="btn btn-sm btn-source-repository-button"
    title="源码库"
    data-bs-placement="bottom" data-bs-toggle="tooltip"
@@ -728,7 +729,7 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 <li><p>对于 trainer，当 <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=false</span></code> 时，调整 <code class="docutils literal notranslate"><span class="pre">trainer.max_token_len_per_gpu</span></code>；当 <code class="docutils literal notranslate"><span class="pre">trainer.use_dynamic_bsz=true</span></code> 时，调整 <code class="docutils literal notranslate"><span class="pre">trainer.ppo_max_token_len_per_gpu</span></code> 和 <code class="docutils literal notranslate"><span class="pre">trainer.ulysses_sequence_parallel_size</span></code>。设置 <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true</span></code> 也可能有帮助。</p></li>
 <li><p>对于 explorer，调整 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.tensor_parallel_size</span></code>。</p></li>
 </ul>
-<p>此外，Trinity-RFT 提供了<a class="reference external" href="https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html">GPU 相关配置指南</a>，可参考其中建议。</p>
+<p>此外，Trinity-RFT 提供了<a class="reference external" href="https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html">GPU 相关配置指南</a>，可参考其中建议。</p>
 </section>
 <section id="id3">
 <h2>第三部分：调试方法<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
@@ -817,7 +818,7 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 <li><p><strong>Explorer 与 Trainer 分离</strong>：Trinity-RFT 用独立 Explorer 模块替代 veRL 的 rollout model，专门负责 agent 与环境交互，支持更灵活的 workflow 设计和 rollout-training 调度。</p></li>
 <li><p><strong>全生命周期数据通路</strong>：Trinity-RFT 在 Explorer 和 Trainer 之间增加 Buffer 模块，提供完整的数据存储、处理和采样通路，支持经验回放、优先采样等高级数据处理策略。</p></li>
 </ul>
-<p>我们还提供了 Trinity-RFT 与 veRL 及其衍生系统（如 <a class="reference external" href="https://github.com/rllm-org/rllm">rLLM</a>）的基准对比，详见 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/benchmark">Benchmark</a>。</p>
+<p>我们还提供了 Trinity-RFT 与 veRL 及其衍生系统（如 <a class="reference external" href="https://github.com/rllm-org/rllm">rLLM</a>）的基准对比，详见 <a class="reference external" href="https://github.com/agentscope-ai/Trinity-RFT/tree/main/benchmark">Benchmark</a>。</p>
 </section>
 </section>
 

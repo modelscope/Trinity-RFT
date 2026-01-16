@@ -50,7 +50,7 @@ For SFT, we download the `open-r1/Mixture-of-Thoughts` dataset to the local dire
 
 ### Configuration for DPO
 
-We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) for this experiment. Some important setups are listed in the following:
+We use the configurations in [`dpo.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) for this experiment. Some important setups are listed in the following:
 
 We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and pass the data path to the trainer.
 
@@ -105,7 +105,7 @@ For more configuration options, please refer to the {ref}`Configuration Guide <C
 
 ### Configuration for SFT
 
-We set the `algorithm_type` as `sft` to run SFT process and then modify the config file [`examples/sft_mot/sft.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml) with the following changes:
+We set the `algorithm_type` as `sft` to run SFT process and then modify the config file [`examples/sft_mot/sft.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml) with the following changes:
 
 ```yaml
 project: <project_name>

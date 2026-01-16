@@ -31,7 +31,7 @@ python trinity/common/workflows/envs/email_searcher/prepare_data.py
 
 ### 第二步：运行工作流
 
-配置文件位于 [`email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/email_search.yaml)。
+配置文件位于 [`email_search.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_email_search/email_search.yaml)。
 要运行此示例，可执行以下命令：
 
 ```bash

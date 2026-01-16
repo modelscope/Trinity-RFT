@@ -104,7 +104,7 @@ ray start --head
 - 对于 trainer，当 `trainer.use_dynamic_bsz=false` 时，调整 `trainer.max_token_len_per_gpu`；当 `trainer.use_dynamic_bsz=true` 时，调整 `trainer.ppo_max_token_len_per_gpu` 和 `trainer.ulysses_sequence_parallel_size`。设置 `trainer.trainer_config.actor_rollout_ref.actor.entropy_from_logits_with_chunking=true` 也可能有帮助。
 - 对于 explorer，调整 `explorer.rollout_model.tensor_parallel_size`。
 
-此外，Trinity-RFT 提供了[GPU 相关配置指南](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html)，可参考其中建议。
+此外，Trinity-RFT 提供了[GPU 相关配置指南](https://agentscope-ai.github.io/Trinity-RFT/en/main/tutorial/trinity_gpu_configs.html)，可参考其中建议。
 
 ## 第三部分：调试方法
 
@@ -209,4 +209,4 @@ model.load_state_dict(load_fsdp_state_dict_from_verl_checkpoint(ckp_path))
 - **Explorer 与 Trainer 分离**：Trinity-RFT 用独立 Explorer 模块替代 veRL 的 rollout model，专门负责 agent 与环境交互，支持更灵活的 workflow 设计和 rollout-training 调度。
 - **全生命周期数据通路**：Trinity-RFT 在 Explorer 和 Trainer 之间增加 Buffer 模块，提供完整的数据存储、处理和采样通路，支持经验回放、优先采样等高级数据处理策略。
 
-我们还提供了 Trinity-RFT 与 veRL 及其衍生系统（如 [rLLM](https://github.com/rllm-org/rllm)）的基准对比，详见 [Benchmark](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark)。
+我们还提供了 Trinity-RFT 与 veRL 及其衍生系统（如 [rLLM](https://github.com/rllm-org/rllm)）的基准对比，详见 [Benchmark](https://github.com/agentscope-ai/Trinity-RFT/tree/main/benchmark)。

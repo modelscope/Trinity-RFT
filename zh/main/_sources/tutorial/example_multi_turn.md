@@ -66,7 +66,7 @@ python examples/grpo_webshop/get_webshop_data.py
 
 ## 第二步：配置准备并运行实验
 
-你可以参考 [快速开始](./example_reasoning_basic.md) 来设置配置和其他内容。默认配置文件分别为 [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) 和 [`webshop.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml)。
+你可以参考 [快速开始](./example_reasoning_basic.md) 来设置配置和其他内容。默认配置文件分别为 [`alfworld.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) 和 [`webshop.yaml`](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml)。
 你可以适当修改配置并运行实验！
 
 ```bash
