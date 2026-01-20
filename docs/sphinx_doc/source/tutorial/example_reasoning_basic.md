@@ -117,6 +117,93 @@ Run the RFT process with the following command:
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
 
+## Optional: Convert Checkpoints to Hugging Face Format
+
+After running Trinity-RFT experiments, the system automatically saves training checkpoints to the following path:
+
+```
+${checkpoint_root_dir}/${project_name}/${name}
+```
+
+The directory structure is as follows:
+
+```
+${checkpoint_root_dir}/${project_name}/${name}
+├── buffer
+│   ├── experience_buffer.jsonl          # Stores experience data generated during training
+│   └── explorer_output.db               # Database file output by the Explorer module
+├── log                                  # Contains logs from multiple Ray Actors
+│   ├── checkpoint_monitor.log
+│   ├── explorer.log
+│   ├── explorer_experience_pipeline.log
+│   ├── explorer_runner_0.log  ...  explorer_runner_31.log
+│   ├── queue_experience_buffer.log
+│   └── synchronizer.log
+├── monitor                              # Monitoring-related files (may be empty)
+├── global_step_58                       # Example: Full checkpoint at step 58
+│   └── actor
+│       ├── huggingface                  # (Optional) Hugging Face formatted model files
+│       │   ├── added_tokens.json
+│       │   ├── chat_template.jinja
+│       │   ├── config.json
+│       │   ├── generation_config.json
+│       │   ├── merges.txt
+│       │   ├── model.safetensors        # ← Key model weights file
+│       │   ├── special_tokens_map.json
+│       │   ├── tokenizer.json
+│       │   ├── tokenizer_config.json
+│       │   └── vocab.json
+│       ├── extra_state_world_size_4_rank_0.pt  # Additional state (e.g., random seeds)
+│       ├── ...
+│       ├── fsdp_config.json             # FSDP configuration file
+│       ├── model_world_size_4_rank_0.pt ... model_world_size_4_rank_3.pt  # Sharded model parameters
+│       ├── optim_world_size_4_rank_0.pt ... optim_world_size_4_rank_3.pt  # Sharded optimizer states
+│       └── ...
+├── explorer_meta.json                   # Metadata for the Explorer module
+├── trainer_meta.json                    # Metadata for the Trainer module
+├── latest_checkpointed_iteration.txt    # Training step of the most recent full checkpoint
+└── latest_state_dict_iteration.txt      # Training step of the most recent model parameter save (used for checkpoint synchronization)
+```
+
+### When Is Conversion Needed?
+
+If you wish to use the model in **Hugging Face format** (e.g., for inference or deployment), but find that the `model.safetensors` file is **missing** from the `global_step_*/actor/huggingface/` directory, you need to manually perform the conversion.
+
+### Automatic Batch Conversion Feature
+
+The `trinity convert` command supports **recursively scanning** all `global_step_*` subdirectories under the specified directory and **automatically converting each checkpoint**. This means you don't need to manually specify each training step individually—just point to the project root directory to process all checkpoints in bulk.
+
+#### Basic Usage (Recommended)
+
+To convert **all saved checkpoints** to Hugging Face format, simply run:
+
+```bash
+trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name}
+```
+
+This command will:
+- Automatically locate all subdirectories matching the pattern `global_step_<number>`;
+- Convert the `actor` model within each subdirectory;
+- Save the resulting Hugging Face format files (including `model.safetensors`, etc.) into the corresponding `actor/huggingface/` directory.
+
+#### Special Case: Missing Base Model Configuration
+
+If a `global_step_*/actor/huggingface/` directory is **missing `config.json`** (typically because the full configuration wasn't saved during training), the conversion process requires the configuration file from the original base model. In this case, specify the base model path using `--base-model-dir`:
+
+```bash
+trinity convert \
+  --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name} \
+  --base-model-dir /path/to/your/base/model
+```
+
+> 💡 This parameter applies to **all scanned checkpoints**. If any checkpoint lacks `config.json`, you must provide this argument.
+
+### Notes
+
+- **Actor Model Only**: The current `trinity convert` command only processes model parameters in the `actor` folder and **does not handle `critic` models** (even if they exist). Converting Critic models requires separate operations.
+- **Automatic Training Format Detection**: `trinity convert` natively supports checkpoints from both **FSDP** and **Megatron** distributed training formats. **No additional parameters are required**—the tool automatically detects the format and correctly merges the sharded weights.
+- **Idempotency**: If a `global_step_*` checkpoint already contains a complete set of Hugging Face files (especially `model.safetensors`) in its `huggingface/` directory, the conversion will be skipped to avoid redundant processing.
+- **Performance Tip**: The conversion process can be time-consuming, especially when dealing with many checkpoints or large models. It's recommended to run this during off-peak hours.
 
 
 ## Optional: RFT with SFT Warmup
