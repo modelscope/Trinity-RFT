@@ -15,6 +15,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   trinity.manager.checkpoint_converter
    trinity.manager.config_manager
    trinity.manager.state_manager
    trinity.manager.synchronizer

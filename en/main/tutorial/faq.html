@@ -357,6 +357,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.trainer_config_manager.html">trinity.manager.config_registry.trainer_config_manager module</a></li>
 </ul>
 </details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.checkpoint_converter.html">trinity.manager.checkpoint_converter module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.config_manager.html">trinity.manager.config_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.state_manager.html">trinity.manager.state_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.synchronizer.html">trinity.manager.synchronizer module</a></li>
@@ -803,8 +804,14 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 </div>
 <hr class="docutils" />
 <p><strong>Q:</strong> How to load the checkpoints outside of the Trinity-RFT framework?</p>
-<p><strong>A:</strong> You need to specify model path and checkpoint path. The following code snippet gives an example with transformers.</p>
-<p>Here is an example of loading from fsdp trainer checkpoints:</p>
+<p><strong>A:</strong> Currently, two loading methods are supported:</p>
+<ol class="arabic simple">
+<li><p><strong>Recommended approach</strong>: Use the <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">convert</span></code> command to convert the original checkpoint into the standard Hugging Face format.
+After conversion, you can load and use it directly just like any ordinary Hugging Face model.
+For detailed instructions, please refer to the tutorial: <a class="reference external" href="https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html#optional-convert-checkpoints-to-hugging-face-format">Optional: Converting Checkpoints to Hugging Face Format</a></p></li>
+<li><p><strong>Direct loading (for actor checkpoints trained with FSDP)</strong>:
+If you prefer to load the checkpoint directly without converting its format, you can use the following code example:</p></li>
+</ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">AutoModelForCausalLM</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_fsdp_state_dict_from_verl_checkpoint</span>
