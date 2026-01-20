@@ -118,7 +118,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
 
 
-## 可选：将检查点转换为 Hugging Face 格式
+## 进阶选项：将检查点转换为 Hugging Face 格式
 
 在运行 Trinity-RFT 进行实验后，系统会自动将训练过程中的检查点（checkpoint）保存到以下路径：
 

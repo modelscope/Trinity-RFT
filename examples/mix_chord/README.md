@@ -56,49 +56,8 @@ trinity run --config examples/mix_chord/mix_chord_toolace.yaml
 
 It takes around 3 hours to run on 8 H20 GPUs.
 
-After the run, you may also want to convert the checkpoint to a Hugging Face checkpoint.
+After the run, you can use the `trinity convert` command to convert the original checkpoint into the standard Hugging Face format. For detailed instructions, please refer to the tutorial: [Optional: Converting Checkpoints to Hugging Face Format](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html#optional-convert-checkpoints-to-hugging-face-format)
 
-```python
-import os
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from trinity.common.models.utils import load_fsdp_state_dict_from_verl_checkpoint
-
-# The following variables are assumed to be predefined:
-# model_path, checkpoint_root_dir, project, name
-model = AutoModelForCausalLM.from_pretrained(model_path)
-ckp_path = os.path.join(checkpoint_root_dir, project, name, "global_step_100", "actor")
-state_dict = load_fsdp_state_dict_from_verl_checkpoint(ckp_path)
-model.load_state_dict(state_dict)
-output_dir = os.path.join(ckp_path, "huggingface")
-
-def save_to_huggingface_checkpoint(state_dict: dict, output_dir: str):
-    """Convert state dict to Hugging Face format and save it.
-
-    Args:
-        state_dict: The state dict loaded from the Verl checkpoint.
-        output_dir: The directory to save the Hugging Face checkpoint.
-    """
-    import os
-    import torch
-    from transformers import PreTrainedModel
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Convert state dict keys to Hugging Face format if needed
-    hf_state_dict = {}
-    for key, value in state_dict.items():
-        # Add any key mapping logic here if needed
-        # Example:
-        # if key.startswith("model."):
-        #     new_key = key.replace("model.", "")
-        #     hf_state_dict[new_key] = value
-        # else:
-        #     hf_state_dict[key] = value
-        hf_state_dict[key] = value
-    torch.save(hf_state_dict, os.path.join(output_dir, "pytorch_model.bin"))
-
-save_to_huggingface_checkpoint(state_dict, output_dir)
-```
 
 ## Evaluate the Trained Model on BFCL
 
