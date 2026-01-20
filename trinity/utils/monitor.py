@@ -47,11 +47,15 @@ def gather_metrics(
     try:
         df = pd.DataFrame(metric_list)
         numeric_df = df.select_dtypes(include=[np.number])
-        stats_df = numeric_df.agg(output_stats)
         metric = {}
-        for col in stats_df.columns:
-            for stats in output_stats:
-                metric[f"{prefix}/{col}/{stats}"] = stats_df.loc[stats, col].item()
+        for col in numeric_df.columns:
+            # Skip the columns that are already aggregated
+            if "std" in col.lower() or "mean" in col.lower():
+                metric[f"{prefix}/{col}"] = numeric_df[col].mean()
+            else:
+                stats_df = numeric_df[[col]].agg(output_stats)
+                for stats in output_stats:
+                    metric[f"{prefix}/{col}/{stats}"] = stats_df.loc[stats, col].item()
         return metric
     except Exception as e:
         raise ValueError(f"Failed to gather metrics: {e}") from e
