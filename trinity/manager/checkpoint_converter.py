@@ -1,6 +1,6 @@
-
 import os
 from typing import Optional
+
 from trinity.utils.log import get_logger
 
 
@@ -25,8 +25,7 @@ class Converter:
             self.base_model, _ = self._get_config_and_empty_model(self.base_model_dir)
         except Exception:
             self.logger.error(
-                f"Failed to initialize base model from {self.base_model_dir}",
-                exc_info=True
+                f"Failed to initialize base model from {self.base_model_dir}", exc_info=True
             )
             return False
         return True
@@ -127,7 +126,7 @@ class Converter:
                     auto_model_cls.from_pretrained(huggingface_dir)
                 except Exception:
                     self.logger.debug(
-                        f"Incomplete or invalid Hugging Face checkpoint in {huggingface_dir}, will re-convert.", 
+                        f"Incomplete or invalid Hugging Face checkpoint in {huggingface_dir}, will re-convert.",
                         exc_info=True,
                     )
                     has_hf_checkpoint = False

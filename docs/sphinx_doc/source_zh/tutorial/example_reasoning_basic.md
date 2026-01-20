@@ -123,13 +123,13 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 在运行 Trinity-RFT 进行实验后，系统会自动将训练过程中的检查点（checkpoint）保存到以下路径：
 
 ```
-${checkpoint_root_dir}/${project_name}/${name}
+${checkpoint_root_dir}/${project}/${name}
 ```
 
 该目录的结构如下：
 
 ```
-${checkpoint_root_dir}/${project_name}/${name}
+${checkpoint_root_dir}/${project}/${name}
 ├── buffer
 │   ├── experience_buffer.jsonl          # 存储训练过程中生成的经验数据
 │   └── explorer_output.db               # Explorer 模块输出的数据库文件
@@ -170,30 +170,39 @@ ${checkpoint_root_dir}/${project_name}/${name}
 
 如果你希望使用 **Hugging Face 格式** 的模型（例如用于推理或部署），但发现 `global_step_*/actor/huggingface/` 目录中 **缺少 `model.safetensors` 文件**，就需要手动执行转换。
 
-### 自动批量转换功能
+### 转换工具：`trinity convert`
 
-`trinity convert` 命令支持**递归扫描**指定目录下的所有 `global_step_*` 子文件夹，并**自动为每个检查点执行转换**。这意味着你无需逐一手动指定每个训练步，只需指向项目根目录即可完成批量处理。
+`trinity convert` 命令提供了灵活的模型转换功能，支持以下几种使用方式：
 
-#### 基本用法（推荐）
-
-如果你希望将 **所有已保存的检查点** 转换为 Hugging Face 格式，直接运行：
+#### ✅ 批量转换（推荐）
+将 `--checkpoint-dir` 指向项目根目录（即包含多个 `global_step_*` 子目录的路径），工具会**自动递归查找所有 `global_step_*` 目录**，并对每个检查点执行转换。
 
 ```bash
-trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name}
+trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project}/${name}
 ```
 
 该命令会：
-- 自动查找目录下所有形如 `global_step_数字` 的子文件夹；
-- 对每个子文件夹中的 `actor` 模型执行转换；
+- 自动识别所有形如 `global_step_数字` 的子目录；
+- 对每个子目录中的 `actor` 模型进行转换；
 - 将生成的 Hugging Face 格式文件（包括 `model.safetensors` 等）保存到对应的 `actor/huggingface/` 目录中。
 
-#### 特殊情况：缺少基础模型配置
+#### ✅ 单步转换
+如果只想转换某一个特定训练步的模型，可直接将 `--checkpoint-dir` 指向对应的 `global_step_XXX` 文件夹：
 
-如果某个 `global_step_*/actor/huggingface/` 目录中 **缺少 `config.json`**（通常是因为训练时未保存完整配置），转换过程需要原始基础模型的配置文件。此时，请通过 `--base-model-dir` 指定基础模型路径：
+```bash
+trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project}/${name}/global_step_120
+```
+
+#### ✅ 路径容错
+即使你指定了 `global_step_XXX` 内部的子路径（例如 `.../global_step_120/actor`），工具也能智能识别并正确完成转换，无需严格对齐到 `global_step_XXX` 层级。
+
+### 特殊情况：缺少基础模型配置
+
+如果某个 `global_step_*/actor/huggingface/` 目录中 **缺少 `config.json`**（通常是因为训练时未完整保存配置），转换过程需要原始基础模型的配置文件。此时，请通过 `--base-model-dir` 指定基础模型路径：
 
 ```bash
 trinity convert \
-  --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name} \
+  --checkpoint-dir ${checkpoint_root_dir}/${project}/${name} \
   --base-model-dir /path/to/your/base/model
 ```
 

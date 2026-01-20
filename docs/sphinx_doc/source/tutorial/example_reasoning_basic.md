@@ -122,13 +122,13 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 After running Trinity-RFT experiments, the system automatically saves training checkpoints to the following path:
 
 ```
-${checkpoint_root_dir}/${project_name}/${name}
+${checkpoint_root_dir}/${project}/${name}
 ```
 
 The directory structure is as follows:
 
 ```
-${checkpoint_root_dir}/${project_name}/${name}
+${checkpoint_root_dir}/${project}/${name}
 ├── buffer
 │   ├── experience_buffer.jsonl          # Stores experience data generated during training
 │   └── explorer_output.db               # Database file output by the Explorer module
@@ -169,30 +169,39 @@ ${checkpoint_root_dir}/${project_name}/${name}
 
 If you wish to use the model in **Hugging Face format** (e.g., for inference or deployment), but find that the `model.safetensors` file is **missing** from the `global_step_*/actor/huggingface/` directory, you need to manually perform the conversion.
 
-### Automatic Batch Conversion Feature
+### Conversion Tool: `trinity convert`
 
-The `trinity convert` command supports **recursively scanning** all `global_step_*` subdirectories under the specified directory and **automatically converting each checkpoint**. This means you don't need to manually specify each training step individually—just point to the project root directory to process all checkpoints in bulk.
+The `trinity convert` command provides flexible model conversion capabilities and supports the following usage patterns:
 
-#### Basic Usage (Recommended)
-
-To convert **all saved checkpoints** to Hugging Face format, simply run:
+#### ✅ Batch Conversion (Recommended)
+Point `--checkpoint-dir` to your project root directory (i.e., the path containing multiple `global_step_*` subdirectories). The tool will **automatically recursively scan for all `global_step_*` directories** and convert each checkpoint accordingly.
 
 ```bash
-trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name}
+trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project}/${name}
 ```
 
 This command will:
-- Automatically locate all subdirectories matching the pattern `global_step_<number>`;
+- Automatically detect all subdirectories matching the pattern `global_step_<number>`;
 - Convert the `actor` model within each subdirectory;
-- Save the resulting Hugging Face format files (including `model.safetensors`, etc.) into the corresponding `actor/huggingface/` directory.
+- Save the resulting Hugging Face–formatted files (including `model.safetensors`, etc.) into the corresponding `actor/huggingface/` subdirectory.
 
-#### Special Case: Missing Base Model Configuration
+#### ✅ Single-step Conversion
+If you only want to convert a model from a specific training step, directly point `--checkpoint-dir` to the corresponding `global_step_XXX` folder:
 
-If a `global_step_*/actor/huggingface/` directory is **missing `config.json`** (typically because the full configuration wasn't saved during training), the conversion process requires the configuration file from the original base model. In this case, specify the base model path using `--base-model-dir`:
+```bash
+trinity convert --checkpoint-dir ${checkpoint_root_dir}/${project}/${name}/global_step_120
+```
+
+#### ✅ Path Tolerance
+Even if you specify a subpath inside a `global_step_XXX` directory (e.g., `.../global_step_120/actor`), the tool can intelligently recognize the correct context and complete the conversion successfully—no need to strictly align the path to the `global_step_XXX` level.
+
+### Special Case: Missing Base Model Configuration
+
+If a `config.json` file is **missing** from any `global_step_*/actor/huggingface/` directory (typically because the configuration wasn't fully saved during training), the conversion process requires the original base model's configuration. In this case, use `--base-model-dir` to specify the path to your base model:
 
 ```bash
 trinity convert \
-  --checkpoint-dir ${checkpoint_root_dir}/${project_name}/${name} \
+  --checkpoint-dir ${checkpoint_root_dir}/${project}/${name} \
   --base-model-dir /path/to/your/base/model
 ```
 
