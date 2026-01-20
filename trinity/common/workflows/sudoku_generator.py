@@ -3,72 +3,73 @@ import random
 
 class SudokuGenerator:
     """
-    Lightweight Sudoku generator.
+    Sudoku puzzle generator inspired by standard backtracking-based generators.
 
-    This generator avoids relying on a single canonical solution by applying
-    randomized transformations to a solved grid before removing values to
-    create a puzzle. The difficulty is controlled by the number of removed
-    cells (holes).
-
+    - Generates a fresh solved Sudoku board using backtracking
+    - Removes cells based on difficulty (number of empty cells)
+    - Avoids relying on a single canonical solution
     """
 
-    BASE_SOLUTION = [
-        [5, 3, 4, 6, 7, 8, 9, 1, 2],
-        [6, 7, 2, 1, 9, 5, 3, 4, 8],
-        [1, 9, 8, 3, 4, 2, 5, 6, 7],
-        [8, 5, 9, 7, 6, 1, 4, 2, 3],
-        [4, 2, 6, 8, 5, 3, 7, 9, 1],
-        [7, 1, 3, 9, 2, 4, 8, 5, 6],
-        [9, 6, 1, 5, 3, 7, 2, 8, 4],
-        [2, 8, 7, 4, 1, 9, 6, 3, 5],
-        [3, 4, 5, 2, 8, 6, 1, 7, 9],
-    ]
+    def generate(self, difficulty="medium"):
+        holes_map = {
+            "easy": 30,
+            "medium": 40,
+            "hard": 50,
+        }
+        holes = holes_map.get(difficulty, 40)
 
-    def _shuffle_solution(self, board):
-        """
-        Randomize a solved Sudoku grid while preserving validity.
+        board = [[0 for _ in range(9)] for _ in range(9)]
+        self._fill_board(board)
 
-        This follows common Sudoku generation techniques:
-        - permuting numbers
-        - shuffling rows
-        - shuffling columns
-        """
-        board = [row[:] for row in board]
+        solution = [row[:] for row in board]
+        self._remove_cells(board, holes)
 
-        # Shuffle numbers 1–9
-        numbers = list(range(1, 10))
-        shuffled_numbers = numbers[:]
-        random.shuffle(shuffled_numbers)
-        mapping = dict(zip(numbers, shuffled_numbers))
-        board = [[mapping[v] for v in row] for row in board]
+        return board, solution
 
-        # Shuffle rows
-        random.shuffle(board)
+    def _fill_board(self, board):
+        empty = self._find_empty(board)
+        if not empty:
+            return True
 
-        # Shuffle columns
-        board = list(map(list, zip(*board)))
-        random.shuffle(board)
-        board = list(map(list, zip(*board)))
+        r, c = empty
+        nums = list(range(1, 10))
+        random.shuffle(nums)
 
-        return board
+        for v in nums:
+            if self._is_valid(board, r, c, v):
+                board[r][c] = v
+                if self._fill_board(board):
+                    return True
+                board[r][c] = 0
 
-    def generate(self, holes=40):
-        """
-        Generate a Sudoku puzzle.
+        return False
 
-        Args:
-            holes (int): Number of empty cells (0s) in the puzzle.
-                         Larger values correspond to higher difficulty.
+    def _find_empty(self, board):
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] == 0:
+                    return i, j
+        return None
 
-        Returns:
-            tuple: (puzzle, solution)
-        """
-        solution = self._shuffle_solution(self.BASE_SOLUTION)
-        puzzle = [row[:] for row in solution]
+    def _is_valid(self, board, r, c, v):
+        if v in board[r]:
+            return False
 
-        for _ in range(holes):
-            r = random.randint(0, 8)
-            c = random.randint(0, 8)
-            puzzle[r][c] = 0
+        if v in [board[i][c] for i in range(9)]:
+            return False
 
-        return puzzle, solution
+        br, bc = (r // 3) * 3, (c // 3) * 3
+        for i in range(br, br + 3):
+            for j in range(bc, bc + 3):
+                if board[i][j] == v:
+                    return False
+
+        return True
+
+    def _remove_cells(self, board, holes):
+        cells = [(i, j) for i in range(9) for j in range(9)]
+        random.shuffle(cells)
+
+        for i in range(min(holes, 81)):
+            r, c = cells[i]
+            board[r][c] = 0
