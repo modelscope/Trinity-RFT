@@ -69,7 +69,7 @@ def gather_eval_metrics(
         for col in numeric_df.columns:
             # Skip the columns that are already aggregated
             key_words = ["std", "mean", "min", "max"]
-            if any(col.endswith(key_word) for key_word in key_words):
+            if any(key_word in col.lower() for key_word in key_words):
                 metric[f"{prefix}/{col}"] = numeric_df[col].mean()
             else:
                 stats_df = numeric_df[[col]].agg(output_stats)
