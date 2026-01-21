@@ -1,13 +1,23 @@
+import math
+
+
 class SudokuJudge:
     """
     Judge Sudoku board state.
-    - Checks row validity
-    - Checks column validity
-    - Checks 3x3 block validity
+
+    - Supports both 9x9 and 4x4 Sudoku boards
+    - Allows incomplete boards (zeros are treated as empty cells)
+    - Checks:
+        * Row validity
+        * Column validity
+        * Sub-grid validity (3x3 for 9x9, 2x2 for 4x4)
     """
 
     @staticmethod
     def is_valid(board):
+        size = len(board)
+        block = int(math.sqrt(size))
+
         # Check rows
         for row in board:
             nums = [v for v in row if v != 0]
@@ -15,21 +25,21 @@ class SudokuJudge:
                 return False
 
         # Check columns
-        for col in range(9):
+        for c in range(size):
             nums = []
-            for row in range(9):
-                v = board[row][col]
+            for r in range(size):
+                v = board[r][c]
                 if v != 0:
                     nums.append(v)
             if len(nums) != len(set(nums)):
                 return False
 
-        # Check 3x3 sub-grids
-        for br in range(0, 9, 3):
-            for bc in range(0, 9, 3):
+        # Check sub-grids
+        for br in range(0, size, block):
+            for bc in range(0, size, block):
                 nums = []
-                for r in range(br, br + 3):
-                    for c in range(bc, bc + 3):
+                for r in range(br, br + block):
+                    for c in range(bc, bc + block):
                         v = board[r][c]
                         if v != 0:
                             nums.append(v)

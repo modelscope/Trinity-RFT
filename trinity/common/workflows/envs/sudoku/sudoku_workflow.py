@@ -6,11 +6,22 @@ from .sudoku_judge import SudokuJudge
 
 
 class SudokuWorkflow(Workflow):
+    """
+    Agentic multi-step Sudoku solving workflow.
+
+    The workflow:
+    - Presents the current Sudoku board to the model
+    - Allows the model to propose multiple moves per step
+    - Applies moves incrementally and validates them
+    - Terminates on success, invalid action, or step limit
+    """
+
     can_reset = True
 
     def __init__(self, task, model, auxiliary_models=None):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
 
+        # Load puzzle from task if provided, otherwise generate a new one
         if "puzzle" in task.raw_task and "solution" in task.raw_task:
             self.board = [row[:] for row in task.raw_task["puzzle"]]
             self.solution = [row[:] for row in task.raw_task["solution"]]
@@ -19,14 +30,20 @@ class SudokuWorkflow(Workflow):
             self.board, self.solution = generator.generate()
 
         self.judge = SudokuJudge()
+
+        # Workflow configuration
         self.max_steps = 20
         self.max_moves_per_step = 5
 
+        # Runtime state
         self.current_step = 0
         self.last_board = None
         self.last_action = None
 
     def reset(self, task):
+        """
+        Reset workflow state for a new task instance.
+        """
         self.board = [row[:] for row in task.raw_task["puzzle"]]
         self.solution = [row[:] for row in task.raw_task["solution"]]
         self.current_step = 0
@@ -34,9 +51,19 @@ class SudokuWorkflow(Workflow):
         self.last_action = None
 
     def render_board(self):
+        """
+        Render the board into a human-readable string format
+        for inclusion in the prompt.
+        """
         return "\n".join(" ".join(str(v) for v in row) for row in self.board)
 
     def _build_prompt(self):
+        """
+        Build a step-aware prompt describing:
+        - Sudoku rules
+        - Current board state
+        - Allowed action format
+        """
         prompt = (
             "You are playing a Sudoku game.\n\n"
             "Rules:\n"
@@ -58,6 +85,7 @@ class SudokuWorkflow(Workflow):
             f"Current board:\n{self.render_board()}\n"
         )
 
+        # Feedback when the previous step made no progress
         if self.last_board is not None and self.board == self.last_board:
             prompt += (
                 "\nYour previous response was invalid or had no effect. "
@@ -67,6 +95,13 @@ class SudokuWorkflow(Workflow):
         return prompt
 
     def parse_action(self, text):
+        """
+        Parse model output into a list of (row, col, value) moves.
+
+        Expected format:
+            row col value
+            row col value
+        """
         lines = text.strip().splitlines()
         actions = []
 
@@ -74,15 +109,19 @@ class SudokuWorkflow(Workflow):
             line = line.strip()
             if not line:
                 continue
+
             parts = line.split()
             if len(parts) != 3:
                 return None
+
             try:
                 r, c, v = map(int, parts)
             except ValueError:
                 return None
+
             if not (0 <= r <= 8 and 0 <= c <= 8 and 1 <= v <= 9):
                 return None
+
             actions.append((r, c, v))
 
         if not actions or len(actions) > self.max_moves_per_step:
@@ -91,6 +130,12 @@ class SudokuWorkflow(Workflow):
         return actions
 
     def run(self):
+        """
+        Execute the Sudoku workflow until:
+        - The puzzle is solved
+        - An invalid action is produced
+        - The maximum number of steps is reached
+        """
         experiences = []
 
         for _ in range(self.max_steps):
@@ -98,6 +143,7 @@ class SudokuWorkflow(Workflow):
             responses = self.model.chat([{"role": "user", "content": prompt}])
             resp = responses[0]
 
+            # Snapshot board to detect no-op steps
             self.last_board = [row[:] for row in self.board]
 
             actions = self.parse_action(resp.response_text)
@@ -122,6 +168,7 @@ class SudokuWorkflow(Workflow):
                 self.board[r][c] = v
                 board_changed = True
 
+            # Invalid or ineffective step
             if invalid_move or not board_changed or not self.judge.is_valid(self.board):
                 experiences.append(
                     Experience(
@@ -133,6 +180,7 @@ class SudokuWorkflow(Workflow):
                 )
                 break
 
+            # Solved successfully
             if self.judge.is_solved(self.board, self.solution):
                 experiences.append(
                     Experience(
@@ -144,6 +192,7 @@ class SudokuWorkflow(Workflow):
                 )
                 break
 
+            # Intermediate step
             experiences.append(
                 Experience(
                     tokens=resp.tokens,
