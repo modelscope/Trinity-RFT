@@ -455,6 +455,11 @@ class ModelWrapper:
         return self._model_name
 
     @property
+    def model_config(self) -> InferenceModelConfig:
+        """Get the model config."""
+        return self.config
+
+    @property
     def generate_kwargs(self) -> Dict[str, Any]:
         """Get the generation kwargs for openai client."""
         return self._generate_kwargs
