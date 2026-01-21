@@ -1341,7 +1341,7 @@ class TestTrainerLoRA(BaseTrainerCase):
             self.assertGreater(len(gsm8k_metrics), 0, f"{prefix}/gsm8k metrics not found")
             # mean@k, std@k
             for eval_stats in ["mean", "std"]:
-                k = 4
+                k = 8
                 metric_name = f"{prefix}/gsm8k/accuracy/{eval_stats}@{k}"
                 metric_steps = parser.metric_steps(metric_name)
                 self.assertEqual(metric_steps, [0, 2])
