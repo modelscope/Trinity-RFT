@@ -30,7 +30,7 @@ from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
-from trinity.utils.monitor import MONITOR, gather_metrics
+from trinity.utils.monitor import MONITOR, gather_eval_metrics, gather_metrics
 from trinity.utils.plugin_loader import load_plugins
 from trinity.utils.timer import Timer
 
@@ -431,10 +431,8 @@ class Explorer:
             statuses, _ = await self.scheduler.get_results(batch_id=f"{step}/{eval_task_name}")
             metric[f"{prefix}/{eval_task_name}/finished_task_count"] = len(statuses)
             metric.update(
-                gather_metrics(
-                    [status.metrics[0] for status in statuses],
-                    f"{prefix}/{eval_task_name}",
-                    output_stats=["mean", "std"],
+                gather_eval_metrics(
+                    [status.metrics[0] for status in statuses], f"{prefix}/{eval_task_name}"
                 )
             )
         if self.eval_start_time is not None:

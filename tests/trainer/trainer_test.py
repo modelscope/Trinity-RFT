@@ -166,7 +166,14 @@ class TestTrainerCountdown(BaseTrainerCase):
             for taskset_name in ["countdown", "copy_countdown"]:
                 metrics = parser.metric_list(f"{prefix}/{taskset_name}")
                 self.assertGreater(len(metrics), 0, f"{prefix}/{taskset_name} metrics not found")
-                for eval_stats in ["mean", "best", "worst"]:
+                # mean@k, std@k
+                for eval_stats in ["mean", "std"]:
+                    k = 4
+                    metric_name = f"{prefix}/{taskset_name}/score/{eval_stats}@{k}"
+                    metric_steps = parser.metric_steps(metric_name)
+                    self.assertEqual(metric_steps, [0, 4, 8])
+                # best@k/mean, best@k/std, worst@k/mean, worst@k/std
+                for eval_stats in ["best", "worst"]:
                     for k in [2, 4]:
                         for stats in ["mean", "std"]:
                             metric_name = f"{prefix}/{taskset_name}/score/{eval_stats}@{k}/{stats}"
@@ -1332,7 +1339,14 @@ class TestTrainerLoRA(BaseTrainerCase):
         for prefix in ["eval", "bench"]:
             gsm8k_metrics = parser.metric_list(f"{prefix}/gsm8k")
             self.assertGreater(len(gsm8k_metrics), 0, f"{prefix}/gsm8k metrics not found")
-            for eval_stats in ["mean", "best", "worst"]:
+            # mean@k, std@k
+            for eval_stats in ["mean", "std"]:
+                k = 4
+                metric_name = f"{prefix}/gsm8k/accuracy/{eval_stats}@{k}"
+                metric_steps = parser.metric_steps(metric_name)
+                self.assertEqual(metric_steps, [0, 2])
+            # best@k/mean, best@k/std, worst@k/mean, worst@k/std
+            for eval_stats in ["best", "worst"]:
                 for k in [2, 4, 8]:
                     for stats in ["mean", "std"]:
                         metric_name = f"{prefix}/gsm8k/accuracy/{eval_stats}@{k}/{stats}"

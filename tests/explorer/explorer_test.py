@@ -69,10 +69,18 @@ class TestExplorerCountdownEval(BaseExplorerCase):
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
         self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
         for eval_taskset, k_list in zip(eval_tasksets, [[1], [2, 4, 6], [2, 4, 8, 10]]):
-            for eval_stats in ["mean", "best", "worst"]:
+            metric_name = "score" if eval_taskset.name == "countdown" else "accuracy"
+            for eval_stats in ["mean", "std"]:
+                k = k_list[-1]
+                self.assertIn(
+                    f"eval/{eval_taskset.name}/{metric_name}/{eval_stats}@{k}",
+                    eval_metrics,
+                )
+            for eval_stats in ["best", "worst"]:
                 for k in k_list:
+                    if k == 1:
+                        continue
                     for stats in ["mean", "std"]:
-                        metric_name = "score" if eval_taskset.name == "countdown" else "accuracy"
                         self.assertIn(
                             f"eval/{eval_taskset.name}/{metric_name}/{eval_stats}@{k}/{stats}",
                             eval_metrics,
