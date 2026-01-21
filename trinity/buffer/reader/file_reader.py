@@ -79,7 +79,14 @@ class _HFBatchReader:
         batch = []
         for i in indices:
             assert 0 <= i < self.dataset_size
+            if self.current_offset >= self.total_samples:
+                if not self.drop_last and len(batch) > 0:
+                    break
+                self.progress_bar.close()
+                raise StopIteration
             batch.append(self.dataset[int(i)])
+            self.current_offset += 1
+
         self.progress_bar.update(len(batch))  # update progress bar
         return batch
 
@@ -110,9 +117,9 @@ class FileReader(BaseFileReader):
     def load_state_dict(self, state_dict):
         return self.reader.load_state_dict(state_dict)
 
-    def update(self, **pipeline_metrics: dict):
+    def feedback(self, **pipeline_metrics):
         if self.reader.selector is not None:
-            self.reader.selector.update(**pipeline_metrics)
+            self.reader.selector.feedback(**pipeline_metrics)
 
     def __len__(self):
         return self.reader.__len__()
@@ -210,8 +217,7 @@ class TaskFileReader(BaseFileReader):
     def load_state_dict(self, state_dict):
         if self.selector is not None:
             self.selector.load_state_dict(state_dict)
-        else:
-            self.dataset.current_offset = state_dict["current_index"]
+        self.dataset.current_offset = state_dict["current_index"]
 
     def __len__(self):
         return self.dataset.dataset_size

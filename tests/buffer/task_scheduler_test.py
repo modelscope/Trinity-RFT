@@ -340,7 +340,7 @@ class TestTaskScheduler(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(task_scheduler_state), 1)
         self.assertEqual(task_scheduler_state[0]["current_index"], 4)
         # no effect
-        task_scheduler.update({"metric1": 0.5})
+        task_scheduler.feedback({"metric1": 0.5})
 
         task_scheduler = get_taskset_scheduler(
             {

@@ -411,7 +411,7 @@ class Explorer:
                 batch_id=step, min_num=self.min_wait_num
             )
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
-        self.taskset.update(pipeline_metrics)
+        self.taskset.feedback(pipeline_metrics)
         metric.update(pipeline_metrics)
         if statuses:
             metric.update(gather_metrics([status.metrics[0] for status in statuses], "rollout"))

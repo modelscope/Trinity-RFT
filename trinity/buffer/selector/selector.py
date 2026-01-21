@@ -44,7 +44,7 @@ class BaseSelector:
         """
         raise NotImplementedError
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         """
         Update internal state based on feedback (e.g., model loss, accuracy).
 
@@ -95,7 +95,7 @@ class SequentialSelector(BaseSelector):
             return list(range(start, end))
         return list(range(start, self.dataset_size)) + list(range(0, end - self.dataset_size))
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # No-op: sequential selection doesn't adapt based on feedback
         pass
 
@@ -150,7 +150,7 @@ class ShuffleSelector(BaseSelector):
         self.current_index += batch_size
         return ret
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # No-op: static shuffling does not adapt
         pass
 
@@ -188,7 +188,7 @@ class RandomSelector(BaseSelector):
         else:
             return selected_indices
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # No-op: basic random selection doesn't adapt
         pass
 
@@ -239,7 +239,7 @@ class OfflineEasy2HardSelector(BaseSelector):
         self.dataset_size = data_source.dataset_size
         self.current_index = 0
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # No-op: this selector does not adapt based on runtime feedback
         pass
 
@@ -340,7 +340,7 @@ class DifficultyBasedSelector(BaseSelector):
             adaptive_rho=adaptive_rho,
         )
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         """
         Updates the difficulty estimator with observed performance on selected samples.
 

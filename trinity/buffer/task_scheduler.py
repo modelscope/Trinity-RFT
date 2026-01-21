@@ -47,7 +47,7 @@ class TasksetSchedulerBase:
         """
         raise NotImplementedError
 
-    def update(self, pipeline_metrics: Dict) -> None:
+    def feedback(self, pipeline_metrics: Dict) -> None:
         """Update selectors using feedback from the training pipeline."""
         raise NotImplementedError
 
@@ -79,7 +79,7 @@ class SimpleTasksetScheduler(TasksetSchedulerBase):
     def state_dict(self) -> List[Dict]:
         return [self.reader.state_dict()]
 
-    def update(self, pipeline_metrics: Dict) -> None:
+    def feedback(self, pipeline_metrics: Dict) -> None:
         # do nothing here
         return
 
@@ -236,7 +236,7 @@ class TasksetScheduler(TasksetSchedulerBase):
         """
         return [taskset.state_dict() for taskset in self.tasksets]
 
-    def update(self, pipeline_metrics: Dict) -> None:
+    def feedback(self, pipeline_metrics: Dict) -> None:
         """
         Update selectors in tasksets using feedback from the training pipeline.
 
@@ -259,4 +259,4 @@ class TasksetScheduler(TasksetSchedulerBase):
         selector_metric = pipeline_metrics.pop(SELECTOR_METRIC, {})
         for taskset_id, taskset_kwargs in selector_metric.items():
             taskset = self.tasksets[taskset_id]
-            taskset.update(**taskset_kwargs)
+            taskset.feedback(**taskset_kwargs)
