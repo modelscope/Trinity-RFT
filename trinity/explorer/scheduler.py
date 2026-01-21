@@ -100,9 +100,9 @@ def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str
 
             n_values = len(values)
             result[f"{key}/mean@{n_values}"] = np.mean(values)
+            result[f"{key}/std@{n_values}"] = np.std(values)
 
             if n_values > 1:
-                result[f"{key}/std@{n_values}"] = np.std(values)
                 ns = []
                 n = 2
                 while n < n_values:
