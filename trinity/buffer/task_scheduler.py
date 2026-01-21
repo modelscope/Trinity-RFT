@@ -2,12 +2,12 @@
 """The taskset scheduler."""
 
 from collections import Counter
+from copy import deepcopy
 from typing import Dict, List
 
 import numpy as np
 
 from trinity.buffer.buffer import get_buffer_reader
-from trinity.buffer.selector import SELECTORS
 from trinity.common.config import Config
 from trinity.common.constants import SELECTOR_METRIC
 from trinity.utils.annotations import Experimental
@@ -68,8 +68,10 @@ class SimpleTasksetScheduler(TasksetSchedulerBase):
         index = self.explorer_state.get("taskset_states", [{"current_index": 0}])[0].get(
             "current_index", 0
         )
-        self.config.buffer.explorer_input.tasksets[0].index = index
-        self.reader = get_buffer_reader(config.buffer.explorer_input.tasksets[0])
+        taskset_config = deepcopy(self.config.buffer.explorer_input.tasksets[0])
+        taskset_config.index = index
+        taskset_config.task_selector = None  # disable selection
+        self.reader = get_buffer_reader(taskset_config)
 
     async def read_async(self) -> List:
         return await self.reader.read_async()
@@ -127,7 +129,6 @@ class TasksetScheduler(TasksetSchedulerBase):
             "taskset_states", [{"current_index": 0}] * len(taskset_configs)
         )
         self.tasksets = []
-        self.selectors = []
         for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config)
@@ -136,15 +137,8 @@ class TasksetScheduler(TasksetSchedulerBase):
                     f"Taskset '{taskset_config.name}' has an unsupported type '{type(taskset).__name__}'."
                     f"Currently, only 'FileReader' is supported by TasksetScheduler."
                 )
-
-            # Create selector based on type specified in config (e.g., 'sequential', 'shuffle')
-            selector = SELECTORS.get(taskset_config.task_selector.selector_type)(
-                taskset.reader.dataset, taskset_config.task_selector
-            )
-            selector.load_state_dict(taskset_state)  # Restore any prior state
-
+            taskset.load_state_dict(taskset_state)  # Restore any prior state
             self.tasksets.append(taskset)
-            self.selectors.append(selector)
 
         # Each explorer step calls read_async once → track step globally
         self.step = explorer_state.get("latest_iteration", 0)
@@ -224,8 +218,7 @@ class TasksetScheduler(TasksetSchedulerBase):
         counter = Counter(taskset_ids)
         batch = []
         for taskset_id, count in counter.items():
-            indices = self.selectors[taskset_id].get_indices(batch_size=count)
-            tasks = await self.tasksets[taskset_id].read_with_indices_async(indices)
+            tasks = await self.tasksets[taskset_id].read_async(batch_size=count)
             # Annotate each task with its origin
             for task in tasks:
                 task.index["taskset_id"] = taskset_id
@@ -239,13 +232,13 @@ class TasksetScheduler(TasksetSchedulerBase):
         Save persistent state for checkpointing.
 
         Returns:
-            List[Dict]: State dicts for all selectors (one per taskset)
+            List[Dict]: State dicts for all tasksets
         """
-        return [selector.state_dict() for selector in self.selectors]
+        return [taskset.state_dict() for taskset in self.tasksets]
 
     def update(self, pipeline_metrics: Dict) -> None:
         """
-        Update selectors using feedback from the training pipeline.
+        Update selectors in tasksets using feedback from the training pipeline.
 
         Expected format:
             pipeline_metrics = {
@@ -265,5 +258,5 @@ class TasksetScheduler(TasksetSchedulerBase):
             return
         selector_metric = pipeline_metrics.pop(SELECTOR_METRIC, {})
         for taskset_id, taskset_kwargs in selector_metric.items():
-            selector = self.selectors[taskset_id]
-            selector.update(**taskset_kwargs)
+            taskset = self.tasksets[taskset_id]
+            taskset.update(**taskset_kwargs)

@@ -104,19 +104,15 @@ class FileReader(BaseFileReader):
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         return self.reader.read(batch_size)
 
-    def read_with_indices(self, indices: List[int]) -> List:
-        """Read tasks with indices."""
-        return self.reader.read_with_indices(indices)
-
-    async def read_with_indices_async(self, indices: List[int]) -> List:
-        """Read tasks with indices asynchronously."""
-        return await self.reader.read_with_indices_async(indices)
-
     def state_dict(self):
         return self.reader.state_dict()
 
     def load_state_dict(self, state_dict):
         return self.reader.load_state_dict(state_dict)
+
+    def update(self, **pipeline_metrics: dict):
+        if self.reader.selector is not None:
+            self.reader.selector.update(**pipeline_metrics)
 
     def __len__(self):
         return self.reader.__len__()
@@ -139,6 +135,7 @@ class ExperienceFileReader(BaseFileReader):
             total_steps=config.total_steps,
             enable_progress_bar=config.enable_progress_bar,
         )
+        self.selector = None
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         samples, _ = self.dataset.read_batch(batch_size or self.read_batch_size)
@@ -178,6 +175,15 @@ class TaskFileReader(BaseFileReader):
             enable_progress_bar=self.config.enable_progress_bar,
         )
         self.formatter = FORMATTER.get("task")(config)
+        if self.config.task_selector is not None:
+            from trinity.buffer.selector import SELECTORS
+            from trinity.buffer.selector.selector import BaseSelector
+
+            self.selector: BaseSelector = SELECTORS.get(self.config.task_selector.selector_type)(
+                self.dataset, self.config.task_selector
+            )
+        else:
+            self.selector = None
 
     def _get_tasks(self, samples: List, indices: List) -> List:
         tasks = []
@@ -189,23 +195,23 @@ class TaskFileReader(BaseFileReader):
 
     def read(self, batch_size: Optional[int] = None, **kwargs) -> List:
         batch_size = batch_size or self.read_batch_size
-        samples, indices = self.dataset.read_batch(batch_size)
+        if self.selector is not None:
+            indices = self.selector.get_indices(batch_size)
+            samples = self.dataset.select_batch(indices)
+        else:
+            samples, indices = self.dataset.read_batch(batch_size)
         return self._get_tasks(samples, indices)
-
-    def read_with_indices(self, indices: List[int]) -> List:
-        """Read tasks with indices."""
-        samples = self.dataset.select_batch(indices)
-        return self._get_tasks(samples, indices)
-
-    async def read_with_indices_async(self, indices: List[int]) -> List:
-        """Read tasks with indices asynchronously."""
-        return self.read_with_indices(indices)
 
     def state_dict(self):
+        if self.selector is not None:
+            return self.selector.state_dict()
         return {"current_index": self.dataset.current_offset}
 
     def load_state_dict(self, state_dict):
-        self.dataset.current_offset = state_dict["current_index"]
+        if self.selector is not None:
+            self.selector.load_state_dict(state_dict)
+        else:
+            self.dataset.current_offset = state_dict["current_index"]
 
     def __len__(self):
         return self.dataset.dataset_size
