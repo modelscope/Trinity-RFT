@@ -1055,9 +1055,9 @@ document.write(`
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-<div class="viewcode-block" id="BaseSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.BaseSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update internal state based on feedback (e.g., model loss, accuracy).</span>
 
@@ -1124,9 +1124,9 @@ document.write(`
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span><span class="p">))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="SequentialSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SequentialSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.SequentialSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: sequential selection doesn&#39;t adapt based on feedback</span>
         <span class="k">pass</span></div>
 
@@ -1197,9 +1197,9 @@ document.write(`
         <span class="k">return</span> <span class="n">ret</span></div>
 
 
-<div class="viewcode-block" id="ShuffleSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ShuffleSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.ShuffleSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: static shuffling does not adapt</span>
         <span class="k">pass</span></div>
 
@@ -1253,9 +1253,9 @@ document.write(`
             <span class="k">return</span> <span class="n">selected_indices</span></div>
 
 
-<div class="viewcode-block" id="RandomSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="RandomSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.RandomSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: basic random selection doesn&#39;t adapt</span>
         <span class="k">pass</span></div>
 
@@ -1319,9 +1319,9 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="OfflineEasy2HardSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="OfflineEasy2HardSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.OfflineEasy2HardSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># No-op: this selector does not adapt based on runtime feedback</span>
         <span class="k">pass</span></div>
 
@@ -1441,9 +1441,9 @@ document.write(`
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="DifficultyBasedSelector.update">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.update">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DifficultyBasedSelector.feedback">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.selector.selector.html#trinity.buffer.selector.DifficultyBasedSelector.feedback">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the difficulty estimator with observed performance on selected samples.</span>
 

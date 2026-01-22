@@ -625,10 +625,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader"><code class="docutils literal notranslate"><span class="pre">FileReader</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.__init__"><code class="docutils literal notranslate"><span class="pre">FileReader.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read"><code class="docutils literal notranslate"><span class="pre">FileReader.read()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices"><code class="docutils literal notranslate"><span class="pre">FileReader.read_with_indices()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices_async"><code class="docutils literal notranslate"><span class="pre">FileReader.read_with_indices_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.state_dict"><code class="docutils literal notranslate"><span class="pre">FileReader.state_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.load_state_dict"><code class="docutils literal notranslate"><span class="pre">FileReader.load_state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.feedback"><code class="docutils literal notranslate"><span class="pre">FileReader.feedback()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.ExperienceFileReader"><code class="docutils literal notranslate"><span class="pre">ExperienceFileReader</span></code></a><ul class="nav section-nav flex-column">
@@ -641,8 +640,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader"><code class="docutils literal notranslate"><span class="pre">TaskFileReader</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.__init__"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read_with_indices()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices_async"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read_with_indices_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.state_dict"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.state_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.load_state_dict"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.load_state_dict()</span></code></a></li>
 </ul>
@@ -711,18 +708,6 @@ document.write(`
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.FileReader.read_with_indices">
-<span class="sig-name descname"><span class="pre">read_with_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#FileReader.read_with_indices"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices" title="Link to this definition">#</a></dt>
-<dd><p>Read tasks with indices.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.FileReader.read_with_indices_async">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_with_indices_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#FileReader.read_with_indices_async"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices_async" title="Link to this definition">#</a></dt>
-<dd><p>Read tasks with indices asynchronously.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.FileReader.state_dict">
 <span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#FileReader.state_dict"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.FileReader.state_dict" title="Link to this definition">#</a></dt>
 <dd><p>Return the state of the reader as a dict.
@@ -735,6 +720,11 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.FileReader.load_state_dict">
 <span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#FileReader.load_state_dict"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.FileReader.load_state_dict" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.FileReader.feedback">
+<span class="sig-name descname"><span class="pre">feedback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pipeline_metrics</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#FileReader.feedback"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.FileReader.feedback" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -786,18 +776,6 @@ document.write(`
 <dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.TaskFileReader.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#TaskFileReader.read"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.TaskFileReader.read" title="Link to this definition">#</a></dt>
 <dd><p>Read from buffer.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices">
-<span class="sig-name descname"><span class="pre">read_with_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#TaskFileReader.read_with_indices"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices" title="Link to this definition">#</a></dt>
-<dd><p>Read tasks with indices.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices_async">
-<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_with_indices_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/reader/file_reader.html#TaskFileReader.read_with_indices_async"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices_async" title="Link to this definition">#</a></dt>
-<dd><p>Read tasks with indices asynchronously.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -877,10 +855,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader"><code class="docutils literal notranslate"><span class="pre">FileReader</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.__init__"><code class="docutils literal notranslate"><span class="pre">FileReader.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read"><code class="docutils literal notranslate"><span class="pre">FileReader.read()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices"><code class="docutils literal notranslate"><span class="pre">FileReader.read_with_indices()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.read_with_indices_async"><code class="docutils literal notranslate"><span class="pre">FileReader.read_with_indices_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.state_dict"><code class="docutils literal notranslate"><span class="pre">FileReader.state_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.load_state_dict"><code class="docutils literal notranslate"><span class="pre">FileReader.load_state_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.FileReader.feedback"><code class="docutils literal notranslate"><span class="pre">FileReader.feedback()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.ExperienceFileReader"><code class="docutils literal notranslate"><span class="pre">ExperienceFileReader</span></code></a><ul class="nav section-nav flex-column">
@@ -893,8 +870,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader"><code class="docutils literal notranslate"><span class="pre">TaskFileReader</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.__init__"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read_with_indices()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.read_with_indices_async"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.read_with_indices_async()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.state_dict"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.state_dict()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.buffer.reader.file_reader.TaskFileReader.load_state_dict"><code class="docutils literal notranslate"><span class="pre">TaskFileReader.load_state_dict()</span></code></a></li>
 </ul>

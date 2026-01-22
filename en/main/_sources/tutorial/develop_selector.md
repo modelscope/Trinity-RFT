@@ -51,7 +51,7 @@ To create a new selector, inherit from `BaseSelector` and implement the followin
 | Method | Purpose |
 |-------|--------|
 | `get_indices(batch_size: int, return_extra_info=False) -> List[int]` | Return a list of sample indices to read next. |
-| `update(indices: List[int], values: List[float])` | Update internal state using feedback (e.g., rewards, losses). |
+| `feedback(indices: List[int], values: List[float])` | Update internal state using feedback (e.g., rewards, losses). |
 | `state_dict() -> Dict` | Serialize current state for checkpointing. |
 | `load_state_dict(state_dict: Dict)` | Restore state from a saved dictionary. |
 
@@ -113,7 +113,7 @@ class DifficultyBasedSelector(BaseSelector):
         else:
             return selected_indices
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # Update difficulty model with observed rewards
         self.diff_estimator.update(indices, values)
 

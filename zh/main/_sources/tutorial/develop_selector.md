@@ -49,7 +49,7 @@
 | 方法 | 功能说明 |
 |------|---------|
 | `get_indices(batch_size: int, return_extra_info=False) -> List[int]` | 返回接下来要读取的样本索引列表。 |
-| `update(indices: List[int], values: List[float])` | 使用反馈信息（如奖励、损失）更新内部状态，用于自适应调整。 |
+| `feedback(indices: List[int], values: List[float])` | 使用反馈信息（如奖励、损失）更新内部状态，用于自适应调整。 |
 | `state_dict() -> Dict` | 序列化当前状态，用于保存检查点。 |
 | `load_state_dict(state_dict: Dict)` | 从保存的状态字典中恢复选择器状态。 |
 
@@ -111,7 +111,7 @@ class DifficultyBasedSelector(BaseSelector):
         else:
             return selected_indices
 
-    def update(self, indices: List[int], values: List[float]) -> None:
+    def feedback(self, indices: List[int], values: List[float]) -> None:
         # 使用观测到的奖励更新难度模型
         self.diff_estimator.update(indices, values)
 

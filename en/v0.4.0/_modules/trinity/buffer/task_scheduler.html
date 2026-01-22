@@ -1017,12 +1017,12 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;The taskset scheduler.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.selector</span><span class="w"> </span><span class="kn">import</span> <span class="n">SELECTORS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SELECTOR_METRIC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experimental</span>
@@ -1076,9 +1076,9 @@ document.write(`
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-<div class="viewcode-block" id="TasksetSchedulerBase.update">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="TasksetSchedulerBase.feedback">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetSchedulerBase.feedback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update selectors using feedback from the training pipeline.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </div>
@@ -1105,8 +1105,10 @@ document.write(`
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;taskset_states&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="s2">&quot;current_index&quot;</span><span class="p">,</span> <span class="mi">0</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+        <span class="n">taskset_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">taskset_config</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># disable selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">taskset_config</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SimpleTasksetScheduler.read_async">
@@ -1121,9 +1123,9 @@ document.write(`
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()]</span></div>
 
 
-<div class="viewcode-block" id="SimpleTasksetScheduler.update">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleTasksetScheduler.feedback">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.SimpleTasksetScheduler.feedback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># do nothing here</span>
         <span class="k">return</span></div>
 </div>
@@ -1179,7 +1181,6 @@ document.write(`
             <span class="s2">&quot;taskset_states&quot;</span><span class="p">,</span> <span class="p">[{</span><span class="s2">&quot;current_index&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">taskset_configs</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">taskset_config</span><span class="p">,</span> <span class="n">taskset_state</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">taskset_configs</span><span class="p">,</span> <span class="n">taskset_states</span><span class="p">):</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">taskset_config</span><span class="o">.</span><span class="n">is_eval</span>  <span class="c1"># assume drop last</span>
             <span class="n">taskset</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">taskset_config</span><span class="p">)</span>
@@ -1188,15 +1189,8 @@ document.write(`
                     <span class="sa">f</span><span class="s2">&quot;Taskset &#39;</span><span class="si">{</span><span class="n">taskset_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; has an unsupported type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">taskset</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;Currently, only &#39;FileReader&#39; is supported by TasksetScheduler.&quot;</span>
                 <span class="p">)</span>
-
-            <span class="c1"># Create selector based on type specified in config (e.g., &#39;sequential&#39;, &#39;shuffle&#39;)</span>
-            <span class="n">selector</span> <span class="o">=</span> <span class="n">SELECTORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span><span class="o">.</span><span class="n">selector_type</span><span class="p">)(</span>
-                <span class="n">taskset</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">taskset_config</span><span class="o">.</span><span class="n">task_selector</span>
-            <span class="p">)</span>
-            <span class="n">selector</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">taskset_state</span><span class="p">)</span>  <span class="c1"># Restore any prior state</span>
-
+            <span class="n">taskset</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">taskset_state</span><span class="p">)</span>  <span class="c1"># Restore any prior state</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">taskset</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
 
         <span class="c1"># Each explorer step calls read_async once → track step globally</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">explorer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;latest_iteration&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -1282,8 +1276,7 @@ document.write(`
         <span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">taskset_ids</span><span class="p">)</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">taskset_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counter</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_indices</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
-            <span class="n">tasks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span><span class="o">.</span><span class="n">read_with_indices_async</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span><span class="o">.</span><span class="n">read_async</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
             <span class="c1"># Annotate each task with its origin</span>
             <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
                 <span class="n">task</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="s2">&quot;taskset_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">taskset_id</span>
@@ -1300,16 +1293,16 @@ document.write(`
 <span class="sd">        Save persistent state for checkpointing.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List[Dict]: State dicts for all selectors (one per taskset)</span>
+<span class="sd">            List[Dict]: State dicts for all tasksets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">selector</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">selector</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">taskset</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">taskset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="TasksetScheduler.update">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetScheduler.update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="TasksetScheduler.feedback">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.task_scheduler.html#trinity.buffer.task_scheduler.TasksetScheduler.feedback">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update selectors using feedback from the training pipeline.</span>
+<span class="sd">        Update selectors in tasksets using feedback from the training pipeline.</span>
 
 <span class="sd">        Expected format:</span>
 <span class="sd">            pipeline_metrics = {</span>
@@ -1329,8 +1322,8 @@ document.write(`
             <span class="k">return</span>
         <span class="n">selector_metric</span> <span class="o">=</span> <span class="n">pipeline_metrics</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">SELECTOR_METRIC</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">for</span> <span class="n">taskset_id</span><span class="p">,</span> <span class="n">taskset_kwargs</span> <span class="ow">in</span> <span class="n">selector_metric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectors</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span>
-            <span class="n">selector</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">taskset_kwargs</span><span class="p">)</span></div>
+            <span class="n">taskset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasksets</span><span class="p">[</span><span class="n">taskset_id</span><span class="p">]</span>
+            <span class="n">taskset</span><span class="o">.</span><span class="n">feedback</span><span class="p">(</span><span class="o">**</span><span class="n">taskset_kwargs</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

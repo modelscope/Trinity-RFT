@@ -735,7 +735,7 @@ document.write(`
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_indices(batch_size:</span> <span class="pre">int,</span> <span class="pre">return_extra_info=False)</span> <span class="pre">-&gt;</span> <span class="pre">List[int]</span></code></p></td>
 <td><p>返回接下来要读取的样本索引列表。</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">update(indices:</span> <span class="pre">List[int],</span> <span class="pre">values:</span> <span class="pre">List[float])</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">feedback(indices:</span> <span class="pre">List[int],</span> <span class="pre">values:</span> <span class="pre">List[float])</span></code></p></td>
 <td><p>使用反馈信息（如奖励、损失）更新内部状态，用于自适应调整。</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">state_dict()</span> <span class="pre">-&gt;</span> <span class="pre">Dict</span></code></p></td>
@@ -804,7 +804,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">selected_indices</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># 使用观测到的奖励更新难度模型</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diff_estimator</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
 
