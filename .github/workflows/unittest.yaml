@@ -59,10 +59,6 @@ jobs:
           MODULE=$(echo "$COMMENT" | sed -n 's/\/unittest-module-\(.*\)/\1/p')
           echo "type=module" >> $GITHUB_OUTPUT
           echo "module=$MODULE" >> $GITHUB_OUTPUT
-        elif [[ "$COMMENT" =~ ^/unittest-submodule-(.+)$ ]]; then
-          SUBMODULE=$(echo "$COMMENT" | sed -n 's/\/unittest-submodule-\(.*\)/\1/p')
-          echo "type=submodule" >> $GITHUB_OUTPUT
-          echo "submodule=$SUBMODULE" >> $GITHUB_OUTPUT
         else
           echo "type=all" >> $GITHUB_OUTPUT
         fi
@@ -100,21 +96,6 @@ jobs:
             docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest tests/$MODULE -v -s --ctrf report.json"
           else
             echo "No module specified, skipping tests."
-            echo "tests_run=false" >> $GITHUB_ENV
-          fi
-        elif [ "$TYPE" = "submodule" ]; then
-          SUBMODULE="${{ steps.test_type.outputs.submodule }}"
-          if [ -n "$SUBMODULE" ]; then
-            # Remove whitespace and .py extension, and convert last hyphen to slash
-            SUBMODULE=$(echo "$SUBMODULE" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/\.py$//')
-            if [[ "$SUBMODULE" == *-* ]]; then
-              SUBMODULE="${SUBMODULE%-*}/${SUBMODULE##*-}"
-            fi
-            TEST_FILE="tests/$SUBMODULE"
-            echo "tests_run=true" >> $GITHUB_ENV
-            docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest $TEST_FILE -v -s --ctrf report.json"
-          else
-            echo "No submodule specified, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV
           fi
         fi
