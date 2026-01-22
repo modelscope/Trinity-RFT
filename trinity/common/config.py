@@ -746,6 +746,8 @@ class MonitorConfig:
     monitor_type: str = "tensorboard"
     # the default args for monitor
     monitor_args: Optional[Dict] = None
+    # whether to return detailed stats (mean, std, max, min) for evaluation metrics
+    detailed_stats: bool = False
     # whether to enable ray timeline profile
     # the output file will be saved to `cache_dir/timeline.json`
     enable_ray_timeline: bool = False

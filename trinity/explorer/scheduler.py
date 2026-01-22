@@ -114,14 +114,8 @@ def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str
                     [(bon_mean, bon_std), (won_mean, won_std)] = bootstrap_metric(
                         data=values, subset_size=n, reduce_fns=[np.max, np.min], seed=42
                     )
-                    result[f"{key}/best@{n}/mean"], result[f"{key}/best@{n}/std"] = (
-                        bon_mean,
-                        bon_std,
-                    )
-                    result[f"{key}/worst@{n}/mean"], result[f"{key}/worst@{n}/std"] = (
-                        won_mean,
-                        won_std,
-                    )
+                    result[f"{key}/best@{n}"] = bon_mean
+                    result[f"{key}/worst@{n}"] = won_mean
         return result
     else:
         return {
