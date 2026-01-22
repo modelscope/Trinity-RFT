@@ -105,8 +105,11 @@ jobs:
         elif [ "$TYPE" = "submodule" ]; then
           SUBMODULE="${{ steps.test_type.outputs.submodule }}"
           if [ -n "$SUBMODULE" ]; then
-            # Normalize path: remove whitespace and .py extension
+            # Remove whitespace and .py extension, and convert last hyphen to slash
             SUBMODULE=$(echo "$SUBMODULE" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/\.py$//')
+            if [[ "$SUBMODULE" == *-* ]]; then
+              SUBMODULE="${SUBMODULE%-*}/${SUBMODULE##*-}"
+            fi
             TEST_FILE="tests/$SUBMODULE"
             echo "tests_run=true" >> $GITHUB_ENV
             docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest $TEST_FILE -v -s --ctrf report.json"
