@@ -18,24 +18,70 @@ from trinity.utils.lora_utils import create_dummy_lora
 
 
 class ConfigValidator(ABC):
+    """Abstract base class for configuration validators.
+
+    Each validator is responsible for checking and potentially modifying specific
+    aspects of the global configuration to ensure validity, set defaults, or handle
+    deprecated settings.
+    """
+
     def __init__(self):
         self.logger = get_logger(__name__)
 
     @abstractmethod
     def validate(self, config: Config) -> None:
+        """Validate and potentially modify the given configuration.
+
+        Args:
+            config: The global configuration object to validate and modify.
+        """
         pass
 
 
 class DeprecatedConfigValidator(ConfigValidator):
+    """Validator for handling deprecated configuration options.
+
+    Issues warnings when deprecated configuration parameters are used and suggests
+    their replacements.
+    """
+
     def validate(self, config: Config) -> None:
+        """Check for deprecated configuration options and issue warnings.
+
+        Specifically checks for the deprecated `explorer.runner_num` parameter
+        and recommends using `explorer.runner_per_model` instead.
+
+        Args:
+            config: The global configuration object to validate.
+        """
         if config.explorer.runner_num is not None:
             self.logger.warning(
-                "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
+                "`explorer.runner_num` is deprecated, "
+                "please use `explorer.runner_per_model` instead."
             )
 
 
 class GlobalConfigValidator(ConfigValidator):
+    """Validator for global configuration settings.
+
+    Handles validation of the main operating mode, sets up checkpoint directories,
+    and configures logging paths. Manages experiment naming conflicts by appending
+    timestamps to avoid overwriting existing experiments.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate global configuration settings and set up directory structure.
+
+        - Validates that the mode is one of the supported values
+        - Creates absolute checkpoint paths and handles experiment naming conflicts
+        - Sets up the log directory path
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If an invalid mode is specified.
+        """
         # check mode
         if config.mode not in ["explore", "train", "both", "bench", "serve"]:
             raise ValueError(f"Invalid mode: {config.mode}")
@@ -53,7 +99,8 @@ class GlobalConfigValidator(ConfigValidator):
         ):
             if config.mode == "bench":
                 self.logger.warning(
-                    "For bench mode, `continue_from_checkpoint` is set as `true` to enable using existing checkpoints."
+                    "For bench mode, `continue_from_checkpoint` is set as `true` "
+                    "to enable using existing checkpoints."
                 )
                 config.continue_from_checkpoint = True
             else:
@@ -71,7 +118,28 @@ class GlobalConfigValidator(ConfigValidator):
 
 
 class RayClusterConfigValidator(ConfigValidator):
+    """Validator for Ray cluster configuration.
+
+    Handles Ray cluster setup including namespace configuration, automatic detection
+    of cluster resources (node count and GPUs per node), and GPU allocation validation
+    based on the current operating mode and model requirements.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure Ray cluster settings.
+
+        - Sets the Ray namespace if not provided
+        - Skips validation if Tinker is enabled
+        - Automatically detects cluster information if not provided
+        - Validates GPU allocation based on mode and model requirements
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            RuntimeError: If no alive nodes are found in the Ray cluster.
+            ValueError: If GPU allocation requirements cannot be satisfied.
+        """
         # set namespace
         if config.ray_namespace is None or len(config.ray_namespace) == 0:
             config.ray_namespace = f"{config.project}/{config.name}"
@@ -85,6 +153,17 @@ class RayClusterConfigValidator(ConfigValidator):
         self._set_gpu_allocation_info(config)
 
     def _set_cluster_info(self, config: Config) -> None:
+        """Automatically detect and set cluster node and GPU information.
+
+        Initializes Ray if not already initialized, queries the cluster for
+        alive nodes and available GPUs, then sets the configuration accordingly.
+
+        Args:
+            config: The global configuration object to modify.
+
+        Raises:
+            RuntimeError: If no alive nodes are found in the Ray cluster.
+        """
         # init ray cluster to detect node_num and gpu_per_node
         was_initialized = ray.is_initialized()
         if not was_initialized:
@@ -119,6 +198,18 @@ class RayClusterConfigValidator(ConfigValidator):
             ray.shutdown()
 
     def _set_gpu_allocation_info(self, config: Config) -> None:
+        """Calculate and validate GPU allocation for explorer and trainer components.
+
+        Computes GPU requirements based on model configurations and validates that
+        the total available GPUs are sufficient for the requested allocation.
+
+        Args:
+            config: The global configuration object to modify.
+
+        Raises:
+            ValueError: If GPU allocation requirements cannot be satisfied based on
+                       the current mode and available resources.
+        """
         cluster = config.cluster
         if config.mode != "train":
             cluster.rollout_gpu_num = (
@@ -162,7 +253,26 @@ class RayClusterConfigValidator(ConfigValidator):
 
 
 class AlgorithmConfigValidator(ConfigValidator):
+    """Validator for algorithm-specific configuration.
+
+    Handles algorithm type validation, sets default configuration parameters,
+    validates function registry entries, and manages deprecated optimizer settings.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure algorithm-specific settings.
+
+        - Validates the algorithm type and runs algorithm-specific validation
+        - Sets default configuration values for various algorithm components
+        - Validates and configures function registry entries (loss functions, etc.)
+        - Handles deprecated optimizer configuration parameters
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If invalid algorithm types or function names are specified.
+        """
         from trinity.algorithm import (
             ADVANTAGE_FN,
             ALGORITHM_TYPE,
@@ -214,7 +324,27 @@ class AlgorithmConfigValidator(ConfigValidator):
 
 
 class ModelConfigValidator(ConfigValidator):
+    """Validator for model configuration settings.
+
+    Handles model path validation, chat template loading, Tinker-specific validation,
+    and model length parameter validation including prompt/response token limits.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure model-specific settings.
+
+        - Sets critic model path to actor model path if not specified
+        - Loads chat templates from file if path is provided
+        - Validates Tinker-specific configuration if enabled
+        - Validates and sets model length parameters (max_model_len, max_prompt_tokens, etc.)
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If chat template file cannot be read, model length constraints
+                       are violated, or Tinker configuration is invalid.
+        """
         model = config.model
         if not model.critic_model_path:
             model.critic_model_path = model.model_path
@@ -236,6 +366,21 @@ class ModelConfigValidator(ConfigValidator):
         self._check_model_len(config)
 
     def _check_tinker(self, config: Config) -> None:
+        """Validate Tinker-specific configuration settings.
+
+        - Validates that critic models are not used with Tinker
+        - Checks that the model is supported by the Tinker service
+        - Issues warnings about entropy coefficient recommendations
+        - Forces engine types to 'tinker' for all components
+        - Disables NCCL synchronization for Tinker
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If critic models are used with Tinker or if the model
+                       is not supported by the Tinker service.
+        """
         model = config.model
         from trinity.algorithm import ALGORITHM_TYPE
 
@@ -282,6 +427,19 @@ class ModelConfigValidator(ConfigValidator):
             )
 
     def _check_model_len(self, config: Config) -> None:
+        """Validate and set model length configuration parameters.
+
+        Ensures that max_model_len, max_prompt_tokens, and max_response_tokens
+        are properly configured and consistent with each other. Sets defaults
+        when values are missing and validates constraints.
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If model length constraints cannot be satisfied or
+                       if required parameters are missing.
+        """
         model = config.model
         # if all three are set, check if they are valid
         if (
@@ -291,8 +449,10 @@ class ModelConfigValidator(ConfigValidator):
         ):
             if model.max_prompt_tokens + model.max_response_tokens > model.max_model_len:
                 raise ValueError(
-                    f"`max_prompt_tokens` + `max_response_tokens` ({model.max_prompt_tokens} + {model.max_response_tokens}) "
-                    f"exceeds `max_model_len` ({model.max_model_len}). Please adjust them accordingly."
+                    "`max_prompt_tokens` + `max_response_tokens` "
+                    f"({model.max_prompt_tokens} + {model.max_response_tokens}) "
+                    f"exceeds `max_model_len` ({model.max_model_len}). "
+                    "Please adjust them accordingly."
                 )
 
         # check max_model_len first
@@ -300,7 +460,8 @@ class ModelConfigValidator(ConfigValidator):
             if model.max_prompt_tokens is not None and model.max_response_tokens is not None:
                 model.max_model_len = model.max_prompt_tokens + model.max_response_tokens
                 self.logger.warning(
-                    f"`max_model_len` is set to {model.max_model_len} from `max_prompt_tokens` and `max_response_tokens`."
+                    f"`max_model_len` is set to {model.max_model_len} from "
+                    "`max_prompt_tokens` and `max_response_tokens`."
                 )
             else:
                 raise ValueError("Unable to determine `max_model_len`, please set it manually.")
@@ -311,7 +472,8 @@ class ModelConfigValidator(ConfigValidator):
             model.max_prompt_tokens = model.max_model_len // 2
             model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
             self.logger.warning(
-                f"`max_prompt_tokens` and `max_response_tokens` are not set, set to {model.max_prompt_tokens} and {model.max_response_tokens} respectively."
+                "`max_prompt_tokens` and `max_response_tokens` are not set, "
+                f"set to {model.max_prompt_tokens} and {model.max_response_tokens} respectively."
             )
 
         # only max_prompt_tokens is None
@@ -319,7 +481,8 @@ class ModelConfigValidator(ConfigValidator):
             model.max_response_tokens = min(model.max_response_tokens, model.max_model_len - 1)
             model.max_prompt_tokens = model.max_model_len - model.max_response_tokens
             self.logger.warning(
-                f"`max_prompt_tokens` is set to {model.max_prompt_tokens}, `max_response_tokens` is set to {model.max_response_tokens}."
+                f"`max_prompt_tokens` is set to {model.max_prompt_tokens}, "
+                f"`max_response_tokens` is set to {model.max_response_tokens}."
             )
 
         # only max_response_tokens is None
@@ -327,7 +490,8 @@ class ModelConfigValidator(ConfigValidator):
             model.max_prompt_tokens = min(model.max_prompt_tokens, model.max_model_len - 1)
             model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
             self.logger.warning(
-                f"`max_response_tokens` is set to {model.max_response_tokens}, `max_prompt_tokens` is set to {model.max_prompt_tokens}."
+                f"`max_response_tokens` is set to {model.max_response_tokens}, "
+                f"`max_prompt_tokens` is set to {model.max_prompt_tokens}."
             )
 
         if model.min_response_tokens >= model.max_response_tokens:  # type: ignore [operator]
@@ -337,19 +501,45 @@ class ModelConfigValidator(ConfigValidator):
         if model.enable_prompt_truncation is True:
             if model.max_prompt_tokens is None:
                 raise ValueError(
-                    "When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly. This function does not work with OpenAI API mode."
+                    "When `model.enable_prompt_truncation` is True, "
+                    "`model.max_prompt_tokens` must be set properly. "
+                    "This function does not work with OpenAI API mode."
                 )
             self.logger.warning(
-                f"`enable_prompt_truncation` is set to True; the prompt will be truncated to `max_prompt_tokens`={model.max_prompt_tokens} tokens if it is too long."
+                "`enable_prompt_truncation` is set to True; the prompt will be"
+                f" truncated to `max_prompt_tokens`={model.max_prompt_tokens} "
+                "tokens if it is too long."
             )
         else:
             self.logger.warning(
-                "`enable_prompt_truncation` is set to False; please make sure the prompt is not too long and `max_model_len` is large enough, otherwise prompt length + response length may exceed `max_model_len`!"
+                "`enable_prompt_truncation` is set to False; please make sure "
+                "the prompt is not too long and `max_model_len` is large enough, "
+                "otherwise prompt length + response length may exceed `max_model_len`!"
             )
 
 
 class ExplorerConfigValidator(ConfigValidator):
+    """Validator for explorer configuration settings.
+
+    Handles rollout model configuration inheritance, auxiliary model validation,
+    over-rollout ratio validation, and LoRA configuration processing.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure explorer-specific settings.
+
+        - Inherits model configuration from the global model config to rollout models
+        - Validates auxiliary model configurations
+        - Validates over-rollout ratio settings and compatibility with sync style
+        - Processes LoRA configurations including dummy LoRA creation
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If auxiliary models lack model paths, over-rollout ratio
+                       is invalid, or multiple LoRA adapters are configured.
+        """
         if config.explorer is None:
             return
 
@@ -390,6 +580,19 @@ class ExplorerConfigValidator(ConfigValidator):
         self._validate_lora(config)
 
     def _validate_lora(self, config: Config) -> None:
+        """Process and validate LoRA configuration settings.
+
+        - Enables LoRA for rollout models when LoRA configs are provided
+        - Validates that only one LoRA adapter is supported
+        - Creates dummy LoRA adapters when no path is provided
+        - Configures LoRA modules and kwargs for the rollout model
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If more than one LoRA adapter is configured.
+        """
         # for lora configs
         if not config.model.tinker.enable and config.model.lora_configs is not None:
             config.explorer.rollout_model.enable_lora = True
@@ -434,25 +637,59 @@ class ExplorerConfigValidator(ConfigValidator):
 
 
 class SynchronizerConfigValidator(ConfigValidator):
+    """Validator for synchronizer configuration settings.
+
+    Handles synchronizer namespace configuration and validates NCCL synchronization
+    compatibility with different modes and features.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure synchronizer settings.
+
+        - Sets the Ray namespace for the synchronizer
+        - Sets the explorer world size based on rollout GPU count
+        - Disables NCCL synchronization for incompatible modes and features
+
+        Args:
+            config: The global configuration object to validate.
+        """
         config.synchronizer.ray_namespace = config.ray_namespace
         config.synchronizer.explorer_world_size = config.cluster.rollout_gpu_num
         if config.synchronizer.sync_method == SyncMethod.NCCL:
             if config.mode in ["train", "explore", "bench", "serve"]:
                 config.synchronizer.sync_method = SyncMethod.CHECKPOINT
                 self.logger.warning(
-                    f"`{config.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                    f"`{config.mode}` mode does not support NCCL synchronization, "
+                    "set `synchronizer.sync_method` to `checkpoint`."
                 )
             if config.model.lora_configs is not None:
                 config.synchronizer.sync_method = SyncMethod.CHECKPOINT
                 self.logger.warning(
-                    "LoRA is not supported with NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                    "LoRA is not supported with NCCL synchronization, "
+                    "set `synchronizer.sync_method` to `checkpoint`."
                 )
 
 
 class IntervalConfigValidator(ConfigValidator):
+    """Validator for interval configuration settings.
+
+    Validates synchronization and evaluation intervals, ensuring that evaluation
+    intervals are multiples of synchronization intervals when applicable.
+    """
+
     def validate(self, config: Config) -> None:
-        assert config.synchronizer.sync_interval > 0
+        """Validate interval configuration settings.
+
+        - Ensures synchronization interval is positive
+        - Adjusts evaluation interval to be a multiple of sync interval when needed
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            AssertionError: If synchronization interval is not positive.
+        """
+        assert config.synchronizer.sync_interval > 0, "`sync_interval` must be positive."
 
         if config.mode != "bench" and config.algorithm.algorithm_type != "dpo":  # TODO
             # check eval_interval
@@ -461,12 +698,30 @@ class IntervalConfigValidator(ConfigValidator):
                     max(config.explorer.eval_interval // config.synchronizer.sync_interval, 1)
                 ) * config.synchronizer.sync_interval
                 self.logger.warning(
-                    f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={config.explorer.eval_interval}."
+                    "`eval_interval` is not a multiple of `sync_interval`; "
+                    f"adjusted to the nearest integer={config.explorer.eval_interval}."
                 )
 
 
 class MonitorConfigValidator(ConfigValidator):
+    """Validator for monitor configuration settings.
+
+    Validates monitor type, sets default arguments, and configures monitor cache directory.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure monitor settings.
+
+        - Validates that the monitor type is supported
+        - Sets default monitor arguments if not provided
+        - Creates the monitor cache directory
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If an invalid monitor type is specified.
+        """
         from trinity.utils.monitor import MONITOR
 
         monitor_cls = MONITOR.get(config.monitor.monitor_type)
@@ -485,13 +740,36 @@ class MonitorConfigValidator(ConfigValidator):
 
 
 class BufferConfigValidator(ConfigValidator):
+    """Validator for buffer configuration settings.
+
+    Handles train batch size validation, buffer directory setup, tokenizer configuration,
+    and comprehensive validation of explorer/trainer input configurations including
+    tasksets, experience buffers, and data pipelines.
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure buffer settings.
+
+        - Sets train batch size based on mode and algorithm configuration
+        - Creates buffer cache directory
+        - Configures pad token ID using tokenizer
+        - Validates explorer input configurations (tasksets, selectors)
+        - Validates trainer input configurations (experience buffers, auxiliary buffers)
+        - Validates data processor pipeline configurations
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If required buffer configurations are missing or invalid.
+            RuntimeError: If buffer directory creation fails.
+        """
         # check train_batch_size
         if not config.buffer.train_batch_size:
             if config.mode == "train" or config.algorithm.algorithm_type in ["sft", "dpo"]:
                 raise ValueError(
-                    "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "
-                    "'sft' or 'dpo'"
+                    "`buffer.train_batch_size` is required when `mode` is 'train' "
+                    "or `algorithm.algorithm_type` is 'sft' or 'dpo'"
                 )
             self.logger.info(
                 "`buffer.train_batch_size` is set to `buffer.batch_size` * `algorithm.repeat_times`"
@@ -535,6 +813,18 @@ class BufferConfigValidator(ConfigValidator):
         self._check_data_processor(config)
 
     def _check_explorer_input(self, config: Config):
+        """Validate explorer input configuration including tasksets and selectors.
+
+        - Handles taskset vs tasksets configuration
+        - Validates that at least one taskset is provided in non-bench modes
+        - Configures taskset defaults and validates selectors
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If taskset configuration is invalid or selectors are unsupported.
+        """
         from trinity.buffer.selector import SELECTORS
 
         if config.mode in {"train", "serve"}:
@@ -568,8 +858,8 @@ class BufferConfigValidator(ConfigValidator):
                 if taskset.repeat_times != config.algorithm.repeat_times:
                     taskset.repeat_times = config.algorithm.repeat_times
                     self.logger.info(
-                        "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
-                        f" (={config.algorithm.repeat_times})."
+                        "`buffer.explorer_input.taskset.repeat_times` is set to "
+                        f"`algorithm.repeat_times` (={config.algorithm.repeat_times})."
                     )
 
             set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
@@ -596,6 +886,19 @@ class BufferConfigValidator(ConfigValidator):
             _fill_taskset_config(taskset, idx, is_eval=True)
 
     def _check_trainer_input(self, config: Config):
+        """Validate trainer input configuration including experience buffers.
+
+        - Configures experience buffer defaults and storage types
+        - Validates auxiliary buffer configurations
+        - Sets buffer schema types based on algorithm
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If required trainer input configurations are missing.
+            AssertionError: If experience buffer is missing in train mode.
+        """
         if config.mode == "bench":
             # no need to check trainer_input in bench mode
             return
@@ -613,7 +916,8 @@ class BufferConfigValidator(ConfigValidator):
             )
         elif experience_buffer.storage_type == StorageType.FILE.value and config.mode == "both":
             self.logger.warning(
-                "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
+                "`FILE` storage is not supported to use as experience_buffer "
+                "in `both` mode, use `QUEUE` instead."
             )
             experience_buffer.storage_type = StorageType.QUEUE.value
 
@@ -653,12 +957,34 @@ class BufferConfigValidator(ConfigValidator):
             experience_buffer.total_steps = config.buffer.total_steps
 
     def _default_storage_path(self, config: Config, storage_type: str, name: str) -> str:
+        """Generate default storage path based on storage type.
+
+        Args:
+            config: The global configuration object.
+            storage_type: The type of storage (SQL, FILE, etc.).
+            name: The name of the storage component.
+
+        Returns:
+            The default storage path for the given storage type and name.
+        """
         if storage_type == StorageType.SQL.value:
             return "sqlite:///" + os.path.join(config.buffer.cache_dir, f"{name}.db")  # type: ignore[arg-type]
         else:
             return os.path.join(config.buffer.cache_dir, f"{name}.jsonl")  # type: ignore[arg-type]
 
     def _check_data_processor(self, config: Config):
+        """Validate data processor pipeline configurations.
+
+        - Configures experience pipeline input save paths
+        - Integrates Data-Juicer service configuration into operators
+        - Validates task pipeline output configuration and path conflicts
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If task pipeline output is missing or path already exists.
+        """
         # check input/output buffers in pipelines
         experience_pipeline = config.data_processor.experience_pipeline
         if experience_pipeline is not None and config.mode in {"explore", "both", "serve"}:
@@ -667,7 +993,8 @@ class BufferConfigValidator(ConfigValidator):
                     config, StorageType.SQL.value, "explorer_output"
                 )
                 self.logger.info(
-                    f"Auto set `data_processor.experience_pipeline.input_save_path` to {experience_pipeline.input_save_path}"
+                    "Auto set `data_processor.experience_pipeline.input_save_path` "
+                    f"to {experience_pipeline.input_save_path}"
                 )
 
             if config.service.data_juicer is not None:
@@ -689,7 +1016,8 @@ class BufferConfigValidator(ConfigValidator):
                     task_pipeline.output = config.buffer.trainer_input.experience_buffer
                 else:
                     raise ValueError(
-                        "`data_processor.task_pipeline.output` is missing. Please set it to the desired output storage config."
+                        "`data_processor.task_pipeline.output` is missing. "
+                        "Please set it to the desired output storage config."
                     )
             if task_pipeline.output.path and os.path.exists(task_pipeline.output.path):
                 raise ValueError(
@@ -699,7 +1027,27 @@ class BufferConfigValidator(ConfigValidator):
 
 
 class TrainerConfigValidator(ConfigValidator):
+    """Validator for trainer configuration settings.
+
+    Handles trainer type validation, configuration merging, and parameter validation
+    for different trainer implementations (veRL, Tinker, etc.).
+    """
+
     def validate(self, config: Config) -> None:
+        """Validate and configure trainer settings.
+
+        - Validates trainer type and handles configuration for different trainer types
+        - Merges trainer configuration with schema defaults
+        - Validates save checkpoint strategy options
+        - Synchronizes trainer configuration with global config
+
+        Args:
+            config: The global configuration object to validate.
+
+        Raises:
+            ValueError: If trainer type is invalid, deprecated config path is used,
+                       or save checkpoint strategy is invalid.
+        """
         if (
             config.mode not in ["train", "both", "bench"]
             and config.trainer.trainer_strategy != "megatron"
