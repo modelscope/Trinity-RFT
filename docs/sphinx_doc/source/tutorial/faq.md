@@ -190,9 +190,14 @@ for exp in exp_list:
 
 **Q:** How to load the checkpoints outside of the Trinity-RFT framework?
 
-**A:** You need to specify model path and checkpoint path. The following code snippet gives an example with transformers.
+**A:** Currently, two loading methods are supported:
 
-Here is an example of loading from fsdp trainer checkpoints:
+1. **Recommended approach**: Use the `trinity convert` command to convert the original checkpoint into the standard Hugging Face format.
+   After conversion, you can load and use it directly just like any ordinary Hugging Face model.
+   For detailed instructions, please refer to the tutorial: [Optional: Converting Checkpoints to Hugging Face Format](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html#optional-convert-checkpoints-to-hugging-face-format)
+
+2. **Direct loading (for actor checkpoints trained with FSDP)**:
+   If you prefer to load the checkpoint directly without converting its format, you can use the following code example:
 
 ```python
 import os

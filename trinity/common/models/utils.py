@@ -413,7 +413,8 @@ def get_megatron_converter(checkpoint_path: str):
             self.hf_config = AutoConfig.from_pretrained(
                 self.config.hf_model_config_path, trust_remote_code=self.config.trust_remote_code
             )
-            print(self.hf_config, flush=True)
+            self.logger = get_logger(__name__)
+            self.logger.debug(self.hf_config)
 
             self.params_mapping = {
                 # megatron core gpt model name, huggingface model name

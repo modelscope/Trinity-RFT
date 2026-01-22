@@ -6,6 +6,7 @@ import sys
 import traceback
 from pathlib import Path
 from pprint import pprint
+from typing import Optional
 
 import ray
 
@@ -13,6 +14,7 @@ from trinity.buffer.pipelines.task_pipeline import check_and_run_task_pipeline
 from trinity.common.config import Config, load_config
 from trinity.common.constants import DEBUG_NAMESPACE, PLUGIN_DIRS_ENV_VAR
 from trinity.explorer.explorer import Explorer
+from trinity.manager.checkpoint_converter import Converter
 from trinity.manager.state_manager import StateManager
 from trinity.trainer.trainer import Trainer
 from trinity.utils.dlc_utils import is_running, setup_ray_cluster, stop_ray_cluster
@@ -301,6 +303,14 @@ def debug(
         )
 
 
+def convert(checkpoint_dir: str, base_model_dir: Optional[str] = None) -> None:
+    if "global_step_" in checkpoint_dir:
+        while not os.path.basename(checkpoint_dir).startswith("global_step_"):
+            checkpoint_dir = os.path.dirname(checkpoint_dir)
+    converter = Converter(base_model_dir)
+    converter.convert(checkpoint_dir)
+
+
 def main() -> None:
     """The main entrypoint."""
     parser = argparse.ArgumentParser()
@@ -367,6 +377,22 @@ def main() -> None:
         help="The port for Experience Viewer.",
     )
 
+    convert_parser = subparsers.add_parser(
+        "convert", help="Convert checkpoint to huggingface format."
+    )
+    convert_parser.add_argument(
+        "--checkpoint-dir",
+        type=str,
+        required=True,
+        help="The path to the checkpoint directory.",
+    )
+    convert_parser.add_argument(
+        "--base-model-dir",
+        type=str,
+        default=None,
+        help="The path to the base model.",
+    )
+
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
@@ -383,6 +409,8 @@ def main() -> None:
             args.port,
             args.plugin_dir,
         )
+    elif args.command == "convert":
+        convert(args.checkpoint_dir, args.base_model_dir)
 
 
 if __name__ == "__main__":

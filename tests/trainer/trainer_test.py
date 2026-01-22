@@ -28,7 +28,7 @@ from tests.tools import (
     get_vision_language_model_path,
 )
 from trinity.buffer import get_buffer_reader
-from trinity.cli.launcher import bench, both, explore, run, serve, train
+from trinity.cli.launcher import bench, both, convert, explore, run, serve, train
 from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,
@@ -98,7 +98,7 @@ class TestTrainerCountdown(BaseTrainerCase):
         eval_tasksets[0].repeat_times = 4
         eval_tasksets[1].repeat_times = 4
         self.config.trainer.save_interval = 4
-        self.config.trainer.save_hf_checkpoint = "always"
+        self.config.trainer.save_hf_checkpoint = "never"
         if self.strategy == "megatron":
             self.config.trainer.trainer_strategy = "megatron"
         self.config.check_and_update()
@@ -144,12 +144,18 @@ class TestTrainerCountdown(BaseTrainerCase):
         )
         self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_4, "actor"))), 0)
         self.assertGreater(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))), 0)
-        self.assertGreater(
-            len(os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))), 0
-        )
-        self.assertGreater(
-            len(os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))), 0
-        )
+        hf_dir_step_4 = os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))
+        hf_dir_step_8 = os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))
+        self.assertGreater(len(hf_dir_step_4), 0)
+        self.assertGreater(len(hf_dir_step_8), 0)
+        self.assertNotIn("model.safetensors", hf_dir_step_4)
+        self.assertNotIn("model.safetensors", hf_dir_step_8)
+        # test checkpoint convert
+        convert(self.config.checkpoint_job_dir)
+        hf_dir_step_4 = os.listdir(os.path.join(checkpoint_step_4, "actor", "huggingface"))
+        hf_dir_step_8 = os.listdir(os.path.join(checkpoint_step_8, "actor", "huggingface"))
+        self.assertIn("model.safetensors", hf_dir_step_4)
+        self.assertIn("model.safetensors", hf_dir_step_8)
         self.assertEqual(step_num, 8)
         ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
         # test bench mode

@@ -183,9 +183,14 @@ for exp in exp_list:
 
 **Q:** 如何在 Trinity-RFT 框架外加载 checkpoints？
 
-**A:** 你需要指定模型路径和检查点路径。以下代码片段展示了如何使用 transformers 库进行加载。
+**A:** 目前支持两种加载方式：
 
-以下是加载 FSDP trainer 检查点的示例：
+1. **推荐方式**：使用 `trinity convert` 命令将原始检查点转换为标准的 Hugging Face 格式。
+   转换后，你就可以像加载普通 Hugging Face 模型一样直接使用它。
+   详细操作请参考教程：[可选：将检查点转换为 Hugging Face 格式](https://agentscope-ai.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html#hugging-face)
+
+2. **直接加载（适用于 FSDP 训练的 actor 检查点）**：
+   如果你希望不转换格式而直接加载，可以使用以下代码示例：
 
 ```python
 import os
