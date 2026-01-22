@@ -35,4 +35,4 @@ def log_test_lifecycle(request):
     else:
         status = "UNKNOWN"
 
-    print(f"\n[END  ] {end_time} - Result: {status} - {node_id}")
+    print(f"\n[END] {end_time} - Result: {status} - {node_id}")
