@@ -58,7 +58,10 @@ def gather_metrics(
 
 
 def gather_eval_metrics(
-    metric_list: List[Dict], prefix: str, output_stats: List[str] = ["mean", "max", "min"]
+    metric_list: List[Dict],
+    prefix: str,
+    output_stats: List[str] = ["mean", "max", "min", "std"],
+    detailed_stats: bool = False,
 ) -> Dict:
     if not metric_list:
         return {}
@@ -67,14 +70,14 @@ def gather_eval_metrics(
         numeric_df = df.select_dtypes(include=[np.number])
         metric = {}
         for col in numeric_df.columns:
-            # Skip the columns that are already aggregated
-            key_words = ["std", "mean", "min", "max"]
-            if any(key_word in col.lower() for key_word in key_words):
-                metric[f"{prefix}/{col}"] = numeric_df[col].mean()
-            else:
+            if detailed_stats:
                 stats_df = numeric_df[[col]].agg(output_stats)
                 for stats in output_stats:
                     metric[f"{prefix}/{col}/{stats}"] = stats_df.loc[stats, col].item()
+            else:
+                # only return the mean of the column
+                metric[f"{prefix}/{col}"] = numeric_df[col].mean()
+
         return metric
     except Exception as e:
         raise ValueError(f"Failed to gather eval metrics: {e}") from e

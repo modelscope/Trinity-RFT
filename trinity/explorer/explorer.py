@@ -66,6 +66,7 @@ class Explorer:
             role=self.config.explorer.name,
             config=config,
         )
+        self.detailed_stats = config.monitor.detailed_stats
         if config.explorer.over_rollout.ratio > 0.0:
             self.min_wait_num = math.ceil(
                 config.buffer.batch_size * (1 - config.explorer.over_rollout.ratio)
@@ -432,7 +433,9 @@ class Explorer:
             metric[f"{prefix}/{eval_task_name}/finished_task_count"] = len(statuses)
             metric.update(
                 gather_eval_metrics(
-                    [status.metrics[0] for status in statuses], f"{prefix}/{eval_task_name}"
+                    [status.metrics[0] for status in statuses],
+                    f"{prefix}/{eval_task_name}",
+                    detailed_stats=self.detailed_stats,
                 )
             )
         if self.eval_start_time is not None:
