@@ -216,7 +216,7 @@ class Rollout:
     multi_turn: _MultiTurn = field(default_factory=_MultiTurn)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
-    log_prob_use_dynamic_bsz: bool = True
+    log_prob_use_dynamic_bsz: Optional[bool] = None
     log_prob_micro_batch_size: Optional[int] = None
     log_prob_micro_batch_size_per_gpu: Optional[int] = None
     log_prob_max_token_len_per_gpu: Optional[int] = None
