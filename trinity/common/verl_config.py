@@ -393,52 +393,39 @@ class veRLConfig:
     synchronizer: Optional[SynchronizerConfig] = None
     enable_preview: bool = True
 
+    def _adjust_token_len_if_needed(
+        self,
+        obj,
+        config: Config,
+        component_name: str,
+        token_len_attr: str = "ppo_max_token_len_per_gpu",
+        seq_parallel_attr: str = "ulysses_sequence_parallel_size",
+    ) -> None:
+        """
+        Helper to adjust token length per GPU if current setting is too small.
+
+        Ensures: token_len * seq_parallel >= config.model.max_model_len * 2
+        """
+        current_token_len = getattr(obj, token_len_attr)
+        seq_parallel = getattr(obj, seq_parallel_attr)
+        required_min = config.model.max_model_len * 2  # type: ignore
+
+        if current_token_len * seq_parallel < required_min:
+            new_token_len = math.ceil(required_min / seq_parallel)
+            setattr(obj, token_len_attr, new_token_len)
+            logger.warning(
+                f"{component_name}.{token_len_attr} is automatically set to {new_token_len} "
+                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
+                "please set `model.max_model_len` to a smaller value."
+            )
+
     def synchronize_config(self, config: Config) -> None:  # noqa: C901
         """Synchronize config."""
-        if config.mode == "both":
-            rollout_gpu_num = (
-                config.explorer.rollout_model.tensor_parallel_size
-                * config.explorer.rollout_model.engine_num
-                + sum(
-                    [
-                        model.tensor_parallel_size * model.engine_num
-                        for model in config.explorer.auxiliary_models
-                    ]
-                )
-            )
-        else:
-            rollout_gpu_num = 0
+        gpu_allocation_info = config.get_gpu_allocation_info()
+        self.trainer.nnodes = gpu_allocation_info["trainer_node_num"]
+        self.trainer.n_gpus_per_node = gpu_allocation_info["trainer_gpu_num_per_node"]
 
-        assert config.cluster.node_num is not None
-        assert config.cluster.gpu_per_node is not None
-        if config.cluster.node_num == 1:
-            # for single node scenarios, rollout and training are on the same node
-            self.trainer.nnodes = config.cluster.node_num
-            self.trainer.n_gpus_per_node = config.cluster.gpu_per_node - rollout_gpu_num
-        else:
-            # for multi-node scenarios, some nodes for rollout, others for training
-            trainer_gpu_num = (
-                config.cluster.node_num * config.cluster.gpu_per_node - rollout_gpu_num
-            )
-            if (
-                trainer_gpu_num > config.cluster.gpu_per_node
-                and trainer_gpu_num % config.cluster.gpu_per_node != 0
-            ):
-                raise ValueError(
-                    f"Trainer must use an integer number of nodes, but got trainer_gpu_num ({trainer_gpu_num}) with gpu_per_node ({config.cluster.gpu_per_node})"
-                )
-            elif trainer_gpu_num <= 0:
-                raise ValueError(
-                    f"Not enough GPUs for training after allocating {rollout_gpu_num} GPUs for explorer."
-                )
-            if trainer_gpu_num > 0 and trainer_gpu_num <= config.cluster.gpu_per_node:
-                self.trainer.nnodes = 1
-                self.trainer.n_gpus_per_node = trainer_gpu_num
-            else:
-                self.trainer.nnodes = trainer_gpu_num // config.cluster.gpu_per_node
-                self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
-
-        world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
+        world_size = gpu_allocation_info["trainer_gpu_num"]
         if world_size <= 0:
             raise ValueError(
                 "The number of training gpus must be greater than 0, please check `engine_num` in explorer configs"
@@ -476,130 +463,91 @@ class veRLConfig:
         self.critic.ray_namespace = config.synchronizer.ray_namespace
 
         # Actor / Rollout Config
-        set_if_none(self.actor_rollout_ref.actor, "strategy", config.trainer.trainer_strategy)
-        self.actor_rollout_ref.model.path = config.model.model_path
-        self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
-        self.actor_rollout_ref.model.rope_scaling = config.model.rope_scaling
-        self.actor_rollout_ref.model.rope_theta = config.model.rope_theta
-        self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
-        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
-        self.actor_rollout_ref.rollout.temperature = (
+        actor_config = self.actor_rollout_ref.actor
+        rollout_config = self.actor_rollout_ref.rollout
+        actor_model_config = self.actor_rollout_ref.model
+        actor_optim = actor_config.optim
+        actor_model_config.path = config.model.model_path
+        actor_model_config.custom_chat_template = config.model.custom_chat_template
+        actor_model_config.rope_scaling = config.model.rope_scaling
+        actor_model_config.rope_theta = config.model.rope_theta
+        actor_optim.total_training_steps = self.trainer.total_training_steps
+        actor_config.ppo_mini_batch_size = config.buffer.train_batch_size
+        rollout_config.temperature = (
             config.buffer.explorer_input.tasksets[0].rollout_args.temperature
             if config.buffer.explorer_input.tasksets
             else 1.0
         )
-        self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
-        if self.actor_rollout_ref.actor.grad_clip is None:
-            self.actor_rollout_ref.actor.grad_clip = config.trainer.grad_clip
-        if self.actor_rollout_ref.actor.use_dynamic_bsz is None:
-            self.actor_rollout_ref.actor.use_dynamic_bsz = config.trainer.use_dynamic_bsz
-        if self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu is None:
-            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu = (
-                config.trainer.max_token_len_per_gpu
-            )
-        if self.actor_rollout_ref.actor.fix_actor_microbatch_loss_scale is None:
-            self.actor_rollout_ref.actor.fix_actor_microbatch_loss_scale = (
-                config.trainer.fix_actor_microbatch_loss_scale
-            )
-        if self.actor_rollout_ref.actor.ulysses_sequence_parallel_size is None:
-            self.actor_rollout_ref.actor.ulysses_sequence_parallel_size = (
-                config.trainer.ulysses_sequence_parallel_size
-            )
-        if (
-            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu  # type: ignore [operator]
-            * self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
-            < config.model.max_model_len * 2  # type: ignore [operator]
-        ):
-            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu = math.ceil(
-                config.model.max_model_len  # type: ignore [operator]
-                * 2
-                / self.actor_rollout_ref.actor.ulysses_sequence_parallel_size  # type: ignore [operator]
-            )
-            logger.warning(
-                f"actor.ppo_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu} "
-                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
-                "please set `model.max_model_len` to a smaller value."
-            )
+        rollout_config.n = config.algorithm.repeat_times
+        for actor_attr, trainer_attr in [
+            ("grad_clip",) * 2,
+            ("use_dynamic_bsz",) * 2,
+            ("fix_actor_microbatch_loss_scale",) * 2,
+            ("ulysses_sequence_parallel_size",) * 2,
+            ("ppo_max_token_len_per_gpu", "max_token_len_per_gpu"),
+            ("strategy", "trainer_strategy"),
+        ]:
+            set_if_none(actor_config, actor_attr, getattr(config.trainer, trainer_attr))
+        self._adjust_token_len_if_needed(
+            obj=self.actor_rollout_ref.actor,
+            config=config,
+            component_name="actor",
+        )
 
         # Ref Config
-        if self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz is None:
-            self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz = config.trainer.use_dynamic_bsz
-        if self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu is None:
-            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = (
-                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
-            )
-        if self.actor_rollout_ref.ref.ulysses_sequence_parallel_size is None:
-            self.actor_rollout_ref.ref.ulysses_sequence_parallel_size = (
-                config.trainer.ulysses_sequence_parallel_size
-            )
-        if (
-            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu  # type: ignore [operator]
-            * self.actor_rollout_ref.ref.ulysses_sequence_parallel_size
-            < config.model.max_model_len * 2  # type: ignore [operator]
-        ):
-            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = math.ceil(
-                config.model.max_model_len  # type: ignore [operator]
-                * 2
-                / self.actor_rollout_ref.ref.ulysses_sequence_parallel_size  # type: ignore [operator]
-            )
-            logger.warning(
-                f"ref.log_prob_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu} "
-                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
-                "please set `model.max_model_len` to a smaller value."
-            )
+        ref_config = self.actor_rollout_ref.ref
+        for ref_attr, trainer_attr in [
+            ("log_prob_use_dynamic_bsz", "use_dynamic_bsz"),
+            ("log_prob_max_token_len_per_gpu", "max_token_len_per_gpu"),
+            ("ulysses_sequence_parallel_size",) * 2,
+        ]:
+            set_if_none(ref_config, ref_attr, getattr(config.trainer, trainer_attr))
+        self._adjust_token_len_if_needed(
+            obj=self.actor_rollout_ref.ref,
+            config=config,
+            component_name="ref",
+            token_len_attr="log_prob_max_token_len_per_gpu",
+        )
 
         # Critic config
-        set_if_none(self.critic, "strategy", config.trainer.trainer_strategy)
+        critic_optim = self.critic.optim
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
         self.critic.model.rope_scaling = config.model.rope_scaling
         self.critic.model.rope_theta = config.model.rope_theta
         self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
-        self.critic.rollout_n = self.actor_rollout_ref.rollout.n
-        self.critic.optim.total_training_steps = self.trainer.total_training_steps
-        if self.critic.grad_clip is None:
-            self.critic.grad_clip = config.trainer.grad_clip
-        if self.critic.use_dynamic_bsz is None:
-            self.critic.use_dynamic_bsz = config.trainer.use_dynamic_bsz
-        if self.critic.ppo_max_token_len_per_gpu is None:
-            self.critic.ppo_max_token_len_per_gpu = (
-                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
-            )
-        if self.critic.ulysses_sequence_parallel_size is None:
-            self.critic.ulysses_sequence_parallel_size = (
-                config.trainer.ulysses_sequence_parallel_size
-            )
+        self.critic.rollout_n = config.algorithm.repeat_times
+        critic_optim.total_training_steps = self.trainer.total_training_steps
+        for critic_attr, trainer_attr in [
+            ("grad_clip",) * 2,
+            ("use_dynamic_bsz",) * 2,
+            ("ulysses_sequence_parallel_size",) * 2,
+            ("strategy", "trainer_strategy"),
+            ("ppo_max_token_len_per_gpu", "max_token_len_per_gpu"),
+        ]:
+            set_if_none(self.critic, critic_attr, getattr(config.trainer, trainer_attr))
 
-        if (
-            self.critic.ppo_max_token_len_per_gpu * self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
-            < config.model.max_model_len * 2  # type: ignore [operator]
-        ):
-            self.critic.ppo_max_token_len_per_gpu = math.ceil(
-                config.model.max_model_len  # type: ignore [operator]
-                * 2
-                / self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
-            )
-            logger.warning(
-                f"critic.ppo_max_token_len_per_gpu is automatically set to {self.critic.ppo_max_token_len_per_gpu} "
-                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
-                "please set `model.max_model_len` to a smaller value."
-            )
-        if self.critic.forward_max_token_len_per_gpu is None:
-            self.critic.forward_max_token_len_per_gpu = self.critic.ppo_max_token_len_per_gpu
+        self._adjust_token_len_if_needed(
+            obj=self.critic,
+            config=config,
+            component_name="critic",
+        )
+        set_if_none(
+            self.critic, "forward_max_token_len_per_gpu", self.critic.ppo_max_token_len_per_gpu
+        )
 
         # LoRA related config
         if config.model.lora_configs is not None:
             lora_config = config.model.lora_configs[0]
-            actor_model_config = self.actor_rollout_ref.model
             for attr in ["lora_rank", "lora_alpha", "target_modules", "exclude_modules"]:
                 setattr(actor_model_config, attr, getattr(lora_config, attr))
             if not lora_config.is_dummy:
                 actor_model_config.lora_adapter_path = lora_config.path
-            if self.actor_rollout_ref.actor.strategy not in ["fsdp", "fsdp2"]:
+            if actor_config.strategy not in ["fsdp", "fsdp2"]:
                 logger.warning(
-                    f"Lora is only supported for fsdp and fsdp2, but got {self.actor_rollout_ref.actor.strategy} instead, changed to fsdp."
+                    f"Lora is only supported for fsdp and fsdp2, but got {actor_config.strategy} instead, changed to fsdp."
                 )
-                self.actor_rollout_ref.actor.strategy = "fsdp"
+                actor_config.strategy = "fsdp"
             if self.critic.strategy not in ["fsdp", "fsdp2"]:
                 logger.warning(
                     f"Lora is only supported for fsdp and fsdp2, but got {self.critic.strategy} instead, changed to fsdp."
@@ -607,8 +555,6 @@ class veRLConfig:
                 self.critic.strategy = "fsdp"
 
         # Algorithm related config
-        actor_optim = self.actor_rollout_ref.actor.optim
-        critic_optim = self.critic.optim
         optim_config = config.algorithm.optimizer
         for field_name in optim_config.__dataclass_fields__:
             field_value = getattr(optim_config, field_name)
@@ -634,7 +580,7 @@ class veRLConfig:
             }
             actor_optim.optimizer = optim_map.get(actor_optim.optimizer, actor_optim.optimizer)
             critic_optim.optimizer = optim_map.get(critic_optim.optimizer, critic_optim.optimizer)
-        self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
+        actor_config.use_kl_loss = config.algorithm.kl_loss_fn != "none"
         self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"
         # TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to
         # True or False in RayPPOTrainer.__init__() (and hence in VerlPPOTrainerWrapper).
@@ -643,25 +589,17 @@ class veRLConfig:
 
         if config.algorithm.algorithm_type == "dpo":  # for DPO
             logger.warning("DPO micro batch size is doubled for computing loss.")
-            self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2
-            self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2
+            actor_config.ppo_micro_batch_size_per_gpu *= 2
+            ref_config.log_prob_micro_batch_size_per_gpu *= 2
 
         # check rollout config (only works for lora)
-        self.actor_rollout_ref.rollout.log_prob_use_dynamic_bsz = (
-            self.actor_rollout_ref.actor.use_dynamic_bsz
-        )
-        if self.actor_rollout_ref.rollout.log_prob_micro_batch_size is None:
-            self.actor_rollout_ref.rollout.log_prob_micro_batch_size = (
-                self.actor_rollout_ref.actor.ppo_micro_batch_size
-            )
-        if self.actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu is None:
-            self.actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu = (
-                self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu
-            )
-        if self.actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu is None:
-            self.actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu = (
-                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
-            )
+        for rollout_attr, actor_attr in [
+            ("log_prob_use_dynamic_bsz", "use_dynamic_bsz"),
+            ("log_prob_micro_batch_size", "ppo_micro_batch_size"),
+            ("log_prob_micro_batch_size_per_gpu", "ppo_micro_batch_size_per_gpu"),
+            ("log_prob_max_token_len_per_gpu", "ppo_max_token_len_per_gpu"),
+        ]:
+            set_if_none(rollout_config, rollout_attr, getattr(actor_config, actor_attr))
 
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview

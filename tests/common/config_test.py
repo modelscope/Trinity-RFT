@@ -91,7 +91,7 @@ class TestConfig(unittest.TestCase):
         config.cluster.node_num = None
         config.cluster.gpu_per_node = None
 
-        config._update_config_from_ray_cluster()
+        config.check_and_update()
         self.assertEqual(config.cluster.node_num, 2)
         self.assertEqual(config.cluster.gpu_per_node, 2)
 

@@ -2,15 +2,12 @@
 """Configs for RFT."""
 from __future__ import annotations
 
-import math
 import os
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-import ray
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -28,7 +25,6 @@ from trinity.common.constants import (
 )
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
-from trinity.utils.lora_utils import create_dummy_lora
 
 logger = get_logger(__name__)
 
@@ -859,554 +855,6 @@ class Config:
         with open(config_path, "w", encoding="utf-8") as f:
             OmegaConf.save(self, f)
 
-    def _check_deprecated(self) -> None:
-        if self.explorer.runner_num is not None:
-            logger.warning(
-                "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
-            )
-
-    def _update_config_from_ray_cluster(self) -> None:
-        """Update config if `node_num` or `gpu_per_node` are not set."""
-        if self.cluster.node_num is not None and self.cluster.gpu_per_node is not None:
-            return
-        # init ray cluster to detect node_num and gpu_per_node
-        was_initialized = ray.is_initialized()
-        if not was_initialized:
-            ray.init(
-                address=self.cluster.ray_address,
-                ignore_reinit_error=True,
-                namespace=self.ray_namespace,
-            )
-
-        alive_nodes = [n for n in ray.nodes() if n["alive"]]
-        if not alive_nodes:
-            raise RuntimeError("Could not find any alive nodes in the Ray cluster.")
-
-        # set node_num
-        if self.cluster.node_num is None:
-            self.cluster.node_num = len(alive_nodes)
-            logger.info(f"Auto-detected and set node_num: {self.cluster.node_num}")
-
-        # set gpu_per_node
-        if self.cluster.gpu_per_node is None:
-            gpu_per_node = 0
-            for node in alive_nodes:
-                node_gpus = node.get("Resources", {}).get("GPU")
-                if node_gpus and node_gpus > 0:
-                    gpu_per_node = int(node_gpus)
-                    break
-
-            self.cluster.gpu_per_node = gpu_per_node
-            logger.info(f"Auto-detected and set gpu_per_node: {self.cluster.gpu_per_node}")
-
-        if not was_initialized:
-            ray.shutdown()
-
-    def _check_interval(self) -> None:
-        assert self.synchronizer.sync_interval > 0
-
-        if self.mode != "bench" and self.algorithm.algorithm_type != "dpo":  # TODO
-            # check eval_interval
-            if self.explorer.eval_interval % self.synchronizer.sync_interval != 0:
-                self.explorer.eval_interval = (
-                    max(self.explorer.eval_interval // self.synchronizer.sync_interval, 1)
-                ) * self.synchronizer.sync_interval
-                logger.warning(
-                    f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.explorer.eval_interval}."
-                )
-
-    def _check_explorer_input(self) -> None:
-        from trinity.buffer.selector import SELECTORS
-
-        if self.mode in {"train", "serve"}:
-            # no need to check explorer_input in serve mode
-            return
-
-        explorer_input = self.buffer.explorer_input
-
-        if explorer_input.taskset:
-            if len(explorer_input.tasksets) > 0:
-                raise ValueError("Do not support setting `taskset` and `tasksets` simultaneously!")
-            explorer_input.tasksets = [explorer_input.taskset]
-            explorer_input.taskset = None
-        elif self.mode != "bench" and len(explorer_input.tasksets) == 0:
-            raise ValueError("At least one taskset should be provided in explorer_input!")
-
-        for i, taskset in enumerate(explorer_input.tasksets):
-            if not taskset.path:
-                raise ValueError(
-                    "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
-                )
-            if not taskset.name:
-                taskset.name = f"taskset_{i}"
-            if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
-                taskset.repeat_times = self.algorithm.repeat_times
-                logger.info(
-                    "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
-                    f" (={self.algorithm.repeat_times})."
-                )
-            taskset.total_epochs = self.buffer.total_epochs
-            taskset.total_steps = self.buffer.total_steps
-            taskset.batch_size = self.buffer.batch_size
-            set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
-            set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-            set_if_none(taskset, "ray_namespace", self.ray_namespace)
-            set_if_none(taskset.rollout_args, "temperature", self.model.temperature)
-            set_if_none(taskset.rollout_args, "top_p", self.model.top_p)
-            set_if_none(taskset.rollout_args, "top_k", self.model.top_k)
-            set_if_none(taskset.rollout_args, "logprobs", self.model.logprobs)
-            set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
-            set_if_none(taskset.format, "chat_template", self.model.custom_chat_template)
-
-            # check if selector is supported
-            selector = SELECTORS.get(taskset.task_selector.selector_type)
-            if selector is None:
-                raise ValueError(
-                    f"Selector {taskset.task_selector.selector_type} is not supported."
-                )
-
-        for idx, dataset in enumerate(explorer_input.eval_tasksets):
-            if not dataset.path:
-                raise ValueError(f"Eval dataset [{dataset}]'s path is not configured.")
-            dataset.is_eval = True
-            dataset.batch_size = self.buffer.batch_size
-            if not dataset.name:
-                dataset.name = f"eval_taskset_{idx}"
-
-            # eval_workflow has higher priority than workflow in eval tasksets, so we set it first
-            set_if_none(dataset, "default_workflow_type", explorer_input.default_eval_workflow_type)
-            set_if_none(dataset, "default_workflow_type", explorer_input.default_workflow_type)
-            set_if_none(dataset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-            set_if_none(dataset, "ray_namespace", self.ray_namespace)
-            set_if_none(dataset.rollout_args, "temperature", self.model.temperature)
-            set_if_none(dataset.rollout_args, "top_p", self.model.top_p)
-            set_if_none(dataset.rollout_args, "top_k", self.model.top_k)
-            set_if_none(dataset.rollout_args, "logprobs", self.model.logprobs)
-            set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
-
-    def _check_trainer_input(self) -> None:
-        if self.mode == "bench":
-            # no need to check trainer_input in bench mode
-            return
-
-        trainer_input = self.buffer.trainer_input
-        experience_buffer = trainer_input.experience_buffer
-
-        if experience_buffer is None:
-            experience_buffer = trainer_input.experience_buffer = ExperienceBufferConfig(
-                name="experience_buffer",
-                storage_type=StorageType.QUEUE.value,
-            )
-            logger.info(f"Auto set `buffer.trainer_input.experience_buffer` to {experience_buffer}")
-        elif experience_buffer.storage_type == StorageType.FILE.value and self.mode == "both":
-            logger.warning(
-                "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
-            )
-            experience_buffer.storage_type = StorageType.QUEUE.value
-
-        if not experience_buffer.name:
-            experience_buffer.name = "experience_buffer"
-
-        if not experience_buffer.path:
-            experience_buffer.path = self._default_storage_path(
-                experience_buffer.storage_type, experience_buffer.name
-            )
-            logger.warning(
-                f"Auto set `buffer.trainer_input.experience_buffer.path` to {experience_buffer.path}"
-            )
-
-        from trinity.algorithm import ALGORITHM_TYPE
-
-        experience_buffer.schema_type = ALGORITHM_TYPE.get(self.algorithm.algorithm_type).schema
-        experience_buffer.batch_size = self.buffer.train_batch_size
-        experience_buffer.tokenizer_path = self.model.model_path
-        set_if_none(experience_buffer, "ray_namespace", self.ray_namespace)
-        set_if_none(experience_buffer.format, "chat_template", self.model.custom_chat_template)
-        for aux_name, aux_buffer in trainer_input.auxiliary_buffers.items():
-            aux_buffer.batch_size = self.buffer.train_batch_size
-            aux_buffer.tokenizer_path = self.model.model_path
-            set_if_none(aux_buffer, "ray_namespace", self.ray_namespace)
-            if aux_buffer.path is None or aux_buffer.path == "":
-                raise ValueError(
-                    f"`buffer.trainer_input.auxiliary_buffers[{aux_name}].path` is required, "
-                    f"please set it to the path of the auxiliary buffer."
-                )
-
-        if self.mode == "train":
-            assert (
-                experience_buffer is not None
-            ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
-            experience_buffer.total_epochs = self.buffer.total_epochs
-            experience_buffer.total_steps = self.buffer.total_steps
-
-    def _default_storage_path(self, storage_type: str, name: str) -> str:
-        if storage_type == StorageType.SQL.value:
-            return "sqlite:///" + os.path.join(self.buffer.cache_dir, f"{name}.db")  # type: ignore[arg-type]
-        else:
-            return os.path.join(self.buffer.cache_dir, f"{name}.jsonl")  # type: ignore[arg-type]
-
-    def _check_data_processor(self) -> None:
-        # check input/output buffers in pipelines
-        experience_pipeline = self.data_processor.experience_pipeline
-        if experience_pipeline is not None and self.mode in {"explore", "both", "serve"}:
-            if experience_pipeline.save_input and experience_pipeline.input_save_path is None:
-                experience_pipeline.input_save_path = self._default_storage_path(
-                    StorageType.SQL.value, "explorer_output"
-                )
-                logger.info(
-                    f"Auto set `data_processor.experience_pipeline.input_save_path` to {experience_pipeline.input_save_path}"
-                )
-
-        task_pipeline = self.data_processor.task_pipeline
-        if task_pipeline is not None and self.mode in {"explore", "train", "both"}:
-            if task_pipeline.output is None:
-                if self.mode != "train":
-                    if len(self.buffer.explorer_input.tasksets) > 0:
-                        task_pipeline.output = self.buffer.explorer_input.tasksets[0]
-                    else:
-                        raise ValueError(
-                            "At least one taskset should be provided in explorer_input!"
-                        )
-                elif self.mode == "train" and self.algorithm.algorithm_type in {"dpo", "sft"}:
-                    task_pipeline.output = self.buffer.trainer_input.experience_buffer
-                else:
-                    raise ValueError(
-                        "`data_processor.task_pipeline.output` is missing. Please set it to the desired output storage config."
-                    )
-            if task_pipeline.output.path and os.path.exists(task_pipeline.output.path):
-                raise ValueError(
-                    f"Task pipeline output path {task_pipeline.output.path} already exists.\n"
-                    "Please choose a different output path to avoid overwriting."
-                )
-
-    def _check_buffer(self) -> None:  # noqa: C901
-        # check train_batch_size
-        if not self.buffer.train_batch_size:
-            if self.mode == "train" or self.algorithm.algorithm_type in ["sft", "dpo"]:
-                raise ValueError(
-                    "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "
-                    "'sft' or 'dpo'"
-                )
-            logger.info(
-                "`buffer.train_batch_size` is set to `buffer.batch_size` * `algorithm.repeat_times`"
-            )
-            self.buffer.train_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
-
-        # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
-        self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
-        try:
-            os.makedirs(self.buffer.cache_dir, exist_ok=True)
-        except Exception as e:
-            raise RuntimeError(
-                f"Failed to create buffer dir {self.buffer.cache_dir}, please check "
-                f"your checkpoint directory: {self.checkpoint_job_dir}"
-            ) from e
-
-        # set pad_token_id / tokenizer_path
-        if self.buffer.pad_token_id is None:
-            from transformers import AutoTokenizer
-
-            try:
-                tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
-                if tokenizer.pad_token_id is None:
-                    tokenizer.pad_token_id = tokenizer.eos_token_id
-                    logger.warning(
-                        f"tokenizer.pad_token_id is None. Now set to {tokenizer.eos_token_id}",
-                        stacklevel=1,
-                    )
-                self.buffer.pad_token_id = tokenizer.pad_token_id
-
-            except Exception:
-                logger.warning(f"Failed to get pad token id from model {self.model.model_path}")
-                self.buffer.pad_token_id = 0
-
-        self._check_explorer_input()
-        self._check_trainer_input()
-        self._check_data_processor()
-
-    def _check_algorithm(self) -> None:
-        from trinity.algorithm import (
-            ADVANTAGE_FN,
-            ALGORITHM_TYPE,
-            ENTROPY_LOSS_FN,
-            KL_FN,
-            POLICY_LOSS_FN,
-            SAMPLE_STRATEGY,
-        )
-
-        algorithm = ALGORITHM_TYPE.get(self.algorithm.algorithm_type)
-        algorithm.check_config(self)
-        default_config = {
-            "sample_strategy": "warmup",
-            "policy_loss_fn": "ppo",
-            "advantage_fn": "ppo",
-            "kl_penalty_fn": "none",
-            "kl_loss_fn": "k2",
-            "entropy_loss_fn": "default",
-            "loss_agg_mode": "token-mean",
-        }
-        default_config.update(algorithm.default_config())
-        for key, value in default_config.items():
-            set_if_none(self.algorithm, key, value)
-
-        def check_and_set(name, registry, args_attr):
-            fn_cls = registry.get(getattr(self.algorithm, name))
-            if fn_cls is None:
-                raise ValueError(f"Invalid {name}: {getattr(self.algorithm, name)}")
-            set_if_none(self.algorithm, args_attr, fn_cls.default_args())
-            return fn_cls
-
-        check_and_set("sample_strategy", SAMPLE_STRATEGY, "sample_strategy_args")
-        check_and_set("policy_loss_fn", POLICY_LOSS_FN, "policy_loss_fn_args")
-        check_and_set("advantage_fn", ADVANTAGE_FN, "advantage_fn_args")
-        check_and_set("kl_loss_fn", KL_FN, "kl_loss_fn_args")
-        check_and_set("kl_penalty_fn", KL_FN, "kl_penalty_fn_args")
-        check_and_set("entropy_loss_fn", ENTROPY_LOSS_FN, "entropy_loss_fn_args")
-        if "loss_agg_mode" in self.algorithm.policy_loss_fn_args:  # type: ignore [operator]
-            # override loss_agg_mode in policy_loss_fn_args
-            self.algorithm.policy_loss_fn_args["loss_agg_mode"] = self.algorithm.loss_agg_mode  # type: ignore [index]
-
-        optim_config = self.algorithm.optimizer
-        if optim_config.warmup_style is not None:
-            optim_config.lr_scheduler_type = optim_config.warmup_style
-            logger.warning(
-                "`warmup_style` is deprecated. Please use `lr_scheduler_type` instead. "
-                f"And `lr_scheduler_type` is set to {optim_config.lr_scheduler_type}."
-            )
-
-    def _check_model(self) -> None:
-        model = self.model
-        if not model.critic_model_path:
-            model.critic_model_path = model.model_path
-
-        if model.tinker.enable:
-            self._check_tinker()
-
-        # check template
-        if model.chat_template_path is not None and model.custom_chat_template is None:
-            try:
-                with open(model.chat_template_path, "r") as f:
-                    model.custom_chat_template = f.read()
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to read chat template from {model.chat_template_path}: {e}"
-                )
-
-        # check max_model_len, max_prompt_tokens, max_response_tokens
-        self._check_model_len()
-
-    def _check_tinker(self) -> None:
-        model = self.model
-        from trinity.algorithm import ALGORITHM_TYPE
-
-        algorithm = ALGORITHM_TYPE.get(self.algorithm.algorithm_type)
-        if algorithm.use_critic:
-            raise ValueError("Critic model is not supported when using tinker!")
-
-        import tinker
-
-        service_client = tinker.ServiceClient()
-        supported_models = {
-            item.model_name for item in service_client.get_server_capabilities().supported_models
-        }
-        if model.model_path not in supported_models:
-            logger.error(f"Supported models: {supported_models}")
-            raise ValueError(f"{model.model_path} is not supported by tinker!")
-
-        if (
-            self.algorithm.entropy_loss_fn != "none"
-            and self.algorithm.entropy_loss_fn_args.get("entropy_coef", 0.0) != 0.0
-        ):
-            logger.warning(
-                "The entropy in Tinker trainer is an estimated value; "
-                "it is recommended to set `entropy_coef` to 0."
-            )
-
-        if self.explorer.rollout_model.engine_type != "tinker":
-            self.explorer.rollout_model.engine_type = "tinker"
-            logger.warning("Rollout model engine type is set to `tinker`.")
-
-        for aux_model_config in self.explorer.auxiliary_models:
-            if aux_model_config.engine_type != "tinker":
-                aux_model_config.engine_type = "tinker"
-                logger.warning("Auxiliary model engine type is set to `tinker`.")
-
-        if self.trainer.trainer_type != "tinker":
-            self.trainer.trainer_type = "tinker"
-            logger.warning("Trainer type is set to `tinker`.")
-
-        if self.synchronizer.sync_method == SyncMethod.NCCL:
-            self.synchronizer.sync_method = SyncMethod.CHECKPOINT
-            logger.warning(
-                "Tinker do not support NCCL, `synchronizer.sync_method` is set to `checkpoint`."
-            )
-
-    def _check_model_len(self) -> None:
-        model = self.model
-        # if all three are set, check if they are valid
-        if (
-            model.max_model_len is not None
-            and model.max_prompt_tokens is not None
-            and model.max_response_tokens is not None
-        ):
-            if model.max_prompt_tokens + model.max_response_tokens > model.max_model_len:
-                raise ValueError(
-                    f"`max_prompt_tokens` + `max_response_tokens` ({model.max_prompt_tokens} + {model.max_response_tokens}) "
-                    f"exceeds `max_model_len` ({model.max_model_len}). Please adjust them accordingly."
-                )
-
-        # check max_model_len first
-        if model.max_model_len is None:
-            if model.max_prompt_tokens is not None and model.max_response_tokens is not None:
-                model.max_model_len = model.max_prompt_tokens + model.max_response_tokens
-                logger.warning(
-                    f"`max_model_len` is set to {model.max_model_len} from `max_prompt_tokens` and `max_response_tokens`."
-                )
-            else:
-                raise ValueError("Unable to determine `max_model_len`, please set it manually.")
-
-        # both max_prompt_tokens and max_response_tokens are None
-        if model.max_prompt_tokens is None and model.max_response_tokens is None:
-            # default to max_model_len / 2
-            model.max_prompt_tokens = model.max_model_len // 2
-            model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
-            logger.warning(
-                f"`max_prompt_tokens` and `max_response_tokens` are not set, set to {model.max_prompt_tokens} and {model.max_response_tokens} respectively."
-            )
-
-        # only max_prompt_tokens is None
-        if model.max_prompt_tokens is None and model.max_response_tokens is not None:
-            model.max_response_tokens = min(model.max_response_tokens, model.max_model_len - 1)
-            model.max_prompt_tokens = model.max_model_len - model.max_response_tokens
-            logger.warning(
-                f"`max_prompt_tokens` is set to {model.max_prompt_tokens}, `max_response_tokens` is set to {model.max_response_tokens}."
-            )
-
-        # only max_response_tokens is None
-        if model.max_response_tokens is None and model.max_prompt_tokens is not None:
-            model.max_prompt_tokens = min(model.max_prompt_tokens, model.max_model_len - 1)
-            model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
-            logger.warning(
-                f"`max_response_tokens` is set to {model.max_response_tokens}, `max_prompt_tokens` is set to {model.max_prompt_tokens}."
-            )
-
-        if model.min_response_tokens >= model.max_response_tokens:  # type: ignore [operator]
-            model.min_response_tokens = max(model.max_response_tokens - 1, 0)  # type: ignore [operator]
-            logger.warning(f"`min_response_tokens` is set to {model.min_response_tokens}.")
-
-        if model.enable_prompt_truncation is True:
-            if model.max_prompt_tokens is None:
-                raise ValueError(
-                    "When `model.enable_prompt_truncation` is True, `model.max_prompt_tokens` must be set properly. This function does not work with OpenAI API mode."
-                )
-            logger.warning(
-                f"`enable_prompt_truncation` is set to True; the prompt will be truncated to `max_prompt_tokens`={model.max_prompt_tokens} tokens if it is too long."
-            )
-        else:
-            logger.warning(
-                "`enable_prompt_truncation` is set to False; please make sure the prompt is not too long and `max_model_len` is large enough, otherwise prompt length + response length may exceed `max_model_len`!"
-            )
-
-    def _check_explorer(self) -> None:
-        rollout_args = ["temperature", "top_p", "top_k", "logprobs", "repetition_penalty"]
-        length_args = [
-            "max_model_len",
-            "max_prompt_tokens",
-            "max_response_tokens",
-            "min_response_tokens",
-            "enable_prompt_truncation",
-        ]
-        rope_args = ["rope_scaling", "rope_theta"]
-        model_args = rollout_args + length_args + rope_args
-        set_if_none(self.explorer.rollout_model, "model_path", self.model.model_path)
-        for args in model_args:
-            set_if_none(self.explorer.rollout_model, args, getattr(self.model, args))
-        if (
-            self.explorer.rollout_model.chat_template is None
-            and self.model.custom_chat_template is not None
-        ):
-            self.explorer.rollout_model.chat_template = self.model.custom_chat_template
-        for aux_model in self.explorer.auxiliary_models:
-            if not aux_model.model_path:
-                raise ValueError("auxiliary model's model_path is required.")
-            for args in model_args:
-                set_if_none(aux_model, args, getattr(self.model, args))
-
-        if self.explorer.rollout_model.engine_type != "tinker":
-            # check gpu number
-            rollout_gpu_num = (
-                self.explorer.rollout_model.tensor_parallel_size
-                * self.explorer.rollout_model.engine_num
-                + sum(
-                    (
-                        model.tensor_parallel_size * model.engine_num
-                        for model in self.explorer.auxiliary_models
-                    )
-                )
-            )
-            assert self.cluster.node_num is not None
-            assert self.cluster.gpu_per_node is not None
-            total_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node
-            if self.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
-                raise ValueError(
-                    f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
-                )
-            elif self.mode == "both" and rollout_gpu_num >= total_gpu_num:
-                raise ValueError(
-                    f"Not enough GPUs for trainer in 'both' mode. Explorer requires {rollout_gpu_num} GPUs, but total available GPUs are {total_gpu_num}."
-                )
-
-        if self.explorer.over_rollout.ratio > 0.0:
-            if not (0.0 <= self.explorer.over_rollout.ratio < 1.0):
-                raise ValueError("over_rollout_ratio should be in [0.0, 1.0)")
-            if self.synchronizer.sync_style == SyncStyle.FIXED:
-                raise ValueError(
-                    "over_rollout_ratio is not compatible with fixed sync_style, please set "
-                    "`synchronizer.sync_style` to `dynamic_by_explorer` or `dynamic_by_trainer`."
-                )
-
-        # for lora configs
-        if not self.model.tinker.enable and self.model.lora_configs is not None:
-            self.explorer.rollout_model.enable_lora = True
-            if len(self.model.lora_configs) > 1:
-                raise ValueError("Only one lora adapter is supported for now.")
-            lora_config = self.model.lora_configs[0]
-            if lora_config.path is None:
-                logger.info("Creating dummy lora, since no lora_path is provided.")
-                lora_path = create_dummy_lora(
-                    model_path=self.model.model_path,
-                    checkpoint_job_dir=self.checkpoint_job_dir,
-                    lora_rank=lora_config.lora_rank,
-                    lora_alpha=lora_config.lora_alpha,
-                    target_modules=lora_config.target_modules,
-                    exclude_modules=lora_config.exclude_modules,
-                )
-                lora_config.path = lora_path
-                lora_config.is_dummy = True
-            self.explorer.rollout_model.lora_modules = [
-                {
-                    "lora_int_id": i + 1,
-                    "lora_name": cfg.name,
-                    "lora_path": cfg.path,
-                    "base_model_name": cfg.base_model_name,
-                }
-                for i, cfg in enumerate(self.model.lora_configs)
-            ]
-            self.explorer.rollout_model.lora_kwargs = {
-                "max_loras": len(self.model.lora_configs),
-                "max_lora_rank": max(
-                    (
-                        model_config.lora_rank
-                        for model_config in self.model.lora_configs
-                        if model_config.lora_rank > 0
-                    ),
-                    default=0,
-                ),
-                "default_lora_path": os.path.join(
-                    self.checkpoint_job_dir, "global_step_0", "actor", "lora_adapter"
-                ),  # will be poped later
-            }
-
     def __iter__(self):
         """Iterate over configs with each stage applied in order.
 
@@ -1426,138 +874,67 @@ class Config:
             new_config.stages = []
             yield new_config
 
-    def check_and_update(self) -> Config:  # noqa: C901
+    def check_and_update(self) -> Config:
         """Check and update the config."""
-        self._check_deprecated()
+        from trinity.common.config_validator import validators
 
-        # set namespace
-        if self.ray_namespace is None or len(self.ray_namespace) == 0:
-            self.ray_namespace = f"{self.project}/{self.name}"
-
-        # check cluster infomation
-        self._update_config_from_ray_cluster()
-
-        # check algorithm
-        self._check_algorithm()
-
-        # check mode
-        if self.mode not in ["explore", "train", "both", "bench", "serve"]:
-            raise ValueError(f"Invalid mode: {self.mode}")
-
-        # prepare for the checkpoint directory
-        if not os.path.isabs(self.checkpoint_root_dir):
-            self.checkpoint_root_dir = os.path.join(os.getcwd(), self.checkpoint_root_dir)
-        # create a job dir at checkpoint_root_dir/project/name
-        self.checkpoint_job_dir = os.path.join(
-            self.checkpoint_root_dir, self.project, self.group, self.name
-        )
-        # rename the experiment when necessary
-        if not self.continue_from_checkpoint and (
-            os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
-        ):
-            if self.mode == "bench":
-                logger.warning(
-                    "For bench mode, `continue_from_checkpoint` is set as `true` to enable using existing checkpoints."
-                )
-                self.continue_from_checkpoint = True
-            else:
-                ori_name = self.name
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                self.name = f"{ori_name}_{timestamp}"
-                self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
-                logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
-        os.makedirs(self.checkpoint_job_dir, exist_ok=True)
-
-        # check model
-        self._check_model()
-
-        # check explorer
-        if self.explorer is not None:
-            self._check_explorer()
-
-        # check synchronizer
-        self.synchronizer.ray_namespace = self.ray_namespace
-        self.synchronizer.explorer_world_size = (
-            self.explorer.rollout_model.engine_num
-            * self.explorer.rollout_model.tensor_parallel_size
-        )
-        if self.synchronizer.sync_method == SyncMethod.NCCL:
-            if self.mode in ["train", "explore", "bench", "serve"]:
-                self.synchronizer.sync_method = SyncMethod.CHECKPOINT
-                logger.warning(
-                    f"`{self.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
-                )
-            if self.model.lora_configs is not None:
-                self.synchronizer.sync_method = SyncMethod.CHECKPOINT
-                logger.warning(
-                    "LoRA is not supported with NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
-                )
-
-        self._check_interval()
-
-        # check monitor
-        from trinity.utils.monitor import MONITOR
-
-        monitor_cls = MONITOR.get(self.monitor.monitor_type)
-        if monitor_cls is None:
-            raise ValueError(f"Invalid monitor type: {self.monitor.monitor_type}")
-        set_if_none(self.monitor, "monitor_args", monitor_cls.default_args())
-        # create a job dir in <checkpoint_root_dir>/<project>/<name>/monitor
-        self.monitor.cache_dir = os.path.join(self.checkpoint_job_dir, "monitor")
-        try:
-            os.makedirs(self.monitor.cache_dir, exist_ok=True)
-        except Exception:
-            logger.warning(
-                f"Failed to create monitor dir {self.monitor.cache_dir}, please check "
-                f"your checkpoint directory: {self.checkpoint_job_dir}"
-            )
-
-        # check buffer
-        self._check_buffer()
-        # check and update trainer
-        if self.mode in ["train", "both", "bench"] or self.trainer.trainer_strategy == "megatron":
-            if self.trainer.trainer_type == "verl":
-                if self.trainer.trainer_config:
-                    from trinity.common.verl_config import veRLConfig
-
-                    trainer_config_schema = OmegaConf.structured(veRLConfig)
-                    trainer_config = OmegaConf.merge(
-                        trainer_config_schema, self.trainer.trainer_config
-                    )
-                    self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                elif self.trainer.trainer_config_path:
-                    raise ValueError(
-                        "`trainer_config_path` is deprecated; please use `trainer_config` instead."
-                    )
-                else:
-                    from trinity.common.verl_config import veRLConfig
-
-                    logger.info("`trainer_config` is not provided, using default trainer config.")
-                    self.trainer.trainer_config = veRLConfig()
-                if self.trainer.max_token_len_per_gpu is None:
-                    self.trainer.max_token_len_per_gpu = math.ceil(
-                        2 * self.model.max_model_len / self.trainer.ulysses_sequence_parallel_size  # type: ignore [operator]
-                    )
-                if self.trainer.save_hf_checkpoint not in {"last", "always", "never"}:
-                    raise ValueError(
-                        f"Invalid trainer.save_hf_checkpoint: {self.trainer.save_hf_checkpoint}, "
-                        "must be one of 'last', 'always', or 'never'."
-                    )
-                self.trainer.trainer_config.synchronize_config(self)
-            elif self.trainer.trainer_type == "tinker":
-                self.trainer.trainer_config = None
-            else:
-                raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-
-        # check service
-        if self.service.data_juicer is not None:
-            for operator in self.data_processor.experience_pipeline.operators:
-                if operator.name == "data_juicer":
-                    operator.args["service_config"] = self.service.data_juicer
-
-        # check log
-        self.log.save_dir = os.path.join(self.checkpoint_job_dir, "log")
+        # validate
+        for validator in validators:
+            validator.validate(self)
         return self
+
+    def get_gpu_allocation_info(self) -> Dict[str, int]:
+        if self.mode == "both":
+            rollout_gpu_num = (
+                self.explorer.rollout_model.tensor_parallel_size
+                * self.explorer.rollout_model.engine_num
+            )
+            auxiliary_model_gpu_num = sum(
+                [
+                    model.tensor_parallel_size * model.engine_num
+                    for model in self.explorer.auxiliary_models
+                ]
+            )
+        else:
+            rollout_gpu_num, auxiliary_model_gpu_num = 0, 0
+        explorer_gpu_num = rollout_gpu_num + auxiliary_model_gpu_num
+
+        assert self.cluster.node_num is not None
+        assert self.cluster.gpu_per_node is not None
+        if self.cluster.node_num == 1:
+            # for single node scenarios, rollout and training are on the same node
+            nnodes = self.cluster.node_num
+            n_gpus_per_node = self.cluster.gpu_per_node - explorer_gpu_num
+        else:
+            # for multi-node scenarios, some nodes for rollout, others for training
+            trainer_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node - explorer_gpu_num
+            if (
+                trainer_gpu_num > self.cluster.gpu_per_node
+                and trainer_gpu_num % self.cluster.gpu_per_node != 0
+            ):
+                raise ValueError(
+                    "Trainer must use an integer number of nodes, "
+                    f"but got trainer_gpu_num ({trainer_gpu_num}) with gpu_per_node ({self.cluster.gpu_per_node})"
+                )
+            elif trainer_gpu_num <= 0:
+                raise ValueError(
+                    f"Not enough GPUs for training after allocating {explorer_gpu_num} GPUs for explorer."
+                )
+            if trainer_gpu_num > 0 and trainer_gpu_num <= self.cluster.gpu_per_node:
+                nnodes = 1
+                n_gpus_per_node = trainer_gpu_num
+            else:
+                nnodes = trainer_gpu_num // self.cluster.gpu_per_node
+                n_gpus_per_node = self.cluster.gpu_per_node
+
+        return {
+            "rollout_gpu_num": rollout_gpu_num,
+            "auxiliary_model_gpu_num": auxiliary_model_gpu_num,
+            "explorer_gpu_num": explorer_gpu_num,
+            "trainer_gpu_num": nnodes * n_gpus_per_node,
+            "trainer_node_num": nnodes,
+            "trainer_gpu_num_per_node": n_gpus_per_node,
+        }
 
     def flatten(self) -> Dict[str, Any]:
         """Flatten the config into a single-level dict with dot-separated keys for nested fields."""
