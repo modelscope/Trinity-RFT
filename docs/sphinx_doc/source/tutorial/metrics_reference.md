@@ -1,6 +1,6 @@
 # Metrics Reference
 
-This document provides an overview of the metric categories used in Trinity-RFT for tracking performance.
+This document provides an overview of the metric categories used in Trinity-RFT for tracking exploration, evaluation, and training progress.
 
 ## Metric Naming Convention
 
@@ -22,11 +22,81 @@ Explorer metrics track performance during the rollout phase where the model gene
 
 #### Metric Aggregation Levels
 
-Consider a task with `repeat_times` runs, an exploration step with `batch_size` tasks, and an evalutation step with `eval_taskset_size` tasks. Explorer metrics are computed and aggregated at different levels:
+Consider an exploration step with `batch_size` tasks, where each task has `repeat_times` runs. Rollout metrics (e.g., `rollout/`) are computed and aggregated at different levels:
 
-- **Task level**: Metrics aggregated across `repeat_times` runs of the same task. For exploration tasks, the metrics are aggregated across all runs of the task, e.g., `rollout/accuracy` is the average accuracy of all runs of the task. For evaluation tasks, task-level metrics include (e.g., `mean@4`, `std@4`, `best@2`, `worst@2`) that are computed from k runs of the task.
+- **Task level**: Metrics aggregated across `repeat_times` runs of the same task. For example, `rollout/accuracy` is the average accuracy of all runs of the task.
 
-- **Step level**: For most cases, the metrics are reported at the step level. For example, `rollout/accuracy/mean`, `rollout/accuracy/max`, `rollout/accuracy/min` are the average, max, and min accuracy (`rollout/accuracy`) of all tasks in the step. As for evaluation tasks, we report the mean of the metric across all evaluation tasks by default; if you want to return detailed statistics, you can set `monitor.detailed_stats` to `True` in the config.
+- **Step level**: Metrics are reported at the step level. For example, `rollout/accuracy/mean`, `rollout/accuracy/max`, `rollout/accuracy/min` are the average, max, and min accuracy (`rollout/accuracy`) of all tasks in the step.
+
+The following diagram illustrates the aggregation process for rollout metrics:
+
+```mermaid
+graph TD
+    subgraph Step["Batch_size=3 Tasks"]
+        subgraph Task1["Task 1 (repeat_times=2)"]
+            Run1_1["Run 1<br/>accuracy: 0.8"]
+            Run1_2["Run 2<br/>accuracy: 0.9"]
+            Run1_1 --> Task1_Metric["rollout/accuracy<br/>= 0.85"]
+            Run1_2 --> Task1_Metric
+        end
+
+        subgraph Task2["Task 2 (repeat_times=2)"]
+            Run2_1["Run 1<br/>accuracy: 0.6"]
+            Run2_2["Run 2<br/>accuracy: 0.9"]
+            Run2_1 --> Task2_Metric["rollout/accuracy<br/>= 0.75"]
+            Run2_2 --> Task2_Metric
+        end
+
+        subgraph TaskN["Task 3 (repeat_times=2)"]
+            Run3_1["Run 1<br/>accuracy: 0.95"]
+            Run3_2["Run 2<br/>accuracy: 0.85"]
+            Run3_1 --> Task3_Metric["rollout/accuracy<br/>= 0.9"]
+            Run3_2 --> Task3_Metric
+        end
+
+        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>rollout/accuracy/mean=0.83<br/>rollout/accuracy/max=0.9<br/>rollout/accuracy/min=0.6"]
+        Task2_Metric --> Step_Metrics
+        Task3_Metric --> Step_Metrics
+    end
+```
+
+Consider an evaluation step with `len(eval_taskset)` tasks, where each task has `repeat_times` runs. Evaluation metrics (e.g., `eval/`, `bench/`) are computed and aggregated at different levels:
+
+- **Task level**: Task-level metrics include (e.g., `mean@4`, `std@4`, `best@2`, `worst@2`) that are computed from k runs of the task.
+
+- **Step level**: By default, we report the mean of the metric across all evaluation tasks. For example, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. If you want to return detailed statistics, including mean, std, min, max, you can set `monitor.detailed_stats` to `True` in the config.
+
+The following diagram illustrates the aggregation process on a dummy dataset with three tasks for evaluation metrics. By default, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. you may configure `monitor.detailed_stats` to `True` in the config to return detailed statistics, including mean, std, min, max, e.g., `eval/dummy/accuracy/mean@2/mean=0.83`, `eval/dummy/accuracy/mean@2/std=0.062`, `eval/dummy/accuracy/mean@2/max=0.9`, and `eval/dummy/accuracy/mean@2/min=0.75`.
+
+```mermaid
+graph TD
+    subgraph Step["len(eval_taskset)=3 Tasks"]
+        subgraph Task1["Task 1 (repeat_times=2)"]
+            Run1_1["Run 1<br/>accuracy: 0.8"]
+            Run1_2["Run 2<br/>accuracy: 0.9"]
+            Run1_1 --> Task1_Metric["eval/dummy/accuracy/mean@2=0.85<br/>eval/dummy/accuracy/std@2=0.05"]
+            Run1_2 --> Task1_Metric
+        end
+
+        subgraph Task2["Task 2 (repeat_times=2)"]
+            Run2_1["Run 1<br/>accuracy: 0.6"]
+            Run2_2["Run 2<br/>accuracy: 0.9"]
+            Run2_1 --> Task2_Metric["eval/dummy/accuracy/mean@2=0.75<br/>eval/dummy/accuracy/std@2=0.15"]
+            Run2_2 --> Task2_Metric
+        end
+
+        subgraph TaskN["Task 3 (repeat_times=2)"]
+            Run3_1["Run 1<br/>accuracy: 0.95"]
+            Run3_2["Run 2<br/>accuracy: 0.85"]
+            Run3_1 --> Task3_Metric["eval/dummy/accuracy/mean@2=0.9<br/>eval/dummy/accuracy/std@2=0.05"]
+            Run3_2 --> Task3_Metric
+        end
+
+        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>eval/dummy/accuracy/mean@2=0.83<br/>eval/dummy/accuracy/std@2=0.083"]
+        Task2_Metric --> Step_Metrics
+        Task3_Metric --> Step_Metrics
+    end
+```
 
 
 #### Rollout Metrics (`rollout/`)
@@ -36,11 +106,7 @@ Rollout metrics track performance during the rollout phase where the model gener
 - **Format**: `rollout/{metric_name}/{statistic}`
 - **Examples**:
   - `rollout/accuracy/mean`: Average accuracy of generated responses
-  - `rollout/format_score/std`: Average format correctness score
-  - `rollout/finished_task_count`: Number of completed rollout tasks
-  - `rollout/model_version`: Model version used for rollout
-  - `rollout/time/run_execution/mean`: Average execution time per rollout
-
+  - `rollout/format_score/mean`: Average format correctness score
 
 #### Eval Metrics (`eval/`) and Benchmark Metrics (`bench/`)
 
@@ -49,9 +115,7 @@ Evaluation metrics measure model performance on held-out evaluation tasks. These
 - **Format**: `eval/{task_name}/{metric_name}/{statistic}` or `bench/{task_name}/{metric_name}/{statistic}`
 - **Examples**:
   - `eval/gsm8k-eval/accuracy/mean@4`: Mean accuracy across repeat_times=4 runs
-  - `eval/gsm8k-eval/accuracy/best@2`: Best accuracy value across k=2 runs, computed by bootstrap method
-  - `eval/gsm8k-eval/accuracy/worst@2`: Worst accuracy value across k=2 runs, computed by bootstrap method
-  - `bench/gsm8k-eval/accuracy/mean@4`: Mean accuracy across repeat_times=4 runs
+  - `bench/gsm8k-eval/accuracy/best@4`: Best accuracy value across repeat_times=4 runs
 
 - **Note**:
   - Eval and bench metrics are computed in the same way, the only difference is the prefix of the metric name.
@@ -65,14 +129,7 @@ Time metrics measure execution duration for various operations throughout the tr
 - **Format**: `time/{operation_name}`
 - **Examples**:
   - `time/eval`: Time from the start of submitting evaluation tasks to the end of the evaluation phase; this duration includes both evaluation tasks and some rollout tasks.
-  - `time/read_experience`: Time to read experiences from taskset
-  - `time/wait_explore_step`: Time waiting for a rollout/exploration step completion
-  - `time/update_critic`: Time to update critic model
-  - `time/update_actor`: Time to update actor model
-  - `time/sync_weight`: Time to synchronize model weights
-  - `time/save_checkpoint`: Time to save model checkpoint
   - `time/train_step`: Total time for one training step
-  - `time/trainer_sync_interval`: Time interval between trainer synchronizations
 
 **Note**:
   - Time measuring can be inaccurate due to the asynchronous nature of the exploration pipeline, but it is still useful for monitoring the overall training progress.
@@ -80,84 +137,15 @@ Time metrics measure execution duration for various operations throughout the tr
   - Some training operations also report per-token timing metrics with the prefix `timing_per_token_ms/` (e.g., `timing_per_token_ms/update_actor`, `timing_per_token_ms/update_critic`, `timing_per_token_ms/adv`, `timing_per_token_ms/values`). These metrics normalize execution time by the number of tokens processed, providing efficiency measurements independent of batch size.
 
 
-### Training Metrics 
+### Training Metrics
 
-This category includes metrics that track the training dynamics of the policy (actor) model (`actor/`) and the value function (critic) model (`critic/`), as well as some performance metrics (`perf/`, `global_seqlen/`, `response_length/`, `prompt_length/`, `time/`).
-
-#### Actor Metrics (`actor/`)
-
-Actor metrics track the training dynamics of the policy (actor) model in reinforcement learning.
-
-- **Format**: `actor/{metric_name}`
-- **Examples**:
-  - `actor/pg_loss`: Policy gradient loss
-  - `actor/entropy_loss`: Entropy regularization loss
-  - `actor/kl_loss`: KL divergence loss
-  - `actor/ppo_kl`: PPO-specific KL divergence
-  - `actor/pg_clipfrac`: Fraction of policy gradient updates clipped
-  - `actor/final_loss`: Final loss used to update the actor model, usually a combination of policy gradient loss, entropy regularization loss, and KL divergence loss.
-
-#### Critic Metrics (`critic/`)
-
-Critic metrics track the training dynamics of the value function (critic) model.
-
-- **Format**: `critic/{metric_name}/{statistic}`
-- **Examples**:
-  - `critic/score/mean`: Mean sequence-level score
-  - `critic/rewards/mean`: Mean sequence-level reward
-  - `critic/advantages/mean`: Mean advantage values
-  - `critic/returns/mean`: Mean return values
-
-#### Performance Metrics (`perf/`)
-
-Performance metrics measure computational efficiency and resource utilization.
-
-- **Format**: `perf/{metric_name}`
-- **Examples**:
-  - `perf/mfu/actor`: Model FLOPs Utilization (MFU) for actor
-  - `perf/mfu/critic`: Model FLOPs Utilization (MFU) for critic
-  - `perf/mfu/actor_infer`: Model FLOPs Utilization for actor inference (when recomputing logprobs)
-  - `perf/max_memory_allocated_gb`: Peak GPU memory allocated
-  - `perf/max_memory_reserved_gb`: Peak GPU memory reserved
-  - `perf/cpu_memory_used_gb`: CPU memory usage
-  - `perf/total_num_tokens`: Total number of tokens processed
-  - `perf/time_per_step`: Time per training step
-  - `perf/throughput`: Tokens processed per second
-
-#### Global Sequence Length Metrics (`global_seqlen/`)
-
-Global sequence length metrics track sequence length statistics across the training batch.
-
-- **Format**: `global_seqlen/{statistic}`
-- **Examples**:
-  - `global_seqlen/mean`: Mean sequence length
-  - `global_seqlen/min`: Minimum sequence length
-  - `global_seqlen/max`: Maximum sequence length
-  - `global_seqlen/minmax_diff`: Difference between max and min
-  - `global_seqlen/balanced_min`: Balanced minimum (for load balancing)
-  - `global_seqlen/balanced_max`: Balanced maximum (for load balancing)
-
-#### Response and Prompt Length Metrics (`response_length/` and `prompt_length/`)
-
-Metrics tracking the length of generated responses and input prompts.
-
-- **Format**: `response_length/{statistic}` or `prompt_length/{statistic}`
-- **Examples**:
-  - `response_length/mean`: Mean response length in tokens
-  - `response_length/max`: Maximum response length
-  - `response_length/min`: Minimum response length
-  - `response_length/clip_ratio`: Fraction of responses clipped to max length
-  - `prompt_length/mean`: Mean prompt length in tokens
-  - `prompt_length/clip_ratio`: Fraction of prompts clipped to max length
-
-
-**Note**:
-  - `/clip_ratio` means the fraction of responses/prompts that matches the max length (instead of being truncated).
+This category includes metrics that track the training dynamics of the policy (actor) model (`actor/`) and the value function (critic) model (`critic/`), as well as some performance metrics (`perf/`, `global_seqlen/`, `response_length/`, `prompt_length/`, `time/`). These metrics are adapted from [veRL](https://github.com/volcengine/verl). Interested users can refer to the [veRL documentation](https://verl.readthedocs.io/en/latest/index.html) for more details.
 
 
 ### Data Processing Metrics
 
-This category includes metrics that track the processing of experiences through various pipeline operators (`experience_pipeline/`) and data sampling statistics (`sample/`).
+This category includes metrics that track the processing of experiences through various pipeline operators (`experience_pipeline/`) and data sampling statistics (`sample/`). These metrics are aggregated at the step level, as the experience pipeline and data sampling are performed in each step.
+
 
 #### Experience Pipeline Metrics (`experience_pipeline/` and `time/experience_pipeline/`)
 
@@ -166,11 +154,24 @@ Experience pipeline metrics track the processing of experiences through various 
 - **Format**: `experience_pipeline/{metric_name}`
 - **Examples**:
   - `experience_pipeline/experience_count`: Number of experiences processed
-  - `experience_pipeline/filtered_count`: Number of experiences filtered out
-  - `experience_pipeline/group_advantages/reward_mean/mean`: Mean reward statistics
-  - `time/experience_pipeline/operator/{operator_name}`: Time for specific pipeline operators
-  - `time/experience_pipeline/write`: Time to write experiences to storage
-  - `time/experience_pipeline/total`: Total time for experience processing
+  - `experience_pipeline/group_advantages/reward_mean/mean`: Here `reward_mean` is the mean reward of each task, then we compute the mean of the mean rewards of all tasks in the step.
+
+The following diagram illustrates the aggregation process for data processing metrics:
+```mermaid
+graph TD
+    subgraph Step["4 Experiences in one step"]
+        subgraph Task1["Experience 1"]
+            Run1_1["Run 1<br/>reward_mean: 0.8"]
+            Run1_2["Run 2<br/>reward_mean: 0.8"]
+            Run2_1["Run 3<br/>reward_mean: 0.9"]
+            Run2_2["Run 4<br/>reward_mean: 0.9"]
+            Run1_1 --> Task1_Metric["rollout/accuracy<br/>= 0.85"]
+            Run1_2 --> Task1_Metric
+            Run2_1 --> Task1_Metric
+            Run2_2 --> Task1_Metric
+        end
+    end
+```
 
 #### Sample Metrics (`sample/`)
 
