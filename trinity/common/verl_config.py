@@ -421,15 +421,9 @@ class veRLConfig:
 
     def synchronize_config(self, config: Config) -> None:  # noqa: C901
         """Synchronize config."""
-        gpu_allocation_info = config.get_gpu_allocation_info()
-        self.trainer.nnodes = gpu_allocation_info["trainer_node_num"]
-        self.trainer.n_gpus_per_node = gpu_allocation_info["trainer_gpu_num_per_node"]
-
-        world_size = gpu_allocation_info["trainer_gpu_num"]
-        if world_size <= 0:
-            raise ValueError(
-                "The number of training gpus must be greater than 0, please check `engine_num` in explorer configs"
-            )
+        self.trainer.nnodes = config.cluster.trainer_node_num
+        self.trainer.n_gpus_per_node = config.cluster.trainer_gpu_num_per_node
+        world_size = config.cluster.trainer_gpu_num
         if config.buffer.train_batch_size % world_size != 0:
             raise ValueError(
                 f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"

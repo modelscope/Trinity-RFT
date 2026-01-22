@@ -76,9 +76,15 @@ class RayClusterConfigValidator(ConfigValidator):
         if config.ray_namespace is None or len(config.ray_namespace) == 0:
             config.ray_namespace = f"{config.project}/{config.name}"
 
-        # check cluster infomation
-        if config.cluster.node_num is not None and config.cluster.gpu_per_node is not None:
+        if config.model.tinker.enable:
             return
+
+        # check cluster infomation
+        if not config.cluster.node_num or not config.cluster.gpu_per_node:
+            self._set_cluster_info(config)
+        self._set_gpu_allocation_info(config)
+
+    def _set_cluster_info(self, config: Config) -> None:
         # init ray cluster to detect node_num and gpu_per_node
         was_initialized = ray.is_initialized()
         if not was_initialized:
@@ -93,12 +99,12 @@ class RayClusterConfigValidator(ConfigValidator):
             raise RuntimeError("Could not find any alive nodes in the Ray cluster.")
 
         # set node_num
-        if config.cluster.node_num is None:
+        if not config.cluster.node_num:
             config.cluster.node_num = len(alive_nodes)
             self.logger.info(f"Auto-detected and set node_num: {config.cluster.node_num}")
 
         # set gpu_per_node
-        if config.cluster.gpu_per_node is None:
+        if not config.cluster.gpu_per_node:
             gpu_per_node = 0
             for node in alive_nodes:
                 node_gpus = node.get("Resources", {}).get("GPU")
@@ -111,6 +117,48 @@ class RayClusterConfigValidator(ConfigValidator):
 
         if not was_initialized:
             ray.shutdown()
+
+    def _set_gpu_allocation_info(self, config: Config) -> None:
+        cluster = config.cluster
+        if config.mode != "train":
+            cluster.rollout_gpu_num = (
+                config.explorer.rollout_model.tensor_parallel_size
+                * config.explorer.rollout_model.engine_num
+            )
+            cluster.auxiliary_model_gpu_num = sum(
+                model.tensor_parallel_size * model.engine_num
+                for model in config.explorer.auxiliary_models
+            )
+        cluster.explorer_gpu_num = cluster.rollout_gpu_num + cluster.auxiliary_model_gpu_num
+        cluster.total_gpu_num = cluster.node_num * cluster.gpu_per_node
+        if config.mode in ["explore", "bench", "serve"]:
+            if cluster.explorer_gpu_num > cluster.total_gpu_num:
+                raise ValueError(
+                    f"Total GPU number ({cluster.total_gpu_num}) is less than "
+                    f"the number of GPUs required for rollout ({cluster.explorer_gpu_num})."
+                )
+        else:
+            if cluster.explorer_gpu_num >= cluster.total_gpu_num:
+                raise ValueError(
+                    "Not enough GPUs for trainer. "
+                    f"Explorer requires {cluster.explorer_gpu_num} GPUs, "
+                    f"but total available GPUs are {cluster.total_gpu_num}."
+                )
+
+            cluster.trainer_gpu_num = cluster.total_gpu_num - cluster.explorer_gpu_num
+            if cluster.trainer_gpu_num <= cluster.gpu_per_node:
+                cluster.trainer_node_num = 1
+                cluster.trainer_gpu_num_per_node = cluster.trainer_gpu_num
+            else:
+                if cluster.trainer_gpu_num % cluster.gpu_per_node != 0:
+                    raise ValueError(
+                        "Trainer must use an integer number of nodes, "
+                        f"but got trainer_gpu_num ({cluster.trainer_gpu_num}) "
+                        f"with gpu_per_node ({cluster.gpu_per_node}). "
+                        "Please change `engine_num` or `tensor_parallel_size` in explorer config."
+                    )
+                cluster.trainer_node_num = cluster.trainer_gpu_num // cluster.gpu_per_node
+                cluster.trainer_gpu_num_per_node = cluster.gpu_per_node
 
 
 class AlgorithmConfigValidator(ConfigValidator):
@@ -315,43 +363,20 @@ class ExplorerConfigValidator(ConfigValidator):
         ]
         rope_args = ["rope_scaling", "rope_theta"]
         model_args = rollout_args + length_args + rope_args
-        set_if_none(config.explorer.rollout_model, "model_path", config.model.model_path)
-        for args in model_args:
+
+        # rollout model
+        for args in model_args + ["model_path"]:
             set_if_none(config.explorer.rollout_model, args, getattr(config.model, args))
-        if (
-            config.explorer.rollout_model.chat_template is None
-            and config.model.custom_chat_template is not None
-        ):
-            config.explorer.rollout_model.chat_template = config.model.custom_chat_template
+        set_if_none(
+            config.explorer.rollout_model, "chat_template", config.model.custom_chat_template
+        )
+
+        # auxiliary models
         for aux_model in config.explorer.auxiliary_models:
             if not aux_model.model_path:
                 raise ValueError("auxiliary model's model_path is required.")
             for args in model_args:
                 set_if_none(aux_model, args, getattr(config.model, args))
-
-        if config.explorer.rollout_model.engine_type != "tinker":
-            # check gpu number
-            rollout_gpu_num = (
-                config.explorer.rollout_model.tensor_parallel_size
-                * config.explorer.rollout_model.engine_num
-                + sum(
-                    (
-                        model.tensor_parallel_size * model.engine_num
-                        for model in config.explorer.auxiliary_models
-                    )
-                )
-            )
-            assert config.cluster.node_num is not None
-            assert config.cluster.gpu_per_node is not None
-            total_gpu_num = config.cluster.node_num * config.cluster.gpu_per_node
-            if config.mode in ["explore", "bench", "serve"] and rollout_gpu_num > total_gpu_num:
-                raise ValueError(
-                    f"Total GPU number ({total_gpu_num}) is less than the number of GPUs required for rollout ({rollout_gpu_num})."
-                )
-            elif config.mode == "both" and rollout_gpu_num >= total_gpu_num:
-                raise ValueError(
-                    f"Not enough GPUs for trainer in 'both' mode. Explorer requires {rollout_gpu_num} GPUs, but total available GPUs are {total_gpu_num}."
-                )
 
         if config.explorer.over_rollout.ratio > 0.0:
             if not (0.0 <= config.explorer.over_rollout.ratio < 1.0):
@@ -411,10 +436,7 @@ class ExplorerConfigValidator(ConfigValidator):
 class SynchronizerConfigValidator(ConfigValidator):
     def validate(self, config: Config) -> None:
         config.synchronizer.ray_namespace = config.ray_namespace
-        config.synchronizer.explorer_world_size = (
-            config.explorer.rollout_model.engine_num
-            * config.explorer.rollout_model.tensor_parallel_size
-        )
+        config.synchronizer.explorer_world_size = config.cluster.rollout_gpu_num
         if config.synchronizer.sync_method == SyncMethod.NCCL:
             if config.mode in ["train", "explore", "bench", "serve"]:
                 config.synchronizer.sync_method = SyncMethod.CHECKPOINT
@@ -648,6 +670,11 @@ class BufferConfigValidator(ConfigValidator):
                     f"Auto set `data_processor.experience_pipeline.input_save_path` to {experience_pipeline.input_save_path}"
                 )
 
+            if config.service.data_juicer is not None:
+                for operator in experience_pipeline.operators:
+                    if operator.name == "data_juicer":
+                        operator.args["service_config"] = config.service.data_juicer
+
         task_pipeline = config.data_processor.task_pipeline
         if task_pipeline is not None and config.mode in {"explore", "train", "both"}:
             if task_pipeline.output is None:
@@ -669,12 +696,6 @@ class BufferConfigValidator(ConfigValidator):
                     f"Task pipeline output path {task_pipeline.output.path} already exists.\n"
                     "Please choose a different output path to avoid overwriting."
                 )
-
-        if config.service.data_juicer is None:
-            return
-        for operator in config.data_processor.experience_pipeline.operators:
-            if operator.name == "data_juicer":
-                operator.args["service_config"] = config.service.data_juicer
 
 
 class TrainerConfigValidator(ConfigValidator):
@@ -722,13 +743,13 @@ class TrainerConfigValidator(ConfigValidator):
 validators = [
     DeprecatedConfigValidator(),
     GlobalConfigValidator(),
-    RayClusterConfigValidator(),
     MonitorConfigValidator(),
     AlgorithmConfigValidator(),
     ModelConfigValidator(),
-    ExplorerConfigValidator(),
+    RayClusterConfigValidator(),
     SynchronizerConfigValidator(),
     IntervalConfigValidator(),
+    ExplorerConfigValidator(),
     BufferConfigValidator(),
     TrainerConfigValidator(),
 ]

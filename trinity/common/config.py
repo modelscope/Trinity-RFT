@@ -604,8 +604,17 @@ class ClusterConfig:
     """Config for the cluster."""
 
     ray_address: str = "auto"
-    node_num: Optional[int] = None
-    gpu_per_node: Optional[int] = None
+    node_num: int = 0
+    gpu_per_node: int = 0
+
+    # ! DO NOT SET
+    total_gpu_num: int = 0
+    rollout_gpu_num: int = 0
+    auxiliary_model_gpu_num: int = 0
+    explorer_gpu_num: int = 0
+    trainer_gpu_num: int = 0
+    trainer_node_num: int = 0
+    trainer_gpu_num_per_node: int = 0
 
 
 @Experimental
@@ -882,59 +891,6 @@ class Config:
         for validator in validators:
             validator.validate(self)
         return self
-
-    def get_gpu_allocation_info(self) -> Dict[str, int]:
-        if self.mode == "both":
-            rollout_gpu_num = (
-                self.explorer.rollout_model.tensor_parallel_size
-                * self.explorer.rollout_model.engine_num
-            )
-            auxiliary_model_gpu_num = sum(
-                [
-                    model.tensor_parallel_size * model.engine_num
-                    for model in self.explorer.auxiliary_models
-                ]
-            )
-        else:
-            rollout_gpu_num, auxiliary_model_gpu_num = 0, 0
-        explorer_gpu_num = rollout_gpu_num + auxiliary_model_gpu_num
-
-        assert self.cluster.node_num is not None
-        assert self.cluster.gpu_per_node is not None
-        if self.cluster.node_num == 1:
-            # for single node scenarios, rollout and training are on the same node
-            nnodes = self.cluster.node_num
-            n_gpus_per_node = self.cluster.gpu_per_node - explorer_gpu_num
-        else:
-            # for multi-node scenarios, some nodes for rollout, others for training
-            trainer_gpu_num = self.cluster.node_num * self.cluster.gpu_per_node - explorer_gpu_num
-            if (
-                trainer_gpu_num > self.cluster.gpu_per_node
-                and trainer_gpu_num % self.cluster.gpu_per_node != 0
-            ):
-                raise ValueError(
-                    "Trainer must use an integer number of nodes, "
-                    f"but got trainer_gpu_num ({trainer_gpu_num}) with gpu_per_node ({self.cluster.gpu_per_node})"
-                )
-            elif trainer_gpu_num <= 0:
-                raise ValueError(
-                    f"Not enough GPUs for training after allocating {explorer_gpu_num} GPUs for explorer."
-                )
-            if trainer_gpu_num > 0 and trainer_gpu_num <= self.cluster.gpu_per_node:
-                nnodes = 1
-                n_gpus_per_node = trainer_gpu_num
-            else:
-                nnodes = trainer_gpu_num // self.cluster.gpu_per_node
-                n_gpus_per_node = self.cluster.gpu_per_node
-
-        return {
-            "rollout_gpu_num": rollout_gpu_num,
-            "auxiliary_model_gpu_num": auxiliary_model_gpu_num,
-            "explorer_gpu_num": explorer_gpu_num,
-            "trainer_gpu_num": nnodes * n_gpus_per_node,
-            "trainer_node_num": nnodes,
-            "trainer_gpu_num_per_node": n_gpus_per_node,
-        }
 
     def flatten(self) -> Dict[str, Any]:
         """Flatten the config into a single-level dict with dot-separated keys for nested fields."""
