@@ -56,7 +56,7 @@ data = [
     "py-data-juicer>=1.4.3"
 ]
 agent = [
-    "agentscope>=1.0.9"
+    "agentscope>=1.0.12"
 ]
 rm_gallery = [
     "rm-gallery>=0.1.5"

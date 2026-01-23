@@ -43,6 +43,7 @@ class BaseExplorerCase(RayUnittestBase):
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.synchronizer.sync_interval = 2
         self.config.explorer.eval_interval = 4
+        self.config.monitor.detailed_stats = False
 
 
 class TestExplorerCountdownEval(BaseExplorerCase):
@@ -69,14 +70,49 @@ class TestExplorerCountdownEval(BaseExplorerCase):
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
         self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
         for eval_taskset, k_list in zip(eval_tasksets, [[1], [2, 4, 6], [2, 4, 8, 10]]):
-            for eval_stats in ["mean", "best", "worst"]:
-                for k in k_list:
-                    for stats in ["mean", "std"]:
-                        metric_name = "score" if eval_taskset.name == "countdown" else "accuracy"
-                        self.assertIn(
-                            f"eval/{eval_taskset.name}/{metric_name}/{eval_stats}@{k}/{stats}",
-                            eval_metrics,
-                        )
+            metric_name = "score" if eval_taskset.name == "countdown" else "accuracy"
+            repeat_times = k_list[-1]
+            expected_stat_suffixes = [f"mean@{repeat_times}", f"std@{repeat_times}"]
+            for k in k_list:
+                if k == 1:
+                    continue
+                expected_stat_suffixes.extend([f"best@{k}", f"worst@{k}"])
+            # only return the mean of the column
+            for stat_suffix in expected_stat_suffixes:
+                self.assertIn(
+                    f"eval/{eval_taskset.name}/{metric_name}/{stat_suffix}",
+                    eval_metrics,
+                )
+
+
+class TestExplorerEvalDetailedStats(BaseExplorerCase):
+    def test_explorer(self):
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.monitor.detailed_stats = True
+        eval_taskset = get_unittest_dataset_config("eval_short")
+        eval_taskset.repeat_times = 6
+        self.config.buffer.explorer_input.eval_tasksets = [eval_taskset]
+        self.config.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        self.config.check_and_update()
+        explore(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        eval_metrics = parser.metric_list("eval")
+        self.assertTrue(len(eval_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
+        self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
+        metric_name, repeat_times, k_list = "accuracy", 6, [2, 4, 6]
+        expected_stat_suffixes = [f"mean@{repeat_times}", f"std@{repeat_times}"]
+        for k in k_list:  # k_list does not include 1
+            expected_stat_suffixes.extend([f"best@{k}", f"worst@{k}"])
+        # test detailed stats
+        for stat_suffix in expected_stat_suffixes:
+            for stats in ["mean", "std", "max", "min"]:
+                self.assertIn(
+                    f"eval/{eval_taskset.name}/{metric_name}/{stat_suffix}/{stats}",
+                    eval_metrics,
+                )
 
 
 class TestExplorerGSM8KRULERNoEval(BaseExplorerCase):

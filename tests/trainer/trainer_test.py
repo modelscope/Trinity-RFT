@@ -172,12 +172,14 @@ class TestTrainerCountdown(BaseTrainerCase):
             for taskset_name in ["countdown", "copy_countdown"]:
                 metrics = parser.metric_list(f"{prefix}/{taskset_name}")
                 self.assertGreater(len(metrics), 0, f"{prefix}/{taskset_name} metrics not found")
-                for eval_stats in ["mean", "best", "worst"]:
-                    for k in [2, 4]:
-                        for stats in ["mean", "std"]:
-                            metric_name = f"{prefix}/{taskset_name}/score/{eval_stats}@{k}/{stats}"
-                            metric_steps = parser.metric_steps(metric_name)
-                            self.assertEqual(metric_steps, [0, 4, 8])
+                repeat_times, k_list = 4, [2, 4]
+                expected_stat_suffixes = [f"mean@{repeat_times}", f"std@{repeat_times}"]
+                for k in k_list:
+                    expected_stat_suffixes.extend([f"best@{k}", f"worst@{k}"])
+                for stat_suffix in expected_stat_suffixes:
+                    metric_name = f"{prefix}/{taskset_name}/score/{stat_suffix}"
+                    metric_steps = parser.metric_steps(metric_name)
+                    self.assertEqual(metric_steps, [0, 4, 8])
 
     def tearDown(self):
         # remove dir only when the test passed
@@ -1340,12 +1342,14 @@ class TestTrainerLoRA(BaseTrainerCase):
         for prefix in ["eval", "bench"]:
             gsm8k_metrics = parser.metric_list(f"{prefix}/gsm8k")
             self.assertGreater(len(gsm8k_metrics), 0, f"{prefix}/gsm8k metrics not found")
-            for eval_stats in ["mean", "best", "worst"]:
-                for k in [2, 4, 8]:
-                    for stats in ["mean", "std"]:
-                        metric_name = f"{prefix}/gsm8k/accuracy/{eval_stats}@{k}/{stats}"
-                        metric_steps = parser.metric_steps(metric_name)
-                        self.assertEqual(metric_steps, [0, 2])
+            repeat_times, k_list = 8, [2, 4, 8]
+            expected_stat_suffixes = [f"mean@{repeat_times}", f"std@{repeat_times}"]
+            for k in k_list:
+                expected_stat_suffixes.extend([f"best@{k}", f"worst@{k}"])
+            for stat_suffix in expected_stat_suffixes:
+                metric_name = f"{prefix}/gsm8k/accuracy/{stat_suffix}"
+                metric_steps = parser.metric_steps(metric_name)
+                self.assertEqual(metric_steps, [0, 2])
 
     def tearDown(self):
         shutil.rmtree(self.config.checkpoint_job_dir, ignore_errors=True)

@@ -6,8 +6,9 @@ import time
 import traceback
 from collections import defaultdict, deque
 from dataclasses import dataclass, field, replace
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import ray
 
 from trinity.common.config import Config
@@ -29,6 +30,48 @@ class TaskWrapper:
     sub_task_num: int = 1  # number of sub tasks splitted from this task
     # if max_repeat_times_per_runner is set, one task may be splitted into multiple sub tasks
     results: List[Tuple[Status, List[Experience]]] = field(default_factory=list)
+
+
+# Adapted from verl/trainer/ppo/metric_utils.py
+def bootstrap_metric(
+    data: list[Any],
+    subset_size: int,
+    reduce_fns: list[Callable[[np.ndarray], float]],
+    n_bootstrap: int = 1000,
+    seed: int = 42,
+) -> list[tuple[float, float]]:
+    """
+    Performs bootstrap resampling to estimate statistics of metrics.
+
+    This function uses bootstrap resampling to estimate the mean and standard deviation
+    of metrics computed by the provided reduction functions on random subsets of the data.
+
+    Args:
+        data: List of data points to bootstrap from.
+        subset_size: Size of each bootstrap sample.
+        reduce_fns: List of functions that compute a metric from a subset of data.
+        n_bootstrap: Number of bootstrap iterations. Defaults to 1000.
+        seed: Random seed for reproducibility. Defaults to 42.
+
+    Returns:
+        A list of tuples, where each tuple contains (mean, std) for a metric
+        corresponding to each reduction function in reduce_fns.
+
+    Example:
+        >>> data = [1, 2, 3, 4, 5]
+        >>> reduce_fns = [np.mean, np.max]
+        >>> bootstrap_metric(data, 3, reduce_fns)
+        [(3.0, 0.5), (4.5, 0.3)]  # Example values
+    """
+    np.random.seed(seed)
+
+    bootstrap_metric_lsts = [[] for _ in range(len(reduce_fns))]
+    for _ in range(n_bootstrap):
+        bootstrap_idxs = np.random.choice(len(data), size=subset_size, replace=True)
+        bootstrap_data = [data[i] for i in bootstrap_idxs]
+        for i, reduce_fn in enumerate(reduce_fns):
+            bootstrap_metric_lsts[i].append(reduce_fn(bootstrap_data))
+    return [(np.mean(lst), np.std(lst)) for lst in bootstrap_metric_lsts]
 
 
 def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str, float]:
@@ -54,16 +97,25 @@ def calculate_task_level_metrics(metrics: List[Dict], is_eval: bool) -> Dict[str
             if "time/task_execution" in key or "time/run_execution" in key:
                 result[key] = sum(values) / len(values)
                 continue
-            k_list = []
-            k = 2
-            while k < len(values):
-                k_list.append(k)
-                k *= 2
-            k_list.append(len(values))
-            for k in k_list:
-                result[f"{key}/mean@{k}"] = sum(values[:k]) / k
-                result[f"{key}/best@{k}"] = max(values[:k])
-                result[f"{key}/worst@{k}"] = min(values[:k])
+
+            n_values = len(values)
+            result[f"{key}/mean@{n_values}"] = np.mean(values)
+            result[f"{key}/std@{n_values}"] = np.std(values)
+
+            if n_values > 1:
+                ns = []
+                n = 2
+                while n < n_values:
+                    ns.append(n)
+                    n *= 2
+                ns.append(n_values)
+
+                for n in ns:
+                    [(bon_mean, bon_std), (won_mean, won_std)] = bootstrap_metric(
+                        data=values, subset_size=n, reduce_fns=[np.max, np.min], seed=42
+                    )
+                    result[f"{key}/best@{n}"] = bon_mean
+                    result[f"{key}/worst@{n}"] = won_mean
         return result
     else:
         return {

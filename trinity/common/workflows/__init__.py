@@ -48,6 +48,8 @@ WORKFLOWS: Registry = Registry(
         # on-policy distillation workflows
         "on_policy_distill_workflow": "trinity.common.workflows.on_policy_distill_workflow.OnPolicyDistillWorkflow",
         "on_policy_distill_math_workflow": "trinity.common.workflows.on_policy_distill_workflow.OnPolicyDistillMathWorkflow",
+        # custom workflows
+        "sudoku_workflow": "trinity.common.workflows.envs.sudoku.sudoku_workflow.SudokuWorkflow",
     },
 )
 
