@@ -1,3 +1,4 @@
+import gc
 import os
 import unittest
 from collections import defaultdict
@@ -243,20 +244,50 @@ class TensorBoardParser:
         return [name for name in self._metrics if name.startswith(metric_prefix)]
 
 
-class RayUnittestBase(unittest.TestCase):
+class RayCleanupPlugin:
+    @classmethod
+    def _cleanup_ray_data_state(cls):
+        """clean up the global states of Ray Data"""
+        try:
+            # reset execution context
+            if hasattr(ray.data._internal.execution.streaming_executor, "_execution_context"):
+                ray.data._internal.execution.streaming_executor._execution_context = None
+
+            # trigger gc.collect() on all workers in the cluster
+            ray._private.internal_api.global_gc()
+
+            # clean up stats manager
+            from ray.data._internal.stats import StatsManager
+
+            if hasattr(StatsManager, "_instance"):
+                StatsManager._instance = None
+
+        except Exception:
+            pass
+
+
+class RayUnittestBase(unittest.TestCase, RayCleanupPlugin):
     @classmethod
     def setUpClass(cls):
         ray.init(ignore_reinit_error=True, namespace="trinity_unittest")
+
+        # erase existing resources
+        cls._cleanup_ray_data_state()
+        gc.collect()
 
     @classmethod
     def tearDownClass(cls):
         ray.shutdown(_exiting_interpreter=True)
 
 
-class RayUnittestBaseAsync(unittest.IsolatedAsyncioTestCase):
+class RayUnittestBaseAsync(unittest.IsolatedAsyncioTestCase, RayCleanupPlugin):
     @classmethod
     def setUpClass(cls):
         ray.init(ignore_reinit_error=True, namespace="trinity_unittest")
+
+        # erase existing resources
+        cls._cleanup_ray_data_state()
+        gc.collect()
 
     @classmethod
     def tearDownClass(cls):
