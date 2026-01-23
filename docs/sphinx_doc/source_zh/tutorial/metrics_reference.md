@@ -20,7 +20,17 @@
 
 探索器指标跟踪模型生成响应的 rollout 阶段的性能，包括 rollout 指标（`rollout/`）、评估指标（`eval/`）和一些时间指标（`time/`）。
 
-#### 指标聚合级别
+
+#### Rollout 指标（`rollout/`）
+
+Rollout 指标跟踪模型生成响应的 rollout 阶段的性能。
+
+- **格式**：`rollout/{metric_name}/{statistic}`
+- **示例**：
+  - `rollout/accuracy/mean`：生成响应的平均准确率
+  - `rollout/format_score/mean`：平均格式正确性分数
+
+**指标聚合过程**：
 
 考虑一个包含 `batch_size` 个任务的探索步骤，其中每个任务有 `repeat_times` 次运行。Rollout 指标（例如，`rollout/`）在不同级别计算和聚合：
 
@@ -60,13 +70,28 @@ graph TD
     end
 ```
 
+#### 评估指标（`eval/`）和基准测试指标（`bench/`）
+
+评估指标衡量模型在保留的评估任务上的性能。这些指标在定期评估运行期间计算。
+
+- **格式**：`eval/{task_name}/{metric_name}/{statistic}` 或 `bench/{task_name}/{metric_name}/{statistic}`
+- **示例**：
+  - `eval/gsm8k-eval/accuracy/mean@4`：跨 repeat_times=4 次运行的平均准确率
+  - `bench/gsm8k-eval/accuracy/best@4`：跨 repeat_times=4 次运行的最佳准确率值
+
+- **注意**：
+  - Eval 和 bench 指标的计算方式相同，唯一的区别是指标名称的前缀。
+  - 默认情况下，只返回指标的*平均值*。如果你想返回详细统计信息，可以在配置中将 `monitor.detailed_stats` 设置为 `True`。
+
 考虑一个包含 `len(eval_taskset)` 个任务的评估步骤，其中每个任务有 `repeat_times` 次运行。评估指标（例如，`eval/`、`bench/`）在不同级别计算和聚合：
 
 - **任务级别**：任务级别指标包括（例如，`mean@4`、`std@4`、`best@2`、`worst@2`），这些指标是从任务的 k 次运行中计算的。
 
 - **步骤级别**：默认情况下，我们报告所有评估任务中指标的平均值。例如，报告所有评估任务中指标的 `mean@k`、`std@k`、`best@k`、`worst@k`。如果你想返回详细统计信息，包括 mean、std、min、max，可以在配置中将 `monitor.detailed_stats` 设置为 `True`。
 
-以下图表说明了在包含三个任务的虚拟数据集上评估指标的聚合过程。默认情况下，报告所有评估任务中指标的 `mean@k`、`std@k`、`best@k`、`worst@k`。你可以在配置中将 `monitor.detailed_stats` 设置为 `True` 以返回详细统计信息，包括 mean、std、min、max，例如 `eval/dummy/accuracy/mean@2/mean=0.83`、`eval/dummy/accuracy/mean@2/std=0.062`、`eval/dummy/accuracy/mean@2/max=0.9` 和 `eval/dummy/accuracy/mean@2/min=0.75`。
+**指标聚合过程**：
+
+以下图表说明了在包含三个任务的虚拟数据集上评估指标的聚合过程。默认情况下，报告所有评估任务中指标的 `mean@k`、`std@k`、`best@k`、`worst@k`。你可以在配置中将 `monitor.detailed_stats` 设置为 `True` 以返回详细统计信息。
 
 ```mermaid
 graph TD
@@ -97,29 +122,17 @@ graph TD
         Task3_Metric --> Step_Metrics
     end
 ```
+当你将 `monitor.detailed_stats` 设置为 `True` 时，，你会得到详细的信息，包括 mean、std、min、max，例如 `eval/dummy/accuracy/mean@2/mean=0.83`、`eval/dummy/accuracy/mean@2/std=0.062`、`eval/dummy/accuracy/mean@2/max=0.9` 和 `eval/dummy/accuracy/mean@2/min=0.75`。：
 
-
-#### Rollout 指标（`rollout/`）
-
-Rollout 指标跟踪模型生成响应的 rollout 阶段的性能。
-
-- **格式**：`rollout/{metric_name}/{statistic}`
-- **示例**：
-  - `rollout/accuracy/mean`：生成响应的平均准确率
-  - `rollout/format_score/mean`：平均格式正确性分数
-
-#### 评估指标（`eval/`）和基准测试指标（`bench/`）
-
-评估指标衡量模型在保留的评估任务上的性能。这些指标在定期评估运行期间计算。
-
-- **格式**：`eval/{task_name}/{metric_name}/{statistic}` 或 `bench/{task_name}/{metric_name}/{statistic}`
-- **示例**：
-  - `eval/gsm8k-eval/accuracy/mean@4`：跨 repeat_times=4 次运行的平均准确率
-  - `bench/gsm8k-eval/accuracy/best@4`：跨 repeat_times=4 次运行的最佳准确率值
-
-- **注意**：
-  - Eval 和 bench 指标的计算方式相同，唯一的区别是指标名称的前缀。
-  - 默认情况下，只返回指标的*平均值*。如果你想返回详细统计信息，可以在配置中将 `monitor.detailed_stats` 设置为 `True`。
+```mermaid
+graph TD
+    subgraph Step_Metrics_Summary["Detailed Statistics"]
+        Stat1["eval/dummy/accuracy/mean@2/mean=0.83<br/>eval/dummy/accuracy/mean@2/std=0.062<br/>eval/dummy/accuracy/mean@2/max=0.9<br/>eval/dummy/accuracy/mean@2/min=0.75"]
+        Stat2["eval/dummy/accuracy/std@2/mean=0.083<br/>eval/dummy/accuracy/std@2/std=0.047<br/>eval/dummy/accuracy/std@2/max=0.15<br/>eval/dummy/accuracy/std@2/min=0.05"]
+        Step_Metrics --> Stat1
+        Step_Metrics --> Stat2
+    end
+```
 
 
 #### 时间指标（`time/`）
@@ -165,11 +178,11 @@ graph TD
             Run1_2["Run 2<br/>reward_mean: 0.8"]
             Run2_1["Run 3<br/>reward_mean: 0.9"]
             Run2_2["Run 4<br/>reward_mean: 0.9"]
+        end
             Run1_1 --> Task1_Metric["rollout/accuracy<br/>= 0.85"]
             Run1_2 --> Task1_Metric
             Run2_1 --> Task1_Metric
             Run2_2 --> Task1_Metric
-        end
     end
 ```
 

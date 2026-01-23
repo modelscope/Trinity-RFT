@@ -20,7 +20,17 @@ In the following, metrics are categorized by their source component (where they 
 
 Explorer metrics track performance during the rollout phase where the model generates responses, including rollout metrics (`rollout/`), eval metrics (`eval/`), and some time metrics (`time/`).
 
-#### Metric Aggregation Levels
+
+#### Rollout Metrics (`rollout/`)
+
+Rollout metrics track performance during the rollout phase where the model generates responses.
+
+- **Format**: `rollout/{metric_name}/{statistic}`
+- **Examples**:
+  - `rollout/accuracy/mean`: Average accuracy of generated responses
+  - `rollout/format_score/mean`: Average format correctness score
+
+**Metric Aggregation Process**:
 
 Consider an exploration step with `batch_size` tasks, where each task has `repeat_times` runs. Rollout metrics (e.g., `rollout/`) are computed and aggregated at different levels:
 
@@ -60,13 +70,28 @@ graph TD
     end
 ```
 
+#### Eval Metrics (`eval/`) and Benchmark Metrics (`bench/`)
+
+Evaluation metrics measure model performance on held-out evaluation tasks. These metrics are computed during periodic evaluation runs.
+
+- **Format**: `eval/{task_name}/{metric_name}/{statistic}` or `bench/{task_name}/{metric_name}/{statistic}`
+- **Examples**:
+  - `eval/gsm8k-eval/accuracy/mean@4`: Mean accuracy across repeat_times=4 runs
+  - `bench/gsm8k-eval/accuracy/best@4`: Best accuracy value across repeat_times=4 runs
+
+- **Note**:
+  - Eval and bench metrics are computed in the same way, the only difference is the prefix of the metric name.
+  - By default, only the *mean* of the metric is returned. If you want to return detailed statistics, you can set `monitor.detailed_stats` to `True` in the config.
+
 Consider an evaluation step with `len(eval_taskset)` tasks, where each task has `repeat_times` runs. Evaluation metrics (e.g., `eval/`, `bench/`) are computed and aggregated at different levels:
 
 - **Task level**: Task-level metrics include (e.g., `mean@4`, `std@4`, `best@2`, `worst@2`) that are computed from k runs of the task.
 
 - **Step level**: By default, we report the mean of the metric across all evaluation tasks. For example, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. If you want to return detailed statistics, including mean, std, min, max, you can set `monitor.detailed_stats` to `True` in the config.
 
-The following diagram illustrates the aggregation process on a dummy dataset with three tasks for evaluation metrics. By default, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. you may configure `monitor.detailed_stats` to `True` in the config to return detailed statistics, including mean, std, min, max, e.g., `eval/dummy/accuracy/mean@2/mean=0.83`, `eval/dummy/accuracy/mean@2/std=0.062`, `eval/dummy/accuracy/mean@2/max=0.9`, and `eval/dummy/accuracy/mean@2/min=0.75`.
+**Metric Aggregation Process**:
+
+The following diagram illustrates the aggregation process on a dummy dataset with three tasks for evaluation metrics. By default, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. You can set `monitor.detailed_stats` to `True` in the config to return detailed statistics.
 
 ```mermaid
 graph TD
@@ -98,28 +123,17 @@ graph TD
     end
 ```
 
+When you set `monitor.detailed_stats` to `True`, you will get detailed statistics including mean, std, min, max, e.g., `eval/dummy/accuracy/mean@2/mean=0.83`, `eval/dummy/accuracy/mean@2/std=0.062`, `eval/dummy/accuracy/mean@2/max=0.9`, and `eval/dummy/accuracy/mean@2/min=0.75`:
 
-#### Rollout Metrics (`rollout/`)
-
-Rollout metrics track performance during the rollout phase where the model generates responses.
-
-- **Format**: `rollout/{metric_name}/{statistic}`
-- **Examples**:
-  - `rollout/accuracy/mean`: Average accuracy of generated responses
-  - `rollout/format_score/mean`: Average format correctness score
-
-#### Eval Metrics (`eval/`) and Benchmark Metrics (`bench/`)
-
-Evaluation metrics measure model performance on held-out evaluation tasks. These metrics are computed during periodic evaluation runs.
-
-- **Format**: `eval/{task_name}/{metric_name}/{statistic}` or `bench/{task_name}/{metric_name}/{statistic}`
-- **Examples**:
-  - `eval/gsm8k-eval/accuracy/mean@4`: Mean accuracy across repeat_times=4 runs
-  - `bench/gsm8k-eval/accuracy/best@4`: Best accuracy value across repeat_times=4 runs
-
-- **Note**:
-  - Eval and bench metrics are computed in the same way, the only difference is the prefix of the metric name.
-  - By default, only the *mean* of the metric is returned. If you want to return detailed statistics, you can set `monitor.detailed_stats` to `True` in the config.
+```mermaid
+graph TD
+    subgraph Step_Metrics_Summary["Detailed Statistics"]
+        Stat1["eval/dummy/accuracy/mean@2/mean=0.83<br/>eval/dummy/accuracy/mean@2/std=0.062<br/>eval/dummy/accuracy/mean@2/max=0.9<br/>eval/dummy/accuracy/mean@2/min=0.75"]
+        Stat2["eval/dummy/accuracy/std@2/mean=0.083<br/>eval/dummy/accuracy/std@2/std=0.047<br/>eval/dummy/accuracy/std@2/max=0.15<br/>eval/dummy/accuracy/std@2/min=0.05"]
+        Step_Metrics --> Stat1
+        Step_Metrics --> Stat2
+    end
+```
 
 
 #### Time Metrics (`time/`)
