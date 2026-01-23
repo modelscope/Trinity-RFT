@@ -34,12 +34,11 @@ Rollout metrics track performance during the rollout phase where the model gener
 
 Consider an exploration step with `batch_size` tasks, where each task has `repeat_times` runs. Rollout metrics (e.g., `rollout/`) are computed and aggregated at different levels:
 
-- **Task level**: Metrics aggregated across `repeat_times` runs of the same task. For example, `rollout/accuracy` is the average accuracy of all runs of the task.
+- From *run level* to *task level*: In `calculate_task_level_metrics` function, metrics are aggregated across `repeat_times` runs of the same task. For example, `rollout/accuracy` is the average accuracy of all runs of the task.
 
-- **Step level**: Metrics are reported at the step level. For example, `rollout/accuracy/mean`, `rollout/accuracy/max`, `rollout/accuracy/min` are the average, max, and min accuracy (`rollout/accuracy`) of all tasks in the step.
+- From *task level* to *step level*: In `gather_metrics` function, metrics are aggregated across all tasks in the step. For example, `rollout/accuracy/mean`, `rollout/accuracy/max`, `rollout/accuracy/min` are the average, max, and min accuracy (`rollout/accuracy`) of all tasks in the step.
 
 The following diagram illustrates the aggregation process for rollout metrics:
-
 ```mermaid
 graph TD
     subgraph Step["Batch_size=3 Tasks"]
@@ -49,7 +48,6 @@ graph TD
             Run1_1 --> Task1_Metric["rollout/accuracy<br/>= 0.85"]
             Run1_2 --> Task1_Metric
         end
-
         subgraph Task2["Task 2 (repeat_times=2)"]
             Run2_1["Run 1<br/>accuracy: 0.6"]
             Run2_2["Run 2<br/>accuracy: 0.9"]
@@ -64,7 +62,7 @@ graph TD
             Run3_2 --> Task3_Metric
         end
 
-        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>rollout/accuracy/mean=0.83<br/>rollout/accuracy/max=0.9<br/>rollout/accuracy/min=0.6"]
+        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>rollout/accuracy/mean=0.83<br/>rollout/accuracy/max=0.9<br/>rollout/accuracy/min=0.75"]
         Task2_Metric --> Step_Metrics
         Task3_Metric --> Step_Metrics
     end
@@ -83,13 +81,14 @@ Evaluation metrics measure model performance on held-out evaluation tasks. These
   - Eval and bench metrics are computed in the same way, the only difference is the prefix of the metric name.
   - By default, only the *mean* of the metric is returned. If you want to return detailed statistics, you can set `monitor.detailed_stats` to `True` in the config.
 
+**Metric Aggregation Process**:
+
 Consider an evaluation step with `len(eval_taskset)` tasks, where each task has `repeat_times` runs. Evaluation metrics (e.g., `eval/`, `bench/`) are computed and aggregated at different levels:
 
-- **Task level**: Task-level metrics include (e.g., `mean@4`, `std@4`, `best@2`, `worst@2`) that are computed from k runs of the task.
+- From *run level* to *task level*: In `calculate_task_level_metrics` function, metrics are aggregated across `repeat_times` runs of the same task. For example, `eval/dummy/accuracy/mean@2` is the average accuracy of all runs of the task.
 
-- **Step level**: By default, we report the mean of the metric across all evaluation tasks. For example, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. If you want to return detailed statistics, including mean, std, min, max, you can set `monitor.detailed_stats` to `True` in the config.
+- From *task level* to *step level*: In `gather_eval_metrics` function, metrics are aggregated across all tasks in the step. For example, `eval/dummy/accuracy/mean@2`, `eval/dummy/accuracy/std@2`, `eval/dummy/accuracy/best@2`, `eval/dummy/accuracy/worst@2` are the average, std, best, and worst accuracy (`eval/dummy/accuracy`) of all tasks in the step.
 
-**Metric Aggregation Process**:
 
 The following diagram illustrates the aggregation process on a dummy dataset with three tasks for evaluation metrics. By default, `mean@k`, `std@k`, `best@k`, `worst@k` of the metrics across all evaluation tasks are reported. You can set `monitor.detailed_stats` to `True` in the config to return detailed statistics.
 

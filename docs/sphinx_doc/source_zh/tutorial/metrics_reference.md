@@ -34,9 +34,9 @@ Rollout 指标跟踪模型生成响应的 rollout 阶段的性能。
 
 考虑一个包含 `batch_size` 个任务的探索步骤，其中每个任务有 `repeat_times` 次运行。Rollout 指标（例如，`rollout/`）在不同级别计算和聚合：
 
-- **任务级别**：跨同一任务的 `repeat_times` 次运行聚合的指标。例如，`rollout/accuracy` 是该任务所有运行的平均准确率。
+- 从*Run 级别*到*Task 级别*：在 `calculate_task_level_metrics` 函数中，指标跨同一任务的 `repeat_times` 次运行聚合。例如，`rollout/accuracy` 是该任务所有运行的平均准确率。
 
-- **步骤级别**：在步骤级别报告指标。例如，`rollout/accuracy/mean`、`rollout/accuracy/max`、`rollout/accuracy/min` 分别是步骤中所有任务的准确率（`rollout/accuracy`）的平均值、最大值和最小值。
+- 从*Task 级别*到*Step 级别*：在 `gather_metrics` 函数中，指标跨步骤中所有任务聚合。例如，`rollout/accuracy/mean`、`rollout/accuracy/max`、`rollout/accuracy/min` 分别是步骤中所有任务的准确率（`rollout/accuracy`）的平均值、最大值和最小值。
 
 以下图表说明了 rollout 指标的聚合过程：
 
@@ -64,7 +64,7 @@ graph TD
             Run3_2 --> Task3_Metric
         end
 
-        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>rollout/accuracy/mean=0.83<br/>rollout/accuracy/max=0.9<br/>rollout/accuracy/min=0.6"]
+        Task1_Metric --> Step_Metrics["Step Level Metrics<br/>rollout/accuracy/mean=0.83<br/>rollout/accuracy/max=0.9<br/>rollout/accuracy/min=0.75"]
         Task2_Metric --> Step_Metrics
         Task3_Metric --> Step_Metrics
     end
@@ -83,13 +83,13 @@ graph TD
   - Eval 和 bench 指标的计算方式相同，唯一的区别是指标名称的前缀。
   - 默认情况下，只返回指标的*平均值*。如果你想返回详细统计信息，可以在配置中将 `monitor.detailed_stats` 设置为 `True`。
 
+**指标聚合过程**：
+
 考虑一个包含 `len(eval_taskset)` 个任务的评估步骤，其中每个任务有 `repeat_times` 次运行。评估指标（例如，`eval/`、`bench/`）在不同级别计算和聚合：
 
-- **任务级别**：任务级别指标包括（例如，`mean@4`、`std@4`、`best@2`、`worst@2`），这些指标是从任务的 k 次运行中计算的。
+- 从*Run 级别*到*Task 级别*：在 `calculate_task_level_metrics` 函数中，指标跨同一任务的 `repeat_times` 次运行聚合。例如，`eval/dummy/accuracy/mean@2` 是该任务所有运行的平均准确率。
 
-- **步骤级别**：默认情况下，我们报告所有评估任务中指标的平均值。例如，报告所有评估任务中指标的 `mean@k`、`std@k`、`best@k`、`worst@k`。如果你想返回详细统计信息，包括 mean、std、min、max，可以在配置中将 `monitor.detailed_stats` 设置为 `True`。
-
-**指标聚合过程**：
+- 从*Task 级别*到*Step 级别*：在 `gather_eval_metrics` 函数中，指标跨步骤中所有任务聚合。例如，`eval/dummy/accuracy/mean@2`、`eval/dummy/accuracy/std@2`、`eval/dummy/accuracy/best@2`、`eval/dummy/accuracy/worst@2` 分别是步骤中所有任务的准确率（`eval/dummy/accuracy`）的平均值、标准差、最佳值和最差值。
 
 以下图表说明了在包含三个任务的虚拟数据集上评估指标的聚合过程。默认情况下，报告所有评估任务中指标的 `mean@k`、`std@k`、`best@k`、`worst@k`。你可以在配置中将 `monitor.detailed_stats` 设置为 `True` 以返回详细统计信息。
 
@@ -122,7 +122,7 @@ graph TD
         Task3_Metric --> Step_Metrics
     end
 ```
-当你将 `monitor.detailed_stats` 设置为 `True` 时，，你会得到详细的信息，包括 mean、std、min、max，例如 `eval/dummy/accuracy/mean@2/mean=0.83`、`eval/dummy/accuracy/mean@2/std=0.062`、`eval/dummy/accuracy/mean@2/max=0.9` 和 `eval/dummy/accuracy/mean@2/min=0.75`。：
+当你将 `monitor.detailed_stats` 设置为 `True` 时，你会得到详细统计信息，包括 mean、std、min、max，例如 `eval/dummy/accuracy/mean@2/mean=0.83`、`eval/dummy/accuracy/mean@2/std=0.062`、`eval/dummy/accuracy/mean@2/max=0.9` 和 `eval/dummy/accuracy/mean@2/min=0.75`：
 
 ```mermaid
 graph TD
