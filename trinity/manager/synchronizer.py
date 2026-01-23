@@ -67,10 +67,14 @@ class Synchronizer:
             async with self._modules_lock:
                 for module in self._modules:
                     try:
-                        await module.is_alive.remote()
+                        is_alive_ref = module.is_alive.remote()
+                        await asyncio.wait_for(is_alive_ref, timeout=5.0)
                         alive_modules.add(module)
                     except ray.exceptions.RayActorError:
                         pass
+                    except asyncio.TimeoutError:
+                        ray.cancel(is_alive_ref)
+                        alive_modules.add(module)
                 self._modules = alive_modules
             await asyncio.sleep(1)
         self.logger.info("Synchronizer stopped.")

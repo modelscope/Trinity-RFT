@@ -5,10 +5,12 @@ from __future__ import annotations
 import pickle
 import uuid
 from dataclasses import asdict, dataclass, field, fields
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 import torch
-from datasets import Dataset
+
+if TYPE_CHECKING:
+    from datasets import Dataset
 from torch import Tensor
 
 
@@ -624,15 +626,17 @@ def group_by(
     return grouped
 
 
-def to_hf_datasets(experiences: list[Experience]) -> Dataset:
+def to_hf_datasets(experiences: list[Experience]) -> "Dataset":
     """
     Convert a list of Experience objects to a HuggingFace Dataset,
     preserving all fields.
     """
+    from datasets import Dataset
+
     return Dataset.from_list([asdict(exp) for exp in experiences])
 
 
-def from_hf_datasets(dataset: Dataset) -> List[Experience]:
+def from_hf_datasets(dataset: "Dataset") -> List[Experience]:
     """
     Convert a HuggingFace Dataset back to a list of Experience objects.
     """
