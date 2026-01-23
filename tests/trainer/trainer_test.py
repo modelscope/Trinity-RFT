@@ -348,6 +348,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
 
         with self.assertRaises(Exception):
             run(config_path="dummy.yaml")
+        ray.shutdown(_exiting_interpreter=True)
 
         stage_configs = [cfg.check_and_update() for cfg in deepcopy(self.config)]
 
@@ -370,6 +371,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
 
         self.config.stages[1].buffer.explorer_input.taskset.path = old_taskset_path
         mock_load.return_value = deepcopy(self.config)
+        ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
         run(config_path="dummy.yaml")
 
         # grpo stage
