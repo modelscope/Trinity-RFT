@@ -1,4 +1,4 @@
-# Metrics Reference
+# Monitor Metrics Reference
 
 This document provides an overview of the metric categories used in Trinity-RFT for tracking exploration, evaluation, and training progress.
 
@@ -122,7 +122,7 @@ graph TD
     end
 ```
 
-When you set `monitor.detailed_stats` to `True`, you will get detailed statistics including mean, std, min, max, e.g., `eval/dummy/accuracy/mean@2/mean=0.83`, `eval/dummy/accuracy/mean@2/std=0.062`, `eval/dummy/accuracy/mean@2/max=0.9`, and `eval/dummy/accuracy/mean@2/min=0.75`:
+When you set `monitor.detailed_stats` to `True`, you will get detailed statistics including mean, std, min, max, as shown in the following diagram:
 
 ```mermaid
 graph TD
@@ -137,20 +137,20 @@ graph TD
 
 #### Time Metrics (`time/`)
 
-Time metrics measure execution duration for various operations throughout the training pipeline.
+Time metrics measure execution duration for various operations throughout the rollout process.
 
 - **Format**: `time/{operation_name}`
 - **Examples**:
   - `time/eval`: Time from the start of submitting evaluation tasks to the end of the evaluation phase; this duration includes both evaluation tasks and some rollout tasks.
-  - `time/train_step`: Total time for one training step
+  - `time/wait_explore_step`: Time to wait for one rollout step to complete.
 
 **Note**:
-  - Time measuring can be inaccurate due to the asynchronous nature of the exploration pipeline, but it is still useful for monitoring the overall training progress.
-  - Above metrics are reported in seconds unless otherwise specified.
+  - Time measuring can be inaccurate due to the asynchronous nature of the rollout process, but it is still useful for monitoring the overall training progress.
+  - Time metrics are reported in seconds unless otherwise specified.
   - Some training operations also report per-token timing metrics with the prefix `timing_per_token_ms/` (e.g., `timing_per_token_ms/update_actor`, `timing_per_token_ms/update_critic`, `timing_per_token_ms/adv`, `timing_per_token_ms/values`). These metrics normalize execution time by the number of tokens processed, providing efficiency measurements independent of batch size.
 
 
-### Training Metrics
+### Trainer Metrics
 
 This category includes metrics that track the training dynamics of the policy (actor) model (`actor/`) and the value function (critic) model (`critic/`), as well as some performance metrics (`perf/`, `global_seqlen/`, `response_length/`, `prompt_length/`, `time/`). These metrics are adapted from [veRL](https://github.com/volcengine/verl). Interested users can refer to the [veRL documentation](https://verl.readthedocs.io/en/latest/index.html) for more details.
 
