@@ -25,6 +25,7 @@
    tutorial/trinity_gpu_configs.md
    tutorial/synchronizer.md
    tutorial/align_with_verl.md
+   tutorial/metrics_reference.md
 
 .. toctree::
    :maxdepth: 1

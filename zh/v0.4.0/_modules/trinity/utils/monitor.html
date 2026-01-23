@@ -1079,6 +1079,35 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="gather_eval_metrics">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.gather_eval_metrics">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gather_eval_metrics</span><span class="p">(</span>
+    <span class="n">metric_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">output_stats</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
+    <span class="n">detailed_stats</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">metric_list</span><span class="p">)</span>
+        <span class="n">numeric_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">])</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">detailed_stats</span><span class="p">:</span>
+                <span class="n">stats_df</span> <span class="o">=</span> <span class="n">numeric_df</span><span class="p">[[</span><span class="n">col</span><span class="p">]]</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">output_stats</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">stats</span> <span class="ow">in</span> <span class="n">output_stats</span><span class="p">:</span>
+                    <span class="n">metric</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">stats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">stats</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># only return the mean of the column</span>
+                <span class="n">metric</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numeric_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">metric</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to gather eval metrics: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+
+
+
 <div class="viewcode-block" id="Monitor">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.Monitor">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Monitor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>

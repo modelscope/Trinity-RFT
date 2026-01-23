@@ -1826,6 +1826,8 @@ document.write(`
     <span class="n">monitor_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span>
     <span class="c1"># the default args for monitor</span>
     <span class="n">monitor_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># whether to return detailed stats (mean, std, max, min) for evaluation metrics</span>
+    <span class="n">detailed_stats</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># whether to enable ray timeline profile</span>
     <span class="c1"># the output file will be saved to `cache_dir/timeline.json`</span>
     <span class="n">enable_ray_timeline</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
