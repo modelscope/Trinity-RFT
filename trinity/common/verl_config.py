@@ -421,13 +421,9 @@ class veRLConfig:
 
     def synchronize_config(self, config: Config) -> None:  # noqa: C901
         """Synchronize config."""
+        # Trainer Config
         self.trainer.nnodes = config.cluster.trainer_node_num
         self.trainer.n_gpus_per_node = config.cluster.trainer_gpu_num_per_node
-        world_size = config.cluster.trainer_gpu_num
-        if config.buffer.train_batch_size % world_size != 0:
-            raise ValueError(
-                f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
-            )
         self.trainer.total_training_steps = config.trainer.total_steps or sys.maxsize
         self.trainer.sync_freq = config.synchronizer.sync_interval
         self.trainer.save_freq = config.trainer.save_interval
@@ -443,9 +439,8 @@ class veRLConfig:
         else:
             self.trainer.resume_mode = "auto"
 
-        self.data.train_batch_size = (
-            config.buffer.train_batch_size
-        )  # kept to pass RayPPOTrainer._validate_config
+        # kept to pass RayPPOTrainer._validate_config
+        self.data.train_batch_size = config.buffer.train_batch_size
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.nccl_timeout = config.synchronizer.sync_timeout

@@ -777,6 +777,14 @@ class BufferConfigValidator(ConfigValidator):
             config.buffer.train_batch_size = (
                 config.buffer.batch_size * config.algorithm.repeat_times
             )
+        if (
+            config.mode in {"train", "both"}
+            and config.buffer.train_batch_size % config.cluster.trainer_gpu_num != 0
+        ):
+            raise ValueError(
+                f"batch_size ({config.buffer.train_batch_size}) must be "
+                f"divisible by ({config.cluster.trainer_gpu_num})."
+            )
 
         # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
         config.buffer.cache_dir = os.path.abspath(os.path.join(config.checkpoint_job_dir, "buffer"))
