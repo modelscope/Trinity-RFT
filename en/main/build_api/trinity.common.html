@@ -408,6 +408,7 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html">trinity.common.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html">trinity.common.config_validator module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.constants.html">trinity.common.constants module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.experience.html">trinity.common.experience module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html">trinity.common.verl_config module</a></li>
@@ -1218,6 +1219,13 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.ray_address"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.ray_address</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.node_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.node_num</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.gpu_per_node"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.gpu_per_node</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.total_gpu_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.total_gpu_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.rollout_gpu_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.rollout_gpu_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.auxiliary_model_gpu_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.auxiliary_model_gpu_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.explorer_gpu_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.explorer_gpu_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.trainer_gpu_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.trainer_gpu_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.trainer_node_num"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.trainer_node_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.trainer_gpu_num_per_node"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.trainer_gpu_num_per_node</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ClusterConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ClusterConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1375,6 +1383,58 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.load_config"><code class="docutils literal notranslate"><span class="pre">load_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.config_validator.html">trinity.common.config_validator module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ConfigValidator"><code class="docutils literal notranslate"><span class="pre">ConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ConfigValidator.__init__"><code class="docutils literal notranslate"><span class="pre">ConfigValidator.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">ConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.DeprecatedConfigValidator"><code class="docutils literal notranslate"><span class="pre">DeprecatedConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.DeprecatedConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">DeprecatedConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.GlobalConfigValidator"><code class="docutils literal notranslate"><span class="pre">GlobalConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.GlobalConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">GlobalConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.RayClusterConfigValidator"><code class="docutils literal notranslate"><span class="pre">RayClusterConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.RayClusterConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">RayClusterConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.AlgorithmConfigValidator"><code class="docutils literal notranslate"><span class="pre">AlgorithmConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.AlgorithmConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">AlgorithmConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ModelConfigValidator"><code class="docutils literal notranslate"><span class="pre">ModelConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ModelConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">ModelConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ExplorerConfigValidator"><code class="docutils literal notranslate"><span class="pre">ExplorerConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.ExplorerConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">ExplorerConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.SynchronizerConfigValidator"><code class="docutils literal notranslate"><span class="pre">SynchronizerConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.SynchronizerConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">SynchronizerConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.IntervalConfigValidator"><code class="docutils literal notranslate"><span class="pre">IntervalConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.IntervalConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">IntervalConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.MonitorConfigValidator"><code class="docutils literal notranslate"><span class="pre">MonitorConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.MonitorConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">MonitorConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.BufferConfigValidator"><code class="docutils literal notranslate"><span class="pre">BufferConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.BufferConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">BufferConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.TrainerConfigValidator"><code class="docutils literal notranslate"><span class="pre">TrainerConfigValidator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config_validator.html#trinity.common.config_validator.TrainerConfigValidator.validate"><code class="docutils literal notranslate"><span class="pre">TrainerConfigValidator.validate()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.common.constants.html">trinity.common.constants module</a><ul>
