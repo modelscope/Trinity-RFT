@@ -44,7 +44,6 @@ class InferenceModel(ABC):
         messages: List[dict],
         tools: Optional[List[dict]] = None,
         temperature: Optional[float] = None,
-        truncate_status: Optional[str] = None,
     ) -> Experience:
         """Convert a list of messages into an experience in async."""
         raise NotImplementedError
@@ -163,7 +162,6 @@ class BaseInferenceModel(InferenceModel):
         messages: List[dict],
         tools: Optional[List[dict]] = None,
         temperature: Optional[float] = None,
-        truncate_status: Optional[str] = None,
     ) -> Experience:
         """Convert a list of messages into an experience in async.
 
@@ -171,9 +169,6 @@ class BaseInferenceModel(InferenceModel):
             messages: List of message dictionaries
             tools: Optional list of tools
             temperature: Optional temperature for logprobs calculation
-            truncate_status: Optional truncate status to mark if messages were truncated.
-                           If provided, this will be used directly. Otherwise, it will be
-                           determined automatically based on token length limits.
         """
         if self.tokenizer is None:
             await self._initialize_tokenizer()
@@ -187,35 +182,37 @@ class BaseInferenceModel(InferenceModel):
             enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
 
-        # Truncate tokens if they exceed the length limit
         assert token_ids is not None
-        # Use provided truncate_status if given, otherwise determine it from token length
-        if truncate_status is None:
-            if self.config.enable_prompt_truncation and self.config.max_prompt_tokens is not None:
-                if prompt_length > self.config.max_prompt_tokens:
-                    truncate_status = "prompt_truncated"
-                    self.logger.warning(
-                        f"Warning: {prompt_length=} exceeds the length limit {self.config.max_prompt_tokens}, "
-                        f"this experience will be not counted in the loss computation."
-                    )
+        truncate_status = None
+        # Truncate prompt if it exceeds max_prompt_tokens
+        if (
+            self.config.enable_prompt_truncation
+            and self.config.max_prompt_tokens is not None
+            and prompt_length > self.config.max_prompt_tokens
+        ):
+            truncate_status = "prompt_truncated"
+            self.logger.warning(
+                f"Warning: {prompt_length=} exceeds the length limit {self.config.max_prompt_tokens}, "
+                f"this experience will be not counted in the loss computation."
+            )
+            return Experience(
+                tokens=token_ids[: self.config.max_prompt_tokens + 1],
+                logprobs=torch.zeros(1, dtype=torch.float32),
+                prompt_length=self.config.max_prompt_tokens,  # Use truncated length
+                action_mask=torch.zeros(1, dtype=torch.bool),  # ignored in loss computation
+                messages=messages,  # messages are not truncated
+                truncate_status=truncate_status,
+            )
 
-                    return Experience(
-                        tokens=token_ids[: self.config.max_prompt_tokens + 1],
-                        logprobs=torch.zeros(1, dtype=torch.float32),
-                        prompt_length=self.config.max_prompt_tokens,  # Use truncated length
-                        action_mask=torch.zeros(1, dtype=torch.bool),  # ignored in loss computation
-                        messages=messages,  # messages are not truncated
-                        truncate_status=truncate_status,
-                    )
-
-            elif self.config.max_model_len is not None:
-                if len(token_ids) > self.config.max_model_len - 1:
-                    truncate_status = "response_truncated"
-                    self.logger.warning(
-                        f"Warning: {len(token_ids)=} exceeds the length limit {(self.config.max_model_len - 1)=}"
-                    )
-                    token_ids = token_ids[: self.config.max_model_len - 1]
-                    action_mask = action_mask[: self.config.max_model_len - 1]
+        # Truncate response if it exceeds max_model_len
+        max_model_len = self.config.max_model_len
+        if max_model_len is not None and len(token_ids) > max_model_len - 1:
+            truncate_status = "response_truncated"
+            self.logger.warning(
+                f"Warning: {len(token_ids)=} exceeds the length limit {(max_model_len - 1)=}"
+            )
+            token_ids = token_ids[: max_model_len - 1]
+            action_mask = action_mask[: max_model_len - 1]
 
         temperature = temperature if temperature is not None else self.config.temperature
         logprobs = await self.logprobs(
@@ -425,12 +422,11 @@ class ModelWrapper:
         messages: List[dict],
         tools: Optional[List[dict]] = None,
         temperature: Optional[float] = None,
-        truncate_status: Optional[str] = None,
     ) -> Experience:
         """Convert a list of messages into an experience."""
         return ray.get(
             self.model.convert_messages_to_experience.remote(
-                messages, tools=tools, temperature=temperature, truncate_status=truncate_status
+                messages, tools=tools, temperature=temperature
             )
         )
 
@@ -439,11 +435,10 @@ class ModelWrapper:
         messages: List[dict],
         tools: Optional[List[dict]] = None,
         temperature: Optional[float] = None,
-        truncate_status: Optional[str] = None,
     ) -> Experience:
         """Convert a list of messages into an experience in async."""
         return await self.model.convert_messages_to_experience.remote(
-            messages, tools=tools, temperature=temperature, truncate_status=truncate_status
+            messages, tools=tools, temperature=temperature
         )
 
     @property

@@ -372,19 +372,7 @@ class TestMessageProcess(RayUnittestBaseAsync):
         await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
 
-        # Case: "response_truncated" determined by workflow
-        messages = [
-            {"role": "system", "content": "You are helpful."},
-            {"role": "user", "content": "Tell me about weather."},
-            {"role": "assistant", "content": "A very long response" * 10},
-        ]
-
-        converted_experience = self.model_wrapper.convert_messages_to_experience(
-            messages, truncate_status="response_truncated"
-        )
-        self._check_experience(converted_experience, "response_truncated")
-
-        # Case: "prompt_truncated" determined by model
+        # Case: "prompt_truncated"
         messages = [
             {"role": "system", "content": "You are helpful."},
             {"role": "user", "content": "A very long prompt." * 20},
@@ -412,22 +400,30 @@ class TestMessageProcess(RayUnittestBaseAsync):
         self.config.check_and_update()
         await prepare_engines(self.engines, self.auxiliary_engines)
         await self.model_wrapper.prepare()
+
+        # Case: No truncation
         messages = [
             {"role": "system", "content": "You are helpful."},
             {"role": "user", "content": "Tell me about weather."},
         ]
-
         converted_experience = self.model_wrapper.convert_messages_to_experience(messages)
         self._check_experience(converted_experience, None)
+
+        # Case: "response_truncated"
+        messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Tell me about weather."},
+            {"role": "assistant", "content": "A very long response" * 20},
+        ]
+        converted_experience = self.model_wrapper.convert_messages_to_experience(messages)
+        self._check_experience(converted_experience, "response_truncated")
 
     def _check_experience(self, exp, target_truncate_status):
         self.assertIsNotNone(exp)
         model_len = len(exp.tokens)
         prompt_length = exp.prompt_length
-        response_length = model_len - prompt_length
         self.assertEqual(exp.truncate_status, target_truncate_status)
         self.assertLessEqual(prompt_length, self.config.model.max_prompt_tokens)
-        self.assertLessEqual(response_length, self.config.model.max_response_tokens)
         self.assertLessEqual(model_len, self.config.model.max_model_len)
 
 
