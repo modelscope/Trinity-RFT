@@ -353,6 +353,84 @@ class TestModelLenWithoutPromptTruncation(RayUnittestBaseAsync):
         )
 
 
+class TestMessageProcess(RayUnittestBaseAsync):
+    def setUp(self):
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = 100
+        self.config.model.max_prompt_tokens = 50
+        self.config.model.max_response_tokens = 50
+        self.config.model.enable_prompt_truncation = True
+        self.config.explorer.rollout_model.enable_openai_api = True
+        self.config.check_and_update()
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+
+    async def test_truncation_status(self):
+        """Test truncation status for multi-turn conversations."""
+        await prepare_engines(self.engines, self.auxiliary_engines)
+        await self.model_wrapper.prepare()
+
+        # Case: "response_truncated" determined by workflow
+        messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Tell me about weather."},
+            {"role": "assistant", "content": "A very long response" * 10},
+        ]
+
+        converted_experience = self.model_wrapper.convert_messages_to_experience(
+            messages, truncate_status="response_truncated"
+        )
+        self._check_experience(converted_experience, "response_truncated")
+
+        # Case: "prompt_truncated" determined by model
+        messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "A very long prompt." * 20},
+            {"role": "assistant", "content": "OK"},
+        ]
+        converted_experience = self.model_wrapper.convert_messages_to_experience(
+            messages,
+        )
+        self._check_experience(converted_experience, "prompt_truncated")
+
+        # Case: No truncation
+        messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Tell me about weather."},
+            {"role": "assistant", "content": "OK"},
+        ]
+        converted_experience = self.model_wrapper.convert_messages_to_experience(
+            messages,
+        )
+        self._check_experience(converted_experience, None)
+
+    async def test_no_prompt_truncation(self):
+        """Test truncation status for multi-turn conversations in workflow."""
+        self.config.model.enable_prompt_truncation = False
+        self.config.check_and_update()
+        await prepare_engines(self.engines, self.auxiliary_engines)
+        await self.model_wrapper.prepare()
+        messages = [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Tell me about weather."},
+        ]
+
+        converted_experience = self.model_wrapper.convert_messages_to_experience(messages)
+        self._check_experience(converted_experience, None)
+
+    def _check_experience(self, exp, target_truncate_status):
+        self.assertIsNotNone(exp)
+        model_len = len(exp.tokens)
+        prompt_length = exp.prompt_length
+        response_length = model_len - prompt_length
+        self.assertEqual(exp.truncate_status, target_truncate_status)
+        self.assertLessEqual(prompt_length, self.config.model.max_prompt_tokens)
+        self.assertLessEqual(response_length, self.config.model.max_response_tokens)
+        self.assertLessEqual(model_len, self.config.model.max_model_len)
+
+
 class TestAPIServer(RayUnittestBaseAsync):
     def setUp(self):
         self.config = get_template_config()

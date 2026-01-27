@@ -221,7 +221,9 @@ class MultiTurnWorkflow(Workflow):
     def process_messages_to_experience(
         self, messages, reward, info={}, truncate_status=None
     ) -> Experience:
-        converted_experience = self.model.convert_messages_to_experience(messages)
+        converted_experience = self.model.convert_messages_to_experience(
+            messages, truncate_status=truncate_status
+        )
         return self._build_experience_from_converted(
             converted_experience, reward, info, truncate_status
         )
@@ -229,7 +231,9 @@ class MultiTurnWorkflow(Workflow):
     async def process_messages_to_experience_async(
         self, messages, reward, info={}, truncate_status=None
     ) -> Experience:
-        converted_experience = await self.model.convert_messages_to_experience_async(messages)
+        converted_experience = await self.model.convert_messages_to_experience_async(
+            messages, truncate_status=truncate_status
+        )
         return self._build_experience_from_converted(
             converted_experience, reward, info, truncate_status
         )
