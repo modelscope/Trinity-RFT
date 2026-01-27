@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>数据处理 &#8212; Trinity-RFT 0.4.1 文档</title>
+    <title>数据处理 &#8212; Trinity-RFT 0.5.0.dev0 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=a35297e8"></script>
+    <script src="../_static/documentation_options.js?v=19b008a8"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.5.0.dev0 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.5.0.dev0 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -755,10 +755,10 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 <h3>数据处理器服务准备<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 <p>如 Trinity-RFT 整体架构所示，数据处理器是高级功能之一。Trinity-RFT 将其封装为独立服务，以避免隐式依赖冲突问题。因此，你可以为其准备独立环境，并使用预置脚本手动启动服务。</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># 准备独立环境，包括数据处理器环境</span>
-python<span class="w"> </span>scripts/install.py
+python<span class="w"> </span>scripts/data/install.py
 
 <span class="c1"># 启动所有独立服务</span>
-python<span class="w"> </span>scripts/start_servers.py
+python<span class="w"> </span>scripts/data/start_servers.py
 </pre></div>
 </div>
 <p>这些脚本将为 Trinity-RFT 和基于 Data-Juicer 的数据处理器创建独立环境，并在 Data-Juicer 环境中自动启动数据处理器服务。</p>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Data Processing &#8212; Trinity-RFT 0.4.1 documentation</title>
+    <title>Data Processing &#8212; Trinity-RFT 0.5.0.dev0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=a3cf13c8"></script>
+    <script src="../_static/documentation_options.js?v=3b5db68c"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.1 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.1 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.5.0.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.5.0.dev0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -755,10 +755,10 @@ and store the base url and api key in the environment variables <code class="doc
 <p>As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT also encapsulates the data processor as an independent service to avoid implicit dependency conflict issues.
 Thus you can prepare a split environment for it and start the server manually using the prepared scripts.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data processor</span>
-python<span class="w"> </span>scripts/install.py
+python<span class="w"> </span>scripts/data/install.py
 
 <span class="c1"># start all split servers</span>
-python<span class="w"> </span>scripts/start_servers.py
+python<span class="w"> </span>scripts/data/start_servers.py
 </pre></div>
 </div>
 <p>These scripts will create split environments for Trinity-RFT and Data-Juicer-based data processor.

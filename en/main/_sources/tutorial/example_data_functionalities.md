@@ -111,10 +111,10 @@ Thus you can prepare a split environment for it and start the server manually us
 
 ```shell
 # prepare split environments, including the one of data processor
-python scripts/install.py
+python scripts/data/install.py
 
 # start all split servers
-python scripts/start_servers.py
+python scripts/data/start_servers.py
 ```
 
 These scripts will create split environments for Trinity-RFT and Data-Juicer-based data processor.

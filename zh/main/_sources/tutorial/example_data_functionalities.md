@@ -107,10 +107,10 @@ trinity run --config <Trinity-RFT_config_path>
 
 ```shell
 # 准备独立环境，包括数据处理器环境
-python scripts/install.py
+python scripts/data/install.py
 
 # 启动所有独立服务
-python scripts/start_servers.py
+python scripts/data/start_servers.py
 ```
 
 这些脚本将为 Trinity-RFT 和基于 Data-Juicer 的数据处理器创建独立环境，并在 Data-Juicer 环境中自动启动数据处理器服务。
