@@ -1136,10 +1136,6 @@ class GPUMemoryValidator(ConfigValidator):
         if config.model.tinker.enable:
             return
         import torch
-        import transformers
-        from accelerate import init_empty_weights
-
-        from trinity.common.verl_config import veRLConfig
 
         if not torch.cuda.is_available():
             alert_msg = self._format_alert_box(
@@ -1153,6 +1149,18 @@ class GPUMemoryValidator(ConfigValidator):
             self.logger.error("\n" + alert_msg)
             return
         memory_capacity = torch.cuda.get_device_properties(0).total_memory
+        if config.trainer.trainer_strategy.startswith("fsdp"):
+            self._fsdp_memory_check(config, memory_capacity)
+        else:
+            self.logger.info("GPU memory check skipped for non-FSDP strategies.")
+
+    def _fsdp_memory_check(self, config: Config, memory_capacity: float) -> None:
+        import torch
+        import transformers
+        from accelerate import init_empty_weights
+
+        from trinity.common.verl_config import veRLConfig
+
         pytorch_env_flag = (
             os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "") == "expandable_segments:True"
         )
