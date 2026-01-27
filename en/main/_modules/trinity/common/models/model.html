@@ -1233,7 +1233,13 @@ document.write(`
         <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of messages into an experience in async.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of messages into an experience in async.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            messages: List of message dictionaries</span>
+<span class="sd">            tools: Optional list of tools</span>
+<span class="sd">            temperature: Optional temperature for logprobs calculation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_tokenizer</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1246,22 +1252,43 @@ document.write(`
             <span class="n">enable_thinking</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span><span class="p">,</span>
         <span class="p">)</span>  <span class="c1"># (seq_length, ), (seq_length, )</span>
 
-        <span class="c1"># Truncate tokens if they exceed the length limit</span>
         <span class="k">assert</span> <span class="n">token_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">truncate_status</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">truncate_status</span> <span class="o">=</span> <span class="s2">&quot;response_truncated&quot;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span><span class="si">=}</span><span class="s2"> exceeds the length limit </span><span class="si">{</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">=}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="n">token_ids</span> <span class="o">=</span> <span class="n">token_ids</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-                <span class="n">action_mask</span> <span class="o">=</span> <span class="n">action_mask</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Truncate prompt if it exceeds max_prompt_tokens</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_prompt_truncation</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">prompt_length</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span>
+        <span class="p">):</span>
+            <span class="n">truncate_status</span> <span class="o">=</span> <span class="s2">&quot;prompt_truncated&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">prompt_length</span><span class="si">=}</span><span class="s2"> exceeds the length limit </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;this experience will be not counted in the loss computation.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
+                <span class="n">tokens</span><span class="o">=</span><span class="n">token_ids</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">logprobs</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                <span class="n">prompt_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="p">,</span>  <span class="c1"># Use truncated length</span>
+                <span class="n">action_mask</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>  <span class="c1"># ignored in loss computation</span>
+                <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>  <span class="c1"># messages are not truncated</span>
+                <span class="n">truncate_status</span><span class="o">=</span><span class="n">truncate_status</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Truncate response if it exceeds max_model_len</span>
+        <span class="n">max_model_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span>
+        <span class="k">if</span> <span class="n">max_model_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">truncate_status</span> <span class="o">=</span> <span class="s2">&quot;response_truncated&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span><span class="si">=}</span><span class="s2"> exceeds the length limit </span><span class="si">{</span><span class="p">(</span><span class="n">max_model_len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">=}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">token_ids</span> <span class="o">=</span> <span class="n">token_ids</span><span class="p">[:</span> <span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">action_mask</span> <span class="o">=</span> <span class="n">action_mask</span><span class="p">[:</span> <span class="n">max_model_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
         <span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">temperature</span>
         <span class="n">logprobs</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span><span class="p">(</span>
             <span class="n">token_ids</span><span class="o">=</span><span class="n">token_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span>
         <span class="p">)</span>  <span class="c1"># (seq_length - 1,)</span>
+
         <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
             <span class="n">tokens</span><span class="o">=</span><span class="n">token_ids</span><span class="p">,</span>
             <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">[</span><span class="n">prompt_length</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:],</span>

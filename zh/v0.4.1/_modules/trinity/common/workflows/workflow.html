@@ -1279,7 +1279,10 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
         <span class="n">converted_experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">convert_messages_to_experience</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_experience_from_converted</span><span class="p">(</span>
-            <span class="n">converted_experience</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">truncate_status</span>
+            <span class="n">converted_experience</span><span class="p">,</span>
+            <span class="n">reward</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+            <span class="n">converted_experience</span><span class="o">.</span><span class="n">truncate_status</span> <span class="ow">or</span> <span class="n">truncate_status</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -1290,7 +1293,10 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
         <span class="n">converted_experience</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">convert_messages_to_experience_async</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_experience_from_converted</span><span class="p">(</span>
-            <span class="n">converted_experience</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">truncate_status</span>
+            <span class="n">converted_experience</span><span class="p">,</span>
+            <span class="n">reward</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+            <span class="n">converted_experience</span><span class="o">.</span><span class="n">truncate_status</span> <span class="ow">or</span> <span class="n">truncate_status</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 
