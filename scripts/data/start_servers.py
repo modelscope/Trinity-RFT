@@ -22,7 +22,7 @@ def main():
 
     os.makedirs(args.log_dir, exist_ok=True)
     env_mapping_file = os.path.join(
-        os.path.dirname(__file__), "..", "environments", "env_mapping.json"
+        os.path.dirname(__file__), "..", "..", "environments", "env_mapping.json"
     )
     with open(env_mapping_file, "r") as f:
         env_mapping = json.load(f)

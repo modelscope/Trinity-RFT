@@ -43,7 +43,7 @@ RUN . /opt/venv/bin/activate && \
     uv pip install -e .[megatron] && \
     uv pip install flash_attn==2.8.1 --no-build-isolation && \
     uv pip install git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612 && \
-    uv pip install transformer_engine[pytorch]==2.8.0 --no-build-isolation --no-cache-dir && \
+    uv pip install transformer_engine[pytorch]==2.10.0 --no-build-isolation --no-cache-dir && \
     NVCC_APPEND_FLAGS="--threads 4" APEX_PARALLEL_BUILD=8 \
     uv pip install -v --no-build-isolation \
     --config-settings="--build-option=--cpp_ext" \

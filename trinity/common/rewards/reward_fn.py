@@ -22,6 +22,8 @@ class RewardFn(ABC):
 class RMGalleryFn(RewardFn):
     """Reward Function from RMGallery.
     https://github.com/modelscope/RM-Gallery
+
+    TODO: Update to OpenJudgeFn
     """
 
     def __init__(

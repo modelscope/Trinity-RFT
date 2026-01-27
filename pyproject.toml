@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.4.1"
+version = "0.5.0.dev0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -50,7 +50,9 @@ trinity = "trinity.cli.launcher:main"
 
 [project.optional-dependencies]
 vllm = [
-    "vllm>=0.10.2,<=0.11.0",
+    "vllm>=0.10.2,<=0.14.1,!=0.12.0",
+    # v0.12.0 has a huge performance regression so we exclude it
+    # v0.10.2 is the most stable version, but we allow up to 0.14.1 for new features
 ]
 data = [
     "py-data-juicer>=1.4.3"
@@ -75,10 +77,10 @@ dev = [
     "viztracer",
 ]
 megatron = [
-    "megatron-core[mlm]==0.13.1",
+    "megatron-core[mlm]==0.15.0",
     # if you found "undefined symbol" error in transformer engine
     # reinstall it with --no-build-isolation and `--no-cache-dir` flag
-    # "transformer_engine[pytorch]==2.8.0",
+    # "transformer_engine[pytorch]==2.10.0",
 
     # Install mbridge from main branch (unreleased version)
     # "mbridge @ git+https://github.com/ISEEKYAN/mbridge.git@20e9ffbbe72ae7b1df83bfe1bc3c11f7382f2612",

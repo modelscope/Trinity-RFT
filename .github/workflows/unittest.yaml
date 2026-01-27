@@ -59,6 +59,10 @@ jobs:
           MODULE=$(echo "$COMMENT" | sed -n 's/\/unittest-module-\(.*\)/\1/p')
           echo "type=module" >> $GITHUB_OUTPUT
           echo "module=$MODULE" >> $GITHUB_OUTPUT
+        elif [[ "$COMMENT" =~ ^/unittest-pattern-(.+)$ ]]; then
+          PATTERN=$(echo "$COMMENT" | sed -n 's/\/unittest-pattern-\(.*\)/\1/p')
+          echo "type=pattern" >> $GITHUB_OUTPUT
+          echo "pattern=$PATTERN" >> $GITHUB_OUTPUT
         else
           echo "type=all" >> $GITHUB_OUTPUT
         fi
@@ -96,6 +100,15 @@ jobs:
             docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest tests/$MODULE -v -s --ctrf report.json"
           else
             echo "No module specified, skipping tests."
+            echo "tests_run=false" >> $GITHUB_ENV
+          fi
+        elif [ "$TYPE" = "pattern" ]; then
+          PATTERN="${{ steps.test_type.outputs.pattern }}"
+          if [ -n "$PATTERN" ]; then
+            echo "tests_run=true" >> $GITHUB_ENV
+            docker compose exec trinity-node-1 bash -c "source /opt/venv/bin/activate && pytest tests -v -s -k '$PATTERN' --ctrf report.json"
+          else
+            echo "No pattern specified, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV
           fi
         fi

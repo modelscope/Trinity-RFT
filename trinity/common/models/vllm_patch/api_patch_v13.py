@@ -1,5 +1,7 @@
-"""Patch for vllm OpenAI API server. Only for vllm versions == 0.12.0.
+"""Patch for vllm OpenAI API server. Only for vllm versions >= 0.13.0.
 """
+import asyncio
+import functools
 import logging
 from typing import Optional
 
@@ -15,9 +17,9 @@ from vllm.entrypoints.openai.api_server import (
     validate_api_server_args,
 )
 from vllm.entrypoints.openai.cli_args import make_arg_parser
-from vllm.entrypoints.openai.tool_parsers import ToolParserManager
 from vllm.entrypoints.utils import log_non_default_args
 from vllm.reasoning import ReasoningParserManager
+from vllm.tool_parsers import ToolParserManager
 from vllm.utils.argparse_utils import FlexibleArgumentParser
 from vllm.utils.network_utils import is_valid_ipv6_address
 from vllm.utils.system_utils import set_ulimit
@@ -64,6 +66,11 @@ def setup_server_in_ray(args, logger):
     return listen_address, sock
 
 
+def dummy_add_signal_handler(self, *args, **kwargs):
+    # DO NOTHING HERE
+    pass
+
+
 async def run_server_worker_in_ray(
     listen_address,
     sock,
@@ -81,6 +88,9 @@ async def run_server_worker_in_ray(
     app = build_app(args)
 
     await init_app_state(engine_client, app.state, args)
+
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler = functools.partial(dummy_add_signal_handler, loop)
 
     logger.info(
         "Starting vLLM API server %d on %s",
@@ -121,7 +131,7 @@ async def run_server_in_ray(args, engine_client, logger):
     await run_server_worker_in_ray(listen_address, sock, args, engine_client, logger)
 
 
-async def run_api_server_in_ray_actor_v12(
+async def run_api_server_in_ray_actor_v13(
     async_llm,
     host: str,
     port: int,
@@ -133,10 +143,10 @@ async def run_api_server_in_ray_actor_v12(
     enable_log_requests: bool = False,
 ):
     vllm_version = get_vllm_version()
-    if vllm_version <= parse_version("0.11.0"):
+    if vllm_version < parse_version("0.13.0"):
         raise ValueError(
             f"Unsupported vllm version: {vllm.__version__}. "
-            "This patch requires vllm version > 0.11.0"
+            "This patch requires vllm version >= 0.13.0"
         )
 
     parser = FlexibleArgumentParser(description="Run the OpenAI API server.")
@@ -159,7 +169,6 @@ async def run_api_server_in_ray_actor_v12(
     if reasoning_parser:
         cli_args.extend(["--reasoning-parser", reasoning_parser])
     args = parser.parse_args(cli_args)
-    if vllm_version >= parse_version("0.11.0"):
-        args.structured_outputs_config.reasoning_parser = reasoning_parser
+    args.structured_outputs_config.reasoning_parser = reasoning_parser
     logger.info(f"Starting vLLM OpenAI API server with args: {args}")
     await run_server_in_ray(args, async_llm, logger)

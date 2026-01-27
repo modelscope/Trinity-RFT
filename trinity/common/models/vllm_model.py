@@ -93,12 +93,14 @@ class vLLMRolloutModel(BaseInferenceModel):
                 rope_kwargs = {"hf_overrides": rope_params}
             else:
                 rope_kwargs = {}
+            self.logprobs_no_prefix_cache = True
         else:
             rope_kwargs = {
                 key: getattr(config, key)
                 for key in ["rope_scaling", "rope_theta"]
                 if getattr(config, key) is not None
             }
+            self.logprobs_no_prefix_cache = False
         engine_args = vllm.AsyncEngineArgs(
             model=config.model_path,
             enforce_eager=config.enforce_eager,
@@ -111,7 +113,6 @@ class vLLMRolloutModel(BaseInferenceModel):
             enable_chunked_prefill=config.enable_chunked_prefill,
             dtype=config.dtype,
             trust_remote_code=True,
-            task="generate",
             gpu_memory_utilization=config.gpu_memory_utilization,
             override_generation_config={  # TODO: find a way to unittest this
                 "temperature": config.temperature,
@@ -132,7 +133,8 @@ class vLLMRolloutModel(BaseInferenceModel):
             engine_args.disable_log_requests = not config.enable_log_requests
         if self.vllm_version >= parse_version("0.11.0"):
             engine_args.reasoning_parser = config.reasoning_parser
-
+        if self.vllm_version >= parse_version("0.13.0"):
+            engine_args.async_scheduling = False
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = None
         self.state_dict_meta = None
@@ -326,13 +328,19 @@ class vLLMRolloutModel(BaseInferenceModel):
         temperature = temperature if temperature is not None else self.config.temperature
         if temperature is None:
             temperature = 1.0
+        kwargs = {
+            "n": 1,
+            "max_tokens": 1,
+            "prompt_logprobs": 0,  # vLLM return `prompt_logprobs + 1` logrpobs for each token
+            "temperature": temperature,
+        }
+        # avoid using prefix cache when calculating logprobs, only for vLLM >= 0.12.0
+        if self.logprobs_no_prefix_cache:
+            kwargs["skip_reading_prefix_cache"] = True
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids},
             lora_request=lora_request,
-            n=1,
-            max_tokens=1,
-            prompt_logprobs=0,  # vLLM return `prompt_logprobs + 1` logrpobs for each token
-            temperature=temperature,
+            **kwargs,
         )
         return torch.tensor(
             [list(logprob_dict.values())[0].logprob for logprob_dict in output.prompt_logprobs[1:]],
@@ -404,6 +412,8 @@ class vLLMRolloutModel(BaseInferenceModel):
             # in vLLM, 0 means only return the chosen token's logprob
             "logprobs": 0,
         }
+        if include_prompt_logprobs and self.logprobs_no_prefix_cache:
+            params["skip_reading_prefix_cache"] = True
         if sampling_params.stop is not None:
             params["stop"] = sampling_params.stop
         req_output = await self._generate_internal(
@@ -579,41 +589,15 @@ class vLLMRolloutModel(BaseInferenceModel):
             return True  # already running
 
         api_server_host, api_server_port = self.get_available_address()
-        if self.vllm_version <= parse_version("0.11.0"):
-            from trinity.common.models.vllm_patch.api_patch import (
-                run_api_server_in_ray_actor,
-            )
+        from trinity.common.models.vllm_patch import get_api_server
 
-            self.api_server = asyncio.create_task(
-                run_api_server_in_ray_actor(
-                    self.async_llm,
-                    api_server_host,
-                    api_server_port,
-                    self.config.model_path,  # type: ignore [arg-type]
-                    self.config.enable_auto_tool_choice,
-                    self.config.tool_call_parser,
-                    self.config.reasoning_parser,
-                    self.config.enable_log_requests,
-                )
-            )
-        else:
-            from trinity.common.models.vllm_patch.api_patch_v12 import (
-                run_api_server_in_ray_actor_v12,
-            )
-
-            self.api_server = asyncio.create_task(
-                run_api_server_in_ray_actor_v12(
-                    self.async_llm,
-                    api_server_host,
-                    api_server_port,
-                    self.config.model_path,  # type: ignore [arg-type]
-                    logger=self.logger,
-                    enable_auto_tool_choice=self.config.enable_auto_tool_choice,
-                    tool_call_parser=self.config.tool_call_parser,
-                    reasoning_parser=self.config.reasoning_parser,
-                    enable_log_requests=self.config.enable_log_requests,
-                )
-            )
+        self.api_server = get_api_server(
+            self.async_llm,
+            host=api_server_host,
+            port=api_server_port,
+            config=self.config,
+            logger=self.logger,
+        )
         self.api_server_host = api_server_host
         self.api_server_port = api_server_port
         return True
