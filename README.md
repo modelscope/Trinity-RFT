@@ -32,7 +32,7 @@ Trinity-RFT provides functionalities for users with different backgrounds and ob
 
 ## 🚀 News
 
-* [2026-01] Our works, including [CHORD](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/mix_chord), [BOTS](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/bots), and [Group-relative REINFORCE variants](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/rec_gsm8k), are accepted by ICLR 2026. Try these new algorithms in Trinity-RFT!
+* [2026-01] 🎉 Three papers accepted by ICLR 2026: [CHORD](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/mix_chord), [BOTS](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/bots), and [Group-relative REINFORCE variants](https://github.com/agentscope-ai/Trinity-RFT/tree/main/examples/rec_gsm8k). Try out these new algorithms in Trinity-RFT!
 * [2026-01] [[Release Notes]](https://github.com/agentscope-ai/Trinity-RFT/releases/tag/v0.4.1) Trinity-RFT v0.4.1 released: upgraded verl to v0.7.0, Tinker backend supports OpenAI API, bug fixes.
 * [2026-01] Introducing [R3L](https://github.com/shiweijiezero/R3L): a systematic reflect-then-retry RL mechanism with efficient language-guided exploration and stable off-policy learning ([paper](https://arxiv.org/abs/2601.03715)).
 * [2025-12] [[Release Notes]](https://github.com/agentscope-ai/Trinity-RFT/releases/tag/v0.4.0) Trinity-RFT v0.4.0 released: added [Tinker](https://thinkingmachines.ai/tinker/) backend for users **without GPUs**, add more benchmarks, enhance online RL and more.
