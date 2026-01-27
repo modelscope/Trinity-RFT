@@ -1096,6 +1096,104 @@ class TrainerConfigValidator(ConfigValidator):
             raise ValueError(f"Invalid trainer type: {config.trainer.trainer_type}")
 
 
+class GPUMemoryValidator(ConfigValidator):
+    """Validator for GPU memory settings.
+
+    Checks GPU memory usage and suggests changes to configuration settings.
+
+    Note:
+        1. This validator is disabled when `ignore_suggestions` is set to True.
+        2. The coefficients of the following formulas are roughly estimated using the `torch.profile` tool and may not be accurate.
+    """
+
+    def validate(self, config: Config) -> None:
+        if config.ignore_suggestions:
+            return
+
+        if config.model.tinker.enable:
+            return
+        import torch
+        import transformers
+        from accelerate import init_empty_weights
+
+        from trinity.common.verl_config import veRLConfig
+
+        if not torch.cuda.is_available():
+            self.logger.error("Cannot find GPU, please make sure you have a GPU available.")
+            return
+        memory_capacity = torch.cuda.get_device_properties(0).total_memory
+        pytorch_env_flag = (
+            os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "") == "expandable_segments:True"
+        )
+        memory_threshold = (0.9 if pytorch_env_flag else 0.8) * memory_capacity
+
+        try:
+            model_path = config.model.model_path
+            model_config = transformers.AutoConfig.from_pretrained(model_path)
+            with init_empty_weights():
+                save_model = transformers.AutoModel.from_config(
+                    model_config, torch_dtype=torch.bfloat16
+                )
+            params_num: int = save_model.num_parameters()
+            hidden_size: int = model_config.hidden_size
+            num_layers: int = model_config.num_hidden_layers
+            num_tokens: int = config.trainer.max_token_len_per_gpu
+            vocab_size: int = model_config.vocab_size
+
+            verl_config: veRLConfig = config.trainer.trainer_config
+            fsdp_config = verl_config.actor_rollout_ref.actor.fsdp_config
+            dtype_str = str(fsdp_config.mixed_precision.get("dtype", fsdp_config.dtype))
+            dtype_coeff = 1 if "16" in dtype_str else 2
+            actor_params_memory = (12 + 4 * dtype_coeff) * params_num
+            ref_params_memory = 2 * dtype_coeff * params_num
+            critic_params_memory = (
+                (12 + 4 * dtype_coeff) * params_num if verl_config.critic.enable else 0
+            )
+            params_memory = actor_params_memory + ref_params_memory + critic_params_memory
+            if verl_config.actor_rollout_ref.model.enable_gradient_checkpointing:
+                hidden_state_memory = 2 * num_tokens * hidden_size * (num_layers + 4)
+                actor_model_config = verl_config.actor_rollout_ref.model
+                if actor_model_config.use_fused_kernels and actor_model_config.fused_kernel_options:
+                    logits_memory = vocab_size * 20480
+                else:
+                    coeff = 8 if config.algorithm.entropy_loss_fn != "none" else 10
+                    logits_memory = coeff * num_tokens * vocab_size
+                back_memory = 4 * vocab_size * hidden_size + 80 * num_tokens * hidden_size
+                max_activation_memory = hidden_state_memory + max(logits_memory, back_memory)
+                max_activation_memory *= dtype_coeff
+
+                total_memory = params_memory + max_activation_memory
+                self.logger.info(
+                    f"The model is estimated to require {total_memory / 1024 / 1024:.2f} MB "
+                    "GPU memory per GPU. "
+                    f"{params_memory / 1024 / 1024:.2f} MB for parameters, "
+                    f"{max_activation_memory / 1024 / 1024:.2f} MB for activations. "
+                )
+
+                if total_memory > memory_threshold:
+                    error_msg = f"The model [{config.model.model_path}] may be too large to fit into GPU memory. "
+                    if not pytorch_env_flag:
+                        error_msg += (
+                            "You can try to set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True "
+                            "before starting ray cluster. This environment variable enables "
+                            "PyTorch to reduce memory fragmentation and improve memory utilization. "
+                        )
+                    error_msg += (
+                        "And please consider decrease `max_token_len_per_gpu` or "
+                        "increase `ulysses_sequence_parallel_size`. "
+                        "If you are certain that the model can be trained normally, "
+                        "please set `ignore_suggestions` to True."
+                    )
+                    self.logger.error(error_msg)
+                    raise ValueError(error_msg)
+            else:
+                # TODO: add memory check for non-gradient checkpointing.
+                pass
+        except Exception:
+            self.logger.error("Failed to check model config.", exc_info=True)
+            raise
+
+
 validators = [
     DeprecatedConfigValidator(),
     GlobalConfigValidator(),
@@ -1108,4 +1206,5 @@ validators = [
     ExplorerConfigValidator(),
     BufferConfigValidator(),
     TrainerConfigValidator(),
+    GPUMemoryValidator(),
 ]

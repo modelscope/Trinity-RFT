@@ -1,9 +1,11 @@
 import torch
 
 from trinity.common.experience import Experience
+from trinity.common.workflows import WORKFLOWS
 from trinity.common.workflows.workflow import SimpleWorkflow, Task
 
 
+@WORKFLOWS.register_module("synthetic_workflow")
 class SyntheticExpWorkflow(SimpleWorkflow):
     def reset(self, task: Task):
         self.workflow_args = task.workflow_args

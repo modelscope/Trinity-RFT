@@ -46,7 +46,7 @@ buffer:
         prompt_len: ${model.max_prompt_tokens}
         max_model_len: ${model.max_model_len}
     eval_tasksets: []
-    default_workflow_type: scripts.context_length_test.workflow.synthetic_exp_workflow.SyntheticExpWorkflow
+    default_workflow_type: synthetic_workflow
     default_reward_fn_type: math_reward
   trainer_input:
     experience_buffer:
@@ -87,6 +87,10 @@ trainer:
   save_hf_checkpoint: ${oc.env:SAVE_HF_CHECKPOINT,last}
   trainer_config:
     actor_rollout_ref:
+      model:
+        use_fused_kernels: ${oc.env:FUSED_KERNELS,false}
+        fused_kernel_options:
+          impl_backend: torch
       actor:
         entropy_from_logits_with_chunking: ${oc.env:ENTROPY_SAVING,false}
         entropy_checkpointing: ${oc.env:ENTROPY_SAVING,false}
