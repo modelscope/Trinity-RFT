@@ -195,7 +195,8 @@ class BaseInferenceModel(InferenceModel):
                 if prompt_length > self.config.max_prompt_tokens:
                     truncate_status = "prompt_truncated"
                     self.logger.warning(
-                        f"Warning: {len(token_ids)=} exceeds the length limit {(self.config.max_prompt_tokens)=}"
+                        f"Warning: {prompt_length=} exceeds the length limit {self.config.max_prompt_tokens}, "
+                        f"this experience will be not counted in the loss computation."
                     )
 
                     return Experience(
