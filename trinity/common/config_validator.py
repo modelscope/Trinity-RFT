@@ -1,5 +1,7 @@
 import math
 import os
+import sys
+import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 
@@ -1189,9 +1191,41 @@ class GPUMemoryValidator(ConfigValidator):
             else:
                 # TODO: add memory check for non-gradient checkpointing.
                 pass
-        except Exception:
+        except Exception as e:
             self.logger.error("Failed to check model config.", exc_info=True)
-            raise
+            self._get_user_choice(e)
+
+    def _get_user_choice(self, e: Exception, timeout: float = 30.0):
+        if not sys.stdin.isatty():
+            return
+
+        self.logger.warning("Do you want to continue? [y/n]")
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if sys.platform == "win32":
+                import msvcrt
+
+                if msvcrt.kbhit():
+                    user_input = msvcrt.getch().decode("utf-8").lower()
+                    if user_input in ["y", "n"]:
+                        if user_input == "n":
+                            raise e
+                        return
+                    else:
+                        self.logger.warning("Please input y or n")
+            else:  # Unix-like system
+                import select
+
+                if select.select([sys.stdin], [], [], 0.1)[0]:
+                    user_input = sys.stdin.readline().strip().lower()
+                    if user_input in ["y", "n"]:
+                        if user_input == "n":
+                            raise e
+                        return
+                    else:
+                        self.logger.warning("Please input y or n")
+
+            time.sleep(0.1)
 
 
 validators = [
