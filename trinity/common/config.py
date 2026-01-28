@@ -846,7 +846,7 @@ class Config:
     # whether to continue training from the last checkpoint in checkpoint_job_dir (if any)
     continue_from_checkpoint: bool = True
     # whether to checks GPU memory usage and suggests changes to configs.
-    ignore_suggestions: bool = False
+    ignore_validator_suggestions: bool = False
 
     algorithm: AlgorithmConfig = field(default_factory=AlgorithmConfig)
     data_processor: DataProcessorConfig = field(default_factory=DataProcessorConfig)

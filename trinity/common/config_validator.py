@@ -1104,7 +1104,7 @@ class GPUMemoryValidator(ConfigValidator):
     Checks GPU memory usage and suggests changes to configuration settings.
 
     Note:
-        1. This validator is disabled when `ignore_suggestions` is set to True.
+        1. This validator is disabled when `ignore_validator_suggestions` is set to True.
         2. The coefficients of the following formulas are roughly estimated using the `torch.profile` tool and may not be accurate.
     """
 
@@ -1130,7 +1130,7 @@ class GPUMemoryValidator(ConfigValidator):
         return "\n".join(lines)
 
     def validate(self, config: Config) -> None:
-        if config.ignore_suggestions:
+        if config.ignore_validator_suggestions:
             return
 
         if config.model.tinker.enable:
@@ -1241,7 +1241,10 @@ class GPUMemoryValidator(ConfigValidator):
                             "Suggested fixes:",
                         ]
                         + suggestions
-                        + ["", "To bypass this check, set `ignore_suggestions: true` in config."]
+                        + [
+                            "",
+                            "To bypass this check, set `ignore_validator_suggestions: true` in config.",
+                        ]
                     )
 
                     alert_box = self._format_alert_box(
@@ -1270,7 +1273,10 @@ class GPUMemoryValidator(ConfigValidator):
         if not sys.stdin.isatty():
             return
 
-        self.logger.warning("Do you want to continue? [y/n]")
+        self.logger.warning(
+            "Ignore suggestions and continue? [y/n] "
+            f"(It will automatically choose 'y' after {timeout} seconds)"
+        )
         start_time = time.time()
         while time.time() - start_time < timeout:
             if sys.platform == "win32":
