@@ -185,6 +185,7 @@ def find_max_model_len(
     save_hf_checkpoint: str = "last",
     entropy_saving: bool = False,
     offload: bool = False,
+    use_fused_kernels: bool = False,
     trainer_strategy: str = "fsdp",
     timeout: int = 2400,
 ) -> int:
@@ -204,6 +205,7 @@ def find_max_model_len(
         save_hf_checkpoint: Checkpoint saving strategy.
         entropy_saving: Whether to enable entropy-saving options.
         offload: Whether to offload parameters to CPU.
+        use_fused_kernels: Whether to use fused kernels.
         trainer_strategy: Trainer strategy. Only support "fsdp" and "fsdp2" for now.
         timeout: Timeout in seconds for each training job.
 
@@ -253,6 +255,8 @@ def find_max_model_len(
             cmd_env["ENTROPY_SAVING"] = "true"
         if offload:
             cmd_env["OFFLOAD"] = "true"
+        if use_fused_kernels:
+            cmd_env["FUSED_KERNELS"] = "true"
         if trainer_strategy != "fsdp":
             cmd_env["TRAINER_STRATEGY"] = f"{trainer_strategy}"
 
@@ -335,6 +339,7 @@ def main(args):
                 save_hf_checkpoint=args.save_hf_checkpoint,
                 entropy_saving=args.entropy_saving,
                 offload=args.offload,
+                use_fused_kernels=args.use_fused_kernels,
                 trainer_strategy=args.trainer_strategy,
                 timeout=args.timeout,
             )
@@ -412,6 +417,11 @@ if __name__ == "__main__":
         "--offload",
         action="store_true",
         help="Whether to offload model to CPU.",
+    )
+    parser.add_argument(
+        "--use_fused_kernels",
+        action="store_true",
+        help="Whether to use fused kernels.",
     )
     parser.add_argument(
         "--trainer_strategy",

@@ -411,6 +411,8 @@ def main() -> None:
         )
     elif args.command == "convert":
         convert(args.checkpoint_dir, args.base_model_dir)
+    else:
+        raise ValueError(f"Unknown command: {args.command}")
 
 
 if __name__ == "__main__":

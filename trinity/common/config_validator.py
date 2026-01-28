@@ -1,5 +1,7 @@
 import math
 import os
+import sys
+import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 
@@ -1111,6 +1113,213 @@ class TrainerConfigValidator(ConfigValidator):
             raise ValueError(f"Invalid trainer type: {config.trainer.trainer_type}")
 
 
+class GPUMemoryValidator(ConfigValidator):
+    """Validator for GPU memory settings.
+
+    Checks GPU memory usage and suggests changes to configuration settings.
+
+    Note:
+        1. This validator is disabled when `ignore_validator_suggestions` is set to True.
+        2. The coefficients of the following formulas are roughly estimated using the `torch.profile` tool and may not be accurate.
+    """
+
+    def _format_alert_box(self, title: str, message_lines: list, level="WARNING") -> str:
+        """Generate a clean, aligned ASCII border box for terminal alerts."""
+        # Combine title and all message lines to compute max width
+        all_lines = [title] + message_lines
+        max_content_width = max(len(line) for line in all_lines)
+
+        # Add padding: 2 spaces on each side → total width = content + 4
+        box_width = max_content_width + 4
+        horizontal_border = "+" + "-" * (box_width - 2) + "+"
+
+        lines = [horizontal_border]
+        # Title line centered
+        lines.append(f"| {title:^{box_width - 4}} |")
+        lines.append(horizontal_border)
+        # Message lines left-aligned
+        for line in message_lines:
+            lines.append(f"| {line:<{box_width - 4}} |")
+        lines.append(horizontal_border)
+
+        return "\n".join(lines)
+
+    def validate(self, config: Config) -> None:
+        if config.ignore_validator_suggestions:
+            return
+
+        if config.model.tinker.enable:
+            return
+        import torch
+
+        if not torch.cuda.is_available():
+            alert_msg = self._format_alert_box(
+                "NO GPU DETECTED",
+                [
+                    "No CUDA-compatible GPU found.",
+                    "Please ensure a GPU is available and drivers are installed.",
+                ],
+                level="ERROR",
+            )
+            self.logger.error("\n" + alert_msg)
+            return
+        memory_capacity = torch.cuda.get_device_properties(0).total_memory
+        if config.trainer.trainer_strategy.startswith("fsdp"):
+            self._fsdp_memory_check(config, memory_capacity)
+        else:
+            self.logger.info("GPU memory check skipped for non-FSDP strategies.")
+
+    def _fsdp_memory_check(self, config: Config, memory_capacity: float) -> None:
+        import torch
+        import transformers
+        from accelerate import init_empty_weights
+
+        from trinity.common.verl_config import veRLConfig
+
+        pytorch_env_flag = (
+            os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "") == "expandable_segments:True"
+        )
+        memory_threshold = (0.9 if pytorch_env_flag else 0.8) * memory_capacity
+
+        try:
+            model_path = config.model.model_path
+            model_config = transformers.AutoConfig.from_pretrained(model_path)
+            with init_empty_weights():
+                save_model = transformers.AutoModel.from_config(
+                    model_config, torch_dtype=torch.bfloat16
+                )
+            params_num: int = save_model.num_parameters()
+            hidden_size: int = model_config.hidden_size
+            num_layers: int = model_config.num_hidden_layers
+            num_tokens: int = config.trainer.max_token_len_per_gpu
+            vocab_size: int = model_config.vocab_size
+
+            verl_config: veRLConfig = config.trainer.trainer_config
+            fsdp_config = verl_config.actor_rollout_ref.actor.fsdp_config
+            dtype_str = str(fsdp_config.mixed_precision.get("dtype", fsdp_config.dtype))
+            dtype_coeff = 1 if "16" in dtype_str else 2
+            actor_params_memory = (12 + 4 * dtype_coeff) * params_num
+            ref_params_memory = 2 * dtype_coeff * params_num
+            critic_params_memory = (
+                (12 + 4 * dtype_coeff) * params_num if verl_config.critic.enable else 0
+            )
+            params_memory = actor_params_memory + ref_params_memory + critic_params_memory
+            if verl_config.actor_rollout_ref.model.enable_gradient_checkpointing:
+                hidden_state_memory = 2 * num_tokens * hidden_size * (num_layers + 4)
+                actor_model_config = verl_config.actor_rollout_ref.model
+                if actor_model_config.use_fused_kernels and actor_model_config.fused_kernel_options:
+                    logits_memory = vocab_size * 20480
+                else:
+                    coeff = 8 if config.algorithm.entropy_loss_fn != "none" else 10
+                    logits_memory = coeff * num_tokens * vocab_size
+                back_memory = 4 * vocab_size * hidden_size + 80 * num_tokens * hidden_size
+                max_activation_memory = hidden_state_memory + max(logits_memory, back_memory)
+                max_activation_memory *= dtype_coeff
+
+                total_memory = params_memory + max_activation_memory
+                total_mb = total_memory / (1024**2)
+                params_mb = params_memory / (1024**2)
+                activation_mb = max_activation_memory / (1024**2)
+                gpu_capacity_mb = memory_capacity / (1024**2)
+
+                self.logger.info(
+                    f"Estimated GPU memory usage for model '{model_path}': "
+                    f"{total_mb:.2f} MB ({params_mb:.2f} MB params + {activation_mb:.2f} MB activations) "
+                    f"on a {gpu_capacity_mb:.2f} MB GPU."
+                )
+
+                if total_memory > memory_threshold:
+                    threshold_mb = memory_threshold / (1024**2)
+                    self.logger.warning(
+                        f"⚠️  Estimated memory usage ({total_mb:.2f} MB) exceeds recommended limit "
+                        f"({threshold_mb:.2f} MB, ~{int(80 if not pytorch_env_flag else 90)}% of GPU capacity)."
+                    )
+
+                    suggestions = []
+                    if not pytorch_env_flag:
+                        suggestions.append(
+                            "• Set environment variable `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` "
+                            "before launching your training job to reduce memory fragmentation."
+                        )
+                    suggestions.extend(
+                        [
+                            "• Consider reducing `trainer.max_token_len_per_gpu` to lower activation memory.",
+                            "• Increase `ulysses_sequence_parallel_size` to split sequence across more GPUs.",
+                        ]
+                    )
+
+                    message_lines = (
+                        [
+                            f"Model '{os.path.basename(model_path)}' may exceed GPU memory!",
+                            f"Estimated: {total_mb:.1f} MB > Limit: {threshold_mb:.1f} MB",
+                            "",
+                            "Suggested fixes:",
+                        ]
+                        + suggestions
+                        + [
+                            "",
+                            "To bypass this check, set `ignore_validator_suggestions: true` in config.",
+                        ]
+                    )
+
+                    alert_box = self._format_alert_box(
+                        "MEMORY OVERUSE WARNING", message_lines, level="ERROR"
+                    )
+                    self.logger.error("\n" + alert_box)
+                    raise ValueError(
+                        "GPU memory estimation exceeded safe threshold. See alert above."
+                    )
+            else:
+                # TODO: add memory check for non-gradient checkpointing.
+                warning_lines = [
+                    "Gradient checkpointing is DISABLED.",
+                    "Memory usage will be MUCH higher than estimated.",
+                    "Consider enabling it or verifying GPU capacity manually.",
+                ]
+                warning_box = self._format_alert_box(
+                    "HIGH MEMORY RISK", warning_lines, level="WARNING"
+                )
+                self.logger.warning("\n" + warning_box)
+        except Exception as e:
+            self.logger.error("Failed to check model config.", exc_info=True)
+            self._get_user_choice(e)
+
+    def _get_user_choice(self, e: Exception, timeout: float = 30.0):
+        if not sys.stdin.isatty():
+            return
+
+        self.logger.warning(
+            "Ignore suggestions and continue? [y/n] "
+            f"(It will automatically choose 'y' after {timeout} seconds)"
+        )
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if sys.platform == "win32":
+                import msvcrt
+
+                if msvcrt.kbhit():
+                    user_input = msvcrt.getch().decode("utf-8").lower()
+                    if user_input in ["y", "n"]:
+                        if user_input == "n":
+                            raise e
+                        return
+                    else:
+                        self.logger.warning("Please input y or n")
+            else:  # Unix-like system
+                import select
+
+                if select.select([sys.stdin], [], [], 0.1)[0]:
+                    user_input = sys.stdin.readline().strip().lower()
+                    if user_input in ["y", "n"]:
+                        if user_input == "n":
+                            raise e
+                        return
+                    else:
+                        self.logger.warning("Please input y or n")
+
+            time.sleep(0.1)
+
+
 validators = [
     DeprecatedConfigValidator(),
     GlobalConfigValidator(),
@@ -1123,4 +1332,5 @@ validators = [
     ExplorerConfigValidator(),
     BufferConfigValidator(),
     TrainerConfigValidator(),
+    GPUMemoryValidator(),
 ]
