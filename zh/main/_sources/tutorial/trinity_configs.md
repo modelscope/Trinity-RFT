@@ -387,6 +387,8 @@ buffer:
 explorer:
   name: explorer
   runner_per_model: 8
+  concurrent_mode: sequential
+  max_repeat_times_per_runner: null
   max_timeout: 900
   max_retry_times: 2
   env_vars: {}
@@ -411,6 +413,11 @@ explorer:
 
 - `name`: explorer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。
 - `runner_per_model`: 每个推理引擎实例所服务的 WorkflowRunner 数量。
+- `concurrent_mode`: 执行一组任务（例如 GRPO 算法中对一个任务的多次重复执行）的并发模式。支持如下选项：
+  - `sequential`: 顺序执行（默认）。每次执行一个任务，等待其完成后再执行下一个任务。对 workflow 的实现要求最低，但吞吐量也最差。
+  - `asynchronous`: 异步执行。使用异步模式一次性提交所有任务，并在任务完成后收集结果。要求 workflow 正确地实现了异步调用接口，并且 workflow 之间没有共享状态，以避免竞态条件。吞吐量优于顺序执行，但具体性能受限于 workflow 的实现。
+  - `multi-threading`: 多线程执行。使用多线程同时执行多个任务。需要确保 workflow 的实现是线程安全的，以避免竞态条件。吞吐量通常优于顺序执行，但可能低于异步执行，具体取决于工作流的实现和系统资源。
+- `max_repeat_times_per_runner`: 将本来需要重复执行 `algorithm.repeat_times` 次的任务切分为多个子任务，每个子任务的 `repeat_times` 不超过该值，仅适用于 GRPO 类算法。如果未设置，则不限制重复次数。推荐在 `concurrent_mode` 为 `sequential` 时使用此参数，以避免单个 WorkflowRunner 长时间占用资源。
 - `max_timeout`: 等待 Workflow 完成的最大时间（秒）。
 - `max_retry_times`: Workflow 失败或超时情况下的最大重试次数。
 - `env_vars`: 为每个 WorkflowRunner 设置的环境变量。

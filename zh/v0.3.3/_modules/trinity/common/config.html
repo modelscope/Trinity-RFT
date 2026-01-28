@@ -1759,9 +1759,18 @@ document.write(`
     <span class="n">max_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1800</span>  <span class="c1"># wait each task for 30 minutes at most</span>
     <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># retry each task for 2 times if it fails or timeout</span>
     <span class="n">env_vars</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>  <span class="c1"># environment variables for workflow runner</span>
-    <span class="n">max_repeat_times_per_runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
-        <span class="nb">int</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># the number of time to repeat each task in a single workflow runner (for GRPO-like algorithms)</span>
+
+    <span class="c1"># Workflow Runner Configs for tasks requiring group execution</span>
+    <span class="c1"># how to run a group of tasks in a single workflow runner</span>
+    <span class="c1"># &quot;sequential&quot;: run tasks one by one, no requirements on workflow design, but have lower throughput</span>
+    <span class="c1"># &quot;asynchronous&quot;: run tasks asynchronously, requires the workflow to be designed with async/await</span>
+    <span class="c1">#   syntax, and no sharing of state between tasks</span>
+    <span class="c1"># &quot;multi-threading&quot;: run tasks using multi-threading, requires the workflow to be thread-safe,</span>
+    <span class="c1">#   and no sharing of state between tasks</span>
+    <span class="n">concurrent_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sequential&quot;</span>
+    <span class="c1"># the number of time to repeat each task in a single workflow runner</span>
+    <span class="c1"># we recommend setting this only when using &quot;sequential&quot; concurrent_mode</span>
+    <span class="n">max_repeat_times_per_runner</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">runner_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># ! Deprecated</span>
 
